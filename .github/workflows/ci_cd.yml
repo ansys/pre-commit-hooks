@@ -9,7 +9,7 @@ on:
 
 env:
   MAIN_PYTHON_VERSION: '3.10'
-  DOCUMENTATION_CNAME: 'pre_commit_hooks.docs.pyansys.com'
+  DOCUMENTATION_CNAME: 'ansys.github.io/pre-commit-hooks'
   LIBRARY_NAME: 'ansys-pre_commit_hooks-library'
   LIBRARY_NAMESPACE: 'ansys.pre_commit_hooks.library'
 
