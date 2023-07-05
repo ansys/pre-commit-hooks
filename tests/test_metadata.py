@@ -1,4 +1,4 @@
-from ansys.pre_commit_hooks.library import __version__
+from ansys.pre_commit_hooks import __version__
 
 
 def test_pkg_version():

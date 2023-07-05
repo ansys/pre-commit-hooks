@@ -4,17 +4,17 @@ build-backend = "flit_core.buildapi"
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
-name = "ansys-pre-commit-hooks-library"
+name = "ansys-pre-commit-hooks"
 version = "0.1.dev0"
 description = "A python wrapper to create pre-commit hooks running reuse for header licenses"
 readme = "README.rst"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {file = "LICENSE"}
 authors = [
-    {name = "ANSYS, Inc.", email = "pyansys.support@ansys.com"},
+    {name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},
 ]
 maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
+    {name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},
 ]
 
 classifiers = [
@@ -41,7 +41,7 @@ doc = [
 
 
 [tool.flit.module]
-name = "ansys.pre_commit_hooks.library"
+name = "ansys.pre_commit_hooks"
 
 [project.urls]
 Source = "https://github.com/ansys/pre-commit-hooks"

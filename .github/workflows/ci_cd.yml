@@ -8,10 +8,10 @@ on:
       - main
 
 env:
-  MAIN_PYTHON_VERSION: '3.7'
-  DOCUMENTATION_CNAME: 'pre_commit_hooks.docs.pyansys.com'
-  LIBRARY_NAME: 'ansys-pre_commit_hooks-library'
-  LIBRARY_NAMESPACE: 'ansys.pre_commit_hooks.library'
+  MAIN_PYTHON_VERSION: '3.10'
+  DOCUMENTATION_CNAME: 'ansys.github.io/pre-commit-hooks'
+  LIBRARY_NAME: 'ansys-pre_commit_hooks'
+  LIBRARY_NAMESPACE: 'ansys.pre_commit_hooks'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
     steps:
       - uses: ansys/actions/build-wheelhouse@v4
         with:
@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
        os: [ubuntu-latest, windows-latest]
-       python-version: ['3.7', '3.8', '3.9', '3.10']
+       python-version: ['3.8', '3.9', '3.10', '3.11']
       fail-fast: false
     steps:
       - uses: ansys/actions/tests-pytest@v4
