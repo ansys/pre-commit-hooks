@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Run reuse for files missing license headers."""
 import datetime
 import os
@@ -40,13 +41,6 @@ def run_reuse(file):
 
 def main():
     """Run reuse on files without license headers."""
-    # Get location of main.py
-    script_loc = os.path.dirname(__file__)
-
-    # Move to pre-commit-hooks directory
-    root_dir = rf"{script_loc}/../../../../"
-    os.chdir(root_dir)
-
     # Run reuse lint command to find files without license header
     missing_header = get_files()
 

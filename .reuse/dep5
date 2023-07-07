@@ -4,7 +4,7 @@ Upstream-Contact: pyansys.support@ansys.com
 Source: https://github.com/ansys/pre-commit-hooks
 
 
-Files: src/ansys/pre_commit_hooks/LICENSES/*
+Files: src/ansys/pre_commit_hooks/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 

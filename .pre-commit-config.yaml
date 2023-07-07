@@ -30,7 +30,7 @@ repos:
 # - repo: https://github.com/ansys/pre-commit-hooks
 #   rev: v0.0.1
 #   hooks:
-#   - id: pre-commit-hooks
+#   - id: add-headers
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
   rev: 0.23.2

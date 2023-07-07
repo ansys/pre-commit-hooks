@@ -1,0 +1,5 @@
+- id: "add-headers"
+  name: "Add License Headers"
+  entry: src/ansys/pre_commit_hooks/main.py
+  language: "script"
+  description: "Adds missing license headers to files by using reuse lint and annotate"
