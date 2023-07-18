@@ -1,4 +1,4 @@
-- id: "add-headers"
+- id: "add-license-headers"
   name: "Add License Headers"
   entry: src/ansys/pre_commit_hooks/main.py
   language: "script"
