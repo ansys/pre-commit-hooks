@@ -44,11 +44,16 @@ def main():
     # Run reuse lint command to find files without license header
     missing_header = get_files()
 
-    # Run reuse command for files without license header
-    for file in missing_header:
-        if os.path.isfile(file):
-            run_reuse(file)
+    if missing_header != set():
+        # Run reuse command for files without license header
+        for file in missing_header:
+            if os.path.isfile(file):
+                run_reuse(file)
+        return 1
+
+    # Return zero if all files have license header
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
