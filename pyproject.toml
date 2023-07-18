@@ -9,7 +9,7 @@ version = "0.1.dev0"
 description = "A python wrapper to create pre-commit hooks running reuse for header licenses"
 readme = "README.rst"
 requires-python = ">=3.8"
-license = {file = "LICENSE"}
+license = {file = "LICENSES/MIT.txt"}
 authors = [
     {name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},
 ]
