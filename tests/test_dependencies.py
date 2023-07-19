@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.pre_commit_hooks import __version__
+import os
 
 
-def test_pkg_version():
-    assert __version__ == "0.1.dev0"
+def test_template_exists():
+    """Test license format file exists."""
+    jinja_file = os.path.join(".", ".reuse", "templates", "ansys.jinja2")
+    assert os.path.exists(jinja_file)

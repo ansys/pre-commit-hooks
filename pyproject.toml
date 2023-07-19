@@ -86,3 +86,10 @@ source = ["ansys.pre_commit_hooks"]
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.pytest.ini_options]
+minversion = "7.1"
+addopts = "--cov=ansys.pre_commit_hooks --cov-report term -vv"
+testpaths = [
+    "tests",
+]

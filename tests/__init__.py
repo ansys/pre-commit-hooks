@@ -20,9 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-- id: "add-license-headers"
-  name: "Add License Headers"
-  entry: src/ansys/pre_commit_hooks/main.py
-  language: "script"
-  args: ["--loc=./"]
-  description: "Add missing license headers to files by using reuse lint and annotate"
+"""
+pre-commit-hooks.
+
+library
+"""
+
+try:
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:
+    import importlib_metadata
+
+# __version__ = importlib_metadata.version(__name__.replace(".", "-"))
