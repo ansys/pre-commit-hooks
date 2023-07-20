@@ -40,7 +40,7 @@ def create_test_file(tmp_path):
 def test_reuse_runs(tmp_path: pytest.TempPathFactory):
     """Test reuse annotate command is successful."""
     test_file = create_test_file(tmp_path)
-    loc = hook.get_loc([rf"--loc={tmp_path}"])
+    loc = hook.get_args([rf"--loc={tmp_path}"])
 
     # Run reuse on temporary file without header
     hook.run_reuse_on_files(loc)
