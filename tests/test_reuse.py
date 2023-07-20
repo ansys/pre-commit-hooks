@@ -10,7 +10,7 @@ def test_argparse_passes():
     """Test argparse parses loc argument correctly."""
     sys.argv[1:] = ["--loc=./"]
     result = hook.get_args(sys.argv[1:])
-    assert result.loc == "./"
+    assert result == "./"
 
 
 def test_argparse_fails():
