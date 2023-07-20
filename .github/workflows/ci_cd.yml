@@ -66,8 +66,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y python3-pip
+          python -m pip install python-debian
           pip3 install --upgrade pip reuse
-          pip3 install python-debian
       - uses: ansys/actions/tests-pytest@v4
         with:
           pytest-extra-args: "--cov=ansys --cov-report=term --cov-report=html:.cov/html"
