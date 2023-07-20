@@ -66,7 +66,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y python3-pip
-          sudo apt install -y python3-debian
+          sudo apt install --reinstall python-debian python3-debian python-chardet python3-chardet
           pip3 install --upgrade pip reuse
       - uses: ansys/actions/tests-pytest@v4
         with:
