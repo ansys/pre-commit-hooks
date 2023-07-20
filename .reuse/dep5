@@ -3,32 +3,39 @@ Upstream-Name: pre-commit-hooks
 Upstream-Contact: pyansys.core@ansys.com
 Source: https://github.com/ansys/pre-commit-hooks
 
-
-Files: src/ansys/pre_commit_hooks/*
-Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-License: MIT
-
 Files: .github/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
-Files: doc/.vale.ini
+Files: .reuse/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
-Files: doc/styles/*
+Files: .venv/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
-Files: doc/source/_static/*
+Files: doc/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
-Files: doc/source/_templates/*
+Files: examples/*
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: LICENSES/*
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: tests/*
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
 Files: .flake8
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: .gitattributes
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
@@ -40,18 +47,30 @@ Files: .pre-commit-config.yaml
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
+Files: .pre-commit-hooks.yaml
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: CHANGELOG.md
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: CODE_OF_CONDUCT.md
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: CONTRIBUTING.md
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: pyproject.toml
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: README.rst
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
 Files: tox.ini
-Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-License: MIT
-
-Files: AUTHORS.md
-Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-License: MIT
-
-Files: doc/make.bat
-Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-License: MIT
-
-Files: doc/Makefile
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT

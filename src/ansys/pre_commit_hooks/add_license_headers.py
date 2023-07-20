@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+
+# Copyright (C) 2023 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Run reuse for files missing license headers."""
 import argparse
 import datetime
@@ -12,15 +35,12 @@ from reuse.report import ProjectReport
 
 
 def get_args(args):
-    """Retrieve all arguments passed in by the user."""
-    parser = argparse.ArgumentParser(description="Get repository location.")
-    parser.add_argument("--loc", type=str, required=True, help="Path to repository location")
-    return parser.parse_args(args)
-
-
-def get_loc(args):
     """Retrieve value of --loc argument."""
-    loc = get_args(args).loc
+    parser = argparse.ArgumentParser(description="Get repository location.")
+    parser.add_argument(
+        "--loc", type=str, required=True, help="Path to repository location", default="src"
+    )
+    loc = parser.parse_args(args).loc
     return loc
 
 
@@ -85,9 +105,12 @@ def run_reuse_on_files(loc):
 
 def main():
     """Run reuse on files without license headers."""
-    # Get repository location argument
-    loc = get_loc([sys.argv[1]])
-    return run_reuse_on_files(loc)
+    try:
+        # Get repository location argument
+        loc = get_args([sys.argv[1]])
+        return run_reuse_on_files(loc)
+    except IndexError as e:
+        print("Please provide the --loc argument. IndexError: " + str(e))
 
 
 if __name__ == "__main__":
