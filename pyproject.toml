@@ -47,12 +47,14 @@ classifiers = [
 ]
 dependencies = [
     "importlib-metadata >=4.0",
+    "reuse==1.1.2",
 ]
 
 [project.optional-dependencies]
 tests = [
     "pytest==7.3.0",
     "pytest-cov==4.0.0",
+    "reuse==1.1.2",
 ]
 doc = [
     "ansys-sphinx-theme==0.9.7",
