@@ -62,12 +62,6 @@ jobs:
        python-version: ['3.8', '3.9', '3.10', '3.11']
       fail-fast: false
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y python3-pip
-          python -m pip install python-debian
-          pip3 install --upgrade pip reuse
       - uses: ansys/actions/tests-pytest@v4
         with:
           pytest-extra-args: "--cov=ansys --cov-report=term --cov-report=html:.cov/html"
