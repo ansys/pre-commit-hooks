@@ -64,7 +64,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          pip3 install --upgrade pip reuse debian
+          apt update
+          apt install -y lsb-release
+          apt install -y python3-pip
+          pip3 install --upgrade pip reuse
       - uses: ansys/actions/tests-pytest@v4
         with:
           pytest-extra-args: "--cov=ansys --cov-report=term --cov-report=html:.cov/html"
