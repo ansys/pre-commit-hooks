@@ -41,8 +41,7 @@ def get_args(args):
     parser.add_argument(
         "--loc", type=str, required=True, help="Path to repository location", default="src"
     )
-    loc = parser.parse_args(args).loc
-    return loc
+    return parser.parse_args(args).loc
 
 
 def get_files(loc):
