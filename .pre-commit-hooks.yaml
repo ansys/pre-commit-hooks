@@ -1,0 +1,6 @@
+- id: "add-license-headers"
+  name: "Add License Headers"
+  entry: add-license-headers
+  language: python
+  args: ["--loc=src"]
+  description: "Add missing license headers to files by using reuse lint and annotate"
