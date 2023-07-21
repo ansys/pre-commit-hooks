@@ -91,9 +91,9 @@ def run_reuse_cmd(file):
 def run_reuse_on_files(loc):
     """Run the reuse annotate command on all files without license header."""
     missing_header = get_files_missing_header(loc)
-
-    if missing_header != set():
+    if missing_header:
         # Run reuse command for files without license header
+        for file in missing_header:
         for file in missing_header:
             print(f"License header added to {file}")
             if os.path.isfile(file):
