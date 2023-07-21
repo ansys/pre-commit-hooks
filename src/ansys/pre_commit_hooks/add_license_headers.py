@@ -66,8 +66,7 @@ def get_files_missing_header(loc):
     """Retrieve files without license header."""
     try:
         # Run reuse lint command to find files without license header
-        missing_header = get_files(loc)
-        return missing_header
+        return get_files(loc)
     except NotADirectoryError as e:  # When loc is an invalid path
         return str(e) + " for a repository"
 
