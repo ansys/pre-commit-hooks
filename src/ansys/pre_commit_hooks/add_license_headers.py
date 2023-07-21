@@ -47,7 +47,7 @@ def get_args(args):
 def get_files(loc):
     """
     Generate report containing files without the license header.
-    
+
     Parameters
     ----------
     loc : str
