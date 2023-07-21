@@ -94,7 +94,6 @@ def run_reuse_on_files(loc):
     if missing_header:
         # Run reuse command for files without license header
         for file in missing_header:
-        for file in missing_header:
             print(f"License header added to {file}")
             if os.path.isfile(file):
                 run_reuse_cmd(file)
