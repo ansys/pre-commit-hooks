@@ -28,6 +28,7 @@ import datetime
 import os
 import subprocess
 import sys
+from tempfile import NamedTemporaryFile
 
 from reuse import lint
 from reuse.project import Project
@@ -48,10 +49,10 @@ def get_files(loc):
     """Generate report containing files without the license header."""
     project = Project(loc)
     report = ProjectReport.generate(project)
-    f = open(os.path.join(loc, "tmp"), "w")
-    output = lint.lint_files_without_copyright_and_licensing(report, f)
-    f.close()
-    os.remove(os.path.join(loc, "tmp"))
+
+    with NamedTemporaryFile(mode="w") as tmp:
+        output = lint.lint_files_without_copyright_and_licensing(report, tmp)
+
     return output
 
 
