@@ -20,6 +20,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 """Run reuse for files missing license headers."""
 import argparse
 import datetime
@@ -32,17 +33,16 @@ import git
 from reuse import header, lint, project
 
 
-def find_files_missing_header():
+def set_lint_args(parser):
     """
-    Retrieve files without license header.
+    Add arguments to parser for reuse lint.
+
+    Args:
+        parser (argparse.ArgumentParser): Parser without any arguments.
 
     Returns:
-        0: No files exist that are missing license header.
-        1: Files exist that are missing license header.
+        parser.parse_args (argparse.Namespace): Parser Namespace containing lint arguments.
     """
-    # Set up argparse for location, parser, and lint
-    # Lint contains 4 args: quiet, json, plain, and no_multiprocessing
-    parser = argparse.ArgumentParser()
     parser.add_argument(
         "--loc", type=str, required=True, help="Path to repository location", default="src"
     )
@@ -52,13 +52,25 @@ def find_files_missing_header():
     parser.add_argument("--no_multiprocessing", action="store_true")
     lint.add_arguments(parser)
 
-    args = parser.parse_args([sys.argv[1]])
-    proj = project.Project(rf"{args.loc}")
+    return parser.parse_args([sys.argv[1]])
 
+
+def list_noncompliant_files(args, proj):
+    """
+    Retrieve list of noncompliant files.
+
+    Args:
+        args (argparse.Namespace): Namespace of arguments with their values.
+        proj (project.Project): Project reuse runs on.
+
+    Returns:
+        missing_headers (list): List of files without license headers.
+    """
     # Create a temporary file containing lint.run json output
     with NamedTemporaryFile(mode="w", delete=False) as tmp:
         args.json = True
         lint.run(args, proj, tmp)
+
     # Open the temporary file, load the json, and find files missing copyright & licensing info.
     file = open(tmp.name, "rb")
     lint_json = json.load(file)
@@ -73,14 +85,52 @@ def find_files_missing_header():
     # Remove temporary file
     os.remove(tmp.name)
 
+    return missing_headers
+
+
+def find_files_missing_header():
+    """
+    Retrieve files without license header.
+
+    Returns:
+        0: No files exist that are missing license header.
+        1: Files exist that are missing license header.
+    """
+    # Set up argparse for location, parser, and lint
+    # Lint contains 4 args: quiet, json, plain, and no_multiprocessing
+    parser = argparse.ArgumentParser()
+    args = set_lint_args(parser)
+    proj = project.Project(rf"{args.loc}")
+
+    missing_headers = list_noncompliant_files(args, proj)
+
     # Get current year for license file
     year = datetime.date.today().year
 
     # If there are files missing headers, run reuse and return 1
     if missing_headers != []:
-        run_reuse(parser, year, args.loc, missing_headers)
-        return 1
+        # Returns 1 if reuse changes all noncompliant files
+        # Returns 2 if .reuse directory does not exist
+        return run_reuse(parser, year, args.loc, missing_headers)
     return 0
+
+
+def check_reuse_dir():
+    """
+    Check .reuse directory exists in root of git repository.
+
+    Returns:
+        git_root (str): Root path of git repository.
+    """
+    # Get root directory of current git repository
+    git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+    git_root = git_repo.git.rev_parse("--show-toplevel")
+
+    # If .reuse folder does not exist in git repository root, return 1
+    if not os.path.isdir(os.path.join(git_root, ".reuse")):
+        print(f"Please ensure the .reuse directory is in {git_root}")
+        return 1
+    return git_root
 
 
 def run_reuse(parser, year, loc, missing_headers):
@@ -101,14 +151,9 @@ def run_reuse(parser, year, loc, missing_headers):
     # skip-unrecognized, skip-existing
     header.add_arguments(parser)
 
-    # Get root directory of current git repository
-    git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
-    git_root = git_repo.git.rev_parse("--show-toplevel")
-
-    # If .reuse folder does not exist in git repository root, throw error
-    if not os.path.isdir(os.path.join(git_root, ".reuse")):
-        print(f"Please ensure the .reuse directory is in {git_root}")
-        return 1
+    git_root = check_reuse_dir()
+    if git_root == 1:
+        return 2
 
     # Add missing license header to each file in the list
     for file in missing_headers:
@@ -131,10 +176,7 @@ def run_reuse(parser, year, loc, missing_headers):
 
 def main():
     """Find files missing license header & run reuse on them."""
-    status = find_files_missing_header()
-    if status == 1:
-        return 1
-    return 0
+    return find_files_missing_header()
 
 
 if __name__ == "__main__":
