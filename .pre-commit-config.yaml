@@ -39,3 +39,8 @@ repos:
   rev: 0.23.2
   hooks:
     - id: check-github-workflows
+
+# - repo: https://github.com/twisted/towncrier
+#   rev: 22.13.0  # run 'pre-commit autoupdate' to update
+#   hooks:
+#     - id: towncrier-check

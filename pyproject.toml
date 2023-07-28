@@ -25,14 +25,15 @@ classifiers = [
 ]
 dependencies = [
     "importlib-metadata >=4.0",
-    "reuse <2",
+    "reuse>=2",
+    "GitPython==3.1.32",
 ]
 
 [project.optional-dependencies]
 tests = [
     "pytest==7.3.0",
     "pytest-cov==4.0.0",
-    "reuse <2",
+    "reuse>=2",
 ]
 doc = [
     "ansys-sphinx-theme==0.10.0",
@@ -76,3 +77,41 @@ addopts = "--cov=ansys.pre_commit_hooks --cov-report term -vv"
 testpaths = [
     "tests",
 ]
+
+[tool.towncrier]
+directory = "changelog.d"
+filename = "CHANGELOG.md"
+start_string = "<!-- towncrier release notes start -->\n"
+template = "changelog.d/changelog_template.jinja"
+title_format = "## [{version}](https://github.com/ansys/pre-commit-hooks/releases/tag/v{version}) - {project_date}"
+issue_format = "`#{issue} <https://github.com/ansys/pre-commit-hooks/issues/{issue}>`_"
+
+    [[tool.towncrier.type]]
+    directory = "security"
+    name = "Security"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "removed"
+    name = "Removed"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "deprecated"
+    name = "Deprecated"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "added"
+    name = "Added"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "changed"
+    name = "Changed"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "fixed"
+    name = "Fixed"
+    showcontent = true
