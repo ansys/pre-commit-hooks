@@ -37,11 +37,15 @@ def set_lint_args(parser):
     """
     Add arguments to parser for reuse lint.
 
-    Args:
-        parser (argparse.ArgumentParser): Parser without any arguments.
+    Parameters
+    ----------
+    parser: argparse.ArgumentParser
+        Parser without any arguments.
 
-    Returns:
-        parser.parse_args (argparse.Namespace): Parser Namespace containing lint arguments.
+    Returns
+    -------
+    parser.parse_args: argparse.Namespace
+        Parser Namespace containing lint arguments.
     """
     parser.add_argument(
         "--loc", type=str, required=True, help="Path to repository location", default="src"
@@ -59,12 +63,17 @@ def list_noncompliant_files(args, proj):
     """
     Retrieve list of noncompliant files.
 
-    Args:
-        args (argparse.Namespace): Namespace of arguments with their values.
-        proj (project.Project): Project reuse runs on.
+    Parameters
+    ----------
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+    proj: project.Project
+        Project reuse runs on.
 
-    Returns:
-        missing_headers (list): List of files without license headers.
+    Returns
+    -------
+    missing_headers: list
+        List of files without license headers.
     """
     # Create a temporary file containing lint.run json output
     with NamedTemporaryFile(mode="w", delete=False) as tmp:
@@ -92,9 +101,12 @@ def find_files_missing_header():
     """
     Retrieve files without license header.
 
-    Returns:
-        0: No files exist that are missing license header.
-        1: Files exist that are missing license header.
+    Returns
+    -------
+    0: int
+        No files exist that are missing license header.
+    1: int
+        Files exist that are missing license header.
     """
     # Set up argparse for location, parser, and lint
     # Lint contains 4 args: quiet, json, plain, and no_multiprocessing
@@ -119,8 +131,10 @@ def check_reuse_dir():
     """
     Check .reuse directory exists in root of git repository.
 
-    Returns:
-        git_root (str): Root path of git repository.
+    Returns
+    -------
+    git_root: str
+        Root path of git repository.
     """
     # Get root directory of current git repository
     git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
@@ -137,13 +151,21 @@ def run_reuse(parser, year, loc, missing_headers):
     """
     Run reuse command on files without license headers.
 
-    Args:
-        parser (argparse.ArgumentParser): Parser containing previously set arguments.
-        year (int): Current year for license header.
-        loc (str): Location to search for files missing headers.
-        missing_headers (list): List of files that are missing headers.
-    Returns:
-        1: Fails pre-commit hook on return 1
+    Parameters
+    ----------
+    parser: argparse.ArgumentParser
+        Parser containing previously set arguments.
+    year: int
+        Current year for license header.
+    loc: str
+        Location to search for files missing headers.
+    missing_headers: list
+        List of files that are missing headers.
+
+    Returns
+    ----------
+    1: int
+        Fails pre-commit hook on return 1
     """
     # Add header arguments to parser which include: copyright, license, contributor, year,
     # style, copyright-style, template, exclude-year, merge-copyrights, single-line,
