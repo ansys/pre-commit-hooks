@@ -44,7 +44,7 @@ def set_lint_args(parser):
 
     Returns
     -------
-    parser.parse_args: argparse.Namespace
+    argparse.Namespace
         Parser Namespace containing lint arguments.
     """
     parser.add_argument(
@@ -72,7 +72,7 @@ def list_noncompliant_files(args, proj):
 
     Returns
     -------
-    missing_headers: list
+    list
         List of files without license headers.
     """
     # Create a temporary file containing lint.run json output
@@ -103,10 +103,9 @@ def find_files_missing_header():
 
     Returns
     -------
-    0: int
-        No files exist that are missing license header.
-    1: int
-        Files exist that are missing license header.
+    int
+        Returns non-zero int if one or more files are noncompliant,
+        or if the .reuse directory is missing.
     """
     # Set up argparse for location, parser, and lint
     # Lint contains 4 args: quiet, json, plain, and no_multiprocessing
@@ -133,7 +132,7 @@ def check_reuse_dir():
 
     Returns
     -------
-    git_root: str
+    str
         Root path of git repository.
     """
     # Get root directory of current git repository
@@ -164,7 +163,7 @@ def run_reuse(parser, year, loc, missing_headers):
 
     Returns
     ----------
-    1: int
+    int
         Fails pre-commit hook on return 1
     """
     # Add header arguments to parser which include: copyright, license, contributor, year,
