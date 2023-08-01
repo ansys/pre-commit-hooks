@@ -45,6 +45,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11']
     steps:
+      - name:  "Install wget on Windows"
+        if: runner.os == 'Windows'
+        shell: bash
+        run: choco install wget
       - uses: ansys/actions/build-wheelhouse@v4
         with:
           library-name: ${{ env.LIBRARY_NAME }}
