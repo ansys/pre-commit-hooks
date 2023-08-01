@@ -91,6 +91,6 @@ source_suffix = ".rst"
 master_doc = "index"
 
 linkcheck_ignore = [
-    r"https://github.com/ansys/pre-commit-hooks:\d+/",
-    r"https://pypi.org/project/ansys-pre-commit-hooks/:\d+/",
+    r"https://github.com/ansys/pre-commit-hooks/*",
+    r"https://pypi.org/project/ansys-pre-commit-hooks/*",
 ]
