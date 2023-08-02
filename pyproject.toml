@@ -37,7 +37,7 @@ tests = [
 doc = [
     "ansys-sphinx-theme==0.10.0",
     "numpydoc==1.5.0",
-    "sphinx==7.1.1",
+    "sphinx==7.1.2",
     "sphinx-copybutton==0.5.1",
 ]
 
