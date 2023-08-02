@@ -90,7 +90,7 @@ need to follow these steps:
 
    .. code:: bash
 
-      python -m pip install -U pip flit tox
+      python -m pip install -U pip flit tox twine
 
 
 #. Install the project in editable mode:
