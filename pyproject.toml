@@ -6,7 +6,7 @@ build-backend = "flit_core.buildapi"
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-pre-commit-hooks"
 version = "0.1.dev0"
-description = "A python wrapper to create pre-commit hooks running reuse for header licenses"
+description = "A Python wrapper to create pre-commit hooks running reuse"
 readme = "README.rst"
 requires-python = ">=3.8"
 license = {file = "LICENSES/MIT.txt"}
