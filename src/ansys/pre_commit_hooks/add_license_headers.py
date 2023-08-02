@@ -96,7 +96,6 @@ def run_reuse_cmd(file):
 def run_reuse_on_files(loc):
     """
     Run the reuse annotate command on all files without license header.
-    
     Parameters
     ----------
     loc : str
