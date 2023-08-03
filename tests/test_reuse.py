@@ -19,18 +19,15 @@ def test_argparse_passes():
     assert args.loc == "./"
 
 
-def test_argparse_fails():
-    """Test argparse throws error if loc argument is empty."""
-    sys.argv[1:] = [""]
+def test_argparse_default():
+    """Test argparse returns default if loc argument is not provided."""
+    sys.argv[1:] = []
     parser = argparse.ArgumentParser()
-    try:
-        hook.set_lint_args(parser)
-        passes = True
-    except:
-        passes = False
+
+    args = hook.set_lint_args(parser)
 
     # Assert error is thrown for empty loc argument
-    assert not passes
+    assert args.loc == "src"
 
 
 def test_all_files_compliant(tmp_path: pytest.TempPathFactory):
@@ -43,7 +40,7 @@ def test_all_files_compliant(tmp_path: pytest.TempPathFactory):
     missing_headers = hook.list_noncompliant_files(args, proj)
 
     # Assert all files are compliant
-    assert missing_headers == []
+    assert len(missing_headers) == 0
 
 
 def create_test_file(tmp_path):
@@ -109,14 +106,23 @@ def test_reuse_dir_dne(tmp_path: pytest.TempPathFactory):
     git_root = git_repo.git.rev_parse("--show-toplevel")
     os.rename(os.path.join(git_root, ".reuse"), os.path.join(git_root, "invalid_reuse"))
 
-    result = hook.find_files_missing_header()
+    store_err = None
+    try:
+        result = hook.find_files_missing_header()
 
-    # Assert .reuse directory does not exist
-    assert result == 2
+        # Assert .reuse directory does not exist
+        assert result == 2
+
+    except Exception as err:
+        store_err = err
+        pass
 
     # Restore original environment
     os.rename(os.path.join(git_root, "invalid_reuse"), os.path.join(git_root, ".reuse"))
     os.remove(test_file)
+
+    if store_err:
+        raise store_err
 
 
 def test_main_passes():

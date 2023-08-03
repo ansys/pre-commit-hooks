@@ -23,10 +23,9 @@
 
 """Run reuse for files missing license headers."""
 import argparse
-import datetime
+from datetime import date as dt
 import json
 import os
-import sys
 from tempfile import NamedTemporaryFile
 
 import git
@@ -47,16 +46,12 @@ def set_lint_args(parser):
     argparse.Namespace
         Parser Namespace containing lint arguments.
     """
-    parser.add_argument(
-        "--loc", type=str, required=True, help="Path to repository location", default="src"
-    )
-    parser.add_argument(
-        "--parser",
-    )
+    parser.add_argument("--loc", type=str, help="Path to repository location", default="src")
+    parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
     lint.add_arguments(parser)
 
-    return parser.parse_args([sys.argv[1]])
+    return parser.parse_args()
 
 
 def list_noncompliant_files(args, proj):
@@ -76,23 +71,24 @@ def list_noncompliant_files(args, proj):
         List of files without license headers.
     """
     # Create a temporary file containing lint.run json output
+    filename = None
     with NamedTemporaryFile(mode="w", delete=False) as tmp:
         args.json = True
         lint.run(args, proj, tmp)
+        filename = tmp.name
 
     # Open the temporary file, load the json, and find files missing copyright & licensing info.
-    file = open(tmp.name, "rb")
-    lint_json = json.load(file)
-    file.close()
-    missing_headers = list(
-        set(
-            lint_json["non_compliant"]["missing_copyright_info"]
-            + lint_json["non_compliant"]["missing_licensing_info"]
-        )
+    lint_json = None
+    with open(filename, "rb") as file:
+        lint_json = json.load(file)
+
+    missing_headers = set(
+        lint_json["non_compliant"]["missing_copyright_info"]
+        + lint_json["non_compliant"]["missing_licensing_info"]
     )
 
     # Remove temporary file
-    os.remove(tmp.name)
+    os.remove(filename)
 
     return missing_headers
 
@@ -116,13 +112,14 @@ def find_files_missing_header():
     missing_headers = list_noncompliant_files(args, proj)
 
     # Get current year for license file
-    year = datetime.date.today().year
+    year = dt.today().year
 
     # If there are files missing headers, run reuse and return 1
-    if missing_headers != []:
+    if missing_headers:
         # Returns 1 if reuse changes all noncompliant files
         # Returns 2 if .reuse directory does not exist
         return run_reuse(parser, year, args.loc, missing_headers)
+
     return 0
 
 
@@ -134,6 +131,8 @@ def check_reuse_dir():
     -------
     str
         Root path of git repository.
+    int
+        If .reuse directory does not exist at root path of git repository.
     """
     # Get root directory of current git repository
     git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
@@ -143,6 +142,7 @@ def check_reuse_dir():
     if not os.path.isdir(os.path.join(git_root, ".reuse")):
         print(f"Please ensure the .reuse directory is in {git_root}")
         return 1
+
     return git_root
 
 
@@ -162,7 +162,7 @@ def run_reuse(parser, year, loc, missing_headers):
         List of files that are missing headers.
 
     Returns
-    ----------
+    -------
     int
         Fails pre-commit hook on return 1
     """
@@ -174,6 +174,8 @@ def run_reuse(parser, year, loc, missing_headers):
 
     git_root = check_reuse_dir()
     if git_root == 1:
+        # Previous check_reuse_dir() function returned error because .reuse
+        # directory does not exist... returning 2
         return 2
 
     # Add missing license header to each file in the list
