@@ -93,5 +93,5 @@ master_doc = "index"
 # TODO: Once the repo goes public... remove these links
 linkcheck_ignore = [
     r"https://github.com/ansys/pre-commit-hooks/*",
-    r"https://pypi.org/project/ansys-pre-commit-hooks/*",
+    r"https://pypi.org/project/ansys-pre-commit-hooks",
 ]
