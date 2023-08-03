@@ -25,19 +25,23 @@ classifiers = [
 ]
 dependencies = [
     "importlib-metadata >=4.0",
-    "reuse <2",
+    "reuse>=2",
+    "GitPython>=3",
 ]
 
 [project.optional-dependencies]
 tests = [
     "pytest==7.3.0",
     "pytest-cov==4.0.0",
-    "reuse <2",
+    "reuse==2.1.0",
+    "GitPython==3.1.32",
 ]
 doc = [
     "ansys-sphinx-theme==0.10.0",
     "numpydoc==1.5.0",
     "sphinx==7.1.2",
+    "sphinx-autoapi==2.1.1",
+    "sphinx-autodoc-typehints==1.22.0",
     "sphinx-copybutton==0.5.1",
 ]
 

@@ -38,6 +38,8 @@ html_theme_options = {
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "autoapi.extension",
+    "sphinx_autodoc_typehints",
     "numpydoc",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
@@ -65,7 +67,7 @@ numpydoc_validate = True
 numpydoc_validation_checks = {
     "GL06",  # Found unknown section
     "GL07",  # Sections are in the wrong order.
-    "GL08",  # The object does not have a docstring
+    # "GL08",  # The object does not have a docstring
     "GL09",  # Deprecation warning should precede extended summary
     "GL10",  # reST directives {directives} must be followed by two colons
     "SS01",  # No summary found
@@ -90,7 +92,22 @@ source_suffix = ".rst"
 # The master toctree document.
 master_doc = "index"
 
+# TODO: Once the repo goes public... remove these links
 linkcheck_ignore = [
     r"https://github.com/ansys/pre-commit-hooks/*",
     r"https://pypi.org/project/ansys-pre-commit-hooks",
 ]
+
+# Configuration for Sphinx autoapi
+autoapi_type = "python"
+autoapi_dirs = ["../../src/ansys/pre_commit_hooks/"]
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+]
+autoapi_template_dir = "_autoapi_templates"
+autoapi_python_use_implicit_namespaces = True
+exclude_patterns = ["_autoapi_templates/index.rst"]
