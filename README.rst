@@ -42,7 +42,7 @@ At least two installation modes are provided: user and developer.
 For users
 ^^^^^^^^^
 
-In order to install Pypre-commit-hooks library, make sure you
+In order to install ansys-pre-commit-hooks library, make sure you
 have the latest version of `pip`_. To do so, run:
 
 .. code:: bash
@@ -58,7 +58,7 @@ Then, you can simply execute:
 For developers
 ^^^^^^^^^^^^^^
 
-Installing Pypre-commit-hooks library in developer mode allows
+Installing ansys-pre-commit-hooks library in developer mode allows
 you to modify the source and enhance it.
 
 Before contributing to the project, please refer to the `PyAnsys Developer's guide`_. You will
@@ -86,21 +86,28 @@ need to follow these steps:
       # Activate it in Windows Powershell
       .venv\Scripts\Activate.ps1
 
-#. Make sure you have the latest required build system and doc, testing, and CI tools:
+#. Make sure you have the latest required build system tools:
 
    .. code:: bash
 
-      python -m pip install -U pip flit tox
-      python -m pip install -r requirements/requirements_build.txt
-      python -m pip install -r requirements/requirements_doc.txt
-      python -m pip install -r requirements/requirements_tests.txt
+      python -m pip install -U pip flit tox twine
 
 
 #. Install the project in editable mode:
 
     .. code:: bash
 
-      python -m pip install --editable ansys-pre-commit-hooks
+      # Install the minimum requirements
+      python -m pip install -e .
+
+      # Install the minimum + tests requirements
+      python -m pip install -e .[tests]
+
+      # Install the minimum + doc requirements
+      python -m pip install -e .[doc]
+
+      # Install all requirements
+      python -m pip install -e .[tests,doc]
 
     #. Finally, verify your development installation by running:
 
@@ -174,7 +181,7 @@ the building requirements and then executing the build module:
 
 .. code:: bash
 
-    python -m pip install -r requirements/requirements_build.txt
+    python -m pip install .
     python -m build
     python -m twine check dist/*
 
