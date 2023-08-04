@@ -10,6 +10,7 @@ on:
 env:
   MAIN_PYTHON_VERSION: '3.10'
   DOCUMENTATION_CNAME: 'pre-commit-hooks.docs.ansys.com'
+  LIBRARY_NAME: 'ansys-pre-commit-hooks'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,7 +47,6 @@ jobs:
       - uses: ansys/actions/build-wheelhouse@v4
         with:
           library-name: ${{ env.LIBRARY_NAME }}
-          library-namespace: ${{ env.LIBRARY_NAMESPACE }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
 
@@ -62,7 +62,7 @@ jobs:
     steps:
       - uses: ansys/actions/tests-pytest@v4
         with:
-          pytest-extra-args: "--cov=ansys --cov-report=term --cov-report=html:.cov/html"
+          pytest-extra-args: "--cov=ansys.pre_commit_hooks --cov-report=term --cov-report=html:.cov/html"
 
   doc-build:
     name: "Build documentation"
