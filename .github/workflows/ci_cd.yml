@@ -9,9 +9,8 @@ on:
 
 env:
   MAIN_PYTHON_VERSION: '3.10'
-  DOCUMENTATION_CNAME: 'ansys.github.io/pre-commit-hooks'
-  LIBRARY_NAME: 'ansys-pre_commit_hooks'
-  LIBRARY_NAMESPACE: 'ansys.pre_commit_hooks'
+  DOCUMENTATION_CNAME: 'pre-commit-hooks.docs.ansys.com'
+  LIBRARY_NAME: 'ansys-pre-commit-hooks'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -48,7 +47,6 @@ jobs:
       - uses: ansys/actions/build-wheelhouse@v4
         with:
           library-name: ${{ env.LIBRARY_NAME }}
-          library-namespace: ${{ env.LIBRARY_NAMESPACE }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
 
@@ -64,7 +62,7 @@ jobs:
     steps:
       - uses: ansys/actions/tests-pytest@v4
         with:
-          pytest-extra-args: "--cov=ansys --cov-report=term --cov-report=html:.cov/html"
+          pytest-extra-args: "--cov=ansys.pre_commit_hooks --cov-report=term --cov-report=html:.cov/html"
 
   doc-build:
     name: "Build documentation"
@@ -96,10 +94,28 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  release:
+    name: "Release project"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [build-library]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Release to the public PyPI repository"
+        uses: ansys/actions/release-pypi-public@v4
+        with:
+          library-name: ${{ env.LIBRARY_NAME }}
+          twine-username: "__token__"
+          twine-token: ${{ secrets.PYPI_TOKEN }}
+
+      - name: "Release to GitHub"
+        uses: ansys/actions/release-github@v4
+        with:
+          library-name: ${{ env.LIBRARY_NAME }}
+
   doc-deploy-stable:
     name: "Deploy stable documentation"
     runs-on: ubuntu-latest
-    needs: [build-library]
+    needs: [release]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     steps:
       - uses: ansys/actions/doc-deploy-stable@v4

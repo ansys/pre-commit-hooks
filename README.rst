@@ -1,6 +1,6 @@
-Ansys pre-commit-hooks
+Ansys pre-commit hooks
 ======================
-|pyansys| |python| |pypi| |GH-CI| |codecov| |MIT| |black|
+|pyansys| |python| |pypi| |GH-CI| |MIT| |black|
 
 .. |pyansys| image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC
    :target: https://docs.pyansys.com/
@@ -13,10 +13,6 @@ Ansys pre-commit-hooks
 .. |pypi| image:: https://img.shields.io/pypi/v/ansys-pre-commit-hooks.svg?logo=python&logoColor=white
    :target: https://pypi.org/project/ansys-pre-commit-hooks
    :alt: PyPI
-
-.. |codecov| image:: https://codecov.io/gh/ansys/pre-commit-hooks/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/ansys/pre-commit-hooks
-   :alt: Codecov
 
 .. |GH-CI| image:: https://github.com/ansys/pre-commit-hooks/actions/workflows/ci_cd.yml/badge.svg
    :target: https://github.com/ansys/pre-commit-hooks/actions/workflows/ci_cd.yml
@@ -31,7 +27,12 @@ Ansys pre-commit-hooks
    :alt: Black
 
 
-A Python wrapper to create pre-commit hooks running reuse for header licenses
+A repository containing a collection of `pre-commit`_ hooks for different purposes.
+
+The available hooks are the following:
+
+* ``add-license-headers``: Add missing license headers to files by using reuse lint and annotate.
+  Requires repositories to have `REUSE <https://reuse.software/>`_ implemented.
 
 
 How to install
@@ -95,7 +96,7 @@ need to follow these steps:
 
 #. Install the project in editable mode:
 
-    .. code:: bash
+   .. code:: bash
 
       # Install the minimum requirements
       python -m pip install -e .
@@ -109,14 +110,14 @@ need to follow these steps:
       # Install all requirements
       python -m pip install -e .[tests,doc]
 
-    #. Finally, verify your development installation by running:
+#. Finally, verify your development installation by running:
 
    .. code:: bash
 
       tox
 
 
-How to testing
+How to test it
 --------------
 
 This project takes advantage of `tox`_. This tool allows to automate common
@@ -145,8 +146,8 @@ this does not guarantee that your project is being tested in an isolated
 environment, which is the reason why tools like `tox`_ exist.
 
 
-A note on pre-commit
-^^^^^^^^^^^^^^^^^^^^
+A note on ``pre-commit``
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The style checks take advantage of `pre-commit`_. Developers are not forced but
 encouraged to install this tool via:
