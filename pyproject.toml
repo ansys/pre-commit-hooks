@@ -56,6 +56,7 @@ add-license-headers = "ansys.pre_commit_hooks.add_license_headers:main"
 Source = "https://github.com/ansys/pre-commit-hooks"
 Tracker = "https://github.com/ansys/pre-commit-hooks/issues"
 Homepage = "https://github.com/ansys/pre-commit-hooks"
+Documentation = "https://pre-commit-hooks.docs.ansys.com"
 
 
 [tool.black]

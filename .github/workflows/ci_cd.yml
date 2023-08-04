@@ -9,9 +9,7 @@ on:
 
 env:
   MAIN_PYTHON_VERSION: '3.10'
-  DOCUMENTATION_CNAME: 'ansys.github.io/pre-commit-hooks'
-  LIBRARY_NAME: 'ansys-pre_commit_hooks'
-  LIBRARY_NAMESPACE: 'ansys.pre_commit_hooks'
+  DOCUMENTATION_CNAME: 'pre-commit-hooks.docs.ansys.com'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
