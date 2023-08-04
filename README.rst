@@ -1,4 +1,4 @@
-Ansys pre-commit-hooks
+Ansys pre-commit hooks
 ======================
 |pyansys| |python| |pypi| |GH-CI| |codecov| |MIT| |black|
 
@@ -31,7 +31,12 @@ Ansys pre-commit-hooks
    :alt: Black
 
 
-A Python wrapper to create pre-commit hooks running reuse for header licenses
+A repository containing a collection of `pre-commit`_ hooks for different purposes.
+
+The available hooks are the following:
+
+* ``add-license-headers``: Add missing license headers to files by using reuse lint and annotate.
+  Requires repositories to have `REUSE <https://reuse.software/>`_ implemented.
 
 
 How to install
@@ -95,7 +100,7 @@ need to follow these steps:
 
 #. Install the project in editable mode:
 
-    .. code:: bash
+   .. code:: bash
 
       # Install the minimum requirements
       python -m pip install -e .
@@ -109,14 +114,14 @@ need to follow these steps:
       # Install all requirements
       python -m pip install -e .[tests,doc]
 
-    #. Finally, verify your development installation by running:
+#. Finally, verify your development installation by running:
 
    .. code:: bash
 
       tox
 
 
-How to testing
+How to test it
 --------------
 
 This project takes advantage of `tox`_. This tool allows to automate common
@@ -145,8 +150,8 @@ this does not guarantee that your project is being tested in an isolated
 environment, which is the reason why tools like `tox`_ exist.
 
 
-A note on pre-commit
-^^^^^^^^^^^^^^^^^^^^
+A note on ``pre-commit``
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The style checks take advantage of `pre-commit`_. Developers are not forced but
 encouraged to install this tool via:
