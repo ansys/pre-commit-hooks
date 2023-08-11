@@ -105,8 +105,10 @@ def find_files_missing_header():
     Returns
     -------
     int
-        Returns ``1`` if ``REUSE`` changed all noncompliant files.
-        Returns ``2`` if the ``.reuse`` directory is missing.
+        ``1`` if ``REUSE`` changed all noncompliant files.
+
+        ``2`` if the ``.reuse`` directory does not exist in the root path of the
+        GitHub repository.
     """
     # Set up argparse for location, parser, and lint
     # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
@@ -137,8 +139,8 @@ def check_reuse_dir():
     str
         Root path of the GitHub repository.
     int
-        If the ``.reuse`` directory does not exist in the root path of the GitHub
-        repository.
+        ``1`` if  the ``.reuse`` directory does not exist in the root path
+        of the GitHub repository.
     """
     # Get root directory of current git repository
     git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
@@ -146,7 +148,7 @@ def check_reuse_dir():
 
     # If .reuse folder does not exist in root of git repository, return 1
     if not os.path.isdir(os.path.join(git_root, ".reuse")):
-        print(f"Please ensure the .reuse directory is in {git_root}")
+        print(f"Ensure that the .reuse directory is in {git_root}.")
         return 1
 
     return git_root
@@ -170,10 +172,13 @@ def run_reuse(parser, year, loc, missing_headers):
     Returns
     -------
     int
-        Fails pre-commit hook on return 1
+        ``1`` if the pre-commit hook fails.
+
+        ``2`` if  the ``.reuse`` directory does not exist in the root path
+        of the GitHub repository.
     """
-    # Add header arguments to parser, which are: copyright, license, contributor, year,
-    # style, copyright-style, template, exclude-year, merge-copyrights, single-line,
+    # Add header arguments to parser. Arguments are: copyright, license, contributor,
+    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing.
     header.add_arguments(parser)

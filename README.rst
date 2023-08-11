@@ -30,15 +30,16 @@ Ansys pre-commit hooks
 This Ansys repository contains `pre-commit`_ hooks for different purposes.
 Currently, these hooks are available:
 
-* ``add-license-headers``: Add missing license headers to files by using reuse lint and annotate.
-  To use this hook, you must have `REUSE <https://reuse.software/>`_ implemented in your repository.
+* ``add-license-headers``: Add missing license headers to files by using
+`REUSE <https://reuse.software/>`_ and annotate. To use this hook, you must
+have ``REUSE`` implemented in your repository.
 
 
 How to install
 --------------
 
-The following sections provide instructions for installing the ``ansys-pre-commit-hooks`` package
-in one of two installation modes: user and developer.
+The following sections provide instructions for installing the ``ansys-pre-commit-hooks``
+package in two installation modes: user and developer.
 
 For users
 ^^^^^^^^^
@@ -65,7 +66,7 @@ enhance the source code.
 Before contributing to the project, ensure that you are familiar with
 the `PyAnsys Developer's Guide`_.
 
-To contribute, you must follow these steps:
+For a developer installation, you must follow these steps:
 
 #. Clone the repository with this command:
 
@@ -127,8 +128,8 @@ This project takes advantage of `tox`_. This tool automates common
 development tasks (similar to Makefile), but it is oriented towards
 Python development.
 
-Using tox
-^^^^^^^^^
+Using ``tox``
+^^^^^^^^^^^^^
 
 While Makefile has rules, ``tox`` has environments. In fact, ``tox`` creates its
 own virtual environment so that anything being tested is isolated from the project
@@ -145,8 +146,8 @@ These environment commands are provided:
 Raw testing
 ^^^^^^^^^^^
 
-If required, you can always call style commands like `black`_, `isort`_,
-and `flake8`_ or unit testing commands like `pytest`_ from the command line.
+If required, you can always call style commands, such as `black`_, `isort`_,
+and `flake8`_, or unit testing commands, such as `pytest`_, from the command line.
 However, calling these commands does not guarantee that your project is
 being tested in an isolated environment, which is the reason why tools like
 ``tox`` exist.
