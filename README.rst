@@ -31,8 +31,8 @@ This Ansys repository contains `pre-commit`_ hooks for different purposes.
 Currently, these hooks are available:
 
 * ``add-license-headers``: Add missing license headers to files by using
-`REUSE <https://reuse.software/>`_ and annotate. To use this hook, you must
-have ``REUSE`` implemented in your repository.
+  `REUSE <https://reuse.software/>`_ and annotate. To use this hook, you must
+  have ``REUSE`` implemented in your repository.
 
 
 How to install
