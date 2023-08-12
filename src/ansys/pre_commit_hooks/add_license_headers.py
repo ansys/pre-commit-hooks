@@ -132,15 +132,15 @@ def find_files_missing_header():
 
 def check_reuse_dir():
     """
-    Check if the ``.reuse`` directory exists in the root path of the GitHub repository.
+    Check if the ``.reuse`` directory exists in the root path of the git repository.
 
     Returns
     -------
     str
-        Root path of the GitHub repository.
+        Root path of the git repository.
     int
         ``1`` if  the ``.reuse`` directory does not exist in the root path
-        of the GitHub repository.
+        of the git repository.
     """
     # Get root directory of current git repository
     git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
