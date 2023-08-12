@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Initialize package level imports."""
+"""Module for initializing package-level imports for Ansys pre-commit hooks."""
 
 try:
     import importlib.metadata as importlib_metadata

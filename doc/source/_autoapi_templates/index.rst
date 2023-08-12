@@ -1,7 +1,7 @@
 API reference
 =============
 
-This page contains the ``ansys-pre-commit-hooks`` API reference.
+This section provides descriptions of all API members for Ansys pre-commit hooks.
 
 .. toctree::
    :titlesonly:
