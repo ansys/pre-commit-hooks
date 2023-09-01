@@ -11,9 +11,10 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 
 def test_argparse_passes():
     """Test argparse passes given loc."""
-    sys.argv[1:] = ["--loc=./"]
+    default_dir = "src"
+    sys.argv[1:] = [f"--loc=./"]
     parser = argparse.ArgumentParser()
-    args = hook.set_lint_args(parser)
+    args = hook.set_lint_args(parser, default_dir)
 
     # Assert loc argument is same as set above
     assert args.loc == "./"
@@ -21,10 +22,11 @@ def test_argparse_passes():
 
 def test_argparse_default():
     """Test argparse returns default if loc argument is not provided."""
+    default_dir = "src"
     sys.argv[1:] = []
     parser = argparse.ArgumentParser()
 
-    args = hook.set_lint_args(parser)
+    args = hook.set_lint_args(parser, default_dir)
 
     # Assert error is thrown for empty loc argument
     assert args.loc == "src"
@@ -32,9 +34,10 @@ def test_argparse_default():
 
 def test_all_files_compliant(tmp_path: pytest.TempPathFactory):
     """Test no noncompliant files are found."""
+    default_dir = "src"
     sys.argv[1:] = [rf"--loc={tmp_path}"]
     parser = argparse.ArgumentParser()
-    args = hook.set_lint_args(parser)
+    args = hook.set_lint_args(parser, default_dir)
     proj = project.Project(rf"{args.loc}")
 
     missing_headers = hook.list_noncompliant_files(args, proj)
@@ -57,10 +60,11 @@ def create_test_file(tmp_path):
 
 def test_noncompliant_files_found(tmp_path: pytest.TempPathFactory):
     """Test noncompliant file is found."""
+    default_dir = "src"
     test_file = create_test_file(tmp_path)
     sys.argv[1:] = [rf"--loc={tmp_path}"]
     parser = argparse.ArgumentParser()
-    args = hook.set_lint_args(parser)
+    args = hook.set_lint_args(parser, default_dir)
     proj = project.Project(rf"{args.loc}")
 
     missing_headers = hook.list_noncompliant_files(args, proj)
@@ -123,6 +127,25 @@ def test_reuse_dir_dne(tmp_path: pytest.TempPathFactory):
 
     if store_err:
         raise store_err
+
+
+def test_default_dir_dne(tmp_path: pytest.TempPathFactory):
+    """Test default directory does not exist."""
+    test_dir = os.getcwd()
+
+    # Initialize tmp_path as a git repository
+    os.chdir(tmp_path)
+    git.Repo.init(tmp_path)
+
+    # Check if src directory exists
+    default_dir = "src"
+    sys.argv[1:] = [rf"--loc={default_dir}"]
+    result = hook.find_files_missing_header()
+
+    # Assert src directory was not found in the tmp_path directory
+    assert result == 2
+
+    os.chdir(test_dir)
 
 
 def test_main_passes():
