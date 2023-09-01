@@ -6,6 +6,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
+- Directory checks & print statement updates (#34)
+
 ### Changed
 
 ### Fixed
