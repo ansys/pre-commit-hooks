@@ -34,6 +34,20 @@ Currently, these hooks are available:
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
 
+      1. Copy the .reuse directory from this repository into your repository.
+      2. Ensure your repository has the "src" directory.
+        - If the "src" directory does not exist, specify which directory should
+        be checked for files missing license headers. To do so, add the args line
+        to .pre-commit-config.yaml in your repository:
+
+        - repo: https://github.com/ansys/pre-commit-hooks
+          rev: v0.1.0
+          hooks:
+          - id: add-license-headers 
+              args:
+              - --loc=mydir
+
+        Where mydir is a directory containing files that are checked for license headers. 
 
 How to install
 --------------
