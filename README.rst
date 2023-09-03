@@ -43,11 +43,11 @@ Currently, these hooks are available:
         - repo: https://github.com/ansys/pre-commit-hooks
           rev: v0.1.0
           hooks:
-          - id: add-license-headers 
+          - id: add-license-headers
               args:
               - --loc=mydir
 
-        Where mydir is a directory containing files that are checked for license headers. 
+        Where mydir is a directory containing files that are checked for license headers.
 
 How to install
 --------------
