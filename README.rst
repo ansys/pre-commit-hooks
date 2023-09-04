@@ -39,20 +39,20 @@ Currently, these hooks are available:
 
      .. note::
 
-        If the "src" directory does not exist, specify which directory should
+        If the ``src`` directory does not exist, specify which directory should
         be checked for files missing license headers. To do so, add the args line
-        to .pre-commit-config.yaml in your repository:
+        to ``.pre-commit-config.yaml`` in your repository:
 
-     .. code:: yaml
+        .. code:: yaml
 
-        - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.1.0
-          hooks:
-          - id: add-license-headers
-              args:
-              - --loc=mydir
+           - repo: https://github.com/ansys/pre-commit-hooks
+             rev: v0.1.0
+             hooks:
+             - id: add-license-headers
+                 args:
+                 - --loc=mydir
 
-     Where mydir is a directory containing files that are checked for license headers.
+        Where ``mydir`` is a directory containing files that are checked for license headers.
 
 How to install
 --------------
