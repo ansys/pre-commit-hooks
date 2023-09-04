@@ -8,10 +8,12 @@ from reuse import project
 
 import ansys.pre_commit_hooks.add_license_headers as hook
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def test_argparse_passes():
     """Test argparse passes given loc."""
-    sys.argv[1:] = ["--loc=./"]
+    sys.argv[1:] = [f"--loc=./"]
     parser = argparse.ArgumentParser()
     args = hook.set_lint_args(parser)
 
@@ -125,22 +127,59 @@ def test_reuse_dir_dne(tmp_path: pytest.TempPathFactory):
         raise store_err
 
 
+def test_default_dir_dne(tmp_path: pytest.TempPathFactory):
+    """Test default directory does not exist."""
+    test_dir = os.getcwd()
+    os.chdir(tmp_path)
+
+    try:
+        # Initialize tmp_path as a git repository
+        git.Repo.init(tmp_path)
+
+        # Create ".reuse" directory
+        os.mkdir(os.path.join(tmp_path, ".reuse"))
+
+        # Check if src directory exists
+        default_dir = "src"
+        sys.argv[1:] = [rf"--loc={default_dir}"]
+        result = hook.find_files_missing_header()
+
+        # Assert src directory was not found in the tmp_path directory
+        assert result == 2
+    finally:
+        os.chdir(test_dir)
+
+
 def test_main_passes():
     """Test all files are compliant."""
-    sys.argv[1:] = ["--loc=src"]
+    # Ensure you are always running from root path to repo
+    current_work_dir = os.getcwd()
+    os.chdir(ROOT_DIR)
 
-    res = hook.main()
-    assert res == 0
+    try:
+        sys.argv[1:] = ["--loc=src"]
+
+        res = hook.main()
+        assert res == 0
+    finally:
+        os.chdir(current_work_dir)
 
 
 def test_main_fails(tmp_path: pytest.TempPathFactory):
     """Test reuse is being run on noncompliant file."""
-    sys.argv[1:] = [rf"--loc={tmp_path}"]
-    test_file = create_test_file(tmp_path)
+    # Ensure you are always running from root path to repo
+    current_work_dir = os.getcwd()
+    os.chdir(ROOT_DIR)
 
-    # Run main given non_compliant file
-    res = hook.main()
-    assert res == 1
+    try:
+        sys.argv[1:] = [rf"--loc={tmp_path}"]
+        test_file = create_test_file(tmp_path)
 
-    # Remove test file from git repo
-    os.remove(test_file)
+        # Run main given non_compliant file
+        res = hook.main()
+        assert res == 1
+
+    finally:
+        # Remove test file from git repo
+        os.remove(test_file)
+        os.chdir(current_work_dir)

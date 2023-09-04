@@ -92,12 +92,6 @@ source_suffix = ".rst"
 # The master toctree document.
 master_doc = "index"
 
-# TODO: Once the repo goes public... remove these links
-linkcheck_ignore = [
-    r"https://github.com/ansys/pre-commit-hooks/*",
-    r"https://pypi.org/project/ansys-pre-commit-hooks",
-]
-
 # Configuration for Sphinx autoapi
 autoapi_type = "python"
 autoapi_dirs = ["../../src/ansys/pre_commit_hooks/"]
