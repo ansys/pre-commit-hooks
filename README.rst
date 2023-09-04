@@ -49,7 +49,7 @@ Currently, these hooks are available:
         .. code:: yaml
 
            - repo: https://github.com/ansys/pre-commit-hooks
-             rev: v0.1.0
+             rev: v0.1.1
              hooks:
              - id: add-license-headers
                  args:

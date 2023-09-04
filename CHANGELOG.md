@@ -2,7 +2,7 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
-## [Unreleased][]
+## [0.1.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.1) - September 4, 2023
 
 ### Added
 
@@ -14,7 +14,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Dependencies
 
-## [0.1.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.0) - September 1 2023
+## [0.1.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.0) - September 1, 2023
 
 ### Added
 
