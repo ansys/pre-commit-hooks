@@ -35,8 +35,11 @@ from tempfile import NamedTemporaryFile
 import git
 from reuse import header, lint, project
 
+DEFAULT_SOURCE_CODE_DIRECTORY = "src"
+"""Default directory to check files for license headers."""
 
-def set_lint_args(parser, default_dir):
+
+def set_lint_args(parser):
     """
     Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
 
@@ -44,8 +47,6 @@ def set_lint_args(parser, default_dir):
     ----------
     parser: argparse.ArgumentParser
         Parser without any lint arguments.
-    default_dir: str
-        The default directory to check files for license headers.
 
     Returns
     -------
@@ -53,7 +54,10 @@ def set_lint_args(parser, default_dir):
         Parser namespace containing lint arguments.
     """
     parser.add_argument(
-        "--loc", type=str, help="Directory to check files for license headers.", default=default_dir
+        "--loc",
+        type=str,
+        help="Directory to check files for license headers.",
+        default=DEFAULT_SOURCE_CODE_DIRECTORY,
     )
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
@@ -111,24 +115,20 @@ def find_files_missing_header():
     int
         ``1`` if ``REUSE`` changed all noncompliant files.
 
-        ``2`` if the ``.reuse`` or ``{default_dir}`` directory does not exist in the root path
+        ``2`` if the ``.reuse`` or location directory does not exist in the root path
         of the GitHub repository.
     """
-    # Set default directory to check files for license headers
-    default_dir = "src"
-
     # Set up argparse for location, parser, and lint
     # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
     parser = argparse.ArgumentParser()
-    args = set_lint_args(parser, default_dir)
+    args = set_lint_args(parser)
 
-    # If --loc's value is default_dir, check default_dir exists
-    if args.loc == default_dir:
-        dir_status = check_dir_exists(default_dir, default_dir)
-        if dir_status != 0:
-            # Previous check_dir_exists() function returned error because
-            # the default directory does not exist... returning 2
-            return 2
+    # Check if  exists
+    dir_exists = check_dir_exists(args.loc)
+    if not dir_exists:
+        # Previous check_dir_exists() function returned error because
+        # --loc's value does not exist... returning 2
+        return 2
 
     proj = project.Project(rf"{args.loc}")
 
@@ -140,9 +140,10 @@ def find_files_missing_header():
     # If there are files missing headers, run REUSE and return 1
     if missing_headers:
         # Returns 1 if REUSE changes all noncompliant files
-        # Returns 2 if .reuse directory does not exist in root of git repository
-        return run_reuse(parser, year, args.loc, missing_headers, default_dir)
+        run_reuse(parser, year, args.loc, missing_headers)
+        return 1
 
+    # Hook ran fine.... returning exit code 0
     return 0
 
 
@@ -161,52 +162,50 @@ def repo_path():
     return git_root
 
 
-def check_dir_exists(folder_name, default_dir):
+def check_dir_exists(folder_name) -> bool:
     """
-    Check if the ``.reuse`` or ``{default_dir}`` directory exists in the root path of the git repo.
+    Check if the ``.reuse`` or the location directory exists in the root path of the git repo.
 
     Parameters
     ----------
     folder_name: str
         Folder to check if it exists.
-    default_dir: str
-        The default directory to check files for license headers.
 
     Returns
     -------
-    int
-        ``0`` if the ``.reuse`` or ``{default_dir}`` directory exists.
-        ``1`` if  the ``.reuse`` or ``{default_dir}`` directory does not exist
-        in the root path of the git repository.
+    bool
+        Returns ``False`` if  the ``.reuse`` or ``{folder_name}`` directory do
+        not exist in the root path of the git repository. Otherwise, ``True``.
     """
     # Get root path of git repository
     git_root = repo_path()
 
     # If the .reuse or default_dir directory does not exist in the root
     # of the git repository, return 1
-    if not os.path.isdir(os.path.join(git_root, folder_name)):
-        if folder_name == ".reuse":
-            print(
-                f"The .reuse directory does not exist in {git_root}.",
-                "Please copy the .reuse directory from https://github.com/ansys/pre-commit-hooks/.",
-                sep=os.linesep,
-            )
-        elif folder_name == default_dir:
-            print(
-                f"The {default_dir} directory does not exist in {git_root}.",
-                "Please add the --loc flag to .pre-commit-config.yaml, as follows:\n",
-                "- id: add-license-headers",
-                "    args:",
-                "    - --loc=mydir\n",
-                "Where mydir is a directory containing files that are checked for license headers.",
-                sep=os.linesep,
-            )
-        return 1
+    if not os.path.isdir(os.path.join(git_root, ".reuse")):
+        print(
+            f"The .reuse directory does not exist in {git_root}.",
+            "Please copy the .reuse directory from https://github.com/ansys/pre-commit-hooks/.",
+            sep=os.linesep,
+        )
+        return False
+    elif not os.path.isdir(os.path.join(git_root, folder_name)):
+        print(
+            f"The {folder_name} directory does not exist in {git_root}.",
+            "Please add the --loc flag to .pre-commit-config.yaml, as follows:\n",
+            "- id: add-license-headers",
+            "    args:",
+            "    - --loc=mydir",
+            "",
+            "Where mydir is a directory containing files that are checked for license headers.",
+            sep=os.linesep,
+        )
+        return False
+    else:
+        return True
 
-    return 0
 
-
-def run_reuse(parser, year, loc, missing_headers, default_dir):
+def run_reuse(parser, year, loc, missing_headers):
     """
     Run `REUSE <https://reuse.software/>`_ on files that are missing license headers.
 
@@ -220,28 +219,13 @@ def run_reuse(parser, year, loc, missing_headers, default_dir):
         Location to search for files that are missing license headers.
     missing_headers: list
         List of files that are missing license headers.
-    default_dir: str
-        The default directory to check files for license headers.
 
-    Returns
-    -------
-    int
-        ``1`` if the pre-commit hook fails.
-
-        ``2`` if  the ``.reuse`` directory does not exist in the root path
-        of the GitHub repository.
     """
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing.
     header.add_arguments(parser)
-
-    dir_status = check_dir_exists(".reuse", default_dir)
-    if dir_status != 0:
-        # Previous check_dir_exists() function returned error because .reuse
-        # directory does not exist... returning 2
-        return 2
 
     # Add missing license header to each file in the list
     for file in missing_headers:
@@ -258,8 +242,6 @@ def run_reuse(parser, year, loc, missing_headers, default_dir):
         # Requires .reuse directory to be in git_root directory
         proj = project.Project(repo_path())
         header.run(args, proj)
-
-    return 1
 
 
 def main():
