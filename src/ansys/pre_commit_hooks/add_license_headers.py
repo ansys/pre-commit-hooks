@@ -123,7 +123,7 @@ def find_files_missing_header():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-    # Check if  exists
+    # Check if required directories exist
     dir_exists = check_dir_exists(args.loc)
     if not dir_exists:
         # Previous check_dir_exists() function returned error because
