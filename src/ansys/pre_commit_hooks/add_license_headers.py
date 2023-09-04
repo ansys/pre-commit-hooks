@@ -164,7 +164,7 @@ def repo_path():
 
 def check_dir_exists(folder_name) -> bool:
     """
-    Check if the ``.reuse`` or the location directory exists in the root path of the git repo.
+    Check if the ``.reuse`` or the location directory exist in the root path of the git repo.
 
     Parameters
     ----------
