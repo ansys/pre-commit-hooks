@@ -52,8 +52,8 @@ Currently, these hooks are available:
              rev: v0.1.0
              hooks:
              - id: add-license-headers
-                 args:
-                 - --loc=mydir
+               args:
+               - --loc=mydir
 
         Where ``mydir`` is a directory containing files that are checked for license headers.
 
