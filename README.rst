@@ -38,6 +38,22 @@ Currently, these hooks are available:
   have ``REUSE`` implemented in your repository.
 
   #. Copy the .reuse directory from this repository into your repository.
+
+     .. note::
+
+        Configure .reuse/dep5 to match the file structure within your repository.
+        The dep5 file contains files & directories that should not be given license headers.
+
+        .reuse/templates/ansys.jinja2 contains the template for the license headers that are
+        added to the files. If the content of the MIT license changes, replace the lines between
+        the if statements in the following code block:
+
+        .. code:: jinja
+
+           {% if "MIT" in spdx_expressions %}
+           ...
+           {% endif %}
+
   #. Ensure your repository has the "src" directory.
 
      .. note::
@@ -52,8 +68,8 @@ Currently, these hooks are available:
              rev: v0.1.0
              hooks:
              - id: add-license-headers
-                 args:
-                 - --loc=mydir
+               args:
+               - --loc=mydir
 
         Where ``mydir`` is a directory containing files that are checked for license headers.
 

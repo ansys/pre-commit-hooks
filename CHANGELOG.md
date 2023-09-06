@@ -2,11 +2,18 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
+## [Unreleased]()
+
+### Changed
+
+- Update descriptions for add-license-headers in README (#40)
+
 ## [0.1.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.2) - September 5, 2023
 
 ### Dependencies
 
 - [pre-commit.ci] pre-commit autoupdate [#39](https://github.com/ansys/pre-commit-hooks/pull/39)
+
 ## [0.1.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.1) - September 4, 2023
 
 ### Added
