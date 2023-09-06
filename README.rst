@@ -41,13 +41,13 @@ Currently, these hooks are available:
 
      .. note::
 
-        Configure .reuse/dep5 to match the file structure within your repository. 
+        Configure .reuse/dep5 to match the file structure within your repository.
         The dep5 file contains files & directories that should not be given license headers.
 
         .reuse/templates/ansys.jinja2 contains the template for the license headers that are
         added to the files. If the content of the MIT license changes, replace the lines between
         the if statements in the following code block:
-        
+
         .. code:: jinja2
 
            {% if "MIT" in spdx_expressions %}
