@@ -48,7 +48,7 @@ Currently, these hooks are available:
         added to the files. If the content of the MIT license changes, replace the lines between
         the if statements in the following code block:
 
-        .. code:: jinja2
+        .. code:: jinja
 
            {% if "MIT" in spdx_expressions %}
            ...
