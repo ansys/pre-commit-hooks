@@ -47,6 +47,10 @@ Files: .pre-commit-hooks.yaml
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
+Files: AUTHORS
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
 Files: CHANGELOG.md
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
@@ -56,6 +60,10 @@ Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
 Files: CONTRIBUTING.md
+Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+License: MIT
+
+Files: CONTRIBUTORS.md
 Copyright: 2023 ANSYS, Inc. and/or its affiliates.
 License: MIT
 
