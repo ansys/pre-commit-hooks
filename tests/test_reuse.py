@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import sys
 
 import git
@@ -148,6 +149,43 @@ def test_default_dir_dne(tmp_path: pytest.TempPathFactory):
         assert result == 2
     finally:
         os.chdir(test_dir)
+
+
+def test_custom_args(tmp_path: pytest.TempPathFactory):
+    """Test custom arguments for loc, copyright, template, and license."""
+    # Initialize tmp_path as a git repository
+    git.Repo.init(tmp_path)
+
+    dirs = ["dir1", "dir2"]
+    template_name = "test_template.jinja2"
+    template_path = os.path.join(os.getcwd(), "tests", template_name)
+    reuse_dir = os.path.join(tmp_path, ".reuse", "templates")
+
+    # Create .reuse directory and copy template file to it
+    os.makedirs(reuse_dir)
+    shutil.copyfile(f"{template_path}", f"{reuse_dir}/{template_name}")
+
+    # Create directories & files to test
+    for dir in dirs:
+        dir_path = os.path.join(tmp_path, dir)
+        # Create src code directory
+        os.mkdir(dir_path)
+        os.chdir(dir_path)
+        # Add temporary file to directory
+        create_test_file(dir_path)
+        os.chdir(tmp_path)
+
+    # Pass in custom arguments
+    sys.argv[1:] = [
+        f"--loc={dirs[0]},{dirs[1]}",
+        '--custom_copyright="Super cool copyright"',
+        "--custom_template=test_template",
+        "--custom_license=ECL-1.0",
+    ]
+    res = hook.main()
+
+    # Assert main runs successfully with custom arguments
+    assert res == 1
 
 
 def test_main_passes():

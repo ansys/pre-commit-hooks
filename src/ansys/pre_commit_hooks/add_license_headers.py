@@ -36,6 +36,12 @@ from reuse import header, lint, project
 
 DEFAULT_SOURCE_CODE_DIRECTORY = "src"
 """Default directory to check files for license headers."""
+DEFAULT_TEMPLATE = "ansys"
+"""Default template to use for license headers."""
+DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+"""Default copyright line for license headers."""
+DEFAULT_LICENSE = "MIT"
+"""Default license for headers."""
 
 
 def set_lint_args(parser):
@@ -57,6 +63,24 @@ def set_lint_args(parser):
         type=str,
         help="Directory to check files for license headers.",
         default=DEFAULT_SOURCE_CODE_DIRECTORY,
+    )
+    parser.add_argument(
+        "--custom_copyright",
+        type=str,
+        help="Default copyright line for license headers.",
+        default=DEFAULT_COPYRIGHT,
+    )
+    parser.add_argument(
+        "--custom_template",
+        type=str,
+        help="Default template to use for license headers.",
+        default=DEFAULT_TEMPLATE,
+    )
+    parser.add_argument(
+        "--custom_license",
+        type=str,
+        help="Default license for headers.",
+        default=DEFAULT_LICENSE,
     )
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
@@ -163,7 +187,7 @@ def list_noncompliant_files(args, proj):
     return missing_headers
 
 
-def set_header_args(parser, loc, year, path):
+def set_header_args(parser, loc, year, path, copyright, template):
     """
     Set arguments for `REUSE <https://reuse.software/>`_.
 
@@ -178,14 +202,18 @@ def set_header_args(parser, loc, year, path):
     path: str
         Directory to update license headers, or a specific file path to
         create license headers.
+    copyright: str
+        Copyright line for license headers.
+    template: str
+        Name of the template for license headers (name.jinja2).
     """
     # Provide values for license header arguments
     args = parser.parse_args([rf"--loc={loc}", path])
     args.year = [str(year)]
     args.copyright_style = "string-c"
-    args.copyright = ["ANSYS, Inc. and/or its affiliates."]
+    args.copyright = [copyright]
     args.merge_copyrights = True
-    args.template = "ansys"
+    args.template = template
     args.skip_unrecognised = True
     args.parser = parser
     args.recursive = True
@@ -224,7 +252,11 @@ def find_files_missing_header():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
+    # Get custom specified directories, copyright, template, and/or license
     dirs = args.loc.split(",")
+    copyright = args.custom_copyright
+    template = args.custom_template
+    license = args.custom_license
     changed_headers = False
 
     # Get current year for license file
@@ -252,13 +284,13 @@ def find_files_missing_header():
             changed_headers = True
             # Add missing license header to each file in the list
             for file in missing_headers:
-                args = set_header_args(parser, dir, year, file)
+                args = set_header_args(parser, dir, year, file, copyright, template)
                 # If adding license header for the first time
-                args.license = ["MIT"]
+                args.license = [license]
                 run_reuse(args)
 
     if changed_headers:
-        # Returns 1 if REUSE changes all noncompliant files
+        # Returns 1 if REUSE changes noncompliant files
         return 1
     else:
         # Hook ran fine.... returning exit code 0
