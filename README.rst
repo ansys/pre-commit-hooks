@@ -70,16 +70,13 @@ Currently, these hooks are available:
              - id: add-license-headers
                args: ["--loc", "dir1,dir2"]
 
-         or
+        Where ``dir1`` and ``dir2`` are directories containing files that are checked for license headers.
+        ``args`` can also be formatted as follows:
 
-         .. code:: yaml
+        .. code:: yaml
 
-           ...
-             - id: add-license-headers
                args:
                - --loc=dir1,dir2
-
-        Where ``dir1`` and ``dir2`` are directories containing files that are checked for license headers.
 
 How to install
 --------------
