@@ -65,135 +65,6 @@ def set_lint_args(parser):
     return parser.parse_args()
 
 
-def list_noncompliant_files(args, proj):
-    """
-    Get a list of the files that are missing license headers.
-
-    Parameters
-    ----------
-    args: argparse.Namespace
-        Namespace of arguments with their values.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-
-    Returns
-    -------
-    list
-        List of the files that are missing license headers.
-    """
-    # Create a temporary file containing lint.run json output
-    filename = None
-    with NamedTemporaryFile(mode="w", delete=False) as tmp:
-        args.json = True
-        lint.run(args, proj, tmp)
-        filename = tmp.name
-
-    # Open the temporary file, load the JSON file, and find files that
-    # are missing license headers.
-    lint_json = None
-    with open(filename, "rb") as file:
-        lint_json = json.load(file)
-
-    missing_headers = set(
-        lint_json["non_compliant"]["missing_copyright_info"]
-        + lint_json["non_compliant"]["missing_licensing_info"]
-    )
-
-    # Remove temporary file
-    os.remove(filename)
-
-    return missing_headers
-
-
-def set_args_and_run_reuse(parser, loc, year, path):
-    """
-    Set arguments and run `REUSE <https://reuse.software/>`_.
-
-    Parameters
-    ----------
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
-    loc: str
-        Location to search for files that are missing license headers.
-    year: int
-        Current year retrieved by datetime.
-    path: str
-        Directory to update license headers, or a specific file path to
-        create license headers.
-    """
-    # Provide values for license header arguments
-    args = parser.parse_args([rf"--loc={loc}", path])
-    args.year = [str(year)]
-    args.copyright_style = "string-c"
-    args.copyright = ["ANSYS, Inc. and/or its affiliates."]
-    args.merge_copyrights = True
-    args.template = "ansys"
-    args.skip_unrecognised = True
-    args.parser = parser
-    args.recursive = True
-
-    # If adding license header for the first time
-    if os.path.isfile(path):
-        args.license = ["MIT"]
-
-    # Requires .reuse directory to be in git_root directory
-    proj = project.Project(repo_path())
-    header.run(args, proj)
-
-
-def find_files_missing_header():
-    """
-    Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
-
-    Returns
-    -------
-    int
-        ``1`` if ``REUSE`` changed all noncompliant files.
-
-        ``2`` if the ``.reuse`` or location directory does not exist in the root path
-        of the GitHub repository.
-    """
-    # Set up argparse for location, parser, and lint
-    # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
-    parser = argparse.ArgumentParser()
-    args = set_lint_args(parser)
-
-    # Check if required directories exist
-    dir_exists = check_dir_exists(args.loc)
-    if not dir_exists:
-        # Previous check_dir_exists() function returned error because
-        # --loc's value does not exist... returning 2
-        return 2
-
-    proj = project.Project(rf"{args.loc}")
-
-    missing_headers = list_noncompliant_files(args, proj)
-
-    # Get current year for license file
-    year = dt.today().year
-
-    # Add header arguments to parser. Arguments are: copyright, license, contributor,
-    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
-    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing.
-    header.add_arguments(parser)
-
-    # If there are files missing headers, run REUSE and return 1
-    if missing_headers:
-        # Add missing license header to each file in the list
-        for file in missing_headers:
-            set_args_and_run_reuse(parser, args.loc, year, file)
-
-        # Returns 1 if REUSE changes all noncompliant files
-        return 1
-    else:
-        # Run on default directory
-        set_args_and_run_reuse(parser, args.loc, year, DEFAULT_SOURCE_CODE_DIRECTORY)
-
-    # Hook ran fine.... returning exit code 0
-    return 0
-
-
 def repo_path():
     """
     Get the path to the root of the git repository.
@@ -250,6 +121,148 @@ def check_dir_exists(folder_name) -> bool:
         return False
     else:
         return True
+
+
+def list_noncompliant_files(args, proj):
+    """
+    Get a list of the files that are missing license headers.
+
+    Parameters
+    ----------
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+    proj: project.Project
+        Project to run `REUSE <https://reuse.software/>`_ on.
+
+    Returns
+    -------
+    list
+        List of the files that are missing license headers.
+    """
+    # Create a temporary file containing lint.run json output
+    filename = None
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        args.json = True
+        lint.run(args, proj, tmp)
+        filename = tmp.name
+
+    # Open the temporary file, load the JSON file, and find files that
+    # are missing license headers.
+    lint_json = None
+    with open(filename, "rb") as file:
+        lint_json = json.load(file)
+
+    missing_headers = set(
+        lint_json["non_compliant"]["missing_copyright_info"]
+        + lint_json["non_compliant"]["missing_licensing_info"]
+    )
+
+    # Remove temporary file
+    os.remove(filename)
+
+    return missing_headers
+
+
+def set_header_args(parser, loc, year, path):
+    """
+    Set arguments for `REUSE <https://reuse.software/>`_.
+
+    Parameters
+    ----------
+    parser: argparse.ArgumentParser
+        Parser containing default license header arguments.
+    loc: str
+        Location to search for files that are missing license headers.
+    year: int
+        Current year retrieved by datetime.
+    path: str
+        Directory to update license headers, or a specific file path to
+        create license headers.
+    """
+    # Provide values for license header arguments
+    args = parser.parse_args([rf"--loc={loc}", path])
+    args.year = [str(year)]
+    args.copyright_style = "string-c"
+    args.copyright = ["ANSYS, Inc. and/or its affiliates."]
+    args.merge_copyrights = True
+    args.template = "ansys"
+    args.skip_unrecognised = True
+    args.parser = parser
+    args.recursive = True
+
+    return args
+
+
+def run_reuse(args):
+    """
+    Run `REUSE <https://reuse.software/>`_.
+
+    Parameters
+    ----------
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+    """
+    # Requires .reuse directory to be in git_root directory
+    proj = project.Project(repo_path())
+    header.run(args, proj)
+
+
+def find_files_missing_header():
+    """
+    Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+    Returns
+    -------
+    int
+        ``1`` if ``REUSE`` changed all noncompliant files.
+
+        ``2`` if the ``.reuse`` or location directory does not exist in the root path
+        of the GitHub repository.
+    """
+    # Set up argparse for location, parser, and lint
+    # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
+    parser = argparse.ArgumentParser()
+    args = set_lint_args(parser)
+
+    dirs = args.loc.split(",")
+    changed_headers = False
+
+    # Get current year for license file
+    year = dt.today().year
+
+    # Add header arguments to parser. Arguments are: copyright, license, contributor,
+    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
+    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
+    # skip-unrecognized, and skip-existing.
+    header.add_arguments(parser)
+
+    # Check if required directories exist
+    for dir in dirs:
+        dir_exists = check_dir_exists(dir)
+        if not dir_exists:
+            # Previous check_dir_exists() function returned error because
+            # --loc's value does not exist... returning 2
+            return 2
+
+        proj = project.Project(rf"{dir}")
+        missing_headers = list_noncompliant_files(args, proj)
+
+        # If there are files missing headers, run REUSE and return 1
+        if missing_headers:
+            changed_headers = True
+            # Add missing license header to each file in the list
+            for file in missing_headers:
+                args = set_header_args(parser, dir, year, file)
+                # If adding license header for the first time
+                args.license = ["MIT"]
+                run_reuse(args)
+
+    if changed_headers:
+        # Returns 1 if REUSE changes all noncompliant files
+        return 1
+    else:
+        # Hook ran fine.... returning exit code 0
+        return 0
 
 
 def main():
