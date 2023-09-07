@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (C) 2023 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
@@ -106,6 +105,42 @@ def list_noncompliant_files(args, proj):
     return missing_headers
 
 
+def set_args_and_run_reuse(parser, loc, year, path):
+    """
+    Set arguments and run `REUSE <https://reuse.software/>`_.
+
+    Parameters
+    ----------
+    parser: argparse.ArgumentParser
+        Parser containing default license header arguments.
+    loc: str
+        Location to search for files that are missing license headers.
+    year: int
+        Current year retrieved by datetime.
+    path: str
+        Directory to update license headers, or a specific file path to
+        create license headers.
+    """
+    # Provide values for license header arguments
+    args = parser.parse_args([rf"--loc={loc}", path])
+    args.year = [str(year)]
+    args.copyright_style = "string-c"
+    args.copyright = ["ANSYS, Inc. and/or its affiliates."]
+    args.merge_copyrights = True
+    args.template = "ansys"
+    args.skip_unrecognised = True
+    args.parser = parser
+    args.recursive = True
+
+    # If adding license header for the first time
+    if os.path.isfile(path):
+        args.license = ["MIT"]
+
+    # Requires .reuse directory to be in git_root directory
+    proj = project.Project(repo_path())
+    header.run(args, proj)
+
+
 def find_files_missing_header():
     """
     Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
@@ -137,11 +172,23 @@ def find_files_missing_header():
     # Get current year for license file
     year = dt.today().year
 
+    # Add header arguments to parser. Arguments are: copyright, license, contributor,
+    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
+    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
+    # skip-unrecognized, and skip-existing.
+    header.add_arguments(parser)
+
     # If there are files missing headers, run REUSE and return 1
     if missing_headers:
+        # Add missing license header to each file in the list
+        for file in missing_headers:
+            set_args_and_run_reuse(parser, args.loc, year, file)
+
         # Returns 1 if REUSE changes all noncompliant files
-        run_reuse(parser, year, args.loc, missing_headers)
         return 1
+    else:
+        # Run on default directory
+        set_args_and_run_reuse(parser, args.loc, year, DEFAULT_SOURCE_CODE_DIRECTORY)
 
     # Hook ran fine.... returning exit code 0
     return 0
@@ -194,8 +241,8 @@ def check_dir_exists(folder_name) -> bool:
             f"The {folder_name} directory does not exist in {git_root}.",
             "Please add the --loc flag to .pre-commit-config.yaml, as follows:\n",
             "- id: add-license-headers",
-            "    args:",
-            "    - --loc=mydir",
+            "  args:",
+            "  - --loc=mydir",
             "",
             "Where mydir is a directory containing files that are checked for license headers.",
             sep=os.linesep,
@@ -203,45 +250,6 @@ def check_dir_exists(folder_name) -> bool:
         return False
     else:
         return True
-
-
-def run_reuse(parser, year, loc, missing_headers):
-    """
-    Run `REUSE <https://reuse.software/>`_ on files that are missing license headers.
-
-    Parameters
-    ----------
-    parser: argparse.ArgumentParser
-        Parser containing the previously set arguments.
-    year: int
-        Current year for the license header.
-    loc: str
-        Location to search for files that are missing license headers.
-    missing_headers: list
-        List of files that are missing license headers.
-
-    """
-    # Add header arguments to parser. Arguments are: copyright, license, contributor,
-    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
-    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing.
-    header.add_arguments(parser)
-
-    # Add missing license header to each file in the list
-    for file in missing_headers:
-        args = parser.parse_args([rf"--loc={loc}", file])
-        args.year = [str(year)]
-        args.copyright_style = "string-c"
-        args.copyright = ["ANSYS, Inc. and/or its affiliates."]
-        args.merge_copyrights = True
-        args.template = "ansys"
-        args.license = ["MIT"]
-        args.skip_unrecognised = True
-        args.parser = parser
-
-        # Requires .reuse directory to be in git_root directory
-        proj = project.Project(repo_path())
-        header.run(args, proj)
 
 
 def main():
