@@ -6,7 +6,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ## Added
 
-- Allow reuse to run on multiple directories (#43)
+- Create custom flags for add-license-header (#44)
 
 ### Changed
 
