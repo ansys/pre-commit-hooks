@@ -4,6 +4,10 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ## [Unreleased]()
 
+## Added
+
+- Create custom flags for add-license-header (#44)
+
 ### Changed
 
 - Update descriptions for add-license-headers in README (#40)
