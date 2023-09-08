@@ -178,9 +178,9 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     # Pass in custom arguments
     sys.argv[1:] = [
         f"--loc={dirs[0]},{dirs[1]}",
-        '--custom_copyright="Super cool copyright"',
-        "--custom_template=test_template",
-        "--custom_license=ECL-1.0",
+        '--copyright="Super cool copyright"',
+        "--template=test_template",
+        "--license=ECL-1.0",
     ]
     res = hook.main()
 

@@ -65,19 +65,19 @@ def set_lint_args(parser):
         default=DEFAULT_SOURCE_CODE_DIRECTORY,
     )
     parser.add_argument(
-        "--custom_copyright",
+        "--copyright",
         type=str,
         help="Default copyright line for license headers.",
         default=DEFAULT_COPYRIGHT,
     )
     parser.add_argument(
-        "--custom_template",
+        "--template",
         type=str,
         help="Default template to use for license headers.",
         default=DEFAULT_TEMPLATE,
     )
     parser.add_argument(
-        "--custom_license",
+        "--license",
         type=str,
         help="Default license for headers.",
         default=DEFAULT_LICENSE,
@@ -254,9 +254,9 @@ def find_files_missing_header():
 
     # Get custom specified directories, copyright, template, and/or license
     dirs = args.loc.split(",")
-    copyright = args.custom_copyright
-    template = args.custom_template
-    license = args.custom_license
+    copyright = args.copyright
+    template = args.template
+    license = args.license
     changed_headers = False
 
     # Get current year for license file
