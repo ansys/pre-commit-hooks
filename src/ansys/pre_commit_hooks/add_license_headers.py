@@ -65,7 +65,7 @@ def set_lint_args(parser):
         default=DEFAULT_SOURCE_CODE_DIRECTORY,
     )
     parser.add_argument(
-        "--copyright",
+        "--copyright-spdx",
         type=str,
         help="Default copyright line for license headers.",
         default=DEFAULT_COPYRIGHT,

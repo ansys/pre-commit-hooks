@@ -68,7 +68,7 @@ Currently, these hooks are available:
              rev: v0.1.0
              hooks:
              - id: add-license-headers
-               args: ["--loc", "dir1,dir2", "--copyright", "custom_copyright_phrase", "--template", "template_name", "--license", "license_name"]
+               args: ["--loc", "dir1,dir2", "--copyright-spdx", "custom_copyright_phrase", "--template", "template_name", "--license", "license_name"]
 
         - ``dir1`` and ``dir2`` are directories containing files that are checked for license
           headers. By default, it looks for the ``src`` folder.
@@ -86,7 +86,7 @@ Currently, these hooks are available:
 
                args:
                - --loc=dir1,dir2
-               - --copyright=custom_copyright_phrase
+               - --copyright-spdx=custom_copyright_phrase
                - --template=template_name
                - --license=license_name
 
