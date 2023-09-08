@@ -4,7 +4,17 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ## [Unreleased]()
 
-## Added
+### Added
+
+### Changed
+
+### Dependencies
+
+### Fixed
+
+## [0.1.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.3) - September 8, 2023
+
+### Added
 
 - Create custom flags for add-license-header (#44)
 
