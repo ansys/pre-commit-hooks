@@ -8,6 +8,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Changed
 
+- feat: remove "custom" prefix from hook arguments [#49](https://github.com/ansys/pre-commit-hooks/pull/49)
+
 ### Dependencies
 
 ### Fixed
@@ -16,11 +18,11 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
-- Create custom flags for add-license-header (#44)
+- Create custom flags for add-license-header [#44](https://github.com/ansys/pre-commit-hooks/pull/44)
 
 ### Changed
 
-- Update descriptions for add-license-headers in README (#40)
+- Update descriptions for add-license-headers in README [#40](https://github.com/ansys/pre-commit-hooks/pull/40)
 
 ## [0.1.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.2) - September 5, 2023
 
@@ -45,16 +47,16 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
-- Create pre-commit hook to add license header to all files (#7)
-- Default args in pre-commit-hooks.yaml (#11)
-- feat: ignore links (temp) (#20)
+- Create pre-commit hook to add license header to all files [#7](https://github.com/ansys/pre-commit-hooks/pull/7)
+- Default args in pre-commit-hooks.yaml [#11](https://github.com/ansys/pre-commit-hooks/pull/11)
+- feat: ignore links (temp) [#20](https://github.com/ansys/pre-commit-hooks/pull/20)
 
 ### Changed
 
-- Update the readme file (#21)
-- Edits to RST and PY files (#28)
+- Update the readme file [#21](https://github.com/ansys/pre-commit-hooks/pull/21)
+- Edits to RST and PY files [#28](https://github.com/ansys/pre-commit-hooks/pull/28)
 
 ### Fixed
 
-- Fix add-license-headers for reuse version >=2 (#10)
-- Fix reuse 2.0 implementation (#17)
+- Fix add-license-headers for reuse version >=2 [#10](https://github.com/ansys/pre-commit-hooks/pull/10)
+- Fix reuse 2.0 implementation [#17](https://github.com/ansys/pre-commit-hooks/pull/17)
