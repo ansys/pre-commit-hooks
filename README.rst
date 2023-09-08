@@ -70,10 +70,15 @@ Currently, these hooks are available:
              - id: add-license-headers
                args: ["--loc", "dir1,dir2", "--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name"]
 
-        ``dir1`` and ``dir2`` are directories containing files that are checked for license headers.
-        ``custom copyright phrase`` is the copyright line you want to include in the license header.
-        ``template_name`` is the name of the .jinja2 file located in .reuse/templates/
-        ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc. To view a list of licenses that are supported by ``REUSE``, see https://github.com/spdx/license-list-data/tree/main/text
+        - ``dir1`` and ``dir2`` are directories containing files that are checked for license
+          headers. By default, it looks for the ``src`` folder.
+        - ``custom copyright phrase`` is the copyright line you want to include in the license
+          header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
+        - ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
+          By default, it uses ``ansys``.
+        - ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
+          To view a list of licenses that are supported by ``REUSE``, see
+          https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
 
         ``args`` can also be formatted as follows:
 
