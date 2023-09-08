@@ -68,11 +68,11 @@ Currently, these hooks are available:
              rev: v0.1.0
              hooks:
              - id: add-license-headers
-               args: ["--loc", "dir1,dir2", "--copyright", "custom copyright phrase", "--template", "template_name", "--license", "license_name"]
+               args: ["--loc", "dir1,dir2", "--copyright", "custom_copyright_phrase", "--template", "template_name", "--license", "license_name"]
 
         - ``dir1`` and ``dir2`` are directories containing files that are checked for license
           headers. By default, it looks for the ``src`` folder.
-        - ``custom copyright phrase`` is the copyright line you want to include in the license
+        - ``custom_copyright_phrase`` is the copyright line you want to include in the license
           header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
         - ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
           By default, it uses ``ansys``.
@@ -86,7 +86,7 @@ Currently, these hooks are available:
 
                args:
                - --loc=dir1,dir2
-               - --copyright=custom copyright phrase
+               - --copyright=custom_copyright_phrase
                - --template=template_name
                - --license=license_name
 
