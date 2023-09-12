@@ -257,7 +257,7 @@ def find_files_missing_header():
     copyright = args.custom_copyright
     template = args.custom_template
     license = args.custom_license
-    changed_headers = False
+    changed_headers = 0
 
     # Get current year for license file
     year = dt.today().year
@@ -268,33 +268,43 @@ def find_files_missing_header():
     # skip-unrecognized, and skip-existing.
     header.add_arguments(parser)
 
-    # Check if required directories exist
-    for dir in dirs:
-        dir_exists = check_dir_exists(dir)
+    # Set absolute paths for dirs in --loc
+    for i in range(0, len(dirs)):
+        dir_exists = check_dir_exists(dirs[i])
         if not dir_exists:
             # Previous check_dir_exists() function returned error because
             # --loc's value does not exist... returning 2
             return 2
+        else:
+            dirs[i] = os.path.abspath(dirs[i])
 
-        proj = project.Project(rf"{dir}")
-        missing_headers = list_noncompliant_files(args, proj)
+    proj = project.Project(repo_path())
+    missing_headers = list(list_noncompliant_files(args, proj))
 
-        # If there are files missing headers, run REUSE and return 1
-        if missing_headers:
-            changed_headers = True
-            # Add missing license header to each file in the list
-            for file in missing_headers:
-                args = set_header_args(parser, dir, year, file, copyright, template)
-                # If adding license header for the first time
+    def check_exists(changed_headers, i, j):
+        """Check if the file missing its header is in one of the dirs from the --loc argument."""
+        if i < len(dirs) and j < len(missing_headers):
+            # If the --loc directory exists in the file in missing_headers
+            if dirs[i] in missing_headers[j]:
+                changed_headers = 1
+                # Run REUSE on the file
+                args = set_header_args(
+                    parser, dirs[i], year, missing_headers[j], copyright, template
+                )
                 args.license = [license]
                 run_reuse(args)
 
-    if changed_headers:
-        # Returns 1 if REUSE changes noncompliant files
-        return 1
-    else:
-        # Hook ran fine.... returning exit code 0
-        return 0
+                # Check if loc exists in next file in missing_headers
+                check_exists(changed_headers, 0, j + 1)
+            else:
+                # Check if the next dir in loc exists in the file in missing_headers
+                check_exists(changed_headers, i + 1, j)
+
+        return changed_headers
+
+    # Returns 1 if REUSE changes noncompliant files
+    # Returns 0 if all files are compliant
+    return check_exists(changed_headers, 0, 0)
 
 
 def main():
