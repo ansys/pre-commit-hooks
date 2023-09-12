@@ -29,13 +29,12 @@ import argparse
 from datetime import date as dt
 import json
 import os
+import sys
 from tempfile import NamedTemporaryFile
 
 import git
 from reuse import header, lint, project
 
-DEFAULT_SOURCE_CODE_DIRECTORY = "src"
-"""Default directory to check files for license headers."""
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
 DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
@@ -58,24 +57,23 @@ def set_lint_args(parser):
     argparse.Namespace
         Parser namespace containing lint arguments.
     """
-    parser.add_argument(
-        "--loc",
-        type=str,
-        help="Directory to check files for license headers.",
-        default=DEFAULT_SOURCE_CODE_DIRECTORY,
-    )
+    # Get list of committed files
+    parser.add_argument("files", nargs="*")
+    # Get custom copyright statement
     parser.add_argument(
         "--custom_copyright",
         type=str,
         help="Default copyright line for license headers.",
         default=DEFAULT_COPYRIGHT,
     )
+    # Get custom template
     parser.add_argument(
         "--custom_template",
         type=str,
         help="Default template to use for license headers.",
         default=DEFAULT_TEMPLATE,
     )
+    # Get custom license
     parser.add_argument(
         "--custom_license",
         type=str,
@@ -87,64 +85,6 @@ def set_lint_args(parser):
     lint.add_arguments(parser)
 
     return parser.parse_args()
-
-
-def repo_path():
-    """
-    Get the path to the root of the git repository.
-
-    Returns
-    -------
-    str
-        Path to the root of the git repository.
-    """
-    git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
-    git_root = git_repo.git.rev_parse("--show-toplevel")
-
-    return git_root
-
-
-def check_dir_exists(folder_name) -> bool:
-    """
-    Check if the ``.reuse`` or the location directory exist in the root path of the git repo.
-
-    Parameters
-    ----------
-    folder_name: str
-        Folder to check if it exists.
-
-    Returns
-    -------
-    bool
-        Returns ``False`` if  the ``.reuse`` or ``{folder_name}`` directory do
-        not exist in the root path of the git repository. Otherwise, ``True``.
-    """
-    # Get root path of git repository
-    git_root = repo_path()
-
-    # If the .reuse or default_dir directory does not exist in the root
-    # of the git repository, return 1
-    if not os.path.isdir(os.path.join(git_root, ".reuse")):
-        print(
-            f"The .reuse directory does not exist in {git_root}.",
-            "Please copy the .reuse directory from https://github.com/ansys/pre-commit-hooks/.",
-            sep=os.linesep,
-        )
-        return False
-    elif not os.path.isdir(os.path.join(git_root, folder_name)):
-        print(
-            f"The {folder_name} directory does not exist in {git_root}.",
-            "Please add the --loc flag to .pre-commit-config.yaml, as follows:\n",
-            "- id: add-license-headers",
-            "  args:",
-            "  - --loc=mydir",
-            "",
-            "Where mydir is a directory containing files that are checked for license headers.",
-            sep=os.linesep,
-        )
-        return False
-    else:
-        return True
 
 
 def list_noncompliant_files(args, proj):
@@ -187,7 +127,7 @@ def list_noncompliant_files(args, proj):
     return missing_headers
 
 
-def set_header_args(parser, loc, year, path, copyright, template):
+def set_header_args(parser, year, file_path, copyright, template):
     """
     Set arguments for `REUSE <https://reuse.software/>`_.
 
@@ -195,20 +135,17 @@ def set_header_args(parser, loc, year, path, copyright, template):
     ----------
     parser: argparse.ArgumentParser
         Parser containing default license header arguments.
-    loc: str
-        Location to search for files that are missing license headers.
     year: int
         Current year retrieved by datetime.
-    path: str
-        Directory to update license headers, or a specific file path to
-        create license headers.
+    file_path: str
+        Specific file path to create license headers.
     copyright: str
         Copyright line for license headers.
     template: str
         Name of the template for license headers (name.jinja2).
     """
     # Provide values for license header arguments
-    args = parser.parse_args([rf"--loc={loc}", path])
+    args = parser.parse_args([file_path])
     args.year = [str(year)]
     args.copyright_style = "string-c"
     args.copyright = [copyright]
@@ -219,20 +156,6 @@ def set_header_args(parser, loc, year, path, copyright, template):
     args.recursive = True
 
     return args
-
-
-def run_reuse(args):
-    """
-    Run `REUSE <https://reuse.software/>`_.
-
-    Parameters
-    ----------
-    args: argparse.Namespace
-        Namespace of arguments with their values.
-    """
-    # Requires .reuse directory to be in git_root directory
-    proj = project.Project(repo_path())
-    header.run(args, proj)
 
 
 def find_files_missing_header():
@@ -252,15 +175,25 @@ def find_files_missing_header():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-    # Get custom specified directories, copyright, template, and/or license
-    dirs = args.loc.split(",")
+    # Get committed files, the year, and custom copyright, template, and/or license arguments
+    files = args.files
     copyright = args.custom_copyright
     template = args.custom_template
     license = args.custom_license
     changed_headers = 0
-
-    # Get current year for license file
     year = dt.today().year
+
+    # Get root directory of the git repository.
+    git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+    git_root = git_repo.git.rev_parse("--show-toplevel")
+
+    # Update file paths to be absolute paths with correct separators
+    for i in range(0, len(files)):
+        if "win" in sys.platform:
+            split_str = files[i].split("/")
+            files[i] = os.path.abspath(os.path.join(*split_str))
+        else:
+            files[i] = os.path.abspath(files[i])
 
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
@@ -268,37 +201,31 @@ def find_files_missing_header():
     # skip-unrecognized, and skip-existing.
     header.add_arguments(parser)
 
-    # Set absolute paths for dirs in --loc
-    for i in range(0, len(dirs)):
-        dir_exists = check_dir_exists(dirs[i])
-        if not dir_exists:
-            # Previous check_dir_exists() function returned error because
-            # --loc's value does not exist... returning 2
-            return 2
-        else:
-            dirs[i] = os.path.abspath(dirs[i])
-
-    proj = project.Project(repo_path())
+    # Run REUSE on root of the repository
+    proj = project.Project(git_root)
     missing_headers = list(list_noncompliant_files(args, proj))
 
     def check_exists(changed_headers, i, j):
-        """Check if the file missing its header is in one of the dirs from the --loc argument."""
-        if i < len(dirs) and j < len(missing_headers):
-            # If the --loc directory exists in the file in missing_headers
-            if dirs[i] in missing_headers[j]:
+        """Check if the committed file is one that is missing its header."""
+        if i < len(files) and j < len(missing_headers):
+            # If the committed file is the file in missing_headers
+            if files[i] == missing_headers[j]:
                 changed_headers = 1
                 # Run REUSE on the file
-                args = set_header_args(
-                    parser, dirs[i], year, missing_headers[j], copyright, template
-                )
+                args = set_header_args(parser, year, missing_headers[j], copyright, template)
                 args.license = [license]
-                run_reuse(args)
+                header.run(args, proj)
 
-                # Check if loc exists in next file in missing_headers
-                check_exists(changed_headers, 0, j + 1)
+                # Compare the committed file to the next file in missing_headers
+                check_exists(changed_headers, i + 1, 0)
             else:
-                # Check if the next dir in loc exists in the file in missing_headers
-                check_exists(changed_headers, i + 1, j)
+                # If file[i] has not been found in missing_headers,
+                # move to the next committed file (file[i+1]) and
+                # reset the count for missing_headers
+                if (j + 1) >= len(missing_headers):
+                    check_exists(changed_headers, i + 1, 0)
+                else:
+                    check_exists(changed_headers, i, j + 1)
 
         return changed_headers
 
