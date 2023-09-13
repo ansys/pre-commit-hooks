@@ -8,6 +8,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Changed
 
+- Removed loc argument & passed in committed files (#57)
+
 ### Dependencies
 
 ### Fixed
