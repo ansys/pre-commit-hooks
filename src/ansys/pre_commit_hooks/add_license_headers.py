@@ -204,33 +204,27 @@ def find_files_missing_header():
     proj = project.Project(git_root)
     missing_headers = list(list_noncompliant_files(args, proj))
 
-    def check_exists(changed_headers, i, j):
+    def check_exists(changed_headers, i):
         """Check if the committed file is missing its header."""
-        if i < len(files) and j < len(missing_headers):
-            # If the committed file is the file in missing_headers
-            if files[i] == missing_headers[j]:
+        if i < len(files):
+            # If the committed file is in missing_headers
+            if files[i] in missing_headers:
                 changed_headers = 1
                 # Run REUSE on the file
                 args = set_header_args(parser, year, files[i], copyright, template)
                 args.license = [license]
                 header.run(args, proj)
 
-                # Compare the committed file to the next file in missing_headers
-                return check_exists(changed_headers, i + 1, 0)
+                # Check if the next file is in missing_headers
+                return check_exists(changed_headers, i + 1)
             else:
-                # If file[i] has not been found in missing_headers,
-                # move to the next committed file (file[i+1]) and
-                # reset the count for missing_headers
-                if (j + 1) >= len(missing_headers):
-                    return check_exists(changed_headers, i + 1, 0)
-                else:
-                    return check_exists(changed_headers, i, j + 1)
+                return check_exists(changed_headers, i + 1)
 
         return changed_headers
 
     # Returns 1 if REUSE changes noncompliant files
     # Returns 0 if all files are compliant
-    return check_exists(changed_headers, 0, 0)
+    return check_exists(changed_headers, 0)
 
 
 def main():
