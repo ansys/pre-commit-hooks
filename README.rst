@@ -113,7 +113,7 @@ Currently, these hooks are available:
 
         #. In .reuse/dep5
 
-          .. code:: dep5
+          .. code:: debcontrol
 
            Files: path/to/file1.py
            Copyright: 2023 ANSYS, Inc. and/or its affiliates.
