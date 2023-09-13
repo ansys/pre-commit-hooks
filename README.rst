@@ -84,6 +84,50 @@ Currently, these hooks are available:
          To view a list of licenses that are supported by ``REUSE``, see
          https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
 
+  #. Ignore specific files or file types
+
+     .. note::
+
+        There are two different ways to ignore specific files or file types:
+
+        #. In .pre-commit-config.yaml
+
+          .. code:: yaml
+
+           - repo: https://github.com/ansys/pre-commit-hooks
+             rev: v0.1.3
+             hooks:
+             - id: add-license-headers
+               exclude: |
+                   (?x)^(
+                       path/to/file1.py |
+                       path/to/.*\.md |
+                       path/to/.*\.(ts|cpp) |
+                   )$
+
+          .. note ::
+
+           - ``path/to/file1.py`` excludes the stated file.
+           - ``path/to/.*\.md`` exlcudes all .md files within the ``path/to`` directory.
+           - ``path/to/.*\.(ts|cpp)`` excludes all .ts and .cpp files within the ``path/to`` directory.
+
+        #. In .reuse/dep5
+
+          .. code:: dep5
+
+           Files: path/to/file1.py
+           Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+           License: MIT
+
+           Files: path/to/*.py
+           Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+           License: MIT
+
+          .. note::
+           - ``path/to/file1.py`` excludes the stated file.
+           - ``path/to/*.py`` excludes all .py files in the ``path/to`` directory.
+
+
 How to install
 --------------
 
