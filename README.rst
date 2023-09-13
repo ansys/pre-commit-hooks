@@ -43,6 +43,7 @@ Currently, these hooks are available:
 
         Configure .reuse/dep5 to match the file structure within your repository.
         The dep5 file contains files & directories that should not be given license headers.
+        Ensure all files and directories you want to ignore are in this file.
 
         .reuse/templates/ansys.jinja2 contains the template for the license headers that are
         added to the files. If the content of the MIT license changes, replace the lines between
@@ -54,41 +55,34 @@ Currently, these hooks are available:
            ...
            {% endif %}
 
-  #. Ensure your repository has the "src" directory.
+  #. Set custom arguments for the pre-commit hook if necessary.
+
+     .. code:: yaml
+
+      - repo: https://github.com/ansys/pre-commit-hooks
+        rev: v0.1.4
+        hooks:
+        - id: add-license-headers
+          args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name"]
 
      .. note::
 
-        If the ``src`` directory does not exist, specify which directory should
-        be checked for files missing license headers. To do so, add the args line
-        to ``.pre-commit-config.yaml`` in your repository:
+      - ``custom copyright phrase`` is the copyright line you want to include in the license
+         header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
+      - ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
+         By default, it uses ``ansys``.
+      - ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
+         To view a list of licenses that are supported by ``REUSE``, see
+         https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
 
-        .. code:: yaml
+      ``args`` can also be formatted as follows:
 
-           - repo: https://github.com/ansys/pre-commit-hooks
-             rev: v0.1.0
-             hooks:
-             - id: add-license-headers
-               args: ["--loc", "dir1,dir2", "--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name"]
+     .. code:: yaml
 
-        - ``dir1`` and ``dir2`` are directories containing files that are checked for license
-          headers. By default, it looks for the ``src`` folder.
-        - ``custom copyright phrase`` is the copyright line you want to include in the license
-          header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
-        - ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
-          By default, it uses ``ansys``.
-        - ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
-          To view a list of licenses that are supported by ``REUSE``, see
-          https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
-
-        ``args`` can also be formatted as follows:
-
-        .. code:: yaml
-
-               args:
-               - --loc=dir1,dir2
-               - --custom_copyright=custom copyright phrase
-               - --custom_template=template_name
-               - --custom_license=license_name
+      args:
+      - --custom_copyright=custom copyright phrase
+      - --custom_template=template_name
+      - --custom_license=license_name
 
 How to install
 --------------

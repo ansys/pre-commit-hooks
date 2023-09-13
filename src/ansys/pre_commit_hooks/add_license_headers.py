@@ -153,7 +153,6 @@ def set_header_args(parser, year, file_path, copyright, template):
     args.template = template
     args.skip_unrecognised = True
     args.parser = parser
-    args.recursive = True
 
     return args
 
@@ -206,26 +205,26 @@ def find_files_missing_header():
     missing_headers = list(list_noncompliant_files(args, proj))
 
     def check_exists(changed_headers, i, j):
-        """Check if the committed file is one that is missing its header."""
+        """Check if the committed file is missing its header."""
         if i < len(files) and j < len(missing_headers):
             # If the committed file is the file in missing_headers
             if files[i] == missing_headers[j]:
                 changed_headers = 1
                 # Run REUSE on the file
-                args = set_header_args(parser, year, missing_headers[j], copyright, template)
+                args = set_header_args(parser, year, files[i], copyright, template)
                 args.license = [license]
                 header.run(args, proj)
 
                 # Compare the committed file to the next file in missing_headers
-                check_exists(changed_headers, i + 1, 0)
+                return check_exists(changed_headers, i + 1, 0)
             else:
                 # If file[i] has not been found in missing_headers,
                 # move to the next committed file (file[i+1]) and
                 # reset the count for missing_headers
                 if (j + 1) >= len(missing_headers):
-                    check_exists(changed_headers, i + 1, 0)
+                    return check_exists(changed_headers, i + 1, 0)
                 else:
-                    check_exists(changed_headers, i, j + 1)
+                    return check_exists(changed_headers, i, j + 1)
 
         return changed_headers
 
