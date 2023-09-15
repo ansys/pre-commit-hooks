@@ -90,7 +90,7 @@ Currently, these hooks are available:
 
         There are two different ways to ignore specific files or file types:
 
-        #. In .pre-commit-config.yaml
+     #. In .pre-commit-config.yaml
 
           .. code:: yaml
 
@@ -111,7 +111,7 @@ Currently, these hooks are available:
            - ``path/to/.*\.md`` exlcudes all .md files within the ``path/to`` directory.
            - ``path/to/.*\.(ts|cpp)`` excludes all .ts and .cpp files within the ``path/to`` directory.
 
-        #. In .reuse/dep5
+     #. In .reuse/dep5
 
           .. code:: debcontrol
 
