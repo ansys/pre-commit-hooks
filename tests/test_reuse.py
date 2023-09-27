@@ -1,3 +1,4 @@
+import argparse
 import os
 import shutil
 import sys
@@ -150,3 +151,20 @@ def test_main_passes():
 
     # Assert main runs successfully
     assert res == 0
+
+
+def test_license_check():
+    """Test license is checked in the header."""
+    parser = argparse.ArgumentParser()
+    args = hook.set_lint_args(parser)
+
+    assert args.ignore_license_check == False
+
+
+def test_no_license_check():
+    """Test license check is ignored."""
+    sys.argv[1:] = ["--ignore_license_check"]
+    parser = argparse.ArgumentParser()
+    args = hook.set_lint_args(parser)
+
+    assert args.ignore_license_check == True
