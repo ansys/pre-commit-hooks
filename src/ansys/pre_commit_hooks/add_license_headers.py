@@ -80,6 +80,8 @@ def set_lint_args(parser):
         help="Default license for headers.",
         default=DEFAULT_LICENSE,
     )
+    # Ignore license check by default is False when action='store_true'
+    parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
     lint.add_arguments(parser)
@@ -116,10 +118,13 @@ def list_noncompliant_files(args, proj):
     with open(filename, "rb") as file:
         lint_json = json.load(file)
 
-    missing_headers = set(
-        lint_json["non_compliant"]["missing_copyright_info"]
-        + lint_json["non_compliant"]["missing_licensing_info"]
-    )
+    # Get files missing copyright information
+    missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
+
+    # If ignore_license_check is False, check files for missing licensing information
+    if not args.ignore_license_check:
+        missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
+        missing_headers = missing_headers.union(missing_licensing_info)
 
     # Remove temporary file
     os.remove(filename)
