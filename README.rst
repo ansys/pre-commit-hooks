@@ -63,7 +63,7 @@ Currently, these hooks are available:
         rev: v0.1.3
         hooks:
         - id: add-license-headers
-          args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name"]
+          args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check"]
 
      ``args`` can also be formatted as follows:
 
@@ -73,6 +73,7 @@ Currently, these hooks are available:
       - --custom_copyright=custom copyright phrase
       - --custom_template=template_name
       - --custom_license=license_name
+      - --ignore_license_check
 
      .. note::
 
@@ -83,6 +84,10 @@ Currently, these hooks are available:
       #. ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
          To view a list of licenses that are supported by ``REUSE``, see
          https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
+      #. ``ignore_license_check`` is whether or not to check for the license in the header. By default,
+         it is ``False``, meaning the files are checked for both the copyright and licensing information
+         in the header. Add ``--ignore_license_check`` to ignore checking for licensing information
+         in the files.
 
   #. Specify directories to run the hook on
 

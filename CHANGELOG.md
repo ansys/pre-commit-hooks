@@ -6,6 +6,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
+- Added check_license argument (#64)
+
 ### Changed
 
 - Removed loc argument & passed in committed files (#57)
