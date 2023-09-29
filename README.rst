@@ -84,6 +84,23 @@ Currently, these hooks are available:
          To view a list of licenses that are supported by ``REUSE``, see
          https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
 
+  #. Specify directories to run the hook on
+
+     .. note::
+
+        By default, the hook will run on proto files in any directory, as well as python files within
+        directories named src, examples, and tests. To specify additional files and/or directories
+        the hook should run on, add the necessary regex to the ``files`` line in your
+        .pre-commit-config.yaml file:
+
+     .. code:: yaml
+
+      - repo: https://github.com/ansys/pre-commit-hooks
+        rev: v0.1.3
+        hooks:
+        - id: add-license-headers
+          files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
+
   #. Ignore specific files or file types
 
      .. note::
@@ -101,15 +118,19 @@ Currently, these hooks are available:
                exclude: |
                    (?x)^(
                        path/to/file1.py |
-                       path/to/.*\.md |
                        path/to/.*\.(ts|cpp) |
+                       (.folder1|folder2)/.* |
+                       .*\.js |
+                       \..* |
                    )$
 
           .. note ::
 
            - ``path/to/file1.py`` excludes the stated file.
-           - ``path/to/.*\.md`` exlcudes all .md files within the ``path/to`` directory.
            - ``path/to/.*\.(ts|cpp)`` excludes all .ts and .cpp files within the ``path/to`` directory.
+           - ``(.folder1|folder2)/.*`` excludes directories named .folder1 and folder2.
+           - ``.*\.js`` excludes all .js files in all directories.
+           - ``\..*`` excludes all hidden files.
 
      #. In .reuse/dep5
 

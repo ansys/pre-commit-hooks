@@ -118,6 +118,7 @@ def list_noncompliant_files(args, proj):
 
     missing_headers = set(
         lint_json["non_compliant"]["missing_copyright_info"]
+        + lint_json["non_compliant"]["missing_licenses"][args.custom_license]
         + lint_json["non_compliant"]["missing_licensing_info"]
     )
 

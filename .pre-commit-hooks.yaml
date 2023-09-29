@@ -3,3 +3,4 @@
   entry: add-license-headers
   language: python
   description: "Add missing license headers to files by using reuse lint and annotate"
+  files: '(src|examples|tests)/.*\.(py)|\.(proto)'
