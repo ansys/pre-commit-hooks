@@ -94,7 +94,7 @@ Currently, these hooks are available:
      .. note::
 
         By default, the hook will run on proto files in any directory, as well as python files within
-        directories named src, examples, and tests. To specify additional files and/or directories
+        directories named ``src``, ``examples``, and ``tests``. To specify additional files and/or directories
         the hook should run on, add the necessary regex to the ``files`` line in your
         .pre-commit-config.yaml file:
 

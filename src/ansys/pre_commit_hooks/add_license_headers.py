@@ -123,10 +123,7 @@ def list_noncompliant_files(args, proj):
 
     # If ignore_license_check is False, check files for missing licensing information
     if not args.ignore_license_check:
-        missing_licensing_info = set(
-            lint_json["non_compliant"]["missing_licensing_info"]
-            # + lint_json["non_compliant"]["missing_licenses"][args.custom_license]
-        )
+        missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
         missing_headers = missing_headers.union(missing_licensing_info)
 
         if lint_json["non_compliant"]["missing_licenses"]:
