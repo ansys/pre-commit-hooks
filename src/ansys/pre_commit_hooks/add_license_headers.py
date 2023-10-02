@@ -126,6 +126,12 @@ def list_noncompliant_files(args, proj):
         missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
         missing_headers = missing_headers.union(missing_licensing_info)
 
+        if lint_json["non_compliant"]["missing_licenses"]:
+            missing_licenses = set(
+                lint_json["non_compliant"]["missing_licenses"][args.custom_license]
+            )
+            missing_headers = missing_headers.union(missing_licenses)
+
     # Remove temporary file
     os.remove(filename)
 
