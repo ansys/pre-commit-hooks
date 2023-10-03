@@ -16,7 +16,7 @@ repos:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.5
+  rev: v2.2.6
   hooks:
   - id: codespell
 
@@ -36,6 +36,6 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.26.3
+  rev: 0.27.0
   hooks:
     - id: check-github-workflows
