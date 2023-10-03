@@ -154,6 +154,11 @@ def set_header_args(parser, year, file_path, copyright, template):
         Copyright line for license headers.
     template: str
         Name of the template for license headers (name.jinja2).
+
+    Returns
+    -------
+    argparse.Namespace
+        Namespace of arguments with their values.
     """
     # Provide values for license header arguments
     args = parser.parse_args([file_path])
@@ -166,6 +171,90 @@ def set_header_args(parser, year, file_path, copyright, template):
     args.parser = parser
 
     return args
+
+
+def check_exists(changed_headers, parser, values, proj, missing_headers, i):
+    """
+    Check if the committed file is missing its header.
+
+    Parameters
+    ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    parser: argparse.ArgumentParser
+        Parser containing default license header arguments.
+    values: dictionary
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
+    proj: project.Project
+        Project to run `REUSE <https://reuse.software/>`_ on.
+    missing_headers: list
+        Committed files that are missing copyright and/or
+        license information in their headers.
+
+    Returns
+    -------
+    int
+        ``0`` if all files contain headers and are up to date.
+        ``1`` if ``REUSE`` changed all noncompliant files.
+    """
+    files = values["files"]
+    year = values["year"]
+    copyright = values["copyright"]
+    template = values["template"]
+
+    if i < len(files):
+        # If the committed file is in missing_headers
+        if files[i] in missing_headers:
+            changed_headers = 1
+            # Run REUSE on the file
+            args = set_header_args(parser, year, files[i], copyright, template)
+            args.license = [values["license"]]
+            header.run(args, proj)
+
+            # Check if the next file is in missing_headers
+            return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
+        else:
+            # Update the header
+            with NamedTemporaryFile(mode="w", delete=False) as tmp:
+                args = set_header_args(parser, year, files[i], copyright, template)
+                header.run(args, proj, tmp)
+                tmp.close()
+
+            # Print header was successfully changed if it was modified
+            diff = values["git_repo"].git.diff(files[i], name_only=True)
+            if diff:
+                changed_headers = 1
+                print(f"Successfully changed header of {files[i]}")
+
+            return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
+
+    return changed_headers
+
+
+def get_full_paths(file_list):
+    """
+    Update file paths to be absolute paths with system separators.
+
+    Parameters
+    ----------
+    file_list: list
+        List containing committed files.
+
+    Returns
+    -------
+    list
+        List containing the full paths of committed files.
+    """
+    for i in range(0, len(file_list)):
+        if "win" in sys.platform:
+            split_str = file_list[i].split("/")
+            file_list[i] = os.path.abspath(os.path.join(*split_str))
+        else:
+            file_list[i] = os.path.abspath(file_list[i])
+
+    return file_list
 
 
 def find_files_missing_header():
@@ -185,57 +274,42 @@ def find_files_missing_header():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-    # Get committed files, the year, and custom copyright, template, and/or license arguments
-    files = args.files
-    copyright = args.custom_copyright
-    template = args.custom_template
-    license = args.custom_license
-    changed_headers = 0
-    year = dt.today().year
-
     # Get root directory of the git repository.
     git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
-    git_root = git_repo.git.rev_parse("--show-toplevel")
+
+    # Set changed_headers to zero by default
+    changed_headers = 0
+
+    # Create dictionary containing the committed files, custom copyright,
+    # template, license, changed_headers, year, and git_repo
+    values = {
+        "files": args.files,
+        "copyright": args.custom_copyright,
+        "template": args.custom_template,
+        "license": args.custom_license,
+        "year": dt.today().year,
+        "git_repo": git_repo,
+    }
 
     # Update file paths to be absolute paths with correct separators
-    for i in range(0, len(files)):
-        if "win" in sys.platform:
-            split_str = files[i].split("/")
-            files[i] = os.path.abspath(os.path.join(*split_str))
-        else:
-            files[i] = os.path.abspath(files[i])
+    get_full_paths(values["files"])
 
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing.
+    # skip-unrecognized, and skip-existing
     header.add_arguments(parser)
 
     # Run REUSE on root of the repository
+    git_root = values["git_repo"].git.rev_parse("--show-toplevel")
     proj = project.Project(git_root)
+
+    # Get files missing headers (copyright and/or license information)
     missing_headers = list(list_noncompliant_files(args, proj))
-
-    def check_exists(changed_headers, i):
-        """Check if the committed file is missing its header."""
-        if i < len(files):
-            # If the committed file is in missing_headers
-            if files[i] in missing_headers:
-                changed_headers = 1
-                # Run REUSE on the file
-                args = set_header_args(parser, year, files[i], copyright, template)
-                args.license = [license]
-                header.run(args, proj)
-
-                # Check if the next file is in missing_headers
-                return check_exists(changed_headers, i + 1)
-            else:
-                return check_exists(changed_headers, i + 1)
-
-        return changed_headers
 
     # Returns 1 if REUSE changes noncompliant files
     # Returns 0 if all files are compliant
-    return check_exists(changed_headers, 0)
+    return check_exists(changed_headers, parser, values, proj, missing_headers, 0)
 
 
 def main():
