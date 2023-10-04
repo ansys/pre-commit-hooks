@@ -8,6 +8,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 - Added check_license argument ([#64](https://github.com/ansys/pre-commit-hooks/pull/64))
 - Run hook on specific directories and files ([#65](https://github.com/ansys/pre-commit-hooks/pull/65))
+- Update headers & improve unit tests ([#69](https://github.com/ansys/pre-commit-hooks/pull/69))
 
 ### Changed
 
