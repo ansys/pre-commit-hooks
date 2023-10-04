@@ -210,7 +210,8 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
             changed_headers = 1
             # Run REUSE on the file
             args = set_header_args(parser, year, files[i], copyright, template)
-            args.license = [values["license"]]
+            if not args.ignore_license_check:
+                args.license = [values["license"]]
             header.run(args, proj)
 
             # Check if the next file is in missing_headers
