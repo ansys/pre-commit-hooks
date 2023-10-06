@@ -294,7 +294,6 @@ def find_files_missing_header():
     }
 
     # Update file paths to be absolute paths with correct separators
-    get_full_paths(values["files"])
 
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
