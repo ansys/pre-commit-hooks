@@ -284,7 +284,7 @@ def find_files_missing_header():
     # Create dictionary containing the committed files, custom copyright,
     # template, license, changed_headers, year, and git_repo
     values = {
-        "files": args.files,
+        "files": get_full_paths(args.files),
         "copyright": args.custom_copyright,
         "template": args.custom_template,
         "license": args.custom_license,
