@@ -248,14 +248,15 @@ def get_full_paths(file_list):
     list
         List containing the full paths of committed files.
     """
-    for i in range(0, len(file_list)):
+    full_path_files = []
+    for file in file_list:
         if "win" in sys.platform:
-            split_str = file_list[i].split("/")
-            file_list[i] = os.path.abspath(os.path.join(*split_str))
+            split_str = file.split("/")
+            full_path_files.append(os.path.abspath(os.path.join(*split_str)))
         else:
-            file_list[i] = os.path.abspath(file_list[i])
+            full_path_files.append(os.path.abspath(file))
 
-    return file_list
+    return full_path_files
 
 
 def find_files_missing_header():
