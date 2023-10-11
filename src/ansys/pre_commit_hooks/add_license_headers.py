@@ -286,7 +286,6 @@ def get_full_paths(file_list):
         List containing the full paths of committed files.
     """
     full_path_files = []
-    print(file_list)
     for file in file_list:
         if "win" in sys.platform:
             split_str = file.split("/")
