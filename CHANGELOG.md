@@ -17,6 +17,9 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Dependencies
 
+- Bump `ansys-sphinx-theme` from 0.12.1 to 0.12.2 ([#70](https://github.com/ansys/pre-commit-hooks/pull/70))
+- Bump `pre-commit` from v4.4.0 to v4.5.0 ([#71](https://github.com/ansys/pre-commit-hooks/pull/71))
+
 ### Fixed
 
 ## [0.1.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.3) - September 8, 2023
