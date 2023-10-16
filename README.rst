@@ -37,25 +37,56 @@ Currently, these hooks are available:
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
 
-  #. Copy the .reuse directory from this repository into your repository.
+ #. If you are using any custom templates or licenses, copy the .reuse and LICENSES directories from this repository
+    into the target repository. If you are using the default Ansys template and MIT.txt license, skip this step. By default,
+    the hook will copy the LICENSES/MIT.txt, .reuse/templates/ansys.jinja2, and .reuse/dep5 into the target repository when
+    the hook runs.
 
      .. note::
 
-        Configure .reuse/dep5 to match the file structure within your repository.
+        The LICENSES and .reuse folders are required for the hook to run correctly. Your project
+        should have the following layout:
+
+        ::
+
+            project
+            ├── LICENCES
+            │   └── license_name.txt
+            ├── .reuse
+            │   └── templates
+            │       └── template_name.jinja2
+            │   └── dep5
+            ├── src
+            ├── examples
+            ├── tests
+            ├── .pre-commit-config.yaml
+            ├── pyproject.toml
+
+        Where ``license_name`` is the name of the license that is being used, for example, MIT.txt, and
+        ``template_name`` is the name of the custom template being used. The jinja2 file contains the
+        template for the license headers that are added to the files.
+
+        Licenses that are supported by ``REUSE`` can be found in the
+        `spdx/license-list-data <https://github.com/spdx/license-list-data/tree/main/text>`_ repository.
+        Please select a license text file from that repository, and copy it to the LICENSES directory.
+
+ #. Configure the .reuse/dep5 file.
+
+     .. note::
+
+        If the default template and license are being used, run the hook to acquire the
+        .reuse and LICENSES directories. After running the hook, if files in your project
+        contain headers that should not, configure the .reuse/dep5 file to match the file
+        structure within your repository and run the hook again.
+
+        If you are manually setting up the .reuse and LICENSES directories,
+        ensure the .reuse/dep5 entries match the file structure within your repository.
         The dep5 file contains files & directories that should not be given license headers.
         Ensure all files and directories you want to ignore are in this file.
 
-        .reuse/templates/ansys.jinja2 contains the template for the license headers that are
-        added to the files. If the content of the MIT license changes, replace the lines between
-        the if statements in the following code block:
+        See step #5 for examples of how to ignore specific files in dep5.
 
-        .. code:: jinja
-
-           {% if "MIT" in spdx_expressions %}
-           ...
-           {% endif %}
-
-  #. Set custom arguments for the pre-commit hook if necessary.
+ #. Set custom arguments for the pre-commit hook if necessary.
 
      .. code:: yaml
 
@@ -89,7 +120,7 @@ Currently, these hooks are available:
          in the header. Add ``--ignore_license_check`` to ignore checking for licensing information
          in the files.
 
-  #. Specify directories to run the hook on
+ #. Specify directories to run the hook on
 
      .. note::
 
@@ -106,7 +137,7 @@ Currently, these hooks are available:
         - id: add-license-headers
           files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
 
-  #. Ignore specific files or file types
+ #. Ignore specific files or file types
 
      .. note::
 

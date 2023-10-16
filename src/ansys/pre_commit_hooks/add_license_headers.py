@@ -29,6 +29,8 @@ import argparse
 from datetime import date as dt
 import json
 import os
+import pathlib
+import shutil
 import sys
 from tempfile import NamedTemporaryFile
 
@@ -87,6 +89,41 @@ def set_lint_args(parser):
     lint.add_arguments(parser)
 
     return parser.parse_args()
+
+
+def copy_assets(proj_root, args):
+    """Copy .reuse and LICENSES folders from assets directory."""
+    hook_loc = pathlib.Path(__file__).parent.resolve()
+    directories = [".reuse"]
+
+    # If ignore_license_check is False, copy LICENSES folder to
+    # the root of the repository
+    if not args.ignore_license_check:
+        directories.append("LICENSES")
+
+    for dir in directories:
+        src = os.path.join(hook_loc, "assets", dir)
+        dest = os.path.join(proj_root, dir)
+
+        # If .reuse or LICENSES exists in the root of the repository,
+        # only replace .reuse/templates/ansys.jinja2 and LICENSES/MIT.txt
+        if os.path.isdir(dest):
+            if ".reuse" in dest:
+                src_file = os.path.join(src, "templates", "ansys.jinja2")
+                dest_file = os.path.join(dest, "templates", "ansys.jinja2")
+            elif "LICENSES" in dest:
+                src_file = os.path.join(src, "MIT.txt")
+                dest_file = os.path.join(dest, "MIT.txt")
+
+            if os.path.isfile(dest_file):
+                # Remove destination file & replace with
+                # a new copy from source
+                os.remove(dest_file)
+                shutil.copyfile(src_file, dest_file)
+        else:
+            # If destination directory does not exist, copy the entire
+            # folder from src to dest
+            shutil.copytree(src, dest)
 
 
 def list_noncompliant_files(args, proj):
@@ -293,8 +330,6 @@ def find_files_missing_header():
         "git_repo": git_repo,
     }
 
-    # Update file paths to be absolute paths with correct separators
-
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
@@ -303,6 +338,10 @@ def find_files_missing_header():
 
     # Run REUSE on root of the repository
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
+
+    # Copy .reuse folder and LICENSES folder (if licenses are being checked)
+    copy_assets(git_root, args)
+
     proj = project.Project(git_root)
 
     # Get files missing headers (copyright and/or license information)

@@ -281,16 +281,25 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     new_files = []
 
     # Set template and license names
-    template_name = "ansys.jinja2"
-    license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_name = "test_template.jinja2"
+    license_name = "ECL-1.0.txt"
+    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "tests", "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
     new_files.append(tmp_file)
 
-    add_argv_run(repo, new_files, new_files)
+    # Set custom args with all files, test_template, and license
+    custom_args = []
+
+    for file in new_files:
+        custom_args.append(file)
+
+    custom_args.append("--custom_template=test_template")
+    custom_args.append("--custom_license=ECL-1.0")
+
+    add_argv_run(repo, new_files, custom_args)
 
     # Change jinja file
     orig_jinja = os.path.join(tmp_path, ".reuse", "templates", template_name)
@@ -298,8 +307,8 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
 
     with open(orig_jinja, "r+") as f:
         for line in f:
-            if line.startswith("Permission"):
-                line = line.replace("Permission", "New Permission")
+            if line.startswith("The Educational Community"):
+                line = line.replace("The Educational Community", "The PyAnsys Community")
             tmp_jinja.write(line)
         tmp_jinja.close()
         f.close()
@@ -310,41 +319,99 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     # Add jinja file to list of files that have been changed
     new_files.append(orig_jinja)
 
-    add_argv_run(repo, new_files, new_files)
+    # Set custom args with all files, test_template, and license
+    custom_args = []
+
+    for file in new_files:
+        custom_args.append(file)
+
+    custom_args.append("--custom_template=test_template")
+    custom_args.append("--custom_license=ECL-1.0")
+
+    add_argv_run(repo, new_files, custom_args)
 
     # Check that "New Permission" is in the tmp file header
     file = open(tmp_file, "r")
     for line in file:
-        if "Permission" in line:
-            assert "New Permission" in line
+        if "The PyAnsys Community" in line:
+            assert "The PyAnsys Community" in line
 
     os.chdir(REPO_PATH)
 
 
 def test_missing_licenses(tmp_path: pytest.TempPathFactory):
     """Test that LICENSES folder is required."""
-    # List of files to be git added
-    new_files = []
-
     # Set template and license names
-    template_name = "ansys.jinja2"
-    license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_name = "test_template.jinja2"
+    license_name = "ECL-1.0.txt"
+    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "tests", "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
-    new_files.append(tmp_file)
 
-    # Remove LICENSES folder from tmp_path
-    shutil.rmtree(os.path.join(tmp_path, "LICENSES"))
+    # Remove LICENSES/ECL-1.0.txt file from tmp_path
+    os.remove(os.path.join(tmp_path, "LICENSES", license_name))
+
+    custom_args = [
+        tmp_file,
+        "--custom_template=test_template",
+        "--custom_license=ECL-1.0",
+    ]
 
     # Add header to tmp_file
-    add_argv_run(repo, new_files, new_files)
+    add_argv_run(repo, tmp_file, custom_args)
 
-    # If LICENSES folder is missing, then it will fail and
-    # add another SPDX line. This shows you need LICENSES folder
-    # or else it will not work correctly.
-    assert add_argv_run(repo, new_files, new_files) == 1
+    custom_args = [
+        tmp_file,
+        "--custom_template=test_template",
+        "--custom_license=ECL-1.0",
+    ]
+
+    # If LICENSES/license_name.txt file is missing, then it will fail
+    # and add another SPDX line. This shows you need the
+    # license_name.txt (MIT.txt, for example) in LICENSES or else it
+    # will fail
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+
+    # Assert two SPDX-License lines are found in the file if
+    # the LICENSES/ECL-1.0.txt file does not exist.
+    file = open(tmp_file, "r")
+    count = 0
+    for line in file:
+        count += 1
+        if count == 6:
+            assert "SPDX-License" in line
+        # Ensure header was updated correctly and didn't add
+        # an extra SPDX-Identifier line
+        if count == 7:
+            assert "SPDX-License" in line
+        if count > 7:
+            break
+    file.close()
 
     os.chdir(REPO_PATH)
+
+
+def test_copy_assets(tmp_path: pytest.TempPathFactory):
+    """Test .reuse and LICENSES folders are copied."""
+    # List of files to be git added
+    new_files = []
+
+    # Set up git repository in tmp_path with temporary file
+    os.chdir(tmp_path)
+
+    # Create a test file in tmp_path
+    tmp_file = create_test_file(tmp_path)
+
+    # Initialize tmp_path as a git repository
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    new_files.append(tmp_file)
+
+    # Add header to tmp_file
+    assert add_argv_run(repo, new_files, new_files) == 1
+
+    check_ansys_header(tmp_file)
