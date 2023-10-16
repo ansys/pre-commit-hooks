@@ -38,7 +38,7 @@ Currently, these hooks are available:
   have ``REUSE`` implemented in your repository.
 
  #. If you are using any custom templates or licenses, copy the .reuse and LICENSES directories from this repository
-    into the target repository. If you are using the default ansys template and MIT.txt license, skip this step. By default,
+    into the target repository. If you are using the default Ansys template and MIT.txt license, skip this step. By default,
     the hook will copy the LICENSES/MIT.txt, .reuse/templates/ansys.jinja2, and .reuse/dep5 into the target repository when
     the hook runs.
 
