@@ -10,6 +10,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 - Run hook on specific directories and files ([#65](https://github.com/ansys/pre-commit-hooks/pull/65))
 - Update headers & improve unit tests ([#69](https://github.com/ansys/pre-commit-hooks/pull/69))
 - Create assets folder with common REUSE templates ([#72](https://github.com/ansys/pre-commit-hooks/pull/72))
+- Run add-license-headers hook serially ([#74](https://github.com/ansys/pre-commit-hooks/pull/74))
 
 ### Changed
 
