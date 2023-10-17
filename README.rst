@@ -91,7 +91,7 @@ Currently, these hooks are available:
      .. code:: yaml
 
       - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.1.3
+        rev: v0.2.0
         hooks:
         - id: add-license-headers
           args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check"]
@@ -132,7 +132,7 @@ Currently, these hooks are available:
      .. code:: yaml
 
       - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.1.3
+        rev: v0.2.0
         hooks:
         - id: add-license-headers
           files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
@@ -148,7 +148,7 @@ Currently, these hooks are available:
           .. code:: yaml
 
            - repo: https://github.com/ansys/pre-commit-hooks
-             rev: v0.1.3
+             rev: v0.2.0
              hooks:
              - id: add-license-headers
                exclude: |
