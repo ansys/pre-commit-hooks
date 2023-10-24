@@ -6,6 +6,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
+- Added difference check between original file and updated file ([#77](https://github.com/ansys/pre-commit-hooks/pull/77))
+
 ### Fixed
 
 ### Changed
