@@ -37,153 +37,150 @@ Currently, these hooks are available:
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
 
- #. If you are using any custom templates or licenses, copy the .reuse and LICENSES directories from this repository
-    into the target repository. If you are using the default Ansys template and MIT.txt license, skip this step. By default,
-    the hook will copy the LICENSES/MIT.txt, .reuse/templates/ansys.jinja2, and .reuse/dep5 into the target repository when
-    the hook runs.
+|
 
-     .. note::
+``add-license-headers`` setup
+-----------------------------
 
-        The LICENSES and .reuse folders are required for the hook to run correctly. Your project
-        should have the following layout:
+Add required directories
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-        ::
+If you are using any custom templates or licenses, copy the .reuse and LICENSES directories from this repository
+into the target repository. If you are using the default Ansys template and MIT.txt license, skip this step. By default,
+the hook will copy the LICENSES/MIT.txt, .reuse/templates/ansys.jinja2, and .reuse/dep5 into the target repository when
+the hook runs.
 
-            project
-            ├── LICENCES
-            │   └── license_name.txt
-            ├── .reuse
-            │   └── templates
-            │       └── template_name.jinja2
-            │   └── dep5
-            ├── src
-            ├── examples
-            ├── tests
-            ├── .pre-commit-config.yaml
-            ├── pyproject.toml
+The LICENSES and .reuse folders are required for the hook to run correctly. Your project should have the following layout:
 
-        Where ``license_name`` is the name of the license that is being used, for example, MIT.txt, and
-        ``template_name`` is the name of the custom template being used. The jinja2 file contains the
-        template for the license headers that are added to the files.
+ ::
 
-        Licenses that are supported by ``REUSE`` can be found in the
-        `spdx/license-list-data <https://github.com/spdx/license-list-data/tree/main/text>`_ repository.
-        Please select a license text file from that repository, and copy it to the LICENSES directory.
+   project
+   ├── LICENCES
+   │   └── license_name.txt
+   ├── .reuse
+   │   └── templates
+   │       └── template_name.jinja2
+   │   └── dep5
+   ├── src
+   ├── examples
+   ├── tests
+   ├── .pre-commit-config.yaml
+   ├── pyproject.toml
 
- #. Configure the .reuse/dep5 file.
+Where ``license_name`` is the name of the license that is being used, for example, MIT.txt, and
+``template_name`` is the name of the custom template being used. The jinja2 file contains the
+template for the license headers that are added to the files.
 
-     .. note::
+Licenses that are supported by ``REUSE`` can be found in the 
+`spdx/license-list-data <https://github.com/spdx/license-list-data/tree/main/text>`_ repository.
+Please select a license text file from that repository, and copy it to the LICENSES directory.
 
-        If the default template and license are being used, run the hook to acquire the
-        .reuse and LICENSES directories. After running the hook, if files in your project
-        contain headers that should not, configure the .reuse/dep5 file to match the file
-        structure within your repository and run the hook again.
+Configure the .reuse/dep5 file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        If you are manually setting up the .reuse and LICENSES directories,
-        ensure the .reuse/dep5 entries match the file structure within your repository.
-        The dep5 file contains files & directories that should not be given license headers.
-        Ensure all files and directories you want to ignore are in this file.
+If the default template and license are being used, run the hook to acquire the
+.reuse and LICENSES directories. After running the hook, if files in your project
+contain headers that should not, configure the .reuse/dep5 file to match the file
+structure within your repository and run the hook again.
 
-        See step #5 for examples of how to ignore specific files in dep5.
+If you are manually setting up the .reuse and LICENSES directories,
+ensure the .reuse/dep5 entries match the file structure within your repository.
+The dep5 file contains files & directories that should not be given license headers.
 
- #. Set custom arguments for the pre-commit hook if necessary.
+* Ensure all files and directories you want to ignore are in this file.
+* See step #5 for examples of how to ignore specific files in dep5.
 
-     .. code:: yaml
+Set custom arguments
+^^^^^^^^^^^^^^^^^^^^
 
-      - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.2.0
-        hooks:
-        - id: add-license-headers
-          args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check"]
+.. code:: yaml
 
-     ``args`` can also be formatted as follows:
+   - repo: https://github.com/ansys/pre-commit-hooks
+   rev: v0.2.0
+   hooks:
+   - id: add-license-headers
+    args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check"]
 
-     .. code:: yaml
+``args`` can also be formatted as follows:
 
-      args:
-      - --custom_copyright=custom copyright phrase
-      - --custom_template=template_name
-      - --custom_license=license_name
-      - --ignore_license_check
+.. code:: yaml
 
-     .. note::
+   args:
+   - --custom_copyright=custom copyright phrase
+   - --custom_template=template_name
+   - --custom_license=license_name
+   - --ignore_license_check
 
-      #. ``custom copyright phrase`` is the copyright line you want to include in the license
-         header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
-      #. ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
-         By default, it uses ``ansys``.
-      #. ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
-         To view a list of licenses that are supported by ``REUSE``, see
-         https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
-      #. ``ignore_license_check`` is whether or not to check for the license in the header. By default,
-         it is ``False``, meaning the files are checked for both the copyright and licensing information
-         in the header. Add ``--ignore_license_check`` to ignore checking for licensing information
-         in the files.
+* ``custom copyright phrase`` is the copyright line you want to include in the license
+  header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
+* ``template_name`` is the name of the .jinja2 file located in ``.reuse/templates/``.
+  By default, it uses ``ansys``.
+* ``license_name`` is the name of the license being used. For example, MIT, ECL-1.0, etc.
+  To view a list of licenses that are supported by ``REUSE``, see
+  https://github.com/spdx/license-list-data/tree/main/text. By default it uses ``MIT``.
+* ``ignore_license_check`` is whether or not to check for the license in the header. By default,
+  it is ``False``, meaning the files are checked for both the copyright and licensing information
+  in the header. Add ``--ignore_license_check`` to ignore checking for licensing information
+  in the files.
 
- #. Specify directories to run the hook on
+Specify directories to run the hook on
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-     .. note::
+By default, the hook will run on proto files in any directory, as well as python files within
+directories named ``src``, ``examples``, and ``tests``. To specify additional files and/or directories
+the hook should run on, add the necessary regex to the ``files`` line in your
+.pre-commit-config.yaml file:
 
-        By default, the hook will run on proto files in any directory, as well as python files within
-        directories named ``src``, ``examples``, and ``tests``. To specify additional files and/or directories
-        the hook should run on, add the necessary regex to the ``files`` line in your
-        .pre-commit-config.yaml file:
+.. code:: yaml
 
-     .. code:: yaml
+   - repo: https://github.com/ansys/pre-commit-hooks
+     rev: v0.2.0
+     hooks:
+     - id: add-license-headers
+       files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
 
-      - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.2.0
-        hooks:
-        - id: add-license-headers
-          files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
+Ignore specific files or file types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
- #. Ignore specific files or file types
+There are two different ways to ignore specific files or file types:
 
-     .. note::
+In .pre-commit-config.yaml
 
-        There are two different ways to ignore specific files or file types:
+.. code:: yaml
 
-     #. In .pre-commit-config.yaml
+  - repo: https://github.com/ansys/pre-commit-hooks
+    rev: v0.2.0
+    hooks:
+    - id: add-license-headers
+      exclude: |
+          (?x)^(
+              path/to/file1.py |
+              path/to/.*\.(ts|cpp) |
+              (.folder1|folder2)/.* |
+              .*\.js |
+              \..* |
+          )$
 
-          .. code:: yaml
+* ``path/to/file1.py`` excludes the stated file.
+* ``path/to/.*\.(ts|cpp)`` excludes all .ts and .cpp files within the ``path/to`` directory.
+* ``(.folder1|folder2)/.*`` excludes directories named .folder1 and folder2.
+* ``.*\.js`` excludes all .js files in all directories.
+* ``\..*`` excludes all hidden files.
 
-           - repo: https://github.com/ansys/pre-commit-hooks
-             rev: v0.2.0
-             hooks:
-             - id: add-license-headers
-               exclude: |
-                   (?x)^(
-                       path/to/file1.py |
-                       path/to/.*\.(ts|cpp) |
-                       (.folder1|folder2)/.* |
-                       .*\.js |
-                       \..* |
-                   )$
+In .reuse/dep5
 
-          .. note ::
+.. code:: debcontrol
 
-           - ``path/to/file1.py`` excludes the stated file.
-           - ``path/to/.*\.(ts|cpp)`` excludes all .ts and .cpp files within the ``path/to`` directory.
-           - ``(.folder1|folder2)/.*`` excludes directories named .folder1 and folder2.
-           - ``.*\.js`` excludes all .js files in all directories.
-           - ``\..*`` excludes all hidden files.
+  Files: path/to/file1.py
+  Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+  License: MIT
 
-     #. In .reuse/dep5
+  Files: path/to/*.py
+  Copyright: 2023 ANSYS, Inc. and/or its affiliates.
+  License: MIT
 
-          .. code:: debcontrol
-
-           Files: path/to/file1.py
-           Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-           License: MIT
-
-           Files: path/to/*.py
-           Copyright: 2023 ANSYS, Inc. and/or its affiliates.
-           License: MIT
-
-          .. note::
-           - ``path/to/file1.py`` excludes the stated file.
-           - ``path/to/*.py`` excludes all .py files in the ``path/to`` directory.
-
+  * ``path/to/file1.py`` excludes the stated file.
+  * ``path/to/*.py`` excludes all .py files in the ``path/to`` directory.
 
 How to install
 --------------
