@@ -179,8 +179,8 @@ In .reuse/dep5
   Copyright: 2023 ANSYS, Inc. and/or its affiliates.
   License: MIT
 
-  * ``path/to/file1.py`` excludes the stated file.
-  * ``path/to/*.py`` excludes all .py files in the ``path/to`` directory.
+* ``path/to/file1.py`` excludes the stated file.
+* ``path/to/*.py`` excludes all .py files in the ``path/to`` directory.
 
 How to install
 --------------
