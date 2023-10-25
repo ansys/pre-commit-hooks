@@ -71,7 +71,7 @@ Where ``license_name`` is the name of the license that is being used, for exampl
 ``template_name`` is the name of the custom template being used. The jinja2 file contains the
 template for the license headers that are added to the files.
 
-Licenses that are supported by ``REUSE`` can be found in the 
+Licenses that are supported by ``REUSE`` can be found in the
 `spdx/license-list-data <https://github.com/spdx/license-list-data/tree/main/text>`_ repository.
 Please select a license text file from that repository, and copy it to the LICENSES directory.
 
