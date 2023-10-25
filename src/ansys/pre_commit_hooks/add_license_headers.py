@@ -256,11 +256,11 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
             # Save current copy of files[i]
-            tempfile = NamedTemporaryFile(mode="w", delete=True).name
+            tempfile = NamedTemporaryFile(mode="w", delete=False).name
             shutil.copyfile(files[i], tempfile)
 
             # Update the header
-            with NamedTemporaryFile(mode="w", delete=True) as tmp:
+            with NamedTemporaryFile(mode="w", delete=False) as tmp:
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
                 tmp.close()
