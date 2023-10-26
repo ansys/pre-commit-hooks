@@ -31,8 +31,6 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": get_version_match(__version__),
     },
-    "check_switcher": False,
-    "navigation_with_keys": False,
 }
 
 # Sphinx extensions

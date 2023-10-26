@@ -260,10 +260,10 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
             shutil.copyfile(files[i], tempfile)
 
             # Update the header
-            with NamedTemporaryFile(mode="w", delete=False) as tmp:
+            # tmp captures the stdout of the header.run() function
+            with NamedTemporaryFile(mode="w", delete=True) as tmp:
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
-                tmp.close()
 
             # Compare the tempfile with the updated file
             same_content = filecmp.cmp(tempfile, files[i], shallow=False)
