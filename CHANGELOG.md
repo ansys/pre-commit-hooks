@@ -2,17 +2,17 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
-## [Unreleased]()
+## [0.2.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.1) - October 31 2023
 
 ### Added
 
 - Added difference check between original file and updated file ([#77](https://github.com/ansys/pre-commit-hooks/pull/77))
 
-### Fixed
-
-### Changed
-
 ### Dependencies
+
+- `pre-commit` autoupdate ([#76](https://github.com/ansys/pre-commit-hooks/pull/76))
+- Bump `ansys-sphinx-theme` from 0.12.3 to 0.12.4 ([#80](https://github.com/ansys/pre-commit-hooks/pull/80))
+- Bump `pytest` from 7.4.2 to 7.4.3 ([#81](https://github.com/ansys/pre-commit-hooks/pull/81))
 
 ## [0.2.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.0) - October 17 2023
 
