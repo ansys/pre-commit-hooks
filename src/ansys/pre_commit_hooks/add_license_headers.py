@@ -27,6 +27,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 """
 import argparse
 from datetime import date as dt
+import filecmp
 import json
 import os
 import pathlib
@@ -254,15 +255,22 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
             # Check if the next file is in missing_headers
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
+            # Save current copy of files[i]
+            tempfile = NamedTemporaryFile(mode="w", delete=False).name
+            shutil.copyfile(files[i], tempfile)
+
             # Update the header
-            with NamedTemporaryFile(mode="w", delete=False) as tmp:
+            # tmp captures the stdout of the header.run() function
+            with NamedTemporaryFile(mode="w", delete=True) as tmp:
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
-                tmp.close()
 
-            # Print header was successfully changed if it was modified
+            # Compare the tempfile with the updated file
+            same_content = filecmp.cmp(tempfile, files[i], shallow=False)
+            # Diff the updated file with the version of the file that was git added
             diff = values["git_repo"].git.diff(files[i], name_only=True)
-            if diff:
+            # Print header was successfully changed if it was modified
+            if diff or (same_content == False):
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
 
