@@ -2,6 +2,16 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
+## [Unreleased]()
+
+### Added
+
+### Fixed
+
+### Changed
+
+### Dependencies
+
 ## [0.2.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.1) - October 31 2023
 
 ### Added
