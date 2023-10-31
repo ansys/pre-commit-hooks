@@ -92,7 +92,7 @@ def set_lint_args(parser):
     return parser.parse_args()
 
 
-def copy_assets(proj_root, args):
+def link_assets(proj_root, args):
     """Copy .reuse and LICENSES folders from assets directory."""
     hook_loc = pathlib.Path(__file__).parent.resolve()
     directories = [".reuse"]
@@ -103,28 +103,22 @@ def copy_assets(proj_root, args):
         directories.append("LICENSES")
 
     for dir in directories:
-        src = os.path.join(hook_loc, "assets", dir)
-        dest = os.path.join(proj_root, dir)
+        # If dir is .reuse and the custom template is not being used
+        if (".reuse" in dir) and (args.custom_template == DEFAULT_TEMPLATE):
+            src = os.path.join(hook_loc, "assets", dir, "templates", f"{DEFAULT_TEMPLATE}.jinja2")
+            dest = os.path.join(proj_root, dir, "templates", f"{DEFAULT_TEMPLATE}.jinja2")
+        # If dir is LICENSES and the custom license is not being used
+        elif (dir == "LICENSES") and (args.custom_license == DEFAULT_LICENSE):
+            src = os.path.join(hook_loc, "assets", dir, f"{DEFAULT_LICENSE}.txt")
+            dest = os.path.join(proj_root, dir, f"{DEFAULT_LICENSE}.txt")
 
-        # If .reuse or LICENSES exists in the root of the repository,
-        # only replace .reuse/templates/ansys.jinja2 and LICENSES/MIT.txt
-        if os.path.isdir(dest):
-            if ".reuse" in dest:
-                src_file = os.path.join(src, "templates", "ansys.jinja2")
-                dest_file = os.path.join(dest, "templates", "ansys.jinja2")
-            elif "LICENSES" in dest:
-                src_file = os.path.join(src, "MIT.txt")
-                dest_file = os.path.join(dest, "MIT.txt")
+        # If .reuse\templates or LICENSES does not exist, create it
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
 
-            if os.path.isfile(dest_file):
-                # Remove destination file & replace with
-                # a new copy from source
-                os.remove(dest_file)
-                shutil.copyfile(src_file, dest_file)
-        else:
-            # If destination directory does not exist, copy the entire
-            # folder from src to dest
-            shutil.copytree(src, dest)
+        os.symlink(src, dest)
+
+    return directories
 
 
 def list_noncompliant_files(args, proj):
@@ -304,6 +298,28 @@ def get_full_paths(file_list):
     return full_path_files
 
 
+def cleanup(proj_root, args, dirs):
+    """Unlink the default asset files, and remove directories if empty."""
+    if (args.custom_template != DEFAULT_TEMPLATE) and (args.custom_license != DEFAULT_LICENSE):
+        return
+    elif (args.custom_template == DEFAULT_TEMPLATE) or (args.custom_license == DEFAULT_LICENSE):
+        for dir in dirs:
+            # If dir is .reuse and the custom template is not being used
+            if (".reuse" in dir) and (args.custom_template == DEFAULT_TEMPLATE):
+                dest = os.path.join(proj_root, dir, "templates", f"{DEFAULT_TEMPLATE}.jinja2")
+            # If dir is LICENSES and the custom license is not being used
+            elif (dir == "LICENSES") and (args.custom_license == DEFAULT_LICENSE):
+                dest = os.path.join(proj_root, dir, f"{DEFAULT_LICENSE}.txt")
+            else:
+                continue
+
+            os.unlink(dest)
+
+            # If .reuse\templates or LICENSES is empty, remove the folder
+            if not os.listdir(dir):
+                shutil.rmtree(dir)
+
+
 def find_files_missing_header():
     """
     Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
@@ -347,17 +363,24 @@ def find_files_missing_header():
     # Run REUSE on root of the repository
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
 
-    # Copy .reuse folder and LICENSES folder (if licenses are being checked)
-    copy_assets(git_root, args)
+    # Link .reuse folder and LICENSES folder (if licenses are being checked)
+    asset_dirs = link_assets(git_root, args)
 
     proj = project.Project(git_root)
 
     # Get files missing headers (copyright and/or license information)
     missing_headers = list(list_noncompliant_files(args, proj))
 
+    # Add or update headers of required files.
+    # Return 1 if files were added or updated, and return 0 if no files were altered.
+    return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+
+    # Unlink default files & remove folders if empty
+    cleanup(git_root, args, asset_dirs)
+
     # Returns 1 if REUSE changes noncompliant files
     # Returns 0 if all files are compliant
-    return check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+    return return_code
 
 
 def main():
