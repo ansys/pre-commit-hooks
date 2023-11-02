@@ -6,6 +6,8 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
+- Add headers to tests and examples ([#85](https://github.com/ansys/pre-commit-hooks/pull/85))
+
 ### Fixed
 
 ### Changed
