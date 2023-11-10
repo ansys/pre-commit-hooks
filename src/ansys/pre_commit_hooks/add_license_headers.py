@@ -309,7 +309,6 @@ def add_hook_changes(before_hook, after_hook):
         while True:
             try:
                 line = str(next(diff))
-                # print(line)
                 if "+" in line[0] and line[2:] == "\n":
                     tmp.write(line[2:])
                 elif "-" in line[0]:
