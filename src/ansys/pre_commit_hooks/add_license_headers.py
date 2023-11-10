@@ -27,6 +27,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 """
 import argparse
 from datetime import date as dt
+import difflib
 import filecmp
 import json
 import os
@@ -256,8 +257,8 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
             # Save current copy of files[i]
-            tempfile = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(files[i], tempfile)
+            before_hook = NamedTemporaryFile(mode="w", delete=False).name
+            shutil.copyfile(files[i], before_hook)
 
             # Update the header
             # tmp captures the stdout of the header.run() function
@@ -265,18 +266,69 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
 
+            # check diffs between files and do modifications afterwards
+            add_hook_changes(before_hook, files[i])
+
             # Compare the tempfile with the updated file
-            same_content = filecmp.cmp(tempfile, files[i], shallow=False)
-            # Diff the updated file with the version of the file that was git added
-            diff = values["git_repo"].git.diff(files[i], name_only=True)
+            # same_content is True if the two files that are being compared are the same
+            same_content = filecmp.cmp(before_hook, files[i], shallow=False)
+
             # Print header was successfully changed if it was modified
-            if diff or (same_content == False):
+            if same_content == False:
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
     return changed_headers
+
+
+def add_hook_changes(before_hook, after_hook):
+    """
+    Add earlier hook changes to updated file with header.
+
+    Parameters
+    ----------
+    before_hook: str
+        Path to file before add-license-headers was run.
+    after_hook: str
+        Path to file after add-license-headers was run.
+    """
+    # Open files
+    before_file = open(before_hook, "r")
+    after_file = open(after_hook, "r")
+
+    # Compare the files before and after the hook ran
+    diff = difflib.ndiff(after_file.readlines(), before_file.readlines())
+
+    before_file.close()
+    after_file.close()
+
+    # Combine the changes from before the hook with the changes after the hook
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        while True:
+            try:
+                line = str(next(diff))
+                # print(line)
+                if "+" in line[0] and line[2:] == "\n":
+                    tmp.write(line[2:])
+                elif "-" in line[0]:
+                    tmp.write(line[2:])
+                elif "?" in line[0]:
+                    continue
+                elif " " in line[0]:
+                    tmp.write(line[2:])
+            except StopIteration:
+                break
+
+        tmp.close()
+
+        # Copy the file with combined changes to the file that was
+        # edited by the add-license-headers hook
+        shutil.copyfile(tmp.name, after_hook)
+
+        # Delete temporary file
+        os.remove(tmp.name)
 
 
 def get_full_paths(file_list):
