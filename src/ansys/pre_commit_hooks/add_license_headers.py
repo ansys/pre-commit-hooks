@@ -47,7 +47,7 @@ DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 
 
-def set_lint_args(parser):
+def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     """
     Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
 
@@ -93,8 +93,17 @@ def set_lint_args(parser):
     return parser.parse_args()
 
 
-def copy_assets(proj_root, args):
-    """Copy .reuse and LICENSES folders from assets directory."""
+def copy_assets(proj_root: str, args: argparse.Namespace) -> None:
+    """
+    Copy .reuse and LICENSES folders from assets directory.
+
+    Parameters
+    ----------
+    proj_root: str
+        Full path of the repository's root directory.
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+    """
     hook_loc = pathlib.Path(__file__).parent.resolve()
     directories = [".reuse"]
 
@@ -128,7 +137,7 @@ def copy_assets(proj_root, args):
             shutil.copytree(src, dest)
 
 
-def list_noncompliant_files(args, proj):
+def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
     """
     Get a list of the files that are missing license headers.
 
@@ -177,7 +186,9 @@ def list_noncompliant_files(args, proj):
     return missing_headers
 
 
-def set_header_args(parser, year, file_path, copyright, template):
+def set_header_args(
+    parser: argparse.ArgumentParser, year: int, file_path: str, copyright: str, template: str
+) -> argparse.Namespace:
     """
     Set arguments for `REUSE <https://reuse.software/>`_.
 
@@ -212,7 +223,14 @@ def set_header_args(parser, year, file_path, copyright, template):
     return args
 
 
-def check_exists(changed_headers, parser, values, proj, missing_headers, i):
+def check_exists(
+    changed_headers: int,
+    parser: argparse.ArgumentParser,
+    values: dict,
+    proj: project.Project,
+    missing_headers: list,
+    i: int,
+) -> int:
     """
     Check if the committed file is missing its header.
 
@@ -223,7 +241,7 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
         ``1`` if headers were added or updated.
     parser: argparse.ArgumentParser
         Parser containing default license header arguments.
-    values: dictionary
+    values: dict
         Dictionary containing the values of files, copyright,
         template, license, changed_headers, year, and git_repo.
     proj: project.Project
@@ -283,7 +301,7 @@ def check_exists(changed_headers, parser, values, proj, missing_headers, i):
     return changed_headers
 
 
-def add_hook_changes(before_hook, after_hook):
+def add_hook_changes(before_hook: str, after_hook: str) -> None:
     """
     Add earlier hook changes to updated file with header.
 
@@ -330,7 +348,7 @@ def add_hook_changes(before_hook, after_hook):
         os.remove(tmp.name)
 
 
-def get_full_paths(file_list):
+def get_full_paths(file_list: list) -> list:
     """
     Update file paths to be absolute paths with system separators.
 
@@ -355,7 +373,7 @@ def get_full_paths(file_list):
     return full_path_files
 
 
-def find_files_missing_header():
+def find_files_missing_header() -> int:
     """
     Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
 
