@@ -405,8 +405,8 @@ def cleanup(assets: dict, os_git_root: str) -> None:
     for key, value in assets.items():
         dest = os.path.join(os_git_root, value["path"], value["default_file"])
         # If the default asset files exist, unlink and remove directory
-        if os.path.islink(dest):
-            os.unlink(dest)
+        if os.path.exists(dest):
+            os.remove(dest)
             if not os.listdir(value["path"]):
                 shutil.rmtree(key)
 
