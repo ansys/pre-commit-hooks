@@ -51,7 +51,7 @@ to your repository when the hook runs. The .reuse and LICENSES directories will 
 done running.
 
 If you are using a custom template, create a directory named ".reuse", and if you are using a custom license, create a directory
-named "LICENSES" in the root of your repository. The custom template cannot be named ansys.jinja2, otherwise it will be removed
+named ``LICENSES`` in the root of your repository. The custom template cannot be named ``ansys.jinja2``, otherwise it will be removed
 after the hook is done running. The custom license cannot be named MIT.txt for the same reason. The .reuse and/or LICENSES
 directories will have to be committed to your repository and will not be removed once the hook is done running as long as there
 are custom templates or licenses in those directories. Your project should have the following layout:
