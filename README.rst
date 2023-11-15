@@ -45,14 +45,16 @@ Currently, these hooks are available:
 Add required directories
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are using the Ansys template and MIT.txt license, skip this step. By default, the hook will make symbolic links
+If you are using the ansys.jinja2 template and MIT.txt license, skip this step. By default, the hook will make symbolic links
 from its "assets" directory containing LICENSES/MIT.txt and .reuse/templates/ansys.jinja2
 to your repository when the hook runs. The .reuse and LICENSES directories will be deleted once the hook is
 done running.
 
 If you are using a custom template, create a directory named ".reuse", and if you are using a custom license, create a directory
-named "LICENSES" in the root of your repository. The .reuse and/or LICENSES directories will have to be committed to your
-repository and will not be removed once the hook is done running. Your project should have the following layout:
+named "LICENSES" in the root of your repository. The custom template cannot be named ansys.jinja2, otherwise it will be removed
+after the hook is done running. The custom license cannot be named MIT.txt for the same reason. The .reuse and/or LICENSES
+directories will have to be committed to your repository and will not be removed once the hook is done running as long as there
+are custom templates or licenses in those directories. Your project should have the following layout:
 
  ::
 
