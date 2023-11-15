@@ -469,7 +469,7 @@ def find_files_missing_header() -> int:
     # skip-unrecognized, and skip-existing
     header.add_arguments(parser)
 
-    # Unlink default files & remove .reuse and LICENSES folders if empty
+    # Link the default template and/or license from the assets folder to your git repo.
     link_assets(assets, os_git_root, args)
 
     # Project to run `REUSE <https://reuse.software/>`_ on
