@@ -6,13 +6,33 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 ### Added
 
-- Add headers to tests and examples ([#85](https://github.com/ansys/pre-commit-hooks/pull/85))
-
 ### Fixed
 
 ### Changed
 
 ### Dependencies
+
+## [0.2.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.2) - November 15 2023
+
+### Added
+
+- Add headers to tests and examples ([#85](https://github.com/ansys/pre-commit-hooks/pull/85))
+- Add typehints to add-license-headers functions ([#93](https://github.com/ansys/pre-commit-hooks/pull/93))
+
+### Fixed
+
+- Fix add-license-headers to keep edits from previously run hooks ([#88](https://github.com/ansys/pre-commit-hooks/pull/88))
+
+### Changed
+
+- Remove dep5 files from repository ([#89](https://github.com/ansys/pre-commit-hooks/pull/89))
+- Remove .reuse and LICENSES folders ([#95](https://github.com/ansys/pre-commit-hooks/pull/95))
+
+### Dependencies
+
+- Bump `sphinx-autodoc-typehints` from 1.24.0 to 1.25.2 ([#86](https://github.com/ansys/pre-commit-hooks/pull/86), [#90](https://github.com/ansys/pre-commit-hooks/pull/90))
+- `pre-commit` autoupdate ([#87](https://github.com/ansys/pre-commit-hooks/pull/87), [#94](https://github.com/ansys/pre-commit-hooks/pull/94))
+- Bump `ansys-sphinx-theme` from 0.12.4 to 0.12.5 ([#91](https://github.com/ansys/pre-commit-hooks/pull/91))
 
 ## [0.2.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.1) - October 31 2023
 
@@ -45,7 +65,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 - Bump `ansys-sphinx-theme` from 0.12.1 to 0.12.2 ([#70](https://github.com/ansys/pre-commit-hooks/pull/70))
 - Bump `pre-commit` from v4.4.0 to v4.5.0 ([#71](https://github.com/ansys/pre-commit-hooks/pull/71))
 
-## [0.1.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.3) - September 8, 2023
+## [0.1.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.3) - September 8 2023
 
 ### Added
 
@@ -55,13 +75,13 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 - Update descriptions for add-license-headers in README ([#40](https://github.com/ansys/pre-commit-hooks/pull/40))
 
-## [0.1.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.2) - September 5, 2023
+## [0.1.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.2) - September 5 2023
 
 ### Dependencies
 
 - [pre-commit.ci] pre-commit autoupdate [#39](https://github.com/ansys/pre-commit-hooks/pull/39)
 
-## [0.1.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.1) - September 4, 2023
+## [0.1.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.1) - September 4 2023
 
 ### Added
 
