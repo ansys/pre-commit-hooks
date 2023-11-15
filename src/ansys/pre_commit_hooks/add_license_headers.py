@@ -93,48 +93,65 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     return parser.parse_args()
 
 
-def copy_assets(proj_root: str, args: argparse.Namespace) -> None:
+def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     """
-    Copy .reuse and LICENSES folders from assets directory.
+    Link the default template and/or license from the assets folder to your git repo.
 
     Parameters
     ----------
-    proj_root: str
+    assets: dict
+        Dictionary containing the asset folder information.
+    git_root: str
         Full path of the repository's root directory.
     args: argparse.Namespace
         Namespace of arguments with their values.
     """
+    # Unlink default files & remove .reuse and LICENSES folders if empty
+    cleanup(assets, git_root)
+
     hook_loc = pathlib.Path(__file__).parent.resolve()
-    directories = [".reuse"]
 
-    # If ignore_license_check is False, copy LICENSES folder to
-    # the root of the repository
-    if not args.ignore_license_check:
-        directories.append("LICENSES")
+    for key, value in assets.items():
+        hook_asset_dir = os.path.join(hook_loc, "assets", value["path"])
+        repo_asset_dir = os.path.join(git_root, value["path"])
 
-    for dir in directories:
-        src = os.path.join(hook_loc, "assets", dir)
-        dest = os.path.join(proj_root, dir)
+        # If key is .reuse and the custom template is being used
+        if key == ".reuse" and args.custom_template == DEFAULT_TEMPLATE:
+            mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
 
-        # If .reuse or LICENSES exists in the root of the repository,
-        # only replace .reuse/templates/ansys.jinja2 and LICENSES/MIT.txt
-        if os.path.isdir(dest):
-            if ".reuse" in dest:
-                src_file = os.path.join(src, "templates", "ansys.jinja2")
-                dest_file = os.path.join(dest, "templates", "ansys.jinja2")
-            elif "LICENSES" in dest:
-                src_file = os.path.join(src, "MIT.txt")
-                dest_file = os.path.join(dest, "MIT.txt")
+        # If key is LICENSES, the default license is being used, and ignore_license_check is False
+        if (
+            key == "LICENSES"
+            and args.custom_license == DEFAULT_LICENSE
+            and not args.ignore_license_check
+        ):
+            mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
 
-            if os.path.isfile(dest_file):
-                # Remove destination file & replace with
-                # a new copy from source
-                os.remove(dest_file)
-                shutil.copyfile(src_file, dest_file)
-        else:
-            # If destination directory does not exist, copy the entire
-            # folder from src to dest
-            shutil.copytree(src, dest)
+
+def mkdirs_and_link(
+    asset_dir: str, hook_asset_dir: str, repo_asset_dir: str, filename: str
+) -> None:
+    """
+    Make .reuse or LICENSES directory and create symbolic link to file.
+
+    Parameters
+    ----------
+    asset_dir: str
+        Path of the asset directory required for REUSE (.reuse/templates or LICENSES).
+    hook_asset_dir: str
+        Full path of the hook's asset directory.
+    repo_asset_dir: str
+        Full path of the git repository's asset directory.
+    filename: str
+        Name of the file to be linked from the hook_asset_dir to the repo_asset_dir.
+    """
+    src = os.path.join(hook_asset_dir, filename)
+    dest = os.path.join(repo_asset_dir, filename)
+    # If .reuse/templates or LICENSES directories do not exist, create them
+    if not os.path.isdir(asset_dir):
+        os.makedirs(asset_dir)
+    # Make symbolic links to files within the assets folder
+    os.symlink(src, dest)
 
 
 def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
@@ -373,6 +390,27 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
+def cleanup(assets: dict, os_git_root: str) -> None:
+    """
+    Unlink the default asset files, and remove directories if empty.
+
+    Parameters
+    ----------
+    assets: dict
+        Dictionary containing assets information
+    os_git_root: str
+        Full path of the repository's root directory.
+    """
+    # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
+    for key, value in assets.items():
+        dest = os.path.join(os_git_root, value["path"], value["default_file"])
+        # If the default asset files exist, unlink and remove directory
+        if os.path.exists(dest):
+            os.remove(dest)
+            if not os.listdir(value["path"]):
+                shutil.rmtree(key)
+
+
 def find_files_missing_header() -> int:
     """
     Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
@@ -407,26 +445,49 @@ def find_files_missing_header() -> int:
         "git_repo": git_repo,
     }
 
+    # Run REUSE on root of the repository
+    git_root = values["git_repo"].git.rev_parse("--show-toplevel")
+
+    # git_root with correct line separators for operating system
+    os_git_root = git_root.replace("/", os.sep)
+
+    # Dictionary containing the asset folder information
+    assets = {
+        ".reuse": {
+            "path": os.path.join(".reuse", "templates"),
+            "default_file": f"{DEFAULT_TEMPLATE}.jinja2",
+        },
+        "LICENSES": {
+            "path": "LICENSES",
+            "default_file": f"{DEFAULT_LICENSE}.txt",
+        },
+    }
+
     # Add header arguments to parser. Arguments are: copyright, license, contributor,
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing
     header.add_arguments(parser)
 
-    # Run REUSE on root of the repository
-    git_root = values["git_repo"].git.rev_parse("--show-toplevel")
+    # Link the default template and/or license from the assets folder to your git repo.
+    link_assets(assets, os_git_root, args)
 
-    # Copy .reuse folder and LICENSES folder (if licenses are being checked)
-    copy_assets(git_root, args)
-
+    # Project to run `REUSE <https://reuse.software/>`_ on
     proj = project.Project(git_root)
 
     # Get files missing headers (copyright and/or license information)
     missing_headers = list(list_noncompliant_files(args, proj))
 
+    # Add or update headers of required files.
+    # Return 1 if files were added or updated, and return 0 if no files were altered.
+    return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+
+    # Unlink default files & remove .reuse and LICENSES folders if empty
+    cleanup(assets, os_git_root)
+
     # Returns 1 if REUSE changes noncompliant files
     # Returns 0 if all files are compliant
-    return check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+    return return_code
 
 
 def main():

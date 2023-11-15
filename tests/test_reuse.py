@@ -40,8 +40,14 @@ def set_up_repo(tmp_path, template_path, template_name, license_path, license_na
     # Change dir to tmp_path
     os.chdir(tmp_path)
 
+    # Make asset directories if using a custom license or template
+    # Asset directories are .reuse and LICENSES
+    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
+
     # Set up git repository in tmp_path
-    repo = init_git_repo(tmp_path, template_path, template_name, license_path, license_name)
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
 
     # Create a test file in tmp_path
     tmp_file = create_test_file(tmp_path)
@@ -49,24 +55,17 @@ def set_up_repo(tmp_path, template_path, template_name, license_path, license_na
     return repo, tmp_file
 
 
-def init_git_repo(tmp_path, template_path, template_name, license_path, license_name):
-    """Initialize git repository and add the .reuse directory & template."""
-    reuse_dir = os.path.join(tmp_path, ".reuse", "templates")
-    license_dir = os.path.join(tmp_path, "LICENSES")
+def make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name):
+    """Make asset directories if using a custom license or template."""
+    if "ansys" not in template_name:
+        reuse_dir = os.path.join(tmp_path, ".reuse", "templates")
+        os.makedirs(reuse_dir)
+        shutil.copyfile(template_path, f"{reuse_dir}/{template_name}")
 
-    # Create .reuse directory and copy template file to it
-    os.makedirs(reuse_dir)
-    shutil.copyfile(template_path, f"{reuse_dir}/{template_name}")
-
-    os.makedirs(license_dir)
-    shutil.copyfile(license_path, f"{license_dir}/{license_name}")
-
-    # Initialize tmp_path as a git repository
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
-
-    return repo
+    if "MIT" not in license_name:
+        license_dir = os.path.join(tmp_path, "LICENSES")
+        os.makedirs(license_dir)
+        shutil.copyfile(license_path, f"{license_dir}/{license_name}")
 
 
 def create_test_file(tmp_path):
@@ -151,7 +150,7 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-def test_multiple_files(tmp_path: pytest.TempPathFactory, capfd):
+def test_multiple_files(tmp_path: pytest.TempPathFactory):
     """Test reuse is run on files without headers, when one file already has header."""
     # List of files to be git added
     new_files = []
