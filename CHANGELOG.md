@@ -9,9 +9,20 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 ### Fixed
 
 ### Changed
-- Remove python 3.8 and add python 3.12 ([#106](https://github.com/ansys/pre-commit-hooks/pull/106))
 
 ### Dependencies
+
+## [0.2.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.3) - January 2 2024
+
+### Changed
+- Remove python 3.8 and add python 3.12 ([#106](https://github.com/ansys/pre-commit-hooks/pull/106))
+- Update year to 2024 in license files ([#107](https://github.com/ansys/pre-commit-hooks/pull/107))
+
+### Dependencies
+- `pre-commit` autoupdate ([#97](https://github.com/ansys/pre-commit-hooks/pull/97), [#99](https://github.com/ansys/pre-commit-hooks/pull/99), [#100](https://github.com/ansys/pre-commit-hooks/pull/100), [#103](https://github.com/ansys/pre-commit-hooks/pull/103))
+- Bump `actions/labeler` from 4 to 5 ([#98](https://github.com/ansys/pre-commit-hooks/pull/98))
+- Bump `ansys/actions` from 4 to 5 ([#102](https://github.com/ansys/pre-commit-hooks/pull/102))
+- Bump `pytest` from 7.4.3 to 7.4.4 ([#104](https://github.com/ansys/pre-commit-hooks/pull/104))
 
 ## [0.2.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.2) - November 15 2023
 
