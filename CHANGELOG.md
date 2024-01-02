@@ -9,6 +9,7 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 ### Fixed
 
 ### Changed
+- Remove python 3.8 and add python 3.12 ([#106](https://github.com/ansys/pre-commit-hooks/pull/106))
 
 ### Dependencies
 
