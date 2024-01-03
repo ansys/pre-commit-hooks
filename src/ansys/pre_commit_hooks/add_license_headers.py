@@ -300,12 +300,13 @@ def check_exists(
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
 
-            # Check if the file before this hook was run is the same as the one after this hook
-            # was run. If not, apply the changes before this hook was run to the file
+            # Check if the file before add-license-headers was run is the same as the one
+            # after add-license-headers was run. If not, apply the changes before
+            # add-license-headers was run to the file
             if check_same_content(before_hook, files[i]) == False:
                 add_hook_changes(before_hook, files[i])
 
-            # Check if the file content before pre-commit was run has been changed
+            # Check if the file content before add-license-headers was run has been changed
             if check_same_content(before_hook, files[i]) == False:
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
