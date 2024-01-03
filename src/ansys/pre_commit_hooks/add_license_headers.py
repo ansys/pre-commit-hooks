@@ -27,7 +27,6 @@ A license header consists of the Ansys copyright statement and licensing informa
 """
 import argparse
 from datetime import date as dt
-import difflib
 import filecmp
 import json
 import os
@@ -279,6 +278,10 @@ def check_exists(
     template = values["template"]
 
     if i < len(files):
+        # Save current copy of files[i]
+        before_hook = NamedTemporaryFile(mode="w", delete=False).name
+        shutil.copyfile(files[i], before_hook)
+
         # If the committed file is in missing_headers
         if files[i] in missing_headers:
             changed_headers = 1
@@ -291,31 +294,51 @@ def check_exists(
             # Check if the next file is in missing_headers
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
-            # Save current copy of files[i]
-            before_hook = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(files[i], before_hook)
-
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
                 args = set_header_args(parser, year, files[i], copyright, template)
                 header.run(args, proj, tmp)
 
-            # check diffs between files and do modifications afterwards
-            add_hook_changes(before_hook, files[i])
+            # Check if the file before this hook was run is the same as the one after this hook
+            # was run. If not, apply the changes before this hook was run to the file
+            if check_same_content(before_hook, files[i]) == False:
+                add_hook_changes(before_hook, files[i])
 
-            # Compare the tempfile with the updated file
-            # same_content is True if the two files that are being compared are the same
-            same_content = filecmp.cmp(before_hook, files[i], shallow=False)
-
-            # Print header was successfully changed if it was modified
-            if same_content == False:
+            # Check if the file content before pre-commit was run has been changed
+            if check_same_content(before_hook, files[i]) == False:
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
     return changed_headers
+
+
+def check_same_content(before_hook, after_hook):
+    """
+    Check if file before the hook ran is the same as after the hook ran.
+
+    Parameters
+    ----------
+    before_hook: str
+        Path to file before add-license-headers was run.
+    after_hook: str
+        Path to file after add-license-headers was run.
+
+    Returns
+    -------
+    bool
+        ``True`` if the files have the same content.
+        ``False`` if the files have different content.
+    """
+    # Check if the files have the same content
+    same_files = filecmp.cmp(before_hook, after_hook, shallow=False)
+    # If the files are different, return False. Otherwise, return True
+    if same_files == False:
+        return False
+    else:
+        return True
 
 
 def add_hook_changes(before_hook: str, after_hook: str) -> None:
@@ -329,32 +352,40 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
     after_hook: str
         Path to file after add-license-headers was run.
     """
-    # Open files
-    before_file = open(before_hook, "r")
-    after_file = open(after_hook, "r")
+    # Compare each line of the file before and after add-license-headers was run,
+    # and combine the files into one
+    with open(before_hook, "r") as before_edit, open(
+        after_hook, "r"
+    ) as after_edit, NamedTemporaryFile(mode="w", delete=False) as tmp:
+        for before_edit_line, after_edit_line2 in zip(before_edit, after_edit):
+            # If the lines are different,
+            if before_edit_line != after_edit_line2:
+                # If the after_edit_line is empty, and the before_edit_line is the
+                # same as the next after_edit_line, remove the space by writing the
+                # before_edit_line. For example:
+                #
+                # before_edit file                 after_edit file
+                # line 1: """                      line 1:
+                # line 2: print("example")         line 2: """
+                # We want to remove the blank space, so we take line 1 from the before_edit file.
+                if not after_edit_line2.strip() and (before_edit_line == next(after_edit)):
+                    tmp.write(before_edit_line)
+                # If the before_edit_line is empty, write that line and the next line in
+                # the before_edit file. For example:
+                #
+                # before_edit file                 after_edit file
+                # line 1:                          line 1: print("example")
+                # line 2: print("example")         line 2: print("example 2")
+                # We want to keep the blank space, so we take lines 1 & 2 from the before_edit file.
+                elif not before_edit_line.strip():
+                    tmp.write(f"{before_edit_line}{next(before_edit)}")
+                # Otherwise, write the line from the after_edit file
+                else:
+                    tmp.write(after_edit_line2)
+            else:
+                tmp.write(before_edit_line)
 
-    # Compare the files before and after the hook ran
-    diff = difflib.ndiff(after_file.readlines(), before_file.readlines())
-
-    before_file.close()
-    after_file.close()
-
-    # Combine the changes from before the hook with the changes after the hook
-    with NamedTemporaryFile(mode="w", delete=False) as tmp:
-        while True:
-            try:
-                line = str(next(diff))
-                if "+" in line[0] and line[2:] == "\n":
-                    tmp.write(line[2:])
-                elif "-" in line[0]:
-                    tmp.write(line[2:])
-                elif "?" in line[0]:
-                    continue
-                elif " " in line[0]:
-                    tmp.write(line[2:])
-            except StopIteration:
-                break
-
+        # Close the tmp file after writing to it
         tmp.close()
 
         # Copy the file with combined changes to the file that was
