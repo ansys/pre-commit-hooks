@@ -278,10 +278,6 @@ def check_exists(
     template = values["template"]
 
     if i < len(files):
-        # Save current copy of files[i]
-        before_hook = NamedTemporaryFile(mode="w", delete=False).name
-        shutil.copyfile(files[i], before_hook)
-
         # If the committed file is in missing_headers
         if files[i] in missing_headers:
             changed_headers = 1
@@ -294,6 +290,10 @@ def check_exists(
             # Check if the next file is in missing_headers
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
+            # Save current copy of files[i]
+            before_hook = NamedTemporaryFile(mode="w", delete=False).name
+            shutil.copyfile(files[i], before_hook)
+
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
@@ -301,12 +301,14 @@ def check_exists(
                 header.run(args, proj, tmp)
 
             # Check if the file before add-license-headers was run is the same as the one
-            # after add-license-headers was run. If not, apply the changes before
-            # add-license-headers was run to the file
+            # after add-license-headers was run. If not, apply the syntax changes
+            # from other hooks before add-license-headers was run to the file
             if check_same_content(before_hook, files[i]) == False:
                 add_hook_changes(before_hook, files[i])
 
             # Check if the file content before add-license-headers was run has been changed
+            # Assuming the syntax was fixed in the above if statement, this check is
+            # solely for the file's content
             if check_same_content(before_hook, files[i]) == False:
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
