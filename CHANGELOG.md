@@ -2,15 +2,10 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
-## [Unreleased]()
-
-### Added
+## [0.2.4](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.4) - January 4 2024
 
 ### Fixed
-
-### Changed
-
-### Dependencies
+- Apply hook changes after add-license-headers runs ([#108](https://github.com/ansys/pre-commit-hooks/pull/108))
 
 ## [0.2.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.3) - January 2 2024
 
