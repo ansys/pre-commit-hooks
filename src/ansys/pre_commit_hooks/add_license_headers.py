@@ -28,6 +28,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
+import fileinput
 import json
 import os
 import pathlib
@@ -36,7 +37,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import header, lint, project
+from reuse import _util, header, lint, project
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -332,6 +333,8 @@ def check_exists(
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
 
+            os.remove(before_hook)
+
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
     return changed_headers
@@ -374,55 +377,30 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
     after_hook: str
         Path to file after add-license-headers was run.
     """
-    # Compare each line of the file before and after add-license-headers was run,
-    # and combine the files into one
-    try:
-        with open(before_hook, "r") as before_edit, open(
-            after_hook, "r"
-        ) as after_edit, NamedTemporaryFile(mode="w", delete=False) as tmp:
-            for before_edit_line, after_edit_line2 in zip(before_edit, after_edit):
-                # If the lines are different, edit them
-                if before_edit_line != after_edit_line2:
-                    # If the after_edit_line is empty, and the before_edit_line is the
-                    # same as the next after_edit_line, remove the space by writing the
-                    # before_edit_line. For example:
-                    #
-                    # before_edit file                 after_edit file
-                    # line 1: """                      line 1:
-                    # line 2: print("example")         line 2: """
-                    # We want to remove the blank space, so we take line 1
-                    # from the before_edit file.
-                    if not after_edit_line2.strip() and (before_edit_line == next(after_edit)):
-                        tmp.write(before_edit_line)
-                    # If the before_edit_line is empty, write that line and
-                    # the next line in the before_edit file. For example:
-                    #
-                    # before_edit file                 after_edit file
-                    # line 1:                          line 1: print("example")
-                    # line 2: print("example")         line 2: print("example 2")
-                    # We want to keep the blank space, so we take lines 1 & 2
-                    # from the before_edit file.
-                    elif not before_edit_line.strip():
-                        tmp.write(f"{before_edit_line}{next(before_edit)}")
-                    # Otherwise, write the line from the after_edit file
-                    else:
-                        tmp.write(after_edit_line2)
-                else:
-                    tmp.write(before_edit_line)
+    count = 0
+    before_hook_file = open(before_hook, "r", encoding="utf8")
+    before_hook_lines = before_hook_file.readlines()
+    found_reuse_info = False
 
-            # Close the tmp file after writing to it
-            tmp.close()
-
-            # Copy the file with combined changes to the file that was
-            # edited by the add-license-headers hook
-            shutil.copyfile(tmp.name, after_hook)
-
-            # Delete temporary file
-            os.remove(tmp.name)
-    except:
-        # This happens when there is an issue reading a line in a file
-        # For example, having trouble reading unfamiliar characters
-        pass
+    # Copy file content before add-license-header was run into
+    # the file after add-license-header was run.
+    for line in fileinput.input(after_hook, inplace=True, encoding="utf8"):
+        # Copy the new reuse lines into the file
+        if _util.contains_reuse_info(line):
+            count += 1
+            found_reuse_info = True
+            print(line.rstrip())
+        else:
+            # Copy the rest of the file after the reuse information
+            if found_reuse_info:
+                for line_after_reuse_info in before_hook_lines[count:]:
+                    print(line_after_reuse_info.rstrip())
+                break
+            # Copy the header lines before reuse information is found
+            else:
+                count += 1
+                print(line.rstrip())
+    fileinput.close()
 
 
 def get_full_paths(file_list: list) -> list:
