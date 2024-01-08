@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import argparse
+from datetime import date as dt
 import os
 import shutil
 import sys
@@ -108,6 +109,65 @@ def check_ansys_header(file_name):
         if count > 5:
             break
     file.close()
+
+
+def test_custom_start_year(tmp_path: pytest.TempPathFactory):
+    """Test custom start year is in copyright line."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, "--start_year=2023"]
+
+    # Assert the hook fails because it added the header
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+
+    file = open(tmp_file, "r")
+    count = 0
+    for line in file:
+        count += 1
+        # Assert the copyright line's time range is
+        # from 2023 to the current year
+        if count == 1:
+            assert f"2023 - {dt.today().year}" in line
+        if count > 1:
+            break
+    file.close()
+
+    os.chdir(REPO_PATH)
+
+
+def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
+    """Test custom start year is in copyright line."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Assert the hook fails because it added the header
+    assert add_argv_run(repo, tmp_file, [tmp_file]) == 1
+
+    file = open(tmp_file, "r")
+    count = 0
+    for line in file:
+        count += 1
+        # Assert the copyright line's time range is
+        # from 2023 to the current year
+        if count == 1:
+            assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in line
+        if count > 1:
+            break
+    file.close()
+
+    os.chdir(REPO_PATH)
 
 
 def test_custom_args(tmp_path: pytest.TempPathFactory):
