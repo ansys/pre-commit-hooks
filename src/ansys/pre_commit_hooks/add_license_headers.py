@@ -494,6 +494,19 @@ def find_files_missing_header() -> int:
     # Set changed_headers to zero by default
     changed_headers = 0
 
+    # Check start_year is valid
+    try:
+        # Check the start year is not later than the current year
+        if int(args.start_year) > dt.today().year:
+            print("Please provide a start year less than or equal to the current year.")
+            exit(1)
+        # Check the start year isn't earlier than when computers were created :)
+        if int(args.start_year) < 1942:
+            print("Please provide a start year greater than or equal to 1940.")
+            exit(1)
+    except ValueError:
+        print("Please ensure the start year is a number.")
+
     # Create dictionary containing the committed files, custom copyright,
     # template, license, changed_headers, year, and git_repo
     values = {
