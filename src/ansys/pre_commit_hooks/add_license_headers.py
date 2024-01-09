@@ -384,6 +384,7 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
 
     # Copy file content before add-license-header was run into
     # the file after add-license-header was run.
+    # stdout is redirected into the file if inplace is True
     for line in fileinput.input(after_hook, inplace=True, encoding="utf8"):
         # Copy the new reuse lines into the file
         if _util.contains_reuse_info(line):
@@ -391,8 +392,18 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
             found_reuse_info = True
             print(line.rstrip())
         else:
-            # Copy the rest of the file after the reuse information
             if found_reuse_info:
+                try:
+                    # Check the lines after the reuse info are the same
+                    # If not, print the line after the reuse info
+                    # This happens when a comment changes from one line to
+                    # multiline
+                    if line != before_hook_lines[count]:
+                        print(line.rstrip())
+                except IndexError:
+                    pass
+
+                # Copy the rest of the file after the reuse information
                 for line_after_reuse_info in before_hook_lines[count:]:
                     print(line_after_reuse_info.rstrip())
                 break
