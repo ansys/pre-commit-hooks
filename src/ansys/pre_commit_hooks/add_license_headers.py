@@ -28,6 +28,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
+import fileinput
 import json
 import os
 import pathlib
@@ -36,7 +37,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import header, lint, project
+from reuse import _util, header, lint, project
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -44,6 +45,7 @@ DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
+DEFAULT_START_YEAR = dt.today().year
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -82,6 +84,13 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         type=str,
         help="Default license for headers.",
         default=DEFAULT_LICENSE,
+    )
+    # Get custom license
+    parser.add_argument(
+        "--start_year",
+        type=str,
+        help="Start year for copyright line in headers.",
+        default=DEFAULT_START_YEAR,
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
@@ -203,7 +212,12 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
 
 
 def set_header_args(
-    parser: argparse.ArgumentParser, year: int, file_path: str, copyright: str, template: str
+    parser: argparse.ArgumentParser,
+    start_year: str,
+    current_year: int,
+    file_path: str,
+    copyright: str,
+    template: str,
 ) -> argparse.Namespace:
     """
     Set arguments for `REUSE <https://reuse.software/>`_.
@@ -228,7 +242,10 @@ def set_header_args(
     """
     # Provide values for license header arguments
     args = parser.parse_args([file_path])
-    args.year = [str(year)]
+    if start_year == current_year:
+        args.year = [str(current_year)]
+    else:
+        args.year = [start_year, str(current_year)]
     args.copyright_style = "string-c"
     args.copyright = [copyright]
     args.merge_copyrights = True
@@ -273,7 +290,8 @@ def check_exists(
         ``1`` if ``REUSE`` changed all noncompliant files.
     """
     files = values["files"]
-    year = values["year"]
+    start_year = values["start_year"]
+    current_year = values["current_year"]
     copyright = values["copyright"]
     template = values["template"]
 
@@ -282,7 +300,7 @@ def check_exists(
         if files[i] in missing_headers:
             changed_headers = 1
             # Run REUSE on the file
-            args = set_header_args(parser, year, files[i], copyright, template)
+            args = set_header_args(parser, start_year, current_year, files[i], copyright, template)
             if not args.ignore_license_check:
                 args.license = [values["license"]]
             header.run(args, proj)
@@ -297,7 +315,9 @@ def check_exists(
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                args = set_header_args(parser, year, files[i], copyright, template)
+                args = set_header_args(
+                    parser, start_year, current_year, files[i], copyright, template
+                )
                 header.run(args, proj, tmp)
 
             # Check if the file before add-license-headers was run is the same as the one
@@ -312,6 +332,8 @@ def check_exists(
             if check_same_content(before_hook, files[i]) == False:
                 changed_headers = 1
                 print(f"Successfully changed header of {files[i]}")
+
+            os.remove(before_hook)
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
@@ -355,48 +377,41 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
     after_hook: str
         Path to file after add-license-headers was run.
     """
-    # Compare each line of the file before and after add-license-headers was run,
-    # and combine the files into one
-    with open(before_hook, "r") as before_edit, open(
-        after_hook, "r"
-    ) as after_edit, NamedTemporaryFile(mode="w", delete=False) as tmp:
-        for before_edit_line, after_edit_line2 in zip(before_edit, after_edit):
-            # If the lines are different,
-            if before_edit_line != after_edit_line2:
-                # If the after_edit_line is empty, and the before_edit_line is the
-                # same as the next after_edit_line, remove the space by writing the
-                # before_edit_line. For example:
-                #
-                # before_edit file                 after_edit file
-                # line 1: """                      line 1:
-                # line 2: print("example")         line 2: """
-                # We want to remove the blank space, so we take line 1 from the before_edit file.
-                if not after_edit_line2.strip() and (before_edit_line == next(after_edit)):
-                    tmp.write(before_edit_line)
-                # If the before_edit_line is empty, write that line and the next line in
-                # the before_edit file. For example:
-                #
-                # before_edit file                 after_edit file
-                # line 1:                          line 1: print("example")
-                # line 2: print("example")         line 2: print("example 2")
-                # We want to keep the blank space, so we take lines 1 & 2 from the before_edit file.
-                elif not before_edit_line.strip():
-                    tmp.write(f"{before_edit_line}{next(before_edit)}")
-                # Otherwise, write the line from the after_edit file
-                else:
-                    tmp.write(after_edit_line2)
+    count = 0
+    before_hook_file = open(before_hook, "r", encoding="utf8")
+    before_hook_lines = before_hook_file.readlines()
+    found_reuse_info = False
+
+    # Copy file content before add-license-header was run into
+    # the file after add-license-header was run.
+    # stdout is redirected into the file if inplace is True
+    for line in fileinput.input(after_hook, inplace=True, encoding="utf8"):
+        # Copy the new reuse lines into the file
+        if _util.contains_reuse_info(line):
+            count += 1
+            found_reuse_info = True
+            print(line.rstrip())
+        else:
+            if found_reuse_info:
+                try:
+                    # Check the lines after the reuse info are the same
+                    # If not, print the line after the reuse info
+                    # This happens when a comment changes from one line to
+                    # multiline
+                    if line != before_hook_lines[count]:
+                        print(line.rstrip())
+                except IndexError:
+                    pass
+
+                # Copy the rest of the file after the reuse information
+                for line_after_reuse_info in before_hook_lines[count:]:
+                    print(line_after_reuse_info.rstrip())
+                break
+            # Copy the header lines before reuse information is found
             else:
-                tmp.write(before_edit_line)
-
-        # Close the tmp file after writing to it
-        tmp.close()
-
-        # Copy the file with combined changes to the file that was
-        # edited by the add-license-headers hook
-        shutil.copyfile(tmp.name, after_hook)
-
-        # Delete temporary file
-        os.remove(tmp.name)
+                count += 1
+                print(line.rstrip())
+    fileinput.close()
 
 
 def get_full_paths(file_list: list) -> list:
@@ -468,6 +483,19 @@ def find_files_missing_header() -> int:
     # Set changed_headers to zero by default
     changed_headers = 0
 
+    # Check start_year is valid
+    try:
+        # Check the start year is not later than the current year
+        if int(args.start_year) > dt.today().year:
+            print("Please provide a start year less than or equal to the current year.")
+            exit(1)
+        # Check the start year isn't earlier than when computers were created :)
+        if int(args.start_year) < 1942:
+            print("Please provide a start year greater than or equal to 1942.")
+            exit(1)
+    except ValueError:
+        print("Please ensure the start year is a number.")
+
     # Create dictionary containing the committed files, custom copyright,
     # template, license, changed_headers, year, and git_repo
     values = {
@@ -475,7 +503,8 @@ def find_files_missing_header() -> int:
         "copyright": args.custom_copyright,
         "template": args.custom_template,
         "license": args.custom_license,
-        "year": dt.today().year,
+        "start_year": args.start_year,
+        "current_year": dt.today().year,
         "git_repo": git_repo,
     }
 
