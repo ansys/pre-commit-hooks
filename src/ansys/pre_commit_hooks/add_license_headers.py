@@ -480,7 +480,7 @@ def find_files_missing_header() -> int:
             exit(1)
         # Check the start year isn't earlier than when computers were created :)
         if int(args.start_year) < 1942:
-            print("Please provide a start year greater than or equal to 1940.")
+            print("Please provide a start year greater than or equal to 1942.")
             exit(1)
     except ValueError:
         print("Please ensure the start year is a number.")
