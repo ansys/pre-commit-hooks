@@ -111,6 +111,12 @@ Set custom arguments
   it is ``False``, meaning the files are checked for both the copyright and licensing information
   in the header. Add ``--ignore_license_check`` to ignore checking for licensing information
   in the files.
+* ``start_year`` is the start year of the copyright statement. By default, the ``start_year`` is
+  the current year, making the copyright statement
+  "Copyright (C) 2024 ANSYS, Inc. and/or its affiliates." If you are adding license headers
+  to packages released before the current year, add the ``start_year`` argument with the year your
+  package was released. For example, if ``start_year`` is 2023, the copyright statement would be
+  "Copyright (C) 2023 - 2024 ANSYS, Inc. and/or its affiliates." assuming the current year is 2024.
 
 Specify directories to run the hook on
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
