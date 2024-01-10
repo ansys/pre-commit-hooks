@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-pre-commit-hooks"
-version = "0.2.4"
+version = "0.2.5"
 description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
 readme = "README.rst"
 requires-python = ">=3.9,<4"
