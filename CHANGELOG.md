@@ -2,11 +2,11 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
-## [Unreleased]()
+## [0.2.5](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.5) - January 10 2024
 
 ### Added
 
-- Added custom argument for the copyright's start year & update add_hook_changes ([#111](https://github.com/ansys/pre-commit-hooks/pull/111))
+- Added custom argument for the copyright's start year & updated add_hook_changes ([#111](https://github.com/ansys/pre-commit-hooks/pull/111))
 
 ## [0.2.4](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.4) - January 4 2024
 
