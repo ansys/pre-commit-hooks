@@ -84,10 +84,10 @@ Set custom arguments
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-   rev: v0.2.4
+   rev: v0.2.5
    hooks:
    - id: add-license-headers
-     args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check"]
+     args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check", "--start_year", "2023"]
 
 ``args`` can also be formatted as follows:
 
@@ -98,6 +98,7 @@ Set custom arguments
    - --custom_template=template_name
    - --custom_license=license_name
    - --ignore_license_check
+   - --start_year=2023
 
 * ``custom copyright phrase`` is the copyright line you want to include in the license
   header. By default, it uses ``"ANSYS, Inc. and/or its affiliates."``.
@@ -122,7 +123,7 @@ the hook should run on, add the necessary regex to the ``files`` line in your
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.2.4
+     rev: v0.2.5
      hooks:
      - id: add-license-headers
        files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
@@ -135,7 +136,7 @@ In .pre-commit-config.yaml:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.2.4
+    rev: v0.2.5
     hooks:
     - id: add-license-headers
       exclude: |
