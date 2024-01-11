@@ -2,6 +2,12 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
+## [Unreleased]()
+
+### Added
+
+- Add file size check ([#113](https://github.com/ansys/pre-commit-hooks/pull/113))
+
 ## [0.2.5](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.5) - January 10 2024
 
 ### Added
