@@ -297,7 +297,7 @@ def check_exists(
 
     if i < len(files):
         # If the committed file is in missing_headers
-        if files[i] in missing_headers:
+        if (files[i] in missing_headers) or (os.path.getsize(files[i]) == 0):
             changed_headers = 1
             # Run REUSE on the file
             args = set_header_args(parser, start_year, current_year, files[i], copyright, template)
