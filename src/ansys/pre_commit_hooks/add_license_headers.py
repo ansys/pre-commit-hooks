@@ -296,8 +296,8 @@ def check_exists(
     template = values["template"]
 
     if i < len(files):
-        # If the committed file is in missing_headers
-        if files[i] in missing_headers:
+        # If the committed file is in missing_headers and the file isn't empty
+        if (files[i] in missing_headers) and (os.path.getsize(files[i]) > 0):
             changed_headers = 1
             # Run REUSE on the file
             args = set_header_args(parser, start_year, current_year, files[i], copyright, template)
@@ -308,32 +308,34 @@ def check_exists(
             # Check if the next file is in missing_headers
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
         else:
-            # Save current copy of files[i]
-            before_hook = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(files[i], before_hook)
+            # Check the file isn't empty
+            if os.path.getsize(files[i]) > 0:
+                # Save current copy of files[i]
+                before_hook = NamedTemporaryFile(mode="w", delete=False).name
+                shutil.copyfile(files[i], before_hook)
 
-            # Update the header
-            # tmp captures the stdout of the header.run() function
-            with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                args = set_header_args(
-                    parser, start_year, current_year, files[i], copyright, template
-                )
-                header.run(args, proj, tmp)
+                # Update the header
+                # tmp captures the stdout of the header.run() function
+                with NamedTemporaryFile(mode="w", delete=True) as tmp:
+                    args = set_header_args(
+                        parser, start_year, current_year, files[i], copyright, template
+                    )
+                    header.run(args, proj, tmp)
 
-            # Check if the file before add-license-headers was run is the same as the one
-            # after add-license-headers was run. If not, apply the syntax changes
-            # from other hooks before add-license-headers was run to the file
-            if check_same_content(before_hook, files[i]) == False:
-                add_hook_changes(before_hook, files[i])
+                # Check if the file before add-license-headers was run is the same as the one
+                # after add-license-headers was run. If not, apply the syntax changes
+                # from other hooks before add-license-headers was run to the file
+                if check_same_content(before_hook, files[i]) == False:
+                    add_hook_changes(before_hook, files[i])
 
-            # Check if the file content before add-license-headers was run has been changed
-            # Assuming the syntax was fixed in the above if statement, this check is
-            # solely for the file's content
-            if check_same_content(before_hook, files[i]) == False:
-                changed_headers = 1
-                print(f"Successfully changed header of {files[i]}")
+                # Check if the file content before add-license-headers was run has been changed
+                # Assuming the syntax was fixed in the above if statement, this check is
+                # solely for the file's content
+                if check_same_content(before_hook, files[i]) == False:
+                    changed_headers = 1
+                    print(f"Successfully changed header of {files[i]}")
 
-            os.remove(before_hook)
+                os.remove(before_hook)
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
