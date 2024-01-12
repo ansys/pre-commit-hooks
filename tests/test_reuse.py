@@ -96,7 +96,7 @@ def add_argv_run(repo, tmp_file, custom_args):
 
 def check_ansys_header(file_name):
     """Check file contains all copyright and license header components."""
-    file = open(file_name, "r")
+    file = open(file_name, "r", encoding="utf8")
     count = 0
     for line in file:
         count += 1
@@ -496,3 +496,35 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     check_ansys_header(tmp_file)
+
+
+def test_bad_chars(tmp_path: pytest.TempPathFactory):
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    bad_chars_name = "bad_chars.py"
+    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Change dir to tmp_path
+    os.chdir(tmp_path)
+
+    # Make asset directories if using a custom license or template
+    # Asset directories are .reuse and LICENSES
+    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Set up git repository in tmp_path
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    # Copy file with bad characters to git repository
+    shutil.copyfile(os.path.join(REPO_PATH, "tests", bad_chars_name), bad_chars_name)
+
+    # Assert the hook failed
+    assert add_argv_run(repo, bad_chars_name, [bad_chars_name]) == 1
+
+    # Assert the hook added the license header correctly
+    check_ansys_header(bad_chars_name)
+
+    os.chdir(REPO_PATH)
