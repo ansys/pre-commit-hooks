@@ -48,5 +48,6 @@ repos:
     - --start_year=2023
     exclude: |
         (?x)^(
-            tests/bad_chars.py
+            tests/test_reuse_files/bad_chars.py |
+            tests/test_reuse_files/index_error.scss
         )$
