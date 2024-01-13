@@ -41,6 +41,13 @@ repos:
     - id: check-github-workflows
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.2.4
+  rev: v0.2.6
   hooks:
   - id: add-license-headers
+    args:
+    - --start_year=2023
+    exclude: |
+        (?x)^(
+            tests/test_reuse_files/bad_chars.py |
+            tests/test_reuse_files/index_error.scss
+        )$

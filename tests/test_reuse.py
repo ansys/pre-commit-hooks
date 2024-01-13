@@ -58,12 +58,12 @@ def set_up_repo(tmp_path, template_path, template_name, license_path, license_na
 
 def make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name):
     """Make asset directories if using a custom license or template."""
-    if "ansys" not in template_name:
+    if template_name != "ansys.jinja2":
         reuse_dir = os.path.join(tmp_path, ".reuse", "templates")
         os.makedirs(reuse_dir)
         shutil.copyfile(template_path, f"{reuse_dir}/{template_name}")
 
-    if "MIT" not in license_name:
+    if license_name != "MIT.txt":
         license_dir = os.path.join(tmp_path, "LICENSES")
         os.makedirs(license_dir)
         shutil.copyfile(license_path, f"{license_dir}/{license_name}")
@@ -96,7 +96,7 @@ def add_argv_run(repo, tmp_file, custom_args):
 
 def check_ansys_header(file_name):
     """Check file contains all copyright and license header components."""
-    file = open(file_name, "r")
+    file = open(file_name, "r", encoding="utf8")
     count = 0
     for line in file:
         count += 1
@@ -175,8 +175,8 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "LICENSES", license_name)
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -291,7 +291,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "copyright_only.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
     license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
@@ -364,8 +364,8 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "LICENSES", license_name)
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -425,8 +425,8 @@ def test_missing_licenses(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "LICENSES", license_name)
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -496,3 +496,95 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     check_ansys_header(tmp_file)
+
+
+def test_bad_chars(tmp_path: pytest.TempPathFactory):
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    bad_chars_name = "bad_chars.py"
+    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Change dir to tmp_path
+    os.chdir(tmp_path)
+
+    # Make asset directories if using a custom license or template
+    # Asset directories are .reuse and LICENSES
+    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Set up git repository in tmp_path
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    # Copy file with bad characters to git repository
+    shutil.copyfile(
+        os.path.join(REPO_PATH, "tests", "test_reuse_files", bad_chars_name), bad_chars_name
+    )
+
+    # Assert the hook failed
+    assert add_argv_run(repo, bad_chars_name, [bad_chars_name]) == 1
+
+    # Assert the hook added the license header correctly
+    check_ansys_header(bad_chars_name)
+
+    os.chdir(REPO_PATH)
+
+
+def test_index_exception(tmp_path: pytest.TempPathFactory):
+    # Set template and license names
+    template_name = "copyright_only.jinja2"
+    license_name = "MIT.txt"
+    test_filename = "index_error.scss"
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Change dir to tmp_path
+    os.chdir(tmp_path)
+
+    # Make asset directories if using a custom license or template
+    # Asset directories are .reuse and LICENSES
+    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Set up git repository in tmp_path
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    # Copy file that will cause an IndexError to git repository
+    shutil.copyfile(
+        os.path.join(REPO_PATH, "tests", "test_reuse_files", test_filename), test_filename
+    )
+
+    custom_args = [
+        test_filename,
+        "--custom_template=copyright_only",
+        "--custom_copyright=ANSYS, Inc. Unauthorized use, distribution, \
+            or duplication is prohibited.",
+        "--ignore_license_check",
+        "--start_year=2023",
+    ]
+
+    # Assert the hook failed
+    assert add_argv_run(repo, test_filename, custom_args) == 1
+
+    # Assert the single line comment changed to
+    # a multiline comment. This causes an IndexError in the hook
+    file = open(test_filename, "r")
+    count = 0
+    for line in file:
+        count += 1
+        if count == 1:
+            assert "/*" in line
+        # Ensure header was updated correctly and didn't add
+        # an extra SPDX-Identifier line
+        if count == 2:
+            assert f" * Copyright (C) 2023 - {dt.today().year} ANSYS, Inc. Unauthorized use" in line
+        if count == 3:
+            assert "*/" in line
+        if count > 4:
+            break
+    file.close()
+
+    os.chdir(REPO_PATH)
