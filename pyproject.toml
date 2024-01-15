@@ -37,10 +37,10 @@ tests = [
     "pytest==7.4.4",
     "pytest-cov==4.0.0",
     "reuse==2.1.0",
-    "GitPython==3.1.40",
+    "GitPython==3.1.41",
 ]
 doc = [
-    "ansys-sphinx-theme==0.13.0",
+    "ansys-sphinx-theme==0.13.1",
     "numpydoc==1.6.0",
     "sphinx==7.2.6",
     "sphinx-autoapi==3.0.0",
