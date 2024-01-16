@@ -8,6 +8,11 @@ This document follows the conventions laid out in [Keep a CHANGELOG](https://kee
 
 - Fix pytest python versions and fileinput [#118](https://github.com/ansys/pre-commit-hooks/pull/118)
 
+### Dependencies
+
+- Bump `gitpython` from 3.1.40 to 3.1.41 [#120](https://github.com/ansys/pre-commit-hooks/pull/120)
+- Bump `ansys-sphinx-theme` from 0.13.0 to 0.13.1 [#121](https://github.com/ansys/pre-commit-hooks/pull/121)
+
 ## [0.2.6](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.6) - January 11 2024
 
 ### Added
