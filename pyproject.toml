@@ -28,7 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "importlib-metadata >=4.0",
-    "reuse>=2",
+    "reuse>=2,<3",
     "GitPython>=3",
 ]
 
