@@ -29,7 +29,7 @@ classifiers = [
 dependencies = [
     "importlib-metadata==7.0.1",
     "reuse==2.1.0",
-    "GitPython==3.1.41",
+    "GitPython==3.1.42",
 ]
 
 [project.optional-dependencies]
@@ -37,7 +37,7 @@ tests = [
     "pytest==8.0.0",
     "pytest-cov==4.0.0",
     "reuse==2.1.0",
-    "GitPython==3.1.41",
+    "GitPython==3.1.42",
 ]
 doc = [
     "ansys-sphinx-theme==0.13.3",
