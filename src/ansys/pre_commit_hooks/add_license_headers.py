@@ -86,7 +86,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="Default license for headers.",
         default=DEFAULT_LICENSE,
     )
-    # Get custom license
+    # Get the start year
     parser.add_argument(
         "--start_year",
         type=str,
@@ -445,6 +445,74 @@ def get_full_paths(file_list: list) -> list:
             full_path_files.append(os.path.abspath(file))
 
     return full_path_files
+
+
+def update_license_file(arg_dict):
+    """
+    Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+
+    Parameters
+    ----------
+    arg_dict: dict
+        Dictionary containing the committed files, custom copyright, template, license,
+        changed_headers, start & end year, and git_repo
+    """
+    # Get location of LICENSE file in the repository the hook runs on
+    git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
+    repo_license_loc = os.path.join(git_root, "LICENSE")
+
+    # Check if custom_license is MIT
+    if arg_dict["license"] == "MIT":
+        if "3.9" in python_version():
+            file = fileinput.input(repo_license_loc, inplace=True)
+        else:
+            file = fileinput.input(repo_license_loc, inplace=True, encoding="utf8")
+
+        copyright = arg_dict["copyright"]
+        start_year = str(arg_dict["start_year"])
+        current_year = str(arg_dict["current_year"])
+
+        for line in file:
+            if copyright in line:
+                # Copyright line: "Copyright (c) 2023 - 2024 ANSYS, Inc. and/or its affiliates."
+                # Get the index of the closing parenthesis of the copyright line
+                paren_index = line.index(")") + 2
+                # Get the index of the start of the copyright statement
+                cpright_index = line.index(copyright) - 1
+                # Create the year string to be replaced in the copyright line
+                # For example, "2024", or "2023 - 2024"
+                year_range = (
+                    f"{start_year} - {current_year}"
+                    if (start_year != current_year)
+                    else current_year
+                )
+
+                # If the start and end year are different
+                if start_year != current_year:
+                    if "-" in line:
+                        # Get the index of the dash in the year range of the LICENSE file
+                        dash_index = line.index("-") - 1
+                        # Get the start year of the existing copyright line in the LICENSE file
+                        existing_start_year = line[paren_index:dash_index]
+                        # If the start year argument and the existing start year are different,
+                        # replace the existing start year with the new one.
+                        # For example, the existing start year is 2023, but the start_year
+                        # argument is 2022.
+                        if start_year != existing_start_year:
+                            line = line.replace(existing_start_year, start_year)
+                    else:
+                        # Replace the existing copyright years with the new year_range
+                        line = line.replace(line[paren_index:cpright_index], year_range)
+                    print(line.rstrip())
+                else:
+                    if "-" in line:
+                        # If there is a year range in the existing LICENSE file, but the
+                        # start_year and current_year are the same, remove the year range
+                        # and replace it with the current year
+                        line = line.replace(line[paren_index:cpright_index], current_year)
+                    print(line.rstrip())
+            else:
+                print(line.rstrip())
 
 
 def cleanup(assets: dict, os_git_root: str) -> None:
