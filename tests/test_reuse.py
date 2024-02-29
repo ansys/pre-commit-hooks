@@ -36,6 +36,15 @@ git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 
 
+def init_repo(tmp_path):
+    # Set up git repository in tmp_path
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    return repo
+
+
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
     """Move to temporary directory, set up git repo, & create test file."""
     # Change dir to tmp_path
@@ -46,9 +55,7 @@ def set_up_repo(tmp_path, template_path, template_name, license_path, license_na
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
     # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
 
     # Create a test file in tmp_path
     tmp_file = create_test_file(tmp_path)
@@ -486,9 +493,7 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     tmp_file = create_test_file(tmp_path)
 
     # Initialize tmp_path as a git repository
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
 
     new_files.append(tmp_file)
 
@@ -514,9 +519,7 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
     # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
 
     # Copy file with bad characters to git repository
     shutil.copyfile(
@@ -548,9 +551,7 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
     # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
 
     # Copy file that will cause an IndexError to git repository
     shutil.copyfile(
@@ -588,3 +589,58 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     file.close()
 
     os.chdir(REPO_PATH)
+
+
+def check_license_year(license_file, copyright, start_year, current_year):
+    f = open(license_file, "r")
+
+    for line in f:
+        if copyright in line:
+            if start_year != current_year:
+                assert f"{start_year} - {current_year}" in line
+            else:
+                assert current_year in line
+        return
+
+
+def test_license_year_update(tmp_path: pytest.TempPathFactory):
+    """Tests if the year in the license header is updated."""
+    # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    license = "LICENSE"
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
+    tmp_license = os.path.join(tmp_path, license)
+    custom_args = []
+
+    os.chdir(tmp_path)
+
+    # Copy the LICENSE file to the tmp_path
+    shutil.copyfile(template_path, tmp_license)
+
+    # Set up git repository in tmp_path
+    repo = init_repo(tmp_path)
+
+    # Add custom args & tmp_file
+    add_argv_run(repo, tmp_license, custom_args)
+
+    parser = argparse.ArgumentParser()
+    args = hook.set_lint_args(parser)
+
+    values = {
+        "copyright": args.custom_copyright,
+        "license": args.custom_license,
+        "start_year": args.start_year,
+        "current_year": dt.today().year,
+        "git_repo": git_repo,
+    }
+
+    # Years to update the LICENSE file
+    years = [values["start_year"], "2022", dt.today().year]
+
+    # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}",
+    # and "{current_year}"
+    for year in years:
+        values["start_year"] = year
+        hook.update_license_file(values)
+        check_license_year(
+            tmp_license, values["copyright"], values["start_year"], values["current_year"]
+        )
