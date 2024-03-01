@@ -267,7 +267,6 @@ def test_multiple_files(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     for file in new_files:
-        print(f"checking {file}")
         check_ansys_header(file)
 
     os.chdir(REPO_PATH)
