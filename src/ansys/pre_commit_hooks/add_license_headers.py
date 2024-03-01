@@ -598,9 +598,8 @@ def find_files_missing_header() -> int:
         "git_repo": git_repo,
     }
 
+    # Update the year in the copyright line of the LICENSE file
     license_return_code = update_license_file(values)
-    if license_return_code == 1:
-        print("Successfully updated year of LICENSE")
 
     # Run REUSE on root of the repository
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
