@@ -460,13 +460,22 @@ def update_license_file(arg_dict):
     # Get location of LICENSE file in the repository the hook runs on
     git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
     repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
+    save_repo_license = shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save")
+
+    # Get the location of MIT.txt in the hook's assets folder
+    hook_loc = pathlib.Path(__file__).parent.resolve()
+    hook_license_file = os.path.join(hook_loc, "assets", "LICENSES", f"{DEFAULT_LICENSE}.txt")
+
+    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+        shutil.copyfile(hook_license_file, repo_license_loc)
 
     # Whether or not the year in LICENSE was updated
     # 0 is unchanged, 1 is changed
     changed = 0
 
     # Check if custom_license is MIT
-    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == "MIT"):
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
         if "3.9" in python_version():
             file = fileinput.input(repo_license_loc, inplace=True)
         else:
@@ -504,11 +513,9 @@ def update_license_file(arg_dict):
                         # argument is 2022.
                         if start_year != existing_start_year:
                             line = line.replace(existing_start_year, start_year)
-                            changed = 1
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
-                        changed = 1
                     print(line.rstrip())
                 else:
                     if "-" in line:
@@ -516,15 +523,19 @@ def update_license_file(arg_dict):
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
-                        changed = 1
                     print(line.rstrip())
             else:
                 print(line.rstrip())
 
     fileinput.close()
 
-    if changed == 1:
+    # If the year changed, print a message that the LICENSE file was changed
+    if not check_same_content(save_repo_license, repo_license_loc):
+        changed = 1
         print(f"Successfully updated year in {repo_license_loc}")
+
+    # Remove the temporary file
+    os.remove(save_repo_license)
 
     return changed
 
