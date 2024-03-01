@@ -161,7 +161,6 @@ def mkdirs_and_link(
         os.makedirs(asset_dir)
     # Make symbolic links to files within the assets folder
     os.symlink(src, dest)
-    print(dest)
 
 
 def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
@@ -192,8 +191,6 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
     lint_json = None
     with open(filename, "rb") as file:
         lint_json = json.load(file)
-
-    # print(json.dumps(lint_json, indent=4, sort_keys=True))
 
     # Get files missing copyright information
     missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
@@ -340,6 +337,7 @@ def check_exists(
             os.remove(before_hook)
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
+
     return changed_headers
 
 
