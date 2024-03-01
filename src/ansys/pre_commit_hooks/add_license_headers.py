@@ -161,6 +161,7 @@ def mkdirs_and_link(
         os.makedirs(asset_dir)
     # Make symbolic links to files within the assets folder
     os.symlink(src, dest)
+    print(dest)
 
 
 def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
@@ -191,6 +192,8 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
     lint_json = None
     with open(filename, "rb") as file:
         lint_json = json.load(file)
+
+    # print(json.dumps(lint_json, indent=4, sort_keys=True))
 
     # Get files missing copyright information
     missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
@@ -337,7 +340,6 @@ def check_exists(
             os.remove(before_hook)
 
             return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
-
     return changed_headers
 
 
@@ -459,10 +461,14 @@ def update_license_file(arg_dict):
     """
     # Get location of LICENSE file in the repository the hook runs on
     git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
-    repo_license_loc = os.path.join(git_root, "LICENSE")
+    repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
+
+    # Whether or not the year in LICENSE was updated
+    # 0 is unchanged, 1 is changed
+    changed = 0
 
     # Check if custom_license is MIT
-    if arg_dict["license"] == "MIT":
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == "MIT"):
         if "3.9" in python_version():
             file = fileinput.input(repo_license_loc, inplace=True)
         else:
@@ -500,9 +506,11 @@ def update_license_file(arg_dict):
                         # argument is 2022.
                         if start_year != existing_start_year:
                             line = line.replace(existing_start_year, start_year)
+                            changed = 1
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
+                        changed = 1
                     print(line.rstrip())
                 else:
                     if "-" in line:
@@ -510,9 +518,17 @@ def update_license_file(arg_dict):
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
+                        changed = 1
                     print(line.rstrip())
             else:
                 print(line.rstrip())
+
+    fileinput.close()
+
+    if changed == 1:
+        print(f"Successfully updated year in {repo_license_loc}")
+
+    return changed
 
 
 def cleanup(assets: dict, os_git_root: str) -> None:
@@ -536,9 +552,7 @@ def cleanup(assets: dict, os_git_root: str) -> None:
                 shutil.rmtree(key)
 
 
-def find_files_missing_header(
-    parser, assets, os_git_root, args, proj, changed_headers, values
-) -> int:
+def find_files_missing_header() -> int:
     """
     Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
 
@@ -550,32 +564,6 @@ def find_files_missing_header(
         ``2`` if the ``.reuse`` or location directory does not exist in the root path
         of the GitHub repository.
     """
-    # Add header arguments to parser. Arguments are: copyright, license, contributor,
-    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
-    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing
-    header.add_arguments(parser)
-
-    # Link the default template and/or license from the assets folder to your git repo.
-    link_assets(assets, os_git_root, args)
-
-    # Get files missing headers (copyright and/or license information)
-    missing_headers = list(list_noncompliant_files(args, proj))
-
-    # Add or update headers of required files.
-    # Return 1 if files were added or updated, and return 0 if no files were altered.
-    return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
-
-    # Unlink default files & remove .reuse and LICENSES folders if empty
-    cleanup(assets, os_git_root)
-
-    # Returns 1 if REUSE changes noncompliant files
-    # Returns 0 if all files are compliant
-    return return_code
-
-
-def main():
-    """Update the year in the LICENSE file and update the headers in specified files."""
     # Set up argparse for location, parser, and lint
     # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
     parser = argparse.ArgumentParser()
@@ -612,14 +600,15 @@ def main():
         "git_repo": git_repo,
     }
 
+    license_return_code = update_license_file(values)
+    if license_return_code == 1:
+        print("Successfully updated year of LICENSE")
+
     # Run REUSE on root of the repository
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
 
     # git_root with correct line separators for operating system
     os_git_root = git_root.replace("/", os.sep)
-
-    # Project to run `REUSE <https://reuse.software/>`_ on
-    proj = project.Project(git_root)
 
     # Dictionary containing the asset folder information
     assets = {
@@ -633,13 +622,36 @@ def main():
         },
     }
 
-    # Update the year in the LICENSE file using DEFAULT_LICENSE
-    update_license_file(values)
+    # Add header arguments to parser. Arguments are: copyright, license, contributor,
+    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
+    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
+    # skip-unrecognized, and skip-existing
+    header.add_arguments(parser)
 
-    # Find files that are missing license headers and run `REUSE <https://reuse.software/>`_.
-    return find_files_missing_header(
-        parser, assets, os_git_root, args, proj, changed_headers, values
-    )
+    # Link the default template and/or license from the assets folder to your git repo.
+    link_assets(assets, os_git_root, args)
+
+    # Project to run `REUSE <https://reuse.software/>`_ on
+    proj = project.Project(git_root)
+
+    # Get files missing headers (copyright and/or license information)
+    missing_headers = list(list_noncompliant_files(args, proj))
+
+    # Add or update headers of required files.
+    # Return 1 if files were added or updated, and return 0 if no files were altered.
+    file_return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+
+    # Unlink default files & remove .reuse and LICENSES folders if empty
+    cleanup(assets, os_git_root)
+
+    # Returns 1 if REUSE changes noncompliant files or the year was updated in LICENSE
+    # Returns 0 if all files are compliant
+    return 1 if (license_return_code or file_return_code) == 1 else 0
+
+
+def main():
+    """Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them."""
+    return find_files_missing_header()
 
 
 if __name__ == "__main__":

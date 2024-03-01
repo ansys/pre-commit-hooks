@@ -36,6 +36,27 @@ git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 
 
+def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
+    """Move to temporary directory, set up git repo, & create test file."""
+    # Change dir to tmp_path
+    os.chdir(tmp_path)
+
+    # Set up git repository in tmp_path
+    repo = init_repo(tmp_path)
+
+    # Make asset directories if using a custom license or template
+    # Asset directories are .reuse and LICENSES
+    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Copy the LICENSE file to the tmp_path repo
+    cp_LICENSE_file(tmp_path)
+
+    # Create a test file in tmp_path
+    tmp_file = create_test_file(tmp_path)
+
+    return repo, tmp_file
+
+
 def init_repo(tmp_path):
     # Set up git repository in tmp_path
     git.Repo.init(tmp_path)
@@ -43,24 +64,6 @@ def init_repo(tmp_path):
     repo.index.commit("initialized git repo for tmp_path")
 
     return repo
-
-
-def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
-    """Move to temporary directory, set up git repo, & create test file."""
-    # Change dir to tmp_path
-    os.chdir(tmp_path)
-
-    # Make asset directories if using a custom license or template
-    # Asset directories are .reuse and LICENSES
-    make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
-
-    # Set up git repository in tmp_path
-    repo = init_repo(tmp_path)
-
-    # Create a test file in tmp_path
-    tmp_file = create_test_file(tmp_path)
-
-    return repo, tmp_file
 
 
 def make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name):
@@ -74,6 +77,18 @@ def make_asset_dirs(tmp_path, template_path, template_name, license_path, licens
         license_dir = os.path.join(tmp_path, "LICENSES")
         os.makedirs(license_dir)
         shutil.copyfile(license_path, f"{license_dir}/{license_name}")
+
+
+def cp_LICENSE_file(tmp_path):
+    # Create LICENSE file in tmp_path repo
+    license = "LICENSE"
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
+    tmp_license = os.path.join(tmp_path, license)
+
+    os.chdir(tmp_path)
+
+    # Copy the LICENSE file to the tmp_path
+    shutil.copyfile(template_path, tmp_license)
 
 
 def create_test_file(tmp_path):
@@ -252,6 +267,7 @@ def test_multiple_files(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     for file in new_files:
+        print(f"checking {file}")
         check_ansys_header(file)
 
     os.chdir(REPO_PATH)
@@ -325,7 +341,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-def test_update_no_change_header(tmp_path: pytest.TempPathFactory):
+def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     """Test update header."""
     # List of files to be git added
     new_files = []
@@ -495,6 +511,9 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     # Initialize tmp_path as a git repository
     repo = init_repo(tmp_path)
 
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
+
     new_files.append(tmp_file)
 
     # Add header to tmp_file
@@ -520,6 +539,9 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
 
     # Set up git repository in tmp_path
     repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     # Copy file with bad characters to git repository
     shutil.copyfile(
@@ -552,6 +574,9 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
 
     # Set up git repository in tmp_path
     repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     # Copy file that will cause an IndexError to git repository
     shutil.copyfile(
