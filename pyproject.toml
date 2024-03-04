@@ -34,7 +34,7 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = [
-    "pytest==8.0.2",
+    "pytest==8.1.0",
     "pytest-cov==4.0.0",
     "reuse==2.1.0",
     "GitPython==3.1.42",
