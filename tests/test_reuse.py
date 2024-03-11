@@ -41,19 +41,29 @@ def set_up_repo(tmp_path, template_path, template_name, license_path, license_na
     # Change dir to tmp_path
     os.chdir(tmp_path)
 
+    # Set up git repository in tmp_path
+    repo = init_repo(tmp_path)
+
     # Make asset directories if using a custom license or template
     # Asset directories are .reuse and LICENSES
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
-    # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    # Copy the LICENSE file to the tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     # Create a test file in tmp_path
     tmp_file = create_test_file(tmp_path)
 
     return repo, tmp_file
+
+
+def init_repo(tmp_path):
+    # Set up git repository in tmp_path
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
+
+    return repo
 
 
 def make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name):
@@ -67,6 +77,18 @@ def make_asset_dirs(tmp_path, template_path, template_name, license_path, licens
         license_dir = os.path.join(tmp_path, "LICENSES")
         os.makedirs(license_dir)
         shutil.copyfile(license_path, f"{license_dir}/{license_name}")
+
+
+def cp_LICENSE_file(tmp_path):
+    # Create LICENSE file in tmp_path repo
+    license = "LICENSE"
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
+    tmp_license = os.path.join(tmp_path, license)
+
+    os.chdir(tmp_path)
+
+    # Copy the LICENSE file to the tmp_path
+    shutil.copyfile(template_path, tmp_license)
 
 
 def create_test_file(tmp_path):
@@ -318,7 +340,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-def test_update_no_change_header(tmp_path: pytest.TempPathFactory):
+def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     """Test update header."""
     # List of files to be git added
     new_files = []
@@ -486,9 +508,10 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     tmp_file = create_test_file(tmp_path)
 
     # Initialize tmp_path as a git repository
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     new_files.append(tmp_file)
 
@@ -514,9 +537,10 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
     # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     # Copy file with bad characters to git repository
     shutil.copyfile(
@@ -548,9 +572,10 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name)
 
     # Set up git repository in tmp_path
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
 
     # Copy file that will cause an IndexError to git repository
     shutil.copyfile(
@@ -588,3 +613,58 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     file.close()
 
     os.chdir(REPO_PATH)
+
+
+def check_license_year(license_file, copyright, start_year, current_year):
+    f = open(license_file, "r")
+
+    for line in f:
+        if copyright in line:
+            if start_year != current_year:
+                assert f"{start_year} - {current_year}" in line
+            else:
+                assert current_year in line
+        return
+
+
+def test_license_year_update(tmp_path: pytest.TempPathFactory):
+    """Tests if the year in the license header is updated."""
+    # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    license = "LICENSE"
+    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
+    tmp_license = os.path.join(tmp_path, license)
+    custom_args = []
+
+    os.chdir(tmp_path)
+
+    # Copy the LICENSE file to the tmp_path
+    shutil.copyfile(template_path, tmp_license)
+
+    # Set up git repository in tmp_path
+    repo = init_repo(tmp_path)
+
+    # Add custom args & tmp_file
+    add_argv_run(repo, tmp_license, custom_args)
+
+    parser = argparse.ArgumentParser()
+    args = hook.set_lint_args(parser)
+
+    values = {
+        "copyright": args.custom_copyright,
+        "license": args.custom_license,
+        "start_year": args.start_year,
+        "current_year": dt.today().year,
+        "git_repo": git_repo,
+    }
+
+    # Years to update the LICENSE file
+    years = [values["start_year"], "2022", dt.today().year]
+
+    # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}",
+    # and "{current_year}"
+    for year in years:
+        values["start_year"] = year
+        hook.update_license_file(values)
+        check_license_year(
+            tmp_license, values["copyright"], values["start_year"], values["current_year"]
+        )

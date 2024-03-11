@@ -86,7 +86,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="Default license for headers.",
         default=DEFAULT_LICENSE,
     )
-    # Get custom license
+    # Get the start year
     parser.add_argument(
         "--start_year",
         type=str,
@@ -447,6 +447,99 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
+def update_license_file(arg_dict):
+    """
+    Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+
+    Parameters
+    ----------
+    arg_dict: dict
+        Dictionary containing the committed files, custom copyright, template, license,
+        changed_headers, start & end year, and git_repo
+    """
+    # Get location of LICENSE file in the repository the hook runs on
+    git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
+    repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
+    save_repo_license = shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save")
+
+    # Get the location of MIT.txt in the hook's assets folder
+    hook_loc = pathlib.Path(__file__).parent.resolve()
+    hook_license_file = os.path.join(hook_loc, "assets", "LICENSES", f"{DEFAULT_LICENSE}.txt")
+
+    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+        shutil.copyfile(hook_license_file, repo_license_loc)
+
+    # Whether or not the year in LICENSE was updated
+    # 0 is unchanged, 1 is changed
+    changed = 0
+
+    # Check if custom_license is MIT
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+        if "3.9" in python_version():
+            file = fileinput.input(repo_license_loc, inplace=True)
+        else:
+            file = fileinput.input(repo_license_loc, inplace=True, encoding="utf8")
+
+        copyright = arg_dict["copyright"]
+        start_year = str(arg_dict["start_year"])
+        current_year = str(arg_dict["current_year"])
+
+        for line in file:
+            if copyright in line:
+                # Copyright line: "Copyright (c) 2023 - 2024 ANSYS, Inc. and/or its affiliates."
+                # Get the index of the closing parenthesis of the copyright line
+                paren_index = line.index(")") + 2
+                # Get the index of the start of the copyright statement
+                cpright_index = line.index(copyright) - 1
+                # Create the year string to be replaced in the copyright line
+                # For example, "2024", or "2023 - 2024"
+                year_range = (
+                    f"{start_year} - {current_year}"
+                    if (start_year != current_year)
+                    else current_year
+                )
+
+                # If the start and end year are different
+                if start_year != current_year:
+                    if "-" in line:
+                        # Get the index of the dash in the year range of the LICENSE file
+                        dash_index = line.index("-") - 1
+                        # Get the start year of the existing copyright line in the LICENSE file
+                        existing_start_year = line[paren_index:dash_index]
+                        # If the start year argument and the existing start year are different,
+                        # replace the existing start year with the new one.
+                        # For example, the existing start year is 2023, but the start_year
+                        # argument is 2022.
+                        if start_year != existing_start_year:
+                            line = line.replace(existing_start_year, start_year)
+                    else:
+                        # Replace the existing copyright years with the new year_range
+                        line = line.replace(line[paren_index:cpright_index], year_range)
+                    print(line.rstrip())
+                else:
+                    if "-" in line:
+                        # If there is a year range in the existing LICENSE file, but the
+                        # start_year and current_year are the same, remove the year range
+                        # and replace it with the current year
+                        line = line.replace(line[paren_index:cpright_index], current_year)
+                    print(line.rstrip())
+            else:
+                print(line.rstrip())
+
+    fileinput.close()
+
+    # If the year changed, print a message that the LICENSE file was changed
+    if not check_same_content(save_repo_license, repo_license_loc):
+        changed = 1
+        print(f"Successfully updated year in {repo_license_loc}")
+
+    # Remove the temporary file
+    os.remove(save_repo_license)
+
+    return changed
+
+
 def cleanup(assets: dict, os_git_root: str) -> None:
     """
     Unlink the default asset files, and remove directories if empty.
@@ -516,6 +609,9 @@ def find_files_missing_header() -> int:
         "git_repo": git_repo,
     }
 
+    # Update the year in the copyright line of the LICENSE file
+    license_return_code = update_license_file(values)
+
     # Run REUSE on root of the repository
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
 
@@ -551,14 +647,14 @@ def find_files_missing_header() -> int:
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
-    return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+    file_return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, os_git_root)
 
-    # Returns 1 if REUSE changes noncompliant files
+    # Returns 1 if REUSE changes noncompliant files or the year was updated in LICENSE
     # Returns 0 if all files are compliant
-    return return_code
+    return 1 if (license_return_code or file_return_code) == 1 else 0
 
 
 def main():
