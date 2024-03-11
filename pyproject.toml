@@ -27,14 +27,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "importlib-metadata==7.0.1",
+    "importlib-metadata==7.0.2",
     "reuse==2.1.0",
     "GitPython==3.1.42",
 ]
 
 [project.optional-dependencies]
 tests = [
-    "pytest==8.0.2",
+    "pytest==8.1.1",
     "pytest-cov==4.0.0",
     "reuse==2.1.0",
     "GitPython==3.1.42",
