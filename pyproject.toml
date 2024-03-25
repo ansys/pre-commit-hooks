@@ -27,7 +27,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "importlib-metadata==7.0.2",
+    "importlib-metadata==7.1.0",
     "reuse==2.1.0",
     "GitPython==3.1.42",
 ]
