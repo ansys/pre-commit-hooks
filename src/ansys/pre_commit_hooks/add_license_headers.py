@@ -38,7 +38,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import _util, header, lint, project
+from reuse import _annotate, _util, lint, project
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -200,12 +200,6 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
         missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
         missing_headers = missing_headers.union(missing_licensing_info)
 
-        if lint_json["non_compliant"]["missing_licenses"]:
-            missing_licenses = set(
-                lint_json["non_compliant"]["missing_licenses"][args.custom_license]
-            )
-            missing_headers = missing_headers.union(missing_licenses)
-
     # Remove temporary file
     os.remove(filename)
 
@@ -244,9 +238,9 @@ def set_header_args(
     # Provide values for license header arguments
     args = parser.parse_args([file_path])
     if start_year == current_year:
-        args.year = [str(current_year)]
+        args.year = [current_year]
     else:
-        args.year = [start_year, str(current_year)]
+        args.year = [int(start_year), current_year]
     args.copyright_style = "string-c"
     args.copyright = [copyright]
     args.merge_copyrights = True
@@ -296,47 +290,40 @@ def check_exists(
     copyright = values["copyright"]
     template = values["template"]
 
-    if i < len(files):
+    for file in files:
+        args = set_header_args(parser, start_year, current_year, file, copyright, template)
         # If the committed file is in missing_headers
-        if (files[i] in missing_headers) or (os.path.getsize(files[i]) == 0):
+        if (file in missing_headers) or (os.path.getsize(file) == 0):
             changed_headers = 1
             # Run REUSE on the file
-            args = set_header_args(parser, start_year, current_year, files[i], copyright, template)
             if not args.ignore_license_check:
                 args.license = [values["license"]]
-            header.run(args, proj)
 
-            # Check if the next file is in missing_headers
-            return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
+            _annotate.run(args, proj)
         else:
-            # Save current copy of files[i]
+            # Save current copy of file
             before_hook = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(files[i], before_hook)
+            shutil.copyfile(file, before_hook)
 
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                args = set_header_args(
-                    parser, start_year, current_year, files[i], copyright, template
-                )
-                header.run(args, proj, tmp)
+                _annotate.run(args, proj, tmp)
 
             # Check if the file before add-license-headers was run is the same as the one
             # after add-license-headers was run. If not, apply the syntax changes
             # from other hooks before add-license-headers was run to the file
-            if check_same_content(before_hook, files[i]) == False:
-                add_hook_changes(before_hook, files[i])
+            if check_same_content(before_hook, file) == False:
+                add_hook_changes(before_hook, file)
 
             # Check if the file content before add-license-headers was run has been changed
             # Assuming the syntax was fixed in the above if statement, this check is
             # solely for the file's content
-            if check_same_content(before_hook, files[i]) == False:
+            if check_same_content(before_hook, file) == False:
                 changed_headers = 1
-                print(f"Successfully changed header of {files[i]}")
+                print(f"Successfully changed header of {file}")
 
             os.remove(before_hook)
-
-            return check_exists(changed_headers, parser, values, proj, missing_headers, i + 1)
 
     return changed_headers
 
@@ -634,7 +621,8 @@ def find_files_missing_header() -> int:
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing
-    header.add_arguments(parser)
+    # header.add_arguments(parser)
+    _annotate.add_arguments(parser)
 
     # Link the default template and/or license from the assets folder to your git repo.
     link_assets(assets, os_git_root, args)
