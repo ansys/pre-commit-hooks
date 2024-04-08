@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import os
+from pathlib import Path
 
 from ansys_sphinx_theme import get_autoapi_templates_dir_relative_path, get_version_match
 from ansys_sphinx_theme import pyansys_logo_black as logo
