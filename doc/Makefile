@@ -23,7 +23,7 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf $(SOURCEDIR)/examples
-	find . -type d -name "_autosummary" -exec rm -rf {} +
+	find . -type d -name "api" -exec rm -rf {} +
 
 # Customized pdf for svg format images
 pdf:

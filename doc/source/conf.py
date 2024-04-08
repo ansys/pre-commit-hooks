@@ -2,8 +2,9 @@
 
 from datetime import datetime
 import os
+from pathlib import Path
 
-from ansys_sphinx_theme import get_version_match
+from ansys_sphinx_theme import get_autoapi_templates_dir_relative_path, get_version_match
 from ansys_sphinx_theme import pyansys_logo_black as logo
 
 from ansys.pre_commit_hooks import __version__
@@ -43,6 +44,7 @@ extensions = [
     "numpydoc",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -94,7 +96,8 @@ master_doc = "index"
 
 # Configuration for Sphinx autoapi
 autoapi_type = "python"
-autoapi_dirs = ["../../src/ansys/pre_commit_hooks/"]
+autoapi_dirs = ["../../src/"]
+autoapi_root = "api"
 autoapi_options = [
     "members",
     "undoc-members",
@@ -102,6 +105,7 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
-autoapi_template_dir = "_autoapi_templates"
+autoapi_template_dir = get_autoapi_templates_dir_relative_path(Path(__file__))
 autoapi_python_use_implicit_namespaces = True
-exclude_patterns = ["_autoapi_templates/index.rst"]
+autoapi_keep_files = True
+autoapi_own_page_level = "method"
