@@ -44,6 +44,7 @@ extensions = [
     "numpydoc",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
+    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -95,7 +96,7 @@ master_doc = "index"
 
 # Configuration for Sphinx autoapi
 autoapi_type = "python"
-autoapi_dirs = ["../../src/ansys/pre_commit_hooks/"]
+autoapi_dirs = ["../../src/"]
 autoapi_root = "api"
 autoapi_options = [
     "members",
@@ -107,4 +108,4 @@ autoapi_options = [
 autoapi_template_dir = get_autoapi_templates_dir_relative_path(Path(__file__))
 autoapi_python_use_implicit_namespaces = True
 autoapi_keep_files = True
-autoapi_own_page_level = "class"
+autoapi_own_page_level = "method"
