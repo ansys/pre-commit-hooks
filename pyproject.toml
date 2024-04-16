@@ -85,7 +85,7 @@ testpaths = [
 ]
 
 [tool.towncrier]
-package = "ansys.<product>.<library>"
+package = "ansys.pre_commit_hooks"
 directory = "doc/changelog.d"
 filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"
