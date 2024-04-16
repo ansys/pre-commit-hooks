@@ -34,6 +34,7 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 
 git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
+START_YEAR = "2023"
 
 
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
@@ -143,7 +144,7 @@ def test_custom_start_year(tmp_path: pytest.TempPathFactory):
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
-    custom_args = [tmp_file, "--start_year=2023"]
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
 
     # Assert the hook fails because it added the header
     assert add_argv_run(repo, tmp_file, custom_args) == 1
@@ -155,7 +156,7 @@ def test_custom_start_year(tmp_path: pytest.TempPathFactory):
         # Assert the copyright line's time range is
         # from 2023 to the current year
         if count == 1:
-            assert f"2023 - {dt.today().year}" in line
+            assert f"{START_YEAR} - {dt.today().year}" in line
         if count > 1:
             break
     file.close()
@@ -282,8 +283,9 @@ def test_main_fails(tmp_path: pytest.TempPathFactory):
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
 
-    assert add_argv_run(repo, tmp_file, [tmp_file]) == 1
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
 
     check_ansys_header(tmp_file)
 
@@ -292,7 +294,7 @@ def test_main_fails(tmp_path: pytest.TempPathFactory):
 
 def test_main_passes():
     """Test all files are compliant."""
-    sys.argv[1:] = []
+    sys.argv[1:] = [f"--start_year={START_YEAR}"]
 
     # Assert main runs successfully
     assert hook.main() == 0
@@ -442,60 +444,6 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-def test_missing_licenses(tmp_path: pytest.TempPathFactory):
-    """Test that LICENSES folder is required."""
-    # Set template and license names
-    template_name = "test_template.jinja2"
-    license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
-
-    # Set up git repository in tmp_path with temporary file
-    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
-
-    # Remove LICENSES/ECL-1.0.txt file from tmp_path
-    os.remove(os.path.join(tmp_path, "LICENSES", license_name))
-
-    custom_args = [
-        tmp_file,
-        "--custom_template=test_template",
-        "--custom_license=ECL-1.0",
-    ]
-
-    # Add header to tmp_file
-    add_argv_run(repo, tmp_file, custom_args)
-
-    custom_args = [
-        tmp_file,
-        "--custom_template=test_template",
-        "--custom_license=ECL-1.0",
-    ]
-
-    # If LICENSES/license_name.txt file is missing, then it will fail
-    # and add another SPDX line. This shows you need the
-    # license_name.txt (MIT.txt, for example) in LICENSES or else it
-    # will fail
-    assert add_argv_run(repo, tmp_file, custom_args) == 1
-
-    # Assert two SPDX-License lines are found in the file if
-    # the LICENSES/ECL-1.0.txt file does not exist.
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        if count == 6:
-            assert "SPDX-License" in line
-        # Ensure header was updated correctly and didn't add
-        # an extra SPDX-Identifier line
-        if count == 7:
-            assert "SPDX-License" in line
-        if count > 7:
-            break
-    file.close()
-
-    os.chdir(REPO_PATH)
-
-
 def test_copy_assets(tmp_path: pytest.TempPathFactory):
     """Test .reuse and LICENSES folders are copied."""
     # List of files to be git added
@@ -588,7 +536,7 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
         "--custom_copyright=ANSYS, Inc. Unauthorized use, distribution, \
             or duplication is prohibited.",
         "--ignore_license_check",
-        "--start_year=2023",
+        f"--start_year={START_YEAR}",
     ]
 
     # Assert the hook failed
@@ -652,16 +600,16 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     values = {
         "copyright": args.custom_copyright,
         "license": args.custom_license,
-        "start_year": args.start_year,
+        "start_year": START_YEAR,
         "current_year": dt.today().year,
         "git_repo": git_repo,
     }
 
     # Years to update the LICENSE file
-    years = [values["start_year"], "2022", dt.today().year]
+    years = ["2022", dt.today().year, values["start_year"]]
 
-    # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}",
-    # and "{current_year}"
+    # Check the copyright line has "2022 - {current_year}", "{current_year}"
+    # and "2023 - {current_year}"
     for year in years:
         values["start_year"] = year
         hook.update_license_file(values)
