@@ -2,6 +2,10 @@
 
 This document follows the conventions laid out in [Keep a CHANGELOG](https://keepachangelog.com/en/1.0.0).
 
+This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes for the upcoming release can be found in <https://github.com/ansys/pre-commit-hooks/tree/main/doc/changelog.d/>.
+
+<!-- towncrier release notes start -->
+
 ## [0.2.9](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.9) - February 16 2024
 
 ### Changed
