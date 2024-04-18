@@ -304,8 +304,8 @@ def check_exists(
             # Save current copy of file
             before_hook = NamedTemporaryFile(mode="w", delete=False).name
             shutil.copyfile(file, before_hook)
-            text, spdx_comment = get_file_sections(before_hook)
-            before_hook_code = spdx_comment.after
+
+            text, comment, code = get_file_sections(before_hook, proj)
 
             # Update the header
             # tmp captures the stdout of the header.run() function
@@ -316,7 +316,7 @@ def check_exists(
             # after add-license-headers was run. If not, apply the syntax changes
             # from other hooks before add-license-headers was run to the file
             if check_same_content(before_hook, file) == False:
-                fix_header(file, before_hook_code, values)
+                fix_header(file, code, values, proj)
 
             # Check if the file content before add-license-headers was run has been changed
             # Assuming the syntax was fixed in the above if statement, this check is
@@ -330,26 +330,54 @@ def check_exists(
     return changed_headers
 
 
-def get_file_sections(file):
+def get_file_sections(file, proj):
     """Separate the file into before, comment, and after sections."""
     with open(file, "r", encoding="utf-8") as f:
         # Read file contents into a string
         text = f.read()
 
-    # Get comment style of file
-    style = _util._get_comment_style(file)
-    # print(style)
+    # [ReuseInfo(spdx_expressions={LicenseSymbol('MIT', is_exception=False)},
+    # copyright_lines={'Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.'}, ...]
+    reuse_info_list = proj.reuse_info_of(file)
 
-    # Get the first spdx comment of the file, separated into before, middle, and after:
-    # before the comment, the comment, and after the comment
-    spdx_comment = header._find_first_spdx_comment(text, style)
+    if reuse_info_list:
+        # List always has one element since it's only for one file
+        reuse_info = reuse_info_list[0]
+        # {LicenseSymbol('MIT', is_exception=False)} or {}
+        spdx_expression = reuse_info.spdx_expressions
+        # 'Copyright (C) 2023 - 2024 ANSYS, Inc. and/or its affiliates.' or {}
+        copyright_lines = reuse_info.copyright_lines
 
-    return text, spdx_comment
+        if spdx_expression:
+            # Get comment style of file
+            style = _util._get_comment_style(file)
+
+            # Get the first spdx comment of the file, separated into before, middle, and after:
+            # before the comment, the comment, and after the comment
+            spdx_comment = header._find_first_spdx_comment(text, style)
+
+            comment = spdx_comment.middle
+            code = spdx_comment.after
+
+        elif copyright_lines:
+            with open(file, "r") as f:
+                code = f.readlines()
+
+                for cp_line in list(copyright_lines):
+                    for line in filter(lambda x: cp_line in x, code):
+                        code.remove(line)
+
+            comment = ""
+            code = "".join(code)
+
+        return text, comment, code
+    else:
+        return text, "", ""
 
 
-def fix_header(file, before_hook_code, values):
+def fix_header(file, before_hook_code, values, proj):
     """Fix header - remove extra newline & fix year (if needed)."""
-    text, spdx_comment = get_file_sections(file)
+    text, comment, code = get_file_sections(file, proj)
 
     copyright = values["copyright"]
     start_year = str(values["start_year"])
@@ -362,15 +390,17 @@ def fix_header(file, before_hook_code, values):
     desired_yr_range = f"{start_year} - {current_year}"
     file_yr_range = text[paren_index:cpright_index]
 
-    if desired_yr_range != file_yr_range:
+    if (desired_yr_range != file_yr_range) and comment:
         # Save the header section
-        updated_header = spdx_comment.middle
+        updated_header = comment
         updated_header = updated_header.replace(file_yr_range, desired_yr_range)
         # Replace the header with the correct year
-        text = text.replace(spdx_comment.middle, updated_header)
+        text = text.replace(comment, updated_header)
 
-    # Replace the new file's code with the code before the hook ran
-    text = text.replace(spdx_comment.after, before_hook_code)
+    if code:
+        # Replace the new file's code with the code before the hook ran
+        text = text.replace(code, before_hook_code)
+
     with open(file, "w") as f:
         f.write(text)
 

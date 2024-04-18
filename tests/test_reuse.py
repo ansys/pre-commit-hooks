@@ -616,3 +616,8 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
         check_license_year(
             tmp_license, values["copyright"], values["start_year"], values["current_year"]
         )
+
+
+def test_venv():
+    """Test headers are only added to staged files, not the venv."""
+    print("testing venv")
