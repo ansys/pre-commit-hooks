@@ -6,6 +6,18 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.3.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.0) - 2024-04-18
+
+
+### Added
+
+- feat: add doc-changelog and doc-deploy-changelog actions [#164](https://github.com/ansys/pre-commit-hooks/pull/164)
+
+
+### Changed
+
+- maint: bump reuse to v3.0.2 in add-license-headers [#163](https://github.com/ansys/pre-commit-hooks/pull/163)
+
 ## [0.2.9](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.9) - February 16 2024
 
 ### Changed
