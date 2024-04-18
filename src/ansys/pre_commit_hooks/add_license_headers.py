@@ -38,7 +38,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import _annotate, _util, lint, project
+from reuse import _annotate, _util, header, lint, project
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -304,6 +304,8 @@ def check_exists(
             # Save current copy of file
             before_hook = NamedTemporaryFile(mode="w", delete=False).name
             shutil.copyfile(file, before_hook)
+            text, spdx_comment = get_file_sections(before_hook)
+            before_hook_code = spdx_comment.after
 
             # Update the header
             # tmp captures the stdout of the header.run() function
@@ -314,7 +316,7 @@ def check_exists(
             # after add-license-headers was run. If not, apply the syntax changes
             # from other hooks before add-license-headers was run to the file
             if check_same_content(before_hook, file) == False:
-                add_hook_changes(before_hook, file)
+                fix_header(file, before_hook_code, values)
 
             # Check if the file content before add-license-headers was run has been changed
             # Assuming the syntax was fixed in the above if statement, this check is
@@ -326,6 +328,51 @@ def check_exists(
             os.remove(before_hook)
 
     return changed_headers
+
+
+def get_file_sections(file):
+    """Separate the file into before, comment, and after sections."""
+    with open(file, "r", encoding="utf-8") as f:
+        # Read file contents into a string
+        text = f.read()
+
+    # Get comment style of file
+    style = _util._get_comment_style(file)
+    # print(style)
+
+    # Get the first spdx comment of the file, separated into before, middle, and after:
+    # before the comment, the comment, and after the comment
+    spdx_comment = header._find_first_spdx_comment(text, style)
+
+    return text, spdx_comment
+
+
+def fix_header(file, before_hook_code, values):
+    """Fix header - remove extra newline & fix year (if needed)."""
+    text, spdx_comment = get_file_sections(file)
+
+    copyright = values["copyright"]
+    start_year = str(values["start_year"])
+    current_year = str(values["current_year"])
+
+    # Get the index of the closing parenthesis of the copyright line
+    paren_index = text.index(")") + 2
+    # Get the index of the start of the copyright statement
+    cpright_index = text.index(copyright) - 1
+    desired_yr_range = f"{start_year} - {current_year}"
+    file_yr_range = text[paren_index:cpright_index]
+
+    if desired_yr_range != file_yr_range:
+        # Save the header section
+        updated_header = spdx_comment.middle
+        updated_header = updated_header.replace(file_yr_range, desired_yr_range)
+        # Replace the header with the correct year
+        text = text.replace(spdx_comment.middle, updated_header)
+
+    # Replace the new file's code with the code before the hook ran
+    text = text.replace(spdx_comment.after, before_hook_code)
+    with open(file, "w") as f:
+        f.write(text)
 
 
 def check_same_content(before_hook, after_hook):
@@ -347,66 +394,12 @@ def check_same_content(before_hook, after_hook):
     """
     # Check if the files have the same content
     same_files = filecmp.cmp(before_hook, after_hook, shallow=False)
+
     # If the files are different, return False. Otherwise, return True
     if same_files == False:
         return False
     else:
         return True
-
-
-def add_hook_changes(before_hook: str, after_hook: str) -> None:
-    """
-    Add earlier hook changes to updated file with header.
-
-    Parameters
-    ----------
-    before_hook: str
-        Path to file before add-license-headers was run.
-    after_hook: str
-        Path to file after add-license-headers was run.
-    """
-    count = 0
-    before_hook_file = open(before_hook, "r", encoding="utf8")
-    before_hook_lines = before_hook_file.readlines()
-    found_reuse_info = False
-
-    # Check if python version is 3.9 since fileinput.input()
-    # does not support the "encoding" keyword
-    if "3.9" in python_version():
-        file = fileinput.input(after_hook, inplace=True)
-    else:
-        file = fileinput.input(after_hook, inplace=True, encoding="utf8")
-
-    # Copy file content before add-license-header was run into
-    # the file after add-license-header was run.
-    # stdout is redirected into the file if inplace is True
-    for line in file:
-        # Copy the new reuse lines into the file
-        if _util.contains_reuse_info(line):
-            count += 1
-            found_reuse_info = True
-            print(line.rstrip())
-        else:
-            if found_reuse_info:
-                try:
-                    # Check the lines after the reuse info are the same
-                    # If not, print the line after the reuse info
-                    # This happens when a comment changes from one line to
-                    # multiline
-                    if line != before_hook_lines[count]:
-                        print(line.rstrip())
-                except IndexError:
-                    pass
-
-                # Copy the rest of the file after the reuse information
-                for line_after_reuse_info in before_hook_lines[count:]:
-                    print(line_after_reuse_info.rstrip())
-                break
-            # Copy the header lines before reuse information is found
-            else:
-                count += 1
-                print(line.rstrip())
-    fileinput.close()
 
 
 def get_full_paths(file_list: list) -> list:
@@ -486,7 +479,6 @@ def update_license_file(arg_dict):
                     if (start_year != current_year)
                     else current_year
                 )
-
                 # If the start and end year are different
                 if start_year != current_year:
                     if "-" in line:
