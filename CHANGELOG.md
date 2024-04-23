@@ -6,6 +6,20 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.3.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.1) - 2024-04-23
+
+
+### Changed
+
+- chore: update CHANGELOG for v0.3.0 [#167](https://github.com/ansys/pre-commit-hooks/pull/167)
+- build(deps): bump ansys/actions from 5 to 6 [#170](https://github.com/ansys/pre-commit-hooks/pull/170)
+
+
+### Dependencies
+
+- build(deps): bump sphinx from 7.2.6 to 7.3.7 [#168](https://github.com/ansys/pre-commit-hooks/pull/168)
+- build(deps): bump sphinx-autodoc-typehints from 2.0.1 to 2.1.0 [#169](https://github.com/ansys/pre-commit-hooks/pull/169)
+
 ## [0.3.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.0) - 2024-04-18
 
 
