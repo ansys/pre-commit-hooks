@@ -30,6 +30,8 @@ dependencies = [
     "importlib-metadata==7.1.0",
     "reuse==3.0.2",
     "GitPython==3.1.43",
+    "Jinja2==3.1.4",
+    "toml==0.10.2",
 ]
 
 [project.optional-dependencies]
@@ -51,6 +53,7 @@ name = "ansys.pre_commit_hooks"
 
 [project.scripts]
 add-license-headers = "ansys.pre_commit_hooks.add_license_headers:main"
+tech-review = "ansys.pre_commit_hooks.tech_review:main"
 
 [project.urls]
 Source = "https://github.com/ansys/pre-commit-hooks"
