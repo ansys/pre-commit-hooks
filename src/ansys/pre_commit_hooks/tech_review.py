@@ -22,30 +22,31 @@
 """Module for checking if a repository is compliant with required files in the technical review."""
 import argparse
 from datetime import date as dt
+from enum import Enum
+from itertools import product
+import json
 import os
 import pathlib
 import re
-
-# import shutil
 from tempfile import NamedTemporaryFile
 
 import git
 from jinja2 import Environment, FileSystemLoader
-
-# from reuse._licenses import _load_license_list
+import requests
+import semver
 import toml
 
 from ansys.pre_commit_hooks.add_license_headers import check_same_content
 
 # Get current git repository
 git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
-REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
+REPO_PATH = pathlib.Path(git_repo.git.rev_parse("--show-toplevel"))
 """Default repository path."""
-DOC_REPO_NAME = os.path.basename(REPO_PATH)
+DOC_REPO_NAME = REPO_PATH.name
 """Name of the repository."""
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
-LICENSES_JSON = os.path.join(HOOK_PATH, "..", "reuse", "resources", "licenses.json")
+LICENSES_JSON = HOOK_PATH / "assets" / "licenses.json"
 """JSON file containing licenses information."""
 DEFAULT_AUTHOR_MAINT_NAME = "ANSYS, Inc."
 """Default name of project authors and maintainers."""
@@ -57,76 +58,95 @@ DEFAULT_LICENSE = "MIT"
 """Default license of the repository"""
 
 
-def check_config_file(author_maint_name, author_maint_email):
+class Filenames(Enum):
+    """Enum of files to check."""
+
+    AUTHORS = "AUTHORS.md"
+    CONTRIBUTING = "CONTRIBUTING.md"
+    CONTRIBUTORS = "CONTRIBUTORS.md"
+    LICENSE = "LICENSE"
+    README = "README.rst" | "README.md"
+
+
+def check_config_file(author_maint_name, author_maint_email, is_compliant, non_compliant_name):
     """Check naming convention, version, author, and maintainer information."""
     # Is zero when the configuration file is compliant and one when it is not compliant
-    non_compliant = 0
-
-    if os.path.exists(os.path.join(REPO_PATH, "pyproject.toml")):
-        non_compliant, project_name = check_pyproject_toml(
-            author_maint_name, author_maint_email, non_compliant
+    has_pyproject = (REPO_PATH / "pyproject.toml").exists()
+    has_setup = (REPO_PATH / "setup.py").exists()
+    if has_pyproject:
+        is_compliant, project_name = check_pyproject_toml(
+            author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
-    elif os.path.exists(os.path.join(REPO_PATH, "setup.py")):
-        non_compliant, project_name = check_setup_py(
-            author_maint_name, author_maint_email, non_compliant
+    elif has_setup:
+        is_compliant, project_name = check_setup_py(
+            author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     else:
         print("pyproject.toml and setup.py files do not exist")
-        print("Project name does not follow naming conventions")
-        print("Project version does not contain Semantic versioning")
-        print("Author and maintainer is not ANSYS, Inc.")
-        print("Author and maintainer email is not pyansys.core@ansys.com")
-        non_compliant = 1
         project_name = None
 
     # Returns 0 if file is complaint or 1 if it is not compliant
-    return non_compliant, project_name
+    return is_compliant, project_name
 
 
-# also add check for KeyError (try/except)
-def check_pyproject_toml(author_maint_name, author_maint_email, non_compliant) -> int:
+def check_pyproject_toml(
+    author_maint_name, author_maint_email, is_compliant, non_compliant_name
+) -> int:
     """Check pyproject.toml file for correct naming convention, version, author, and maintainer."""
     # Load pyproject.toml
-    with open(os.path.join(REPO_PATH, "pyproject.toml"), "r") as f:
-        config = toml.load(f)
+    with open(REPO_PATH / "pyproject.toml", "r") as project_file:
+        config = toml.load(project_file)
+        project = config.get("project")
 
-        # Check the project name follows naming conventions
-        # ansys-{product}-{library}
-        # ignore this check if name not compliant arg activated
-        name = config["project"]["name"]
-        if not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name)):
-            print("Project name does not follow naming conventions")
-            non_compliant = 1
+        # Check the project name follows naming conventions: ansys-{product}-{library}
+        # Ignore this check if non_compliant_name argument is True
+        if not non_compliant_name:
+            name = project.get("name", "DNE")
+            if (name == "DNE") or (
+                (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
+            ):
+                is_compliant = False
+                print("Project name does not follow naming conventions")
 
         # Check the project version follows Semantic versioning
-        # accept letters in regex in minor & patch versions
-        # look at semver docs for regex
-        version = config["project"]["version"]
-        if not bool(re.match(r"^[0-9]+.[0-9]+.[0-9]+$", version)):
-            print("Project version does not follow Semantic versioning")
-            non_compliant = 1
+        project_version = project.get("version", "DNE")
+        if project_version != "DNE":
+            try:
+                version = semver.Version.parse(project_version)
+            except ValueError:
+                is_compliant = False
+                print("Project version does not follow semantic versioning")
 
-        # Check the project author and maintainer name is ANSYS, Inc.
-        authors_name = config["project"]["authors"][0]["name"]
-        maintainers_name = config["project"]["maintainers"][0]["name"]
-        if author_maint_name not in authors_name:
-            print(f"Project author name is not {author_maint_name}")
-            non_compliant = 1
-        elif author_maint_name not in maintainers_name:
-            print(f"Project maintainer name is not {author_maint_name}")
-            non_compliant = 1
+        # Check the project author and maintainer names and emails match argument input
+        category, metadata = ["authors", "maintainers"], ["name", "email"]
+        # [('authors', 'name'), ('authors', 'email'), ('maintainers', 'name'),
+        # ('maintainers', 'email')]
+        output = list(product(category, metadata))
 
-        # Check the project author and maintainer email is pyansys.core@ansys.com
-        authors_email = config["project"]["authors"][0]["email"]
-        maintainers_email = config["project"]["maintainers"][0]["email"]
-        if author_maint_email not in authors_email:
-            print(f"Project author email is not {author_maint_email}")
-            non_compliant = 1
-        elif author_maint_email not in maintainers_email:
-            print(f"Project maintainer email is not {author_maint_email}")
-            non_compliant = 1
+        for combo in output:
+            # project.get("authors", "DNE")[0].get("name", "DNE")
+            # "DNE" is printed when the key does not exist
+            project_value = project.get(combo[0], "DNE")[0].get(combo[1], "DNE")
+            if project_value == "DNE":
+                print(f"Project {combo[0]} {combo[1]} does not exist in the pyproject.toml file")
+            else:
+                if combo[1] == "email":
+                    is_compliant = check_auth_maint(
+                        project_value, author_maint_email, f"{combo[0]} {combo[1]}"
+                    )
+                elif combo[1] == "name":
+                    is_compliant = check_auth_maint(
+                        project_value, author_maint_name, f"{combo[0]} {combo[1]}"
+                    )
 
-    return non_compliant, name
+    return is_compliant, name
+
+
+def check_auth_maint(project_value, arg_value, err_string):
+    """Check if the author and maintainer names and emails are the same."""
+    if project_value not in arg_value:
+        print(f"Project {err_string} is not {arg_value}")
+        return False
 
 
 def check_setup_py(author_maint_name: str, author_maint_email: str, non_compliant: int):
@@ -134,20 +154,48 @@ def check_setup_py(author_maint_name: str, author_maint_email: str, non_complian
     print("Not implemented")
 
 
-def check_file_exists(files: list, project_name: str, start_year: str) -> int:
+def download_license_json(url: str):
+    """Download the licenses.json file and update it if release dates are different."""
+    if not os.path.exists(LICENSES_JSON):
+        r = requests.get(url)
+        status_code = r.status_code
+        if status_code == 200:
+            with open(LICENSES_JSON, "w") as f:
+                f.write(r.text)
+
+            restructure_json(LICENSES_JSON)
+
+
+def restructure_json(file):
+    """Remove extra information from licenses.json file."""
+    licenseId_name_dict = {}
+
+    with open(file, "r", encoding="utf-8") as json_file:
+        existing_json = json.load(json_file)
+
+        for license in existing_json["licenses"]:
+            if not license["isDeprecatedLicenseId"]:
+                licenseId_name_dict[license["licenseId"]] = license["name"]
+
+    with open(file, "w") as json_file:
+        json_file.write(json.dumps(licenseId_name_dict, indent=4))
+
+
+def check_file_exists(
+    files: list, project_name: str, start_year: str, is_compliant: bool, license: str
+) -> int:
     """Check files exist. If they do not exist, create them using jinja templates."""
     # check if there is a readme (markdown or rst)
-    non_compliant = 0
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
 
     for file in files:
-        repo_file_path = os.path.join(REPO_PATH, file)
+        repo_file_path = REPO_PATH / file
         file_content = generate_file_from_jinja(file, project_name, year_str)
 
         if not os.path.exists(repo_file_path):
-            non_compliant = 1
+            is_compliant = False
             print(f"{file} does not exist. Creating file from template...")
 
             # Create the missing file using jinja templates
@@ -155,10 +203,12 @@ def check_file_exists(files: list, project_name: str, start_year: str) -> int:
                 f.write(file_content)
         else:
             # Check content
-            if file == ("CONTRIBUTORS.md" or "LICENSE"):
-                check_file_content(repo_file_path, file_content)
+            if file in (Filenames.CONTRIBUTORS, Filenames.LICENSE):
+                is_compliant = check_file_content(
+                    repo_file_path, file_content, is_compliant, license
+                )
 
-    return non_compliant
+    return is_compliant
 
 
 def generate_file_from_jinja(file, project_name, year_str):
@@ -173,25 +223,35 @@ def generate_file_from_jinja(file, project_name, year_str):
     return file_content
 
 
-def check_file_content(file, generated_content):
+def check_file_content(file, generated_content, is_compliant, license):
     """Check file content."""
-    non_compliant = 0
-
     generated_file = NamedTemporaryFile(mode="w", delete=False).name
     with open(generated_file, "w") as f:
         f.write(generated_content)
 
     # Check if CONTRIBUTORS.md content has been changed from template
-    if file == "CONTRIBUTORS.md" and check_same_content(file, generated_file):
+    if file in Filenames.CONTRIBUTORS and check_same_content(file, generated_file):
+        is_compliant = False
         print("Please update your CONTRIBUTORS.md file.")
-        non_compliant = 1
     # Check if the license phrase is in LICENSE (by default, MIT)
-    elif file == "LICENSE":
-        with open(file, "r") as f:
-            if "MIT" not in f.readline():
-                print(f"MIT is not in {file}")
+    elif file in Filenames.LICENSE:
+        license_line_found = False
+        with open(LICENSES_JSON, "r") as f:
+            license_json = json.load(f)
+            license_full_name = license_json[license]
 
-    return non_compliant
+        with open(file, "r") as license:
+            for line in license:
+                if license_full_name in line:
+                    license_line_found = True
+                    break
+
+        # If the license line wasn't found in LICENSE, it is not compliant
+        if not license_line_found:
+            is_compliant = False
+            print(f"The {Filenames.LICENSE} file content is missing {license_full_name}")
+
+    return is_compliant
 
 
 # check there are src/ tests/ doc/ folders in root of git repo
@@ -229,24 +289,30 @@ def main():
     parser.add_argument(
         "--license", type=str, help="License that the repository uses.", default=DEFAULT_LICENSE
     )
+    # Whether or not the project name is intentionally non-compliant
+    # non_compliant_name is by default False when action="store_true"
+    parser.add_argument("--non_compliant_name", action="store_true")
 
-    count = 0
     args = parser.parse_args()
     author_maint_name = args.author_maint_name
     author_maint_email = args.author_maint_email
     start_year = args.start_year
+    non_compliant_name = args.non_compliant_name
+    license = args.license
 
-    check_exists_list = ["AUTHORS.md", "CONTRIBUTING.md", "CONTRIBUTORS.md", "LICENSE"]
-    check_content_list = check_exists_list.pop(2)
-    check_content_list = check_content_list.append("README.rst")
+    # ["AUTHORS.md", "CONTRIBUTING.md", "CONTRIBUTORS.md", "LICENSE", "README"]
+    check_exists_list = [file.value for file in Filenames]
+    json_url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 
-    non_compliant, project_name = check_config_file(author_maint_name, author_maint_email)
-    count += non_compliant
-    count += check_file_exists(check_exists_list, project_name, start_year)
-    count += check_file_content(check_content_list)
+    is_compliant = True
+    is_compliant, project_name = check_config_file(
+        author_maint_name, author_maint_email, is_compliant, non_compliant_name
+    )
+    download_license_json(json_url)
+    is_compliant = check_file_exists(check_exists_list, project_name, start_year, license)
 
     # Return 1 if there were one or more non-compliant files.
-    return 1 if count >= 1 else 0
+    return 0 if is_compliant else 1
 
 
 if __name__ == "__main__":

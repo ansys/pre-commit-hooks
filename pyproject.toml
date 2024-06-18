@@ -27,10 +27,12 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "importlib-metadata==7.1.0",
-    "reuse==3.0.2",
     "GitPython==3.1.43",
+    "importlib-metadata==7.1.0",
     "Jinja2==3.1.4",
+    "reuse==3.0.2",
+    "requests==2.32.3",
+    "semver==3.0.2",
     "toml==0.10.2",
 ]
 
@@ -70,6 +72,9 @@ profile = "black"
 force_sort_within_sections = true
 line_length = 100
 src_paths = ["doc", "src", "tests"]
+
+[tool.codespell]
+ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
 
 [tool.coverage.run]
 source = ["ansys.pre_commit_hooks"]
