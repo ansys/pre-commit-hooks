@@ -9,11 +9,6 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 ## [0.3.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.2) - 2024-06-20
 
 
-### Changed
-
-- [pre-commit.ci] pre-commit autoupdate [#179](https://github.com/ansys/pre-commit-hooks/pull/179)
-
-
 ### Fixed
 
 - fix: add recursive argument and code to add-license-headers [#185](https://github.com/ansys/pre-commit-hooks/pull/185)
@@ -32,7 +27,7 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 ### Miscellaneous
 
-- [pre-commit.ci] pre-commit autoupdate [#173](https://github.com/ansys/pre-commit-hooks/pull/173), [#174](https://github.com/ansys/pre-commit-hooks/pull/174), [#177](https://github.com/ansys/pre-commit-hooks/pull/177), [#184](https://github.com/ansys/pre-commit-hooks/pull/184)
+- [pre-commit.ci] pre-commit autoupdate [#173](https://github.com/ansys/pre-commit-hooks/pull/173), [#174](https://github.com/ansys/pre-commit-hooks/pull/174), [#177](https://github.com/ansys/pre-commit-hooks/pull/177), [#179](https://github.com/ansys/pre-commit-hooks/pull/179), [#184](https://github.com/ansys/pre-commit-hooks/pull/184)
 
 ## [0.3.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.1) - 2024-04-23
 
