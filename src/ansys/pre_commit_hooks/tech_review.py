@@ -25,7 +25,6 @@ from datetime import date as dt
 from enum import Enum
 from itertools import product
 import json
-import os
 import pathlib
 import re
 from tempfile import NamedTemporaryFile
@@ -39,7 +38,7 @@ import toml
 from ansys.pre_commit_hooks.add_license_headers import check_same_content
 
 # Get current git repository
-git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+git_repo = git.Repo(pathlib.Path.cwd(), search_parent_directories=True)
 REPO_PATH = pathlib.Path(git_repo.git.rev_parse("--show-toplevel"))
 """Default repository path."""
 DOC_REPO_NAME = REPO_PATH.name
@@ -66,6 +65,8 @@ class Filenames(Enum):
     CONTRIBUTORS = "CONTRIBUTORS.md"
     LICENSE = "LICENSE"
     README = "README.rst" | "README.md"
+    DEPENDABOT = "dependabot.yml"
+    FOLDERS = ["doc", "src", "tests"]
 
 
 def check_config_file(author_maint_name, author_maint_email, is_compliant, non_compliant_name):
@@ -74,25 +75,30 @@ def check_config_file(author_maint_name, author_maint_email, is_compliant, non_c
     has_pyproject = (REPO_PATH / "pyproject.toml").exists()
     has_setup = (REPO_PATH / "setup.py").exists()
     if has_pyproject:
+        config_file = "pyproject"
         is_compliant, project_name = check_pyproject_toml(
             author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     elif has_setup:
+        config_file = "setuptools"
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     else:
+        config_file = ""
         print("pyproject.toml and setup.py files do not exist")
         project_name = None
 
     # Returns 0 if file is complaint or 1 if it is not compliant
-    return is_compliant, project_name
+    return is_compliant, project_name, config_file
 
 
 def check_pyproject_toml(
     author_maint_name, author_maint_email, is_compliant, non_compliant_name
 ) -> int:
     """Check pyproject.toml file for correct naming convention, version, author, and maintainer."""
+    name = ""
+
     # Load pyproject.toml
     with open(REPO_PATH / "pyproject.toml", "r") as project_file:
         config = toml.load(project_file)
@@ -156,7 +162,7 @@ def check_setup_py(author_maint_name: str, author_maint_email: str, non_complian
 
 def download_license_json(url: str):
     """Download the licenses.json file and update it if release dates are different."""
-    if not os.path.exists(LICENSES_JSON):
+    if not pathlib.Path.exists(LICENSES_JSON):
         r = requests.get(url)
         status_code = r.status_code
         if status_code == 200:
@@ -182,19 +188,27 @@ def restructure_json(file):
 
 
 def check_file_exists(
-    files: list, project_name: str, start_year: str, is_compliant: bool, license: str
+    files: list,
+    project_name: str,
+    start_year: str,
+    is_compliant: bool,
+    license: str,
+    repository_url: str,
+    product: str,
+    config_file: str,
 ) -> int:
     """Check files exist. If they do not exist, create them using jinja templates."""
-    # check if there is a readme (markdown or rst)
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
 
     for file in files:
         repo_file_path = REPO_PATH / file
-        file_content = generate_file_from_jinja(file, project_name, year_str)
+        file_content = generate_file_from_jinja(
+            file, project_name, year_str, repository_url, product, config_file
+        )
 
-        if not os.path.exists(repo_file_path):
+        if not pathlib.Path.exists(repo_file_path):
             is_compliant = False
             print(f"{file} does not exist. Creating file from template...")
 
@@ -211,13 +225,18 @@ def check_file_exists(
     return is_compliant
 
 
-def generate_file_from_jinja(file, project_name, year_str):
+def generate_file_from_jinja(file, project_name, year_str, repo_url, product, config_file):
     """Generate file using jinja templates."""
-    loader = FileSystemLoader(searchpath=os.path.join(HOOK_PATH, "templates"))
+    loader = FileSystemLoader(searchpath=pathlib.PurePath.joinpath(HOOK_PATH, "templates"))
     env = Environment(loader=loader)
     template = env.get_template(file)
     file_content = template.render(
-        doc_repo_name=DOC_REPO_NAME, project_name=project_name, year_span=year_str
+        doc_repo_name=DOC_REPO_NAME,  # pymechanical
+        project_name=project_name,  # ansys-mechanical-core
+        year_span=year_str,  # 2022 - 2024
+        repository_url=repo_url,  # https://github.com/ansys/pymechanical
+        product=product,  # mechanical
+        config_file=config_file,  # pyproject
     )
 
     return file_content
@@ -254,12 +273,15 @@ def check_file_content(file, generated_content, is_compliant, license):
     return is_compliant
 
 
-# check there are src/ tests/ doc/ folders in root of git repo
-# verify there are no dockerfiles at the root level - should be in doc folder
-# check there's a dependabot.yml file
+def check_dirs_exist(is_compliant):
+    """Check src, tests, and doc folders exist in the root of the git repository."""
+    for folder in Filenames.FOLDERS:
+        full_path = REPO_PATH / folder
+        if not pathlib.Path.exists(full_path):
+            is_compliant = False
+            print(f"{folder} does not exist")
 
-# eventually - check the ci_cd yml file actions doc-style, code-style, etc
-# run pytest, parse coverage files
+    return is_compliant
 
 
 def main():
@@ -289,6 +311,10 @@ def main():
     parser.add_argument(
         "--license", type=str, help="License that the repository uses.", default=DEFAULT_LICENSE
     )
+    # Get the Ansys product that the repository is related to
+    parser.add_argument(
+        "--product", type=str, help="Ansys product that the repository is related to."
+    )
     # Whether or not the project name is intentionally non-compliant
     # non_compliant_name is by default False when action="store_true"
     parser.add_argument("--non_compliant_name", action="store_true")
@@ -299,17 +325,25 @@ def main():
     start_year = args.start_year
     non_compliant_name = args.non_compliant_name
     license = args.license
+    product = args.product
 
-    # ["AUTHORS.md", "CONTRIBUTING.md", "CONTRIBUTORS.md", "LICENSE", "README"]
+    if not product:
+        print("Product argument is required to run the hook")
+        return 1
+
     check_exists_list = [file.value for file in Filenames]
     json_url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
+    repository_url = f"https://github.com/ansys/{DOC_REPO_NAME}"
 
     is_compliant = True
-    is_compliant, project_name = check_config_file(
+    is_compliant, project_name, config_file = check_config_file(
         author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
     download_license_json(json_url)
-    is_compliant = check_file_exists(check_exists_list, project_name, start_year, license)
+    is_compliant = check_file_exists(
+        check_exists_list, project_name, start_year, license, repository_url, product, config_file
+    )
+    is_compliant = check_dirs_exist(is_compliant)
 
     # Return 1 if there were one or more non-compliant files.
     return 0 if is_compliant else 1
