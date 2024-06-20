@@ -711,13 +711,13 @@ def find_files_missing_header() -> int:
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
-    if len(values["files"]) > 995:
-        file_return_code = non_recursive_file_check(
-            changed_headers, parser, values, proj, missing_headers
-        )
-    else:
+    if len(values["files"]) <= (sys.getrecursionlimit() - 2):
         file_return_code = recursive_file_check(
             changed_headers, parser, values, proj, missing_headers, 0
+        )
+    else:
+        file_return_code = non_recursive_file_check(
+            changed_headers, parser, values, proj, missing_headers
         )
 
     # Unlink default files & remove .reuse and LICENSES folders if empty

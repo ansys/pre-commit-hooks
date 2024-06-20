@@ -641,7 +641,7 @@ def test_no_recursion(tmp_path: pytest.TempPathFactory):
     # Add file with updated header
     repo.index.add([tmp_file])
 
-    for file in range(0, 1000):
+    for file in range(0, sys.getrecursionlimit() + 1):
         # Create temporary python file
         new_file = create_test_file(tmp_path)
         # Git add new file
