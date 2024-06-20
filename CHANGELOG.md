@@ -6,6 +6,29 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.3.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.2) - 2024-06-20
+
+
+### Fixed
+
+- fix: add recursive argument and code to add-license-headers [#185](https://github.com/ansys/pre-commit-hooks/pull/185)
+
+
+### Dependencies
+
+- build(deps): bump pytest from 8.1.1 to 8.2.0 [#172](https://github.com/ansys/pre-commit-hooks/pull/172)
+- build(deps): bump ansys-sphinx-theme[autoapi] from 0.15.2 to 0.16.0 [#175](https://github.com/ansys/pre-commit-hooks/pull/175)
+- build(deps): bump pytest from 8.2.0 to 8.2.1 [#176](https://github.com/ansys/pre-commit-hooks/pull/176)
+- build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.0 to 0.16.2 [#178](https://github.com/ansys/pre-commit-hooks/pull/178)
+- build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.2 to 0.16.5 [#180](https://github.com/ansys/pre-commit-hooks/pull/180)
+- build(deps): bump pytest from 8.2.1 to 8.2.2 [#181](https://github.com/ansys/pre-commit-hooks/pull/181)
+- build(deps): bump sphinx-autodoc-typehints from 2.1.0 to 2.1.1 [#182](https://github.com/ansys/pre-commit-hooks/pull/182)
+
+
+### Miscellaneous
+
+- [pre-commit.ci] pre-commit autoupdate [#173](https://github.com/ansys/pre-commit-hooks/pull/173), [#174](https://github.com/ansys/pre-commit-hooks/pull/174), [#177](https://github.com/ansys/pre-commit-hooks/pull/177), [#179](https://github.com/ansys/pre-commit-hooks/pull/179), [#184](https://github.com/ansys/pre-commit-hooks/pull/184)
+
 ## [0.3.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.1) - 2024-04-23
 
 
