@@ -95,6 +95,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
+    parser.add_argument("--non_recursive_file_check", action="store_true")
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
     lint.add_arguments(parser)
@@ -251,14 +252,7 @@ def set_header_args(
     return args
 
 
-def check_exists(
-    changed_headers: int,
-    parser: argparse.ArgumentParser,
-    values: dict,
-    proj: project.Project,
-    missing_headers: list,
-    i: int,
-) -> int:
+def non_recursive_file_check(changed_headers, parser, values, proj, missing_headers):
     """
     Check if the committed file is missing its header.
 
@@ -324,6 +318,89 @@ def check_exists(
                 print(f"Successfully changed header of {file}")
 
             os.remove(before_hook)
+
+    return changed_headers
+
+
+def recursive_file_check(changed_headers, parser, values, proj, missing_headers, count):
+    """
+    Check if the committed file is missing its header.
+
+    Parameters
+    ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    parser: argparse.ArgumentParser
+        Parser containing default license header arguments.
+    values: dict
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
+    proj: project.Project
+        Project to run `REUSE <https://reuse.software/>`_ on.
+    missing_headers: list
+        Committed files that are missing copyright and/or
+        license information in their headers.
+    count: int
+        Integer of the location in the files array.
+
+    Returns
+    -------
+    int
+        ``0`` if all files contain headers and are up to date.
+        ``1`` if ``REUSE`` changed all noncompliant files.
+    """
+    files = values["files"]
+    start_year = values["start_year"]
+    current_year = values["current_year"]
+    copyright = values["copyright"]
+    template = values["template"]
+
+    if count < len(files):
+        # If the committed file is in missing_headers
+        file = files[count]
+
+        if (file in missing_headers) or (os.path.getsize(file) == 0):
+            changed_headers = 1
+            # Run REUSE on the file
+            args = set_header_args(parser, start_year, current_year, file, copyright, template)
+            if not args.ignore_license_check:
+                args.license = [values["license"]]
+            _annotate.run(args, proj)
+
+            # Check if the next file is in missing_headers
+            return recursive_file_check(
+                changed_headers, parser, values, proj, missing_headers, count + 1
+            )
+        else:
+            # Save current copy of file
+            before_hook = NamedTemporaryFile(mode="w", delete=False).name
+            shutil.copyfile(file, before_hook)
+
+            # Update the header
+            # tmp captures the stdout of the header.run() function
+            with NamedTemporaryFile(mode="w", delete=True) as tmp:
+                args = set_header_args(parser, start_year, current_year, file, copyright, template)
+                _annotate.run(args, proj, tmp)
+
+            # Check if the file before add-license-headers was run is the same as the one
+            # after add-license-headers was run. If not, apply the syntax changes
+            # from other hooks before add-license-headers was run to the file
+            if check_same_content(before_hook, file) == False:
+                add_hook_changes(before_hook, file)
+
+            # Check if the file content before add-license-headers was run has been changed
+            # Assuming the syntax was fixed in the above if statement, this check is
+            # solely for the file's content
+            if check_same_content(before_hook, file) == False:
+                changed_headers = 1
+                print(f"Successfully changed header of {file}")
+
+            os.remove(before_hook)
+
+            return recursive_file_check(
+                changed_headers, parser, values, proj, missing_headers, count + 1
+            )
 
     return changed_headers
 
@@ -635,7 +712,14 @@ def find_files_missing_header() -> int:
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
-    file_return_code = check_exists(changed_headers, parser, values, proj, missing_headers, 0)
+    if args.non_recursive_file_check:
+        file_return_code = non_recursive_file_check(
+            changed_headers, parser, values, proj, missing_headers
+        )
+    else:
+        file_return_code = recursive_file_check(
+            changed_headers, parser, values, proj, missing_headers, 0
+        )
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, os_git_root)

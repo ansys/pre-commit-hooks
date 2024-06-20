@@ -254,12 +254,9 @@ def test_multiple_files(tmp_path: pytest.TempPathFactory):
     repo.index.add([tmp_file])
 
     # Create two new files to run REUSE
-    file_names = []
     for i in range(0, 2):
         # Create temporary python file
         tmp_file = create_test_file(tmp_path)
-        # Save temporary python file name
-        file_names.append(tmp_file)
         # Git add new file
         repo.index.add(tmp_file)
         # Append file to new_files list
@@ -616,3 +613,48 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
         check_license_year(
             tmp_license, values["copyright"], values["start_year"], values["current_year"]
         )
+
+    os.chdir(REPO_PATH)
+
+
+def test_no_recursion(tmp_path: pytest.TempPathFactory):
+    """Test license headers with function that does not use recursion."""
+    # Set template and license names
+    # List of files to be git added
+    new_files = []
+    custom_args = []
+
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
+    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    new_files.append(tmp_file)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", "--non_recursive_file_check"]
+
+    # Git add tmp_file and run hook with custom arguments
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+
+    # Add file with updated header
+    repo.index.add([tmp_file])
+
+    # Create temporary python file
+    new_file = create_test_file(tmp_path)
+    # Git add new file
+    repo.index.add(new_file)
+    # Append file to new_files list
+    new_files.append(new_file)
+
+    # Add new file without header to custom_args
+    custom_args.insert(0, new_file)
+
+    assert add_argv_run(repo, new_files, custom_args) == 1
+
+    # Check headers are correct in all tmp_files
+    for file in new_files:
+        check_ansys_header(file)
+
+    os.chdir(REPO_PATH)
