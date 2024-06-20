@@ -95,7 +95,6 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
-    parser.add_argument("--non_recursive_file_check", action="store_true")
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
     lint.add_arguments(parser)
@@ -712,7 +711,7 @@ def find_files_missing_header() -> int:
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
-    if args.non_recursive_file_check:
+    if len(values["files"]) > 995:
         file_return_code = non_recursive_file_check(
             changed_headers, parser, values, proj, missing_headers
         )

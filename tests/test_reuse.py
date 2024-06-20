@@ -633,7 +633,7 @@ def test_no_recursion(tmp_path: pytest.TempPathFactory):
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
     new_files.append(tmp_file)
-    custom_args = [tmp_file, f"--start_year={START_YEAR}", "--non_recursive_file_check"]
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
 
     # Git add tmp_file and run hook with custom arguments
     assert add_argv_run(repo, tmp_file, custom_args) == 1
@@ -641,15 +641,15 @@ def test_no_recursion(tmp_path: pytest.TempPathFactory):
     # Add file with updated header
     repo.index.add([tmp_file])
 
-    # Create temporary python file
-    new_file = create_test_file(tmp_path)
-    # Git add new file
-    repo.index.add(new_file)
-    # Append file to new_files list
-    new_files.append(new_file)
-
-    # Add new file without header to custom_args
-    custom_args.insert(0, new_file)
+    for file in range(0, 1000):
+        # Create temporary python file
+        new_file = create_test_file(tmp_path)
+        # Git add new file
+        repo.index.add(new_file)
+        # Append file to new_files list
+        new_files.append(new_file)
+        # Add new file without header to custom_args
+        custom_args.insert(0, new_file)
 
     assert add_argv_run(repo, new_files, custom_args) == 1
 
