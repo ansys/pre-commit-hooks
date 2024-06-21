@@ -49,6 +49,8 @@ DEFAULT_START_YEAR = dt.today().year
 """Default start year of the repository."""
 DEFAULT_LICENSE = "MIT"
 """Default license of the repository"""
+JSON_URL = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
+"""URL to retrieve list of license IDs and names."""
 
 
 class Filenames(Enum):
@@ -69,7 +71,6 @@ def check_config_file(
     # Is zero when the configuration file is compliant and one when it is not compliant
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
-    print(has_pyproject)
     if has_pyproject:
         config_file = "pyproject"
         is_compliant, project_name = check_pyproject_toml(
@@ -160,16 +161,20 @@ def check_setup_py(
     return is_compliant
 
 
-def download_license_json(url: str):
+def download_license_json(url: str, json_file: str):
     """Download the licenses.json file and update it if release dates are different."""
-    if not pathlib.Path.exists(LICENSES_JSON):
+    if not pathlib.Path.exists(json_file):
         r = requests.get(url)
         status_code = r.status_code
         if status_code == 200:
-            with open(LICENSES_JSON, "w") as f:
+            with open(json_file, "w", encoding="utf-8") as f:
                 f.write(r.text)
 
-            restructure_json(LICENSES_JSON)
+            restructure_json(json_file)
+            return True
+        else:
+            print("There was a problem downloading license.json. Skipping LICENSE content check")
+            return False
 
 
 def restructure_json(file):
@@ -205,7 +210,10 @@ def check_file_exists(
     )
 
     for file in files:
-        repo_file_path = repo_path / file
+        if "dependabot" in file:
+            repo_file_path = repo_path / ".github" / file
+        else:
+            repo_file_path = repo_path / file
         file_content = generate_file_from_jinja(
             file, project_name, year_str, repository_url, product, config_file, doc_repo_name
         )
@@ -258,21 +266,25 @@ def check_file_content(file, generated_content, is_compliant, license):
         print("Please update your CONTRIBUTORS.md file.")
     # Check if the license phrase is in LICENSE (by default, MIT)
     elif file in Filenames.LICENSE:
-        license_line_found = False
-        with open(LICENSES_JSON, "r") as f:
-            license_json = json.load(f)
-            license_full_name = license_json[license]
+        # Download and adjust json containing license information
+        downloaded = download_license_json(JSON_URL, LICENSES_JSON)
 
-        with open(file, "r") as license:
-            for line in license:
-                if license_full_name in line:
-                    license_line_found = True
-                    break
+        if downloaded:
+            license_line_found = False
+            with open(LICENSES_JSON, "r") as f:
+                license_json = json.load(f)
+                license_full_name = license_json[license]
 
-        # If the license line wasn't found in LICENSE, it is not compliant
-        if not license_line_found:
-            is_compliant = False
-            print(f"The {Filenames.LICENSE} file content is missing {license_full_name}")
+            with open(file, "r") as license:
+                for line in license:
+                    if license_full_name in line:
+                        license_line_found = True
+                        break
+
+            # If the license line wasn't found in LICENSE, it is not compliant
+            if not license_line_found:
+                is_compliant = False
+                print(f"The {Filenames.LICENSE} file content is missing {license_full_name}")
 
     return is_compliant
 
@@ -342,8 +354,6 @@ def main():
         return 1
 
     check_exists_list = [file.value for file in Filenames]
-    print(check_exists_list)
-    json_url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
     repository_url = f"https://github.com/ansys/{doc_repo_name}"
 
     is_compliant = True
@@ -351,9 +361,6 @@ def main():
     is_compliant, project_name, config_file = check_config_file(
         repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
-
-    # Download and adjust json containing license information
-    download_license_json(json_url)
 
     # Check files exist
     is_compliant = check_file_exists(
@@ -370,7 +377,7 @@ def main():
     )
 
     # Check directories exist
-    directories = ["doc", "src", "tests"]
+    directories = [".github", "doc", "src", "tests"]
     is_compliant = check_dirs_exist(repo_path, is_compliant, directories)
 
     # Return 1 if there were one or more non-compliant files.

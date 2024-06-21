@@ -41,10 +41,7 @@ def setup_repo(tmp_path):
     os.chdir(tmp_path)
 
     # Set up git repository in tmp_path
-    # repo = init_repo(tmp_path)
-    git.Repo.init(tmp_path)
-    repo = git.Repo(tmp_path)
-    repo.index.commit("initialized git repo for tmp_path")
+    repo = init_repo(tmp_path)
 
     # Make .github, src, tests, and doc directories
     dir_list = [".github", "src", "tests", "doc"]
@@ -53,6 +50,14 @@ def setup_repo(tmp_path):
     # Copy pyproject.toml and LICENSE files
     file_list = ["pyproject.toml", "LICENSE"]
     create_files(repo, tmp_path, file_list)
+
+    return repo
+
+
+def init_repo(tmp_path):
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+    repo.index.commit("initialized git repo for tmp_path")
 
     return repo
 
@@ -82,14 +87,12 @@ def run_main(custom_args):
 
 @pytest.mark.tech_review
 def test_pyproject_data(tmp_path: pytest.TempPathFactory):
-    # custom_args = ["--product=test"]
     author_maint_name = "ANSYS, Inc."
     author_maint_email = "pyansys.core@ansys.com"
     is_compliant = True
     non_compliant_name = False
 
-    repo = setup_repo(tmp_path)
-    print(os.listdir(tmp_path))
+    setup_repo(tmp_path)
     is_compliant, project_name, config_file = hook.check_config_file(
         tmp_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
@@ -98,10 +101,37 @@ def test_pyproject_data(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-# Tests for
-# name = "ansys-pre-commit-hooks"
-# name2 = "ansys-precommit-hooks"
-# name3 = "mechanical-precommit-hook"
-# bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name)) # False
-# bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name2)) # True
-# bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name3)) # False
+@pytest.mark.tech_review
+def test_templates(tmp_path: pytest.TempPathFactory):
+    custom_args = ["--product=test"]
+
+    setup_repo(tmp_path)
+    assert run_main(custom_args) == 1
+
+    # Check content of each of the files
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_json_download_n_update(tmp_path: pytest.TempPathFactory):
+    url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
+    license_json = tmp_path / "license.json"
+
+    # Change dir to tmp_path
+    os.chdir(tmp_path)
+
+    repo = init_repo(tmp_path)
+
+    assert hook.download_license_json(url, license_json) == True
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_main():
+    custom_args = ["--product=pre-commit-hooks", "--non_compliant_name"]
+
+    assert run_main(custom_args) == 0
+
+    os.chdir(REPO_PATH)
