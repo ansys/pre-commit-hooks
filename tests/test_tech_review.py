@@ -90,7 +90,7 @@ def run_main(custom_args):
 
 
 @pytest.mark.tech_review
-def test_pyproject_data(tmp_path: pytest.TempPathFactory):
+def test_pyproject_toml(tmp_path: pytest.TempPathFactory):
     author_maint_name = "ANSYS, Inc."
     author_maint_email = "pyansys.core@ansys.com"
     is_compliant = True
@@ -108,6 +108,36 @@ def test_pyproject_data(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.tech_review
+def test_setup_py(tmp_path: pytest.TempPathFactory):
+    custom_args = ["--product=techreview"]
+    tmp_path = tmp_path / "pytechreview"
+
+    pathlib.Path.mkdir(tmp_path)
+    os.chdir(tmp_path)
+
+    repo = init_repo(tmp_path)
+    setup_py_file = tmp_path / "setup.py"
+
+    with open(setup_py_file, "w") as setup_file:
+        setup_file.write("# Empty file")
+
+    assert run_main(custom_args) == 1
+
+    # Check each of the file's content generated correctly from templates
+    file_list = ["dependabot.yml"]
+    check_generated_files(tmp_path, file_list, "setuptools")
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_no_config_files(tmp_path: pytest.TempPathFactory):
+    repo = init_repo(tmp_path)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
 def test_templates(tmp_path: pytest.TempPathFactory):
     custom_args = ["--product=techreview"]
     tmp_path = tmp_path / "pytechreview"
@@ -115,20 +145,24 @@ def test_templates(tmp_path: pytest.TempPathFactory):
     setup_repo(tmp_path)
     assert run_main(custom_args) == 1
 
-    # Files that were generated
-    check_files = [file.value for file in hook.Filenames]
-    check_files.remove("CONTRIBUTORS.md")
-
     # Check each of the file's content generated correctly from templates
-    for file in check_files:
+    file_list = [file.value for file in hook.Filenames]
+    file_list.remove("CONTRIBUTORS.md")
+    check_generated_files(tmp_path, file_list, "pyproject")
+
+    os.chdir(REPO_PATH)
+
+
+def check_generated_files(tmp_path, file_list, config_file):
+    # Check each of the file's content generated correctly from templates
+    for file in file_list:
         correct_file = TEMPLATE_PATH / file
         if "dependabot" in file:
+            correct_file = TEMPLATE_PATH / f"{file}".replace(file, f"dependabot_{config_file}.yml")
             created_file = tmp_path / ".github" / file
         else:
             created_file = tmp_path / file
         assert check_same_content(correct_file, created_file) == True
-
-    os.chdir(REPO_PATH)
 
 
 @pytest.mark.tech_review

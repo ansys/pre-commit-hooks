@@ -64,6 +64,21 @@ class Filenames(Enum):
     DEPENDABOT = "dependabot.yml"
 
 
+def check_dirs_exist(repo_path, is_compliant, directories):
+    """Check src, tests, and doc folders exist in the root of the git repository."""
+    for dirs in directories:
+        full_path = repo_path / dirs
+        if not pathlib.Path.exists(full_path):
+            is_compliant = False
+            print(f'The "{dirs}" directory does not exist. Creating the "{dirs}" directory...')
+            pathlib.Path.mkdir(full_path)
+
+    if not is_compliant:
+        print("")
+
+    return is_compliant
+
+
 def check_config_file(
     repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
 ):
@@ -154,11 +169,20 @@ def check_auth_maint(project_value, arg_value, err_string, is_compliant):
 
 
 def check_setup_py(
-    repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool
+    repo_path: str,
+    author_maint_name: str,
+    author_maint_email: str,
+    is_compliant: bool,
+    non_compliant_name: bool,
 ):
     """Check setup.py file for correct naming convention, version, author, and maintainer."""
-    print("Not implemented")
-    return is_compliant
+    print("The setup.py check is not implemented. Please manually check the following:")
+    print("- The project name is ansys-*-*")
+    print("- The project uses semantic versioning (see https://semver.org/)")
+    print(f"- The author and maintainer name is {author_maint_name}")
+    print(f"- The author and maintainer email is {author_maint_email}\n")
+
+    return is_compliant, ""
 
 
 def download_license_json(url: str, json_file: str):
@@ -193,6 +217,15 @@ def restructure_json(file):
         json_file.write(json.dumps(licenseId_name_dict, indent=4))
 
 
+def write_content(message, file_path, file_content):
+    """Write generated content from jinja template to a file."""
+    print(message)
+
+    # Create the missing file using jinja templates
+    with open(file_path, "w") as f:
+        f.write(file_content)
+
+
 def check_file_exists(
     repo_path: str,
     files: list,
@@ -209,6 +242,14 @@ def check_file_exists(
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
+    ref_dict = {
+        "AUTHORS.md": "the-authors-file",
+        "CONTRIBUTING.md": "the-contributing-md-file",
+        "CONTRIBUTORS.md": "the-contributors-md-file",
+        "LICENSE": "the-license-file",
+        "README.rst": "the-readme-file",
+        "README.md": "the-readme-file",
+    }
 
     for file in files:
         if "dependabot" in file:
@@ -221,11 +262,17 @@ def check_file_exists(
 
         if not pathlib.Path.exists(repo_file_path):
             is_compliant = False
-            print(f"{file} does not exist. Creating file from template...")
-
-            # Create the missing file using jinja templates
-            with open(repo_file_path, "w") as f:
-                f.write(file_content)
+            dne_message = f"{file} does not exist. Creating file from template..."
+            if "setuptools" in config_file:
+                if "dependabot" in file:
+                    write_content(dne_message, repo_file_path, file_content)
+                else:
+                    tech_review_docs = (
+                        f"https://dev.docs.pyansys.com/packaging/structure.html#{ref_dict[file]}"
+                    )
+                    print(f"{file} does not exist. Please see {tech_review_docs}")
+            else:
+                write_content(dne_message, repo_file_path, file_content)
         else:
             # Check content
             if file in (Filenames.CONTRIBUTORS.value, Filenames.LICENSE.value):
@@ -291,17 +338,6 @@ def check_file_content(file, generated_content, is_compliant, license):
     return is_compliant
 
 
-def check_dirs_exist(repo_path, is_compliant, directories):
-    """Check src, tests, and doc folders exist in the root of the git repository."""
-    for dirs in directories:
-        full_path = repo_path / dirs
-        if not pathlib.Path.exists(full_path):
-            is_compliant = False
-            print(f"{dirs} does not exist")
-
-    return is_compliant
-
-
 def main():
     """Check files for technical review."""
     parser = argparse.ArgumentParser()
@@ -359,6 +395,11 @@ def main():
     repository_url = f"https://github.com/ansys/{doc_repo_name}"
 
     is_compliant = True
+
+    # Check directories exist
+    directories = [".github", "doc", "src", "tests"]
+    is_compliant = check_dirs_exist(repo_path, is_compliant, directories)
+
     # Check pyproject.toml information is correct
     is_compliant, project_name, config_file = check_config_file(
         repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
@@ -377,10 +418,6 @@ def main():
         config_file,
         doc_repo_name,
     )
-
-    # Check directories exist
-    directories = [".github", "doc", "src", "tests"]
-    is_compliant = check_dirs_exist(repo_path, is_compliant, directories)
 
     # Return 1 if there were one or more non-compliant files.
     return 0 if is_compliant else 1
