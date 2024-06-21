@@ -171,10 +171,11 @@ def download_license_json(url: str, json_file: str):
                 f.write(r.text)
 
             restructure_json(json_file)
-            return True
         else:
             print("There was a problem downloading license.json. Skipping LICENSE content check")
             return False
+
+    return True
 
 
 def restructure_json(file):
@@ -227,7 +228,8 @@ def check_file_exists(
                 f.write(file_content)
         else:
             # Check content
-            if file in (Filenames.CONTRIBUTORS, Filenames.LICENSE):
+            if file in (Filenames.CONTRIBUTORS.value, Filenames.LICENSE.value):
+                print("checking file content")
                 is_compliant = check_file_content(
                     repo_file_path, file_content, is_compliant, license
                 )
@@ -261,11 +263,11 @@ def check_file_content(file, generated_content, is_compliant, license):
         f.write(generated_content)
 
     # Check if CONTRIBUTORS.md content has been changed from template
-    if file in Filenames.CONTRIBUTORS and check_same_content(file, generated_file):
+    if file.name in Filenames.CONTRIBUTORS.value and check_same_content(file, generated_file):
         is_compliant = False
         print("Please update your CONTRIBUTORS.md file.")
     # Check if the license phrase is in LICENSE (by default, MIT)
-    elif file in Filenames.LICENSE:
+    elif file.name in Filenames.LICENSE.value:
         # Download and adjust json containing license information
         downloaded = download_license_json(JSON_URL, LICENSES_JSON)
 
@@ -284,7 +286,7 @@ def check_file_content(file, generated_content, is_compliant, license):
             # If the license line wasn't found in LICENSE, it is not compliant
             if not license_line_found:
                 is_compliant = False
-                print(f"The {Filenames.LICENSE} file content is missing {license_full_name}")
+                print(f"The {Filenames.LICENSE.value} file content is missing {license_full_name}")
 
     return is_compliant
 

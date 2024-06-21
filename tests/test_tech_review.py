@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
 import os
 import pathlib
 import shutil
@@ -28,6 +29,7 @@ import sys
 import git
 import pytest
 
+from ansys.pre_commit_hooks.add_license_headers import check_same_content
 import ansys.pre_commit_hooks.tech_review as hook
 
 git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
@@ -37,6 +39,8 @@ TEMPLATE_PATH = REPO_PATH / "tests" / "test_tech_review_files"
 
 def setup_repo(tmp_path):
     """Move to temporary directory, set up git repo, & create test file."""
+    # Make "pytechreview" folder in tmp_path
+    pathlib.Path.mkdir(tmp_path)
     # Change dir to tmp_path
     os.chdir(tmp_path)
 
@@ -92,6 +96,8 @@ def test_pyproject_data(tmp_path: pytest.TempPathFactory):
     is_compliant = True
     non_compliant_name = False
 
+    tmp_path = tmp_path / "pytechreview"
+
     setup_repo(tmp_path)
     is_compliant, project_name, config_file = hook.check_config_file(
         tmp_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
@@ -103,12 +109,24 @@ def test_pyproject_data(tmp_path: pytest.TempPathFactory):
 
 @pytest.mark.tech_review
 def test_templates(tmp_path: pytest.TempPathFactory):
-    custom_args = ["--product=test"]
+    custom_args = ["--product=techreview"]
+    tmp_path = tmp_path / "pytechreview"
 
     setup_repo(tmp_path)
     assert run_main(custom_args) == 1
 
-    # Check content of each of the files
+    # Files that were generated
+    check_files = [file.value for file in hook.Filenames]
+    check_files.remove("CONTRIBUTORS.md")
+
+    # Check each of the file's content generated correctly from templates
+    for file in check_files:
+        correct_file = TEMPLATE_PATH / file
+        if "dependabot" in file:
+            created_file = tmp_path / ".github" / file
+        else:
+            created_file = tmp_path / file
+        assert check_same_content(correct_file, created_file) == True
 
     os.chdir(REPO_PATH)
 
@@ -116,21 +134,32 @@ def test_templates(tmp_path: pytest.TempPathFactory):
 @pytest.mark.tech_review
 def test_json_download_n_update(tmp_path: pytest.TempPathFactory):
     url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
+    tmp_path = tmp_path / "pytechreview"
     license_json = tmp_path / "license.json"
 
+    # Make pytechreview folder in tmp_path
+    pathlib.Path.mkdir(tmp_path)
     # Change dir to tmp_path
     os.chdir(tmp_path)
 
+    # Initialize repository
     repo = init_repo(tmp_path)
 
+    # Assert the license.json file is downloaded and updated
     assert hook.download_license_json(url, license_json) == True
+
+    # Check license.json's key/value is correct for MIT
+    with open(license_json, "r") as license:
+        existing_json = json.load(license)
+        assert existing_json["MIT"] == "MIT License"
 
     os.chdir(REPO_PATH)
 
 
 @pytest.mark.tech_review
 def test_main():
-    custom_args = ["--product=pre-commit-hooks", "--non_compliant_name"]
+    # Set custom arguments for ansys/pre-commit-hooks repository
+    custom_args = ["--product=techreview", "--non_compliant_name"]
 
     assert run_main(custom_args) == 0
 

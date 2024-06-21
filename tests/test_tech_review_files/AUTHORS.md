@@ -1,4 +1,4 @@
-This is the list of {{ project_name }}'s significant contributors.
+This is the list of ansys-tech-review's significant contributors.
 
 This file does not necessarily list everyone who has contributed code.
 
