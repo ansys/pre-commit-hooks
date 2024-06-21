@@ -63,7 +63,6 @@ Tracker = "https://github.com/ansys/pre-commit-hooks/issues"
 Homepage = "https://github.com/ansys/pre-commit-hooks"
 Documentation = "https://pre-commit-hooks.docs.ansys.com"
 
-
 [tool.black]
 line-length = 100
 
@@ -87,6 +86,10 @@ minversion = "7.1"
 addopts = "--cov=ansys.pre_commit_hooks --cov-report term-missing -vv"
 testpaths = [
     "tests",
+]
+markers = [
+    "license_headers: marks tests for add-license-headers hook",
+    "tech_review: marks tests for tech-review hook",
 ]
 
 [tool.towncrier]

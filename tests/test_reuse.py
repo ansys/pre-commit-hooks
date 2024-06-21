@@ -134,6 +134,7 @@ def check_ansys_header(file_name):
     file.close()
 
 
+@pytest.mark.license_headers
 def test_custom_start_year(tmp_path: pytest.TempPathFactory):
     """Test custom start year is in copyright line."""
     # Set template and license names
@@ -164,6 +165,7 @@ def test_custom_start_year(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
     """Test custom start year is in copyright line."""
     # Set template and license names
@@ -193,6 +195,7 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_custom_args(tmp_path: pytest.TempPathFactory):
     """Test custom arguments for loc, copyright, template, and license."""
     # Set template and license names
@@ -233,6 +236,7 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_multiple_files(tmp_path: pytest.TempPathFactory):
     """Test reuse is run on files without headers, when one file already has header."""
     # List of files to be git added
@@ -273,6 +277,7 @@ def test_multiple_files(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_main_fails(tmp_path: pytest.TempPathFactory):
     """Test reuse is being run on noncompliant file."""
     # Set template and license names
@@ -292,6 +297,7 @@ def test_main_fails(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_main_passes():
     """Test all files are compliant."""
     sys.argv[1:] = [f"--start_year={START_YEAR}"]
@@ -302,6 +308,7 @@ def test_main_passes():
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_license_check():
     """Test license is checked in the header."""
     parser = argparse.ArgumentParser()
@@ -310,6 +317,7 @@ def test_license_check():
     assert args.ignore_license_check == False
 
 
+@pytest.mark.license_headers
 def test_no_license_check(tmp_path: pytest.TempPathFactory):
     """Test license check is ignored."""
     # Set template and license names
@@ -342,6 +350,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     """Test update header."""
     # List of files to be git added
@@ -380,6 +389,7 @@ def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     """Test that header is updated when the jinja file changes."""
     # List of files to be git added
@@ -444,6 +454,7 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_copy_assets(tmp_path: pytest.TempPathFactory):
     """Test .reuse and LICENSES folders are copied."""
     # List of files to be git added
@@ -469,6 +480,7 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     check_ansys_header(tmp_file)
 
 
+@pytest.mark.license_headers
 def test_bad_chars(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
@@ -504,6 +516,7 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_index_exception(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "copyright_only.jinja2"
@@ -575,6 +588,7 @@ def check_license_year(license_file, copyright, start_year, current_year):
         return
 
 
+@pytest.mark.license_headers
 def test_license_year_update(tmp_path: pytest.TempPathFactory):
     """Tests if the year in the license header is updated."""
     # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
