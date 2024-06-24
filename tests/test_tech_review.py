@@ -161,6 +161,14 @@ def check_generated_files(tmp_path, file_list, config_file):
             correct_file = TEMPLATE_PATH / f"{file}".replace(file, f"dependabot_{config_file}.yml")
             created_file = tmp_path / ".github" / file
         else:
+            if "README" in file:
+                if pathlib.Path.exists(tmp_path / f"{file}.md"):
+                    file = f"{file}.md"
+                else:
+                    file = f"{file}.rst"
+
+                correct_file = TEMPLATE_PATH / file
+
             created_file = tmp_path / file
         assert check_same_content(correct_file, created_file) == True
 
