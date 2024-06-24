@@ -75,7 +75,7 @@ class Directories(Enum):
 
 def check_dirs_exist(repo_path: str, is_compliant: bool, directories: list) -> bool:
     """
-    Check src, tests, and doc folders exist in the root of the git repository.
+    Check folders exist in the root of the git repository.
 
     Parameters
     ----------
@@ -93,13 +93,16 @@ def check_dirs_exist(repo_path: str, is_compliant: bool, directories: list) -> b
         ``True`` if all directories exist.
         ``False`` if a directory did not exist and was created.
     """
+    # For each folder, check if it exists in the repository
     for dirs in directories:
         full_path = repo_path / dirs
+        # If the directory does not exist, create it
         if not pathlib.Path.exists(full_path):
             is_compliant = False
             print(f'The "{dirs}" directory does not exist. Creating the "{dirs}" directory...')
             pathlib.Path.mkdir(full_path)
 
+    # Print space after last failure message to break up sections
     if not is_compliant:
         print("")
 
@@ -135,27 +138,31 @@ def check_config_file(
     -------
     bool
         ``True`` if all files exist and contain the correct content.
-        ``False`` if a file was created or did not contain the correct content
+        ``False`` if a file was created or did not contain the correct content.
     """
-    # Is zero when the configuration file is compliant and one when it is not compliant
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
     if has_pyproject:
         config_file = "pyproject"
+        # Check pyproject.toml information
         is_compliant, project_name = check_pyproject_toml(
             repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     elif has_setup:
         config_file = "setuptools"
+        # Check setup.py information
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
         )
     else:
+        # Ignore config file check
         config_file = ""
         print("pyproject.toml and setup.py files do not exist")
         project_name = None
 
-    # Returns 0 if file is complaint or 1 if it is not compliant
+    # Returns True if file is complaint or False if it is not compliant,
+    # the name of the project from the configuration file, and the type
+    # of configuration file found in the repository
     return is_compliant, project_name, config_file
 
 
@@ -228,6 +235,8 @@ def check_pyproject_toml(
             # "DNE" is printed when the key does not exist
             project_value = project.get(combo[0], "DNE")[0].get(combo[1], "DNE")
             if project_value == "DNE":
+                is_compliant = False
+                # For example: "Project author name does not exist ..."
                 print(f"Project {combo[0]} {combo[1]} does not exist in the pyproject.toml file")
             else:
                 if combo[1] == "email":
@@ -264,6 +273,8 @@ def check_auth_maint(project_value: str, arg_value: str, err_string: str, is_com
         ``True`` if the author and maintainer's name and email are correct.
         ``False`` if the author or maintainer's name or email is incorrect.
     """
+    # If the author or maintainer name or email does not match the
+    # --author_maint_name or --author_maint_email arguments, it is not compliant
     if project_value not in arg_value:
         print(f"Project {err_string} is not {arg_value}")
         is_compliant = False
@@ -297,6 +308,7 @@ def check_setup_py(
     str
         An empty string since the setup.py check is not implemented.
     """
+    # Print message about the setup.py check not being implemented
     print("The setup.py check is not implemented. Please manually check the following:")
     print("- The project name is ansys-*-*")
     print("- The project uses semantic versioning (see https://semver.org/)")
@@ -323,13 +335,17 @@ def download_license_json(url: str, json_file: str) -> bool:
         ``True`` if the license file was downloaded and updated.
         ``False`` if there was an issue downloading the license file.
     """
+    # If the licenses.json file does not exist in the hook's folder
     if not pathlib.Path.exists(json_file):
+        # Download licenses.json
         r = requests.get(url)
         status_code = r.status_code
         if status_code == 200:
+            # If it was successfully downloaded, write content to file
             with open(json_file, "w", encoding="utf-8") as f:
                 f.write(r.text)
 
+            # Restructure json file to use "licenseID: name"
             restructure_json(json_file)
         else:
             print("There was a problem downloading license.json. Skipping LICENSE content check")
@@ -349,13 +365,17 @@ def restructure_json(file: str):
     """
     licenseId_name_dict = {}
 
+    # Open the licenses.json file
     with open(file, "r", encoding="utf-8") as json_file:
         existing_json = json.load(json_file)
 
         for license in existing_json["licenses"]:
+            # If the license is not deprecated, add it to the dictionary
             if not license["isDeprecatedLicenseId"]:
+                # { "MIT": "MIT License", ... }
                 licenseId_name_dict[license["licenseId"]] = license["name"]
 
+    # Overwrite json file with the dictionary
     with open(file, "w") as json_file:
         json_file.write(json.dumps(licenseId_name_dict, indent=4))
 
@@ -405,9 +425,11 @@ def check_file_exists(
         ``True`` if the files exist and content was correct.
         ``False`` if a file was created and/or its content was incorrect.
     """
+    # The range of years for the LICENSE file
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
+    # Dictionary of internal page references for the technical review
     ref_dict = {
         "AUTHORS.md": "the-authors-file",
         "CONTRIBUTING.md": "the-contributing-md-file",
@@ -417,6 +439,8 @@ def check_file_exists(
         "README.md": "the-readme-file",
     }
 
+    # Check if each file exists. If not, generate the file from the template.
+    # Check the content of the LICENSE and CONTRIBUTORS.md files as well
     for file in files:
         if "dependabot" in file:
             repo_file_path = repo_path / ".github" / file
@@ -427,19 +451,25 @@ def check_file_exists(
                 else:
                     file = f"{file}.rst"
 
+            # Get the full path of the file in the repository
             repo_file_path = repo_path / file
 
+        # Generate file content from corresponding template file
         file_content = generate_file_from_jinja(
             file, project_name, year_str, repository_url, product, config_file, doc_repo_name
         )
 
+        # If the path does not exist
         if not pathlib.Path.exists(repo_file_path):
             is_compliant = False
             dne_message = f"{file} does not exist. Creating file from template..."
             if "setuptools" in config_file:
+                # Dependabot template only requires config_file, so we can make
+                # the template
                 if "dependabot" in file:
                     write_content(dne_message, repo_file_path, file_content)
                 else:
+                    # Print directions to manually review configuration file information
                     tech_review_docs = (
                         f"https://dev.docs.pyansys.com/packaging/structure.html#{ref_dict[file]}"
                     )
@@ -448,9 +478,10 @@ def check_file_exists(
                 if "README" in file and product == "":
                     print("The --product argument is required to generate the README file.")
                 else:
+                    # Create the file and write template content to it
                     write_content(dne_message, repo_file_path, file_content)
         else:
-            # Check content
+            # Check the content of CONTRIBUTORS.md and LICENSE files
             if file in (Filenames.CONTRIBUTORS.value, Filenames.LICENSE.value):
                 is_compliant = check_file_content(
                     repo_file_path, file_content, is_compliant, license
@@ -493,9 +524,12 @@ def generate_file_from_jinja(
     str
         Content of the template that was generated.
     """
+    # Load the templates from the hook path
     loader = FileSystemLoader(searchpath=pathlib.PurePath.joinpath(HOOK_PATH, "templates"))
     env = Environment(loader=loader)
+    # Get the template for the specified file
     template = env.get_template(file)
+    # Generate the file content from the template
     file_content = template.render(
         doc_repo_name=doc_repo_name,  # pymechanical
         project_name=project_name,  # ansys-mechanical-core
@@ -521,6 +555,7 @@ def write_content(message: str, file_path: str, file_content: str):
     file_content: str
         The file content that was generated from the jinja templates.
     """
+    # Print the message saying the file is not compliant, so the file is being generated
     print(message)
 
     # Create the missing file using jinja templates
@@ -550,6 +585,7 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
         ``True`` if LICENSE and CONTRIBUTORS.md files had the correct content.
         ``False`` if LICENSE and CONTRIBUTORS.md files had the incorrect content.
     """
+    # Save generated file content for comparing the current CONTRIBUTORS.md file with the template
     generated_file = NamedTemporaryFile(mode="w", delete=False).name
     with open(generated_file, "w") as f:
         f.write(generated_content)
@@ -567,10 +603,12 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
             license_line_found = False
             with open(LICENSES_JSON, "r") as f:
                 license_json = json.load(f)
+                # license_json["MIT"] = "MIT License"
                 license_full_name = license_json[license]
 
             with open(file, "r") as license:
                 for line in license:
+                    # Check if "MIT License" is in the LICENSE file
                     if license_full_name in line:
                         license_line_found = True
                         break
@@ -614,6 +652,12 @@ def main():
     parser.add_argument(
         "--product", type=str, help="Ansys product that the repository is related to."
     )
+    # Get the repository URL
+    parser.add_argument(
+        "--url",
+        type=str,
+        help="The repository URL. For example, https://github.com/ansys/pymechanical",
+    )
     # Whether or not the project name is intentionally non-compliant
     # non_compliant_name is by default False when action="store_true"
     parser.add_argument("--non_compliant_name", action="store_true")
@@ -626,6 +670,7 @@ def main():
     non_compliant_name = args.non_compliant_name
     license = args.license
     product = args.product
+    repository_url = args.url
 
     # is_complaint is `True` when all files are compliant and
     # `False` when a file is missing or its content is incorrect
@@ -647,10 +692,10 @@ def main():
 
     # Get a list of files to check
     check_exists_list = [file.value for file in Filenames]
-    print(check_exists_list)
     # Name of the repository
     doc_repo_name = repo_path.name
-    repository_url = f"https://github.com/ansys/{doc_repo_name}"
+    if not repository_url:
+        repository_url = f"https://github.com/ansys/{doc_repo_name}"
 
     # Check files exist and if not, create them using jinja templates
     is_compliant = check_file_exists(
@@ -666,7 +711,8 @@ def main():
         doc_repo_name,
     )
 
-    # Return 1 if there were one or more non-compliant files.
+    # Returns 1 if there were one or more non-compliant files.
+    # Returns 0 if the repository is compliant.
     return 0 if is_compliant else 1
 
 
