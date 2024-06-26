@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import fileinput
 import json
 import os
 import pathlib
@@ -34,7 +35,7 @@ import ansys.pre_commit_hooks.tech_review as hook
 
 git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
 REPO_PATH = pathlib.Path(git_repo.git.rev_parse("--show-toplevel"))
-TEMPLATE_PATH = REPO_PATH / "tests" / "test_tech_review_files"
+TEST_TECH_REVIEW_FILES = REPO_PATH / "tests" / "test_tech_review_files"
 
 
 def setup_repo(tmp_path):
@@ -59,6 +60,7 @@ def setup_repo(tmp_path):
 
 
 def init_repo(tmp_path):
+    """Initialize the repository in the tmp_path."""
     git.Repo.init(tmp_path)
     repo = git.Repo(tmp_path)
     repo.index.commit("initialized git repo for tmp_path")
@@ -67,6 +69,7 @@ def init_repo(tmp_path):
 
 
 def create_dirs(repo, tmp_path, dir_list):
+    """Create directories in the repository and git add them."""
     for directory in dir_list:
         tmp_dir = tmp_path / directory
         os.makedirs(tmp_dir)
@@ -74,15 +77,16 @@ def create_dirs(repo, tmp_path, dir_list):
 
 
 def create_files(repo, tmp_path, file_list):
+    """Create files in the repository and git add them."""
     for file in file_list:
-        src_path = TEMPLATE_PATH / file
+        src_path = TEST_TECH_REVIEW_FILES / file
         dest_path = tmp_path / file
         shutil.copyfile(src_path, dest_path)
         repo.index.add(dest_path)
 
 
 def run_main(custom_args):
-    """Git add tmp_file, pass in sys.argv arguments, and run the hook."""
+    """Git pass in sys.argv arguments and run the hook."""
     # Pass in custom arguments
     sys.argv[1:] = custom_args
 
@@ -91,6 +95,7 @@ def run_main(custom_args):
 
 @pytest.mark.tech_review
 def test_pyproject_toml(tmp_path: pytest.TempPathFactory):
+    """Test pyproject.toml retrieves all information."""
     author_maint_name = "ANSYS, Inc."
     author_maint_email = "pyansys.core@ansys.com"
     is_compliant = True
@@ -102,28 +107,31 @@ def test_pyproject_toml(tmp_path: pytest.TempPathFactory):
     is_compliant, project_name, config_file = hook.check_config_file(
         tmp_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
-    assert is_compliant == True
+    assert is_compliant
 
     os.chdir(REPO_PATH)
 
 
 @pytest.mark.tech_review
 def test_setup_py(tmp_path: pytest.TempPathFactory):
+    """Test setup.py file is not implemented and some files are generated."""
     custom_args = ["--product=techreview"]
     tmp_path = tmp_path / "pytechreview"
 
     pathlib.Path.mkdir(tmp_path)
     os.chdir(tmp_path)
 
+    # Initialize repository
     repo = init_repo(tmp_path)
-    setup_py_file = tmp_path / "setup.py"
 
+    # Create setup.py file with no configurations
+    setup_py_file = tmp_path / "setup.py"
     with open(setup_py_file, "w") as setup_file:
         setup_file.write("# Empty file")
 
     assert run_main(custom_args) == 1
 
-    # Check each of the file's content generated correctly from templates
+    # Check the dependabot.yml file was generated for setup.py
     file_list = ["dependabot.yml"]
     check_generated_files(tmp_path, file_list, "setuptools")
 
@@ -131,17 +139,214 @@ def test_setup_py(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.tech_review
-def test_no_config_files(tmp_path: pytest.TempPathFactory):
-    repo = init_repo(tmp_path)
+def test_no_config_files(tmp_path: pytest.TempPathFactory, capsys):
+    """Test output message and files that are generated when no configuration files exist."""
+    tmp_path = tmp_path / "pytechreview"
+    pathlib.Path.mkdir(tmp_path)
+    os.chdir(tmp_path)
+
+    # Initialize repository
+    init_repo(tmp_path)
+
+    # Ensure hook fails
+    hook.main() == 1
+
+    output = capsys.readouterr()
+    assert "The pyproject.toml and setup.py files do not exist" in output.out
+
+    # Check files and directories exist
+    exists_list = [
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
+        "LICENSE",
+        ".github",
+        "doc",
+        "src",
+        "tests",
+    ]
+    for item in exists_list:
+        assert pathlib.Path.exists(tmp_path / item)
+
+    # Check files do not exist due to missing configuration file
+    dependabot_file = os.path.join(".github", "dependabot.yml")
+    dne_file_list = ["AUTHORS", "README.rst", dependabot_file]
+    for item in dne_file_list:
+        assert not pathlib.Path.exists(tmp_path / item)
+
+    os.chdir(REPO_PATH)
+
+
+def replace_line(tmp_path, file, search, replace):
+    """Replace line in file."""
+    with fileinput.FileInput(tmp_path / file, inplace=True) as pyproj:
+        for line in pyproj:
+            # Find existing line in file and replace it
+            if search in line:
+                print(replace, end="\n")
+            else:
+                print(line, end="")
+
+
+@pytest.mark.tech_review
+def test_non_compliant_name(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when the project name is non compliant."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    # Replace the name in the pyproject.toml file to be invalid
+    search = 'name = "ansys-tech-review"'
+    replace = 'name = "ansys-pre-commit-hooks"'
+    replace_line(tmp_path, "pyproject.toml", search, replace)
+
+    assert hook.main() == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Project name does not follow naming conventions" in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_bad_version(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when the project does not use semantic versioning."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    # Replace the version in the pyproject.toml file to be invalid
+    search = 'version = "0.1.0"'
+    replace = 'version = "0.1.2.3"'
+    replace_line(tmp_path, "pyproject.toml", search, replace)
+
+    assert hook.main() == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Project version does not follow semantic versioning" in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_bad_author_maint_name_email(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when author and maintainers name and emails do not exist."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    # Remove name and email from author and maintainer in pyproject.toml
+    search = '{name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},'
+    replace = "{},"
+    replace_line(tmp_path, "pyproject.toml", search, replace)
+
+    assert hook.main() == 1
+
+    # Check error messages are printed
+    output = capsys.readouterr()
+    assert "Project authors name does not exist in the pyproject.toml file" in output.out
+    assert "Project maintainers name does not exist in the pyproject.toml file" in output.out
+    assert "Project authors email does not exist in the pyproject.toml file" in output.out
+    assert "Project maintainers email does not exist in the pyproject.toml file" in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_mismatch_author_arg(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when the author name is different from the pyproject.toml."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    custom_args = ["--author_maint_name=NOTANSYS, Inc."]
+
+    assert run_main(custom_args) == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Project authors name is not NOTANSYS, Inc." in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_readme_md(tmp_path: pytest.TempPathFactory):
+    """Test README.md file exists in repository."""
+    tmp_path = tmp_path / "pytechreview"
+    repo = setup_repo(tmp_path)
+    create_files(repo, tmp_path, ["README.md"])
+
+    custom_args = []
+    assert run_main(custom_args) == 1
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_no_readme_n_product(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the product argument is not given so the README cannot be generated."""
+    tmp_path = tmp_path / "pytechreview"
+    repo = setup_repo(tmp_path)
+
+    custom_args = []
+    assert run_main(custom_args) == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "The --product argument is required to generate the README file." in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_update_contributors(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the CONTRIBUTORS.md file has not changed after it was generated."""
+    tmp_path = tmp_path / "pytechreview"
+    repo = setup_repo(tmp_path)
+
+    # Generate the missing files
+    custom_args = []
+    assert run_main(custom_args) == 1
+
+    # Run main again without updating CONTRIBUTORS.md
+    assert run_main(custom_args) == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Please update your CONTRIBUTORS.md file" in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_bad_license_file(tmp_path: pytest.TempPathFactory, capsys):
+    """Test LICENSE file does not contain the correct name."""
+    tmp_path = tmp_path / "pytechreview"
+    repo = setup_repo(tmp_path)
+
+    # Generate missing files
+    custom_args = []
+    assert run_main(custom_args) == 1
+
+    # Remove the MIT License line from LICENSE
+    search = "MIT License"
+    replace = ""
+    replace_line(tmp_path, "LICENSE", search, replace)
+
+    assert run_main(custom_args) == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert 'The LICENSE file content is missing "MIT License"' in output.out
 
     os.chdir(REPO_PATH)
 
 
 @pytest.mark.tech_review
 def test_templates(tmp_path: pytest.TempPathFactory):
+    """Test templates are generated correctly when provided with the product argument."""
     custom_args = ["--product=techreview"]
     tmp_path = tmp_path / "pytechreview"
 
+    # Generate missing files
     setup_repo(tmp_path)
     assert run_main(custom_args) == 1
 
@@ -154,11 +359,14 @@ def test_templates(tmp_path: pytest.TempPathFactory):
 
 
 def check_generated_files(tmp_path, file_list, config_file):
-    # Check each of the file's content generated correctly from templates
+    "Check each of the file's content generated correctly from templates"
     for file in file_list:
-        correct_file = TEMPLATE_PATH / file
+        # Get files with correct information already filled out
+        correct_file = TEST_TECH_REVIEW_FILES / file
         if "dependabot" in file:
-            correct_file = TEMPLATE_PATH / f"{file}".replace(file, f"dependabot_{config_file}.yml")
+            correct_file = TEST_TECH_REVIEW_FILES / f"{file}".replace(
+                file, f"dependabot_{config_file}.yml"
+            )
             created_file = tmp_path / ".github" / file
         else:
             if "README" in file:
@@ -167,14 +375,16 @@ def check_generated_files(tmp_path, file_list, config_file):
                 else:
                     file = f"{file}.rst"
 
-                correct_file = TEMPLATE_PATH / file
+                correct_file = TEST_TECH_REVIEW_FILES / file
 
             created_file = tmp_path / file
+        # Check the file with correct content is the same as the generated file
         assert check_same_content(correct_file, created_file) == True
 
 
 @pytest.mark.tech_review
 def test_json_download_n_update(tmp_path: pytest.TempPathFactory):
+    """Test the licenses.json file is downloaded and updated."""
     url = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
     tmp_path = tmp_path / "pytechreview"
     license_json = tmp_path / "license.json"
@@ -200,8 +410,9 @@ def test_json_download_n_update(tmp_path: pytest.TempPathFactory):
 
 @pytest.mark.tech_review
 def test_main():
+    """Test main for the ansys/pre-commit-hooks repository."""
     # Set custom arguments for ansys/pre-commit-hooks repository
-    custom_args = ["--product=techreview", "--non_compliant_name"]
+    custom_args = ["--product=pre-commit-hooks", "--non_compliant_name"]
 
     assert run_main(custom_args) == 0
 

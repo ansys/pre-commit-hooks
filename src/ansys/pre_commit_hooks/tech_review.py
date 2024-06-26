@@ -277,7 +277,7 @@ def check_auth_maint(project_value: str, arg_value: str, err_string: str, is_com
     """
     # If the author or maintainer name or email does not match the
     # --author_maint_name or --author_maint_email arguments, it is not compliant
-    if project_value not in arg_value:
+    if project_value != arg_value:
         print(f"Project {err_string} is not {arg_value}")
         is_compliant = False
 
@@ -482,7 +482,7 @@ def check_file_exists(
                     )
                     print(f"{file} does not exist. Please see {tech_review_docs}")
             else:
-                if "README" in file and product == "":
+                if "README" in file and product is None:
                     print("The --product argument is required to generate the README file.")
                 elif "README" in file and project_name == "":
                     print("The project_name is required to generate the README file.")
@@ -629,7 +629,9 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
             # If the license line wasn't found in LICENSE, it is not compliant
             if not license_line_found:
                 is_compliant = False
-                print(f"The {Filenames.LICENSE.value} file content is missing {license_full_name}")
+                print(
+                    f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
+                )
 
     return is_compliant
 
@@ -677,6 +679,8 @@ def main():
     license = args.license
     product = args.product
     repository_url = args.url
+
+    print(product)
 
     # is_complaint is `True` when all files are compliant and
     # `False` when a file is missing or its content is incorrect
