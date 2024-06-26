@@ -195,7 +195,7 @@ Technical review hook in ``ansys/pre-commit-hooks``' .pre-commit-config.yaml fil
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.3.3
+    rev: v0.4.0
     hooks:
     - id: tech-review
       args:
@@ -207,7 +207,7 @@ Technical review hook in ``PyMechanical``'s .pre-commit-config.yaml file:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.3.3
+    rev: v0.4.0
     hooks:
     - id: tech-review
       args:
