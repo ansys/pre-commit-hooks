@@ -33,7 +33,8 @@ repos:
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
-  # - id: check-yaml
+  - id: check-yaml
+    exclude: templates/dependabot.yml
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema

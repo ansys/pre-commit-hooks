@@ -167,34 +167,30 @@ These are the default values for the arguments of the tech-review hook:
 
 * --author_maint_name=ANSYS, Inc.
 * --author_maint_email=pyansys.core@ansys.com
-* --start_year=2024 (or the current year)
 * --license=MIT
-* --url=https://github.com/ansys/{repo-name}, replacing `repo-name` with the name of the repository
+* --url=https://github.com/ansys/{repo-name}, replacing ``repo-name`` with the name of the repository
 
-The `--author_maint_name` is the name of the author and maintainer in the `pyproject.toml` file.
+The ``--author_maint_name`` is the name of the author and maintainer in the ``pyproject.toml`` file.
 By default, it is "Ansys, Inc.".
 
-The `--author_maint_email` is the email of the author and maintainer in the `pyproject.toml` file.
+The ``--author_maint_email`` is the email of the author and maintainer in the ``pyproject.toml`` file.
 By default, it is "pyansys.core@ansys.com".
 
-The `--start_year` argument is the start year of your repository. If left blank, the default is
-the current year.
-
-The `--license` argument is the license that is being used by your repository. By default, it is
+The ``--license`` argument is the license that is being used by your repository. By default, it is
 MIT.
 
-The `--url` argument is automatically rendered based on the repository name. If your repository
+The ``--url`` argument is automatically rendered based on the repository name. If your repository
 is not in the Ansys organization, please add this argument to your configuration in
 .pre-commit-config.yaml.
 
-The `--product` argument is required if a `README.rst` or `README.md` file does not
+The ``--product`` argument is required if a ``README.rst`` or ``README.md`` file does not
 exist in your repository and you want the template to render correctly. The product
-for `PyMechanical` would be `mechanical`, for example.
+for ``PyMechanical`` would be ``mechanical``, for example.
 
-The `--non_compliant_name` flag can be used if your repository does not follow the typical
-naming convention of `ansys-*-*`.
+The ``--non_compliant_name`` flag can be used if your repository does not follow the typical
+naming convention of ``ansys-*-*``.
 
-Technical review hook in `ansys/pre-commit-hooks`' .pre-commit-config.yaml file:
+Technical review hook in ``ansys/pre-commit-hooks``' .pre-commit-config.yaml file:
 
 .. code:: yaml
 
@@ -203,11 +199,10 @@ Technical review hook in `ansys/pre-commit-hooks`' .pre-commit-config.yaml file:
     hooks:
     - id: tech-review
       args:
-      - --start_year=2023
       - --product=pre_commit_hooks
       - --non_compliant_name
 
-Technical review hook in `PyMechanical`'s .pre-commit-config.yaml file:
+Technical review hook in ``PyMechanical``'s .pre-commit-config.yaml file:
 
 .. code:: yaml
 
@@ -216,7 +211,6 @@ Technical review hook in `PyMechanical`'s .pre-commit-config.yaml file:
     hooks:
     - id: tech-review
       args:
-      - --start_year=2022
       - --product=mechanical
 
 

@@ -56,7 +56,8 @@ JSON_URL = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/l
 class Filenames(Enum):
     """Enum of files to check."""
 
-    AUTHORS = "AUTHORS.md"
+    AUTHORS = "AUTHORS"
+    CODE_OF_CONDUCT = "CODE_OF_CONDUCT.md"
     CONTRIBUTING = "CONTRIBUTING.md"
     CONTRIBUTORS = "CONTRIBUTORS.md"
     LICENSE = "LICENSE"
@@ -157,8 +158,9 @@ def check_config_file(
     else:
         # Ignore config file check
         config_file = ""
-        print("pyproject.toml and setup.py files do not exist")
-        project_name = None
+        project_name = ""
+        print("The pyproject.toml and setup.py files do not exist")
+        print("Cannot get the author and maintainer name and email, project name, and version\n")
 
     # Returns True if file is complaint or False if it is not compliant,
     # the name of the project from the configuration file, and the type
@@ -431,7 +433,8 @@ def check_file_exists(
     )
     # Dictionary of internal page references for the technical review
     ref_dict = {
-        "AUTHORS.md": "the-authors-file",
+        "AUTHORS": "the-authors-file",
+        "CODE_OF_CONDUCT.md": "the-code-of-conduct-md-file",
         "CONTRIBUTING.md": "the-contributing-md-file",
         "CONTRIBUTORS.md": "the-contributors-md-file",
         "LICENSE": "the-license-file",
@@ -459,6 +462,10 @@ def check_file_exists(
             file, project_name, year_str, repository_url, product, config_file, doc_repo_name
         )
 
+        if "AUTHORS" in file:
+            if pathlib.Path.exists(repo_path / f"{file}.md"):
+                repo_file_path = repo_path / f"{file}.md"
+
         # If the path does not exist
         if not pathlib.Path.exists(repo_file_path):
             is_compliant = False
@@ -477,6 +484,12 @@ def check_file_exists(
             else:
                 if "README" in file and product == "":
                     print("The --product argument is required to generate the README file.")
+                elif "README" in file and project_name == "":
+                    print("The project_name is required to generate the README file.")
+                elif "dependabot" in file and config_file == "":
+                    print("The config_file type is required to generate the dependabot.yml file.")
+                elif "AUTHORS" in file and project_name == "":
+                    print("The project_name is required to generate the AUTHORS file.")
                 else:
                     # Create the file and write template content to it
                     write_content(dne_message, repo_file_path, file_content)
@@ -624,8 +637,6 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
 def main():
     """Check files for technical review."""
     parser = argparse.ArgumentParser()
-    # Get list of committed files
-    parser.add_argument("files", nargs="*")
     # Get the name of the authors and maintainers of the project
     parser.add_argument(
         "--author_maint_name",
@@ -639,10 +650,6 @@ def main():
         type=str,
         help="Email of the authors and maintainers of the project.",
         default=DEFAULT_AUTHOR_MAINT_EMAIL,
-    )
-    # Get the start year of the repository
-    parser.add_argument(
-        "--start_year", type=str, help="Start year of the repository.", default=DEFAULT_START_YEAR
     )
     # Get the license the repository uses
     parser.add_argument(
@@ -666,7 +673,6 @@ def main():
     args = parser.parse_args()
     author_maint_name = args.author_maint_name
     author_maint_email = args.author_maint_email
-    start_year = args.start_year
     non_compliant_name = args.non_compliant_name
     license = args.license
     product = args.product
@@ -679,6 +685,12 @@ def main():
     # Get current git repository
     git_repo = git.Repo(pathlib.Path.cwd(), search_parent_directories=True)
     repo_path = pathlib.Path(git_repo.git.rev_parse("--show-toplevel"))
+
+    # Get dates of commits from earliest to most recent
+    g = git.Git(pathlib.Path.cwd())
+    all_dates = g.log("--reverse", r"--format=%ci")
+    # Get year of first commit
+    start_year = int(all_dates[0:4])
 
     # Get a list of directories to check
     directories = [directory.value for directory in Directories]
