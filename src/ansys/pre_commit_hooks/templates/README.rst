@@ -45,7 +45,7 @@ You can use `pip <https://pypi.org/project/pip/>`_ to install {{ doc_repo_name }
 
 .. code:: bash
 
-    pip install {{ project_name }}
+    python -m pip install {{ project_name }}
 
 To install the latest development version, run these commands:
 
@@ -53,7 +53,7 @@ To install the latest development version, run these commands:
 
     git clone {{ repository_url }}
     cd {{ doc_repo_name }}
-    pip install -e .
+    python -m pip install --editable .
 
 For more information, see `Getting Started`_.
 
@@ -71,10 +71,6 @@ For comprehensive usage information, see `Examples`_ in the `{{ doc_repo_name }}
 Documentation and issues
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Documentation for the latest stable release of {{ doc_repo_name }} is hosted at `{{ doc_repo_name }} documentation`_.
-
-In the upper right corner of the documentation's title bar, there is an option for switching from
-viewing the documentation for the latest stable release to viewing the documentation for the
-development version or previously released versions.
 
 On the `{{ doc_repo_name }} Issues <{{ repository_url }}/issues>`_ page,
 you can create issues to report bugs and request new features. On the `{{ doc_repo_name }} Discussions

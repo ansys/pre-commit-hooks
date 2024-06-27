@@ -45,7 +45,7 @@ You can use `pip <https://pypi.org/project/pip/>`_ to install pytechreview.
 
 .. code:: bash
 
-    pip install ansys-tech-review
+    python -m pip install ansys-tech-review
 
 To install the latest development version, run these commands:
 
@@ -53,7 +53,7 @@ To install the latest development version, run these commands:
 
     git clone https://github.com/ansys/pytechreview
     cd pytechreview
-    pip install -e .
+    python -m pip install --editable .
 
 For more information, see `Getting Started`_.
 
@@ -71,10 +71,6 @@ For comprehensive usage information, see `Examples`_ in the `pytechreview docume
 Documentation and issues
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Documentation for the latest stable release of pytechreview is hosted at `pytechreview documentation`_.
-
-In the upper right corner of the documentation's title bar, there is an option for switching from
-viewing the documentation for the latest stable release to viewing the documentation for the
-development version or previously released versions.
 
 On the `pytechreview Issues <https://github.com/ansys/pytechreview/issues>`_ page,
 you can create issues to report bugs and request new features. On the `pytechreview Discussions

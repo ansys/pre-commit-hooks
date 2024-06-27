@@ -22,39 +22,35 @@ A Python wrapper for Ansys {{ product }}.
 
 ## Installation
 
-You can use `pip <https://pypi.org/project/pip/>`_ to install pytechreview.
+You can use [pip](https://pypi.org/project/pip/) to install pytechreview.
 
 ```sh
-  pip install ansys-tech-review
+pip install ansys-tech-review
 ```
 
 To install the latest development version, run these commands:
 
 ```sh
-  git clone https://github.com/ansys/pytechreview
-  cd pytechreview
-  pip install -e .
+git clone https://github.com/ansys/pytechreview
+cd pytechreview
+pip install --editable .
 ```
 
-For more information, see [Getting Started](https://{{ product }}.docs.pyansys.com/version/stable/getting_started/index.html).
+For more information, see [Getting Started](https://techreview.docs.pyansys.com/version/stable/getting_started/index.html).
 
 ## Basic usage
 
 This code shows how to import pytechreview and use some basic capabilities:
 
-``` python
-    print("Put sample code here")
+```python
+print("Put sample code here")
 ```
 
-For comprehensive usage information, see [Examples](https://{{ product }}.docs.pyansys.com/version/stable/examples.html) in the [pytechreview documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html).
+For comprehensive usage information, see [Examples](https://techreview.docs.pyansys.com/version/stable/examples.html) in the [pytechreview documentation](https://techreview.docs.pyansys.com/version/stable/index.html).
 
 ## Documentation and issues
 
-Documentation for the latest stable release of pytechreview is hosted at [pytechreview documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html).
-
-In the upper right corner of the documentation's title bar, there is an option for switching from
-viewing the documentation for the latest stable release to viewing the documentation for the
-development version or previously released versions.
+Documentation for the latest stable release of pytechreview is hosted at [pytechreview documentation](https://techreview.docs.pyansys.com/version/stable/index.html).
 
 On the [pytechreview Issues](https://github.com/ansys/pytechreview/issues) page,
 you can create issues to report bugs and request new features. On the
@@ -64,8 +60,8 @@ you can post questions, share ideas, and get community feedback.
 
 To reach the project support team, email [pyansys.core@ansys.com](mailto:pyansys.core@ansys.com).
 
-## Indices and tables
+## Links and references
 
--  [Getting Started](https://{{ product }}.docs.pyansys.com/version/stable/getting_started/index.html)
--  [Examples](https://{{ product }}.docs.pyansys.com/version/stable/examples.html)
--  [pytechreview documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html)
+-  [Getting Started](https://techreview.docs.pyansys.com/version/stable/getting_started/index.html): Information for setting up your system to use pytechreview
+-  [Examples](https://techreview.docs.pyansys.com/version/stable/examples.html): Examples using pytechreview
+-  [pytechreview documentation](https://techreview.docs.pyansys.com/version/stable/index.html): Documentation for pytechreview

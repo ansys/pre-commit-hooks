@@ -365,7 +365,7 @@ def restructure_json(file: str):
     file: str
         The path of the json_file to be updated.
     """
-    licenseId_name_dict = {}
+    licenseid_name_dict = {}
 
     # Open the licenses.json file
     with open(file, "r", encoding="utf-8") as json_file:
@@ -375,11 +375,11 @@ def restructure_json(file: str):
             # If the license is not deprecated, add it to the dictionary
             if not license["isDeprecatedLicenseId"]:
                 # { "MIT": "MIT License", ... }
-                licenseId_name_dict[license["licenseId"]] = license["name"]
+                licenseid_name_dict[license["licenseId"]] = license["name"]
 
     # Overwrite json file with the dictionary
     with open(file, "w") as json_file:
-        json_file.write(json.dumps(licenseId_name_dict, indent=4))
+        json_file.write(json.dumps(licenseid_name_dict, indent=4))
 
 
 def check_file_exists(
@@ -679,8 +679,6 @@ def main():
     license = args.license
     product = args.product
     repository_url = args.url
-
-    print(product)
 
     # is_complaint is `True` when all files are compliant and
     # `False` when a file is missing or its content is incorrect

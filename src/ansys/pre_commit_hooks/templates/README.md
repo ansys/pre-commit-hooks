@@ -22,18 +22,18 @@ A Python wrapper for Ansys {{ product }}.
 
 ## Installation
 
-You can use `pip <https://pypi.org/project/pip/>`_ to install {{ doc_repo_name }}.
+You can use [pip](https://pypi.org/project/pip/) to install {{ doc_repo_name }}.
 
 ```sh
-  pip install {{ project_name }}
+python -m pip install {{ project_name }}
 ```
 
 To install the latest development version, run these commands:
 
 ```sh
-  git clone {{ repository_url }}
-  cd {{ doc_repo_name }}
-  pip install -e .
+git clone {{ repository_url }}
+cd {{ doc_repo_name }}
+python -m pip install --editable .
 ```
 
 For more information, see [Getting Started](https://{{ product }}.docs.pyansys.com/version/stable/getting_started/index.html).
@@ -42,8 +42,8 @@ For more information, see [Getting Started](https://{{ product }}.docs.pyansys.c
 
 This code shows how to import {{ doc_repo_name }} and use some basic capabilities:
 
-``` python
-    print("Put sample code here")
+```python
+print("Put sample code here")
 ```
 
 For comprehensive usage information, see [Examples](https://{{ product }}.docs.pyansys.com/version/stable/examples.html) in the [{{ doc_repo_name }} documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html).
@@ -51,10 +51,6 @@ For comprehensive usage information, see [Examples](https://{{ product }}.docs.p
 ## Documentation and issues
 
 Documentation for the latest stable release of {{ doc_repo_name }} is hosted at [{{ doc_repo_name }} documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html).
-
-In the upper right corner of the documentation's title bar, there is an option for switching from
-viewing the documentation for the latest stable release to viewing the documentation for the
-development version or previously released versions.
 
 On the [{{ doc_repo_name }} Issues]({{ repository_url }}/issues) page,
 you can create issues to report bugs and request new features. On the
@@ -64,8 +60,8 @@ you can post questions, share ideas, and get community feedback.
 
 To reach the project support team, email [pyansys.core@ansys.com](mailto:pyansys.core@ansys.com).
 
-## Indices and tables
+## Links and references
 
--  [Getting Started](https://{{ product }}.docs.pyansys.com/version/stable/getting_started/index.html)
--  [Examples](https://{{ product }}.docs.pyansys.com/version/stable/examples.html)
--  [{{ doc_repo_name }} documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html)
+-  [Getting Started](https://{{ product }}.docs.pyansys.com/version/stable/getting_started/index.html): Information for setting up your system to use {{ doc_repo_name }}.
+-  [Examples](https://{{ product }}.docs.pyansys.com/version/stable/examples.html): Examples using {{ doc_repo_name }}
+-  [{{ doc_repo_name }} documentation](https://{{ product }}.docs.pyansys.com/version/stable/index.html): Documentation for {{ doc_repo_name }}
