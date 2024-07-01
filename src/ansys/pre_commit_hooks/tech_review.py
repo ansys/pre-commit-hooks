@@ -39,16 +39,22 @@ from ansys.pre_commit_hooks.add_license_headers import check_same_content
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
+
 LICENSES_JSON = HOOK_PATH / "assets" / "licenses.json"
 """JSON file containing licenses information."""
+
 DEFAULT_AUTHOR_MAINT_NAME = "ANSYS, Inc."
 """Default name of project authors and maintainers."""
+
 DEFAULT_AUTHOR_MAINT_EMAIL = "pyansys.core@ansys.com"
 """Default email of project authors and maintainers."""
+
 DEFAULT_START_YEAR = dt.today().year
 """Default start year of the repository."""
+
 DEFAULT_LICENSE = "MIT"
 """Default license of the repository"""
+
 JSON_URL = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 """URL to retrieve list of license IDs and names."""
 
@@ -228,26 +234,23 @@ def check_pyproject_toml(
 
         # Check the project author and maintainer names and emails match argument input
         category, metadata = ["authors", "maintainers"], ["name", "email"]
-        # [('authors', 'name'), ('authors', 'email'), ('maintainers', 'name'),
-        # ('maintainers', 'email')]
         output = list(product(category, metadata))
 
-        for combo in output:
-            # project.get("authors", "DNE")[0].get("name", "DNE")
+        for key, value in output:
             # "DNE" is printed when the key does not exist
-            project_value = project.get(combo[0], "DNE")[0].get(combo[1], "DNE")
+            project_value = project.get(key, "DNE")[0].get(value, "DNE")
             if project_value == "DNE":
                 is_compliant = False
                 # For example: "Project author name does not exist ..."
-                print(f"Project {combo[0]} {combo[1]} does not exist in the pyproject.toml file")
+                print(f"Project {key} {value} does not exist in the pyproject.toml file")
             else:
-                if combo[1] == "email":
+                if value == "email":
                     is_compliant = check_auth_maint(
-                        project_value, author_maint_email, f"{combo[0]} {combo[1]}", is_compliant
+                        project_value, author_maint_email, f"{key} {value}", is_compliant
                     )
-                elif combo[1] == "name":
+                elif value == "name":
                     is_compliant = check_auth_maint(
-                        project_value, author_maint_name, f"{combo[0]} {combo[1]}", is_compliant
+                        project_value, author_maint_name, f"{key} {value}", is_compliant
                     )
 
     return is_compliant, name

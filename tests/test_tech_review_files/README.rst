@@ -68,17 +68,38 @@ This code shows how to import pytechreview and use some basic capabilities:
 
 For comprehensive usage information, see `Examples`_ in the `pytechreview documentation`_.
 
-Documentation and issues
-^^^^^^^^^^^^^^^^^^^^^^^^
+Documentation
+^^^^^^^^^^^^^
 Documentation for the latest stable release of pytechreview is hosted at `pytechreview documentation`_.
 
-On the `pytechreview Issues <https://github.com/ansys/pytechreview/issues>`_ page,
-you can create issues to report bugs and request new features. On the `pytechreview Discussions
-<https://github.com/ansys/pytechreview/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
-page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback.
+- `Getting Started <https://techreview.docs.pyansys.com/version/stable/getting_started/index.html>`_: Information for setting up your system to use pytechreview
+- `Examples <https://techreview.docs.pyansys.com/version/stable/examples.html>`_: Examples using pytechreview
+- `pytechreview documentation: <https://techreview.docs.pyansys.com/version/stable/index.html>`_: Documentation for pytechreview
+
+Troubleshooting
+^^^^^^^^^^^^^^^
+
+For troubleshooting or reporting issues, please open an issue in the project
+repository.
+
+Follow these steps when reporting an issue:
+
+- Go to the project repository
+- Click on the `Issues tab <https://github.com/ansys/pytechreview/issues>`_
+- Click on the ``New Issue`` button
+- Provide a clear and detailed description of the issue you are facing
+- Include any relevant error messages, code snippets, or screenshots
+
+Follow these steps when creating a discussion:
+
+- Go to the project repository
+- Click on the `Discussions tab <https://github.com/ansys/pytechreview/discussions>`_
+or the `Discussions <https://discuss.ansys.com/>`_ page on the Ansys Developer portal
+- Click on the ``New Discussion`` button
+- Provide a clear and detailed description of the issue you are facing
+- Include any relevant error messages, code snippets, or screenshots
 
 To reach the project support team, email `pyansys.core@ansys.com <mailto:pyansys.core@ansys.com>`_.
-
 
 .. LINKS AND REFERENCES
 .. _Getting Started: https://techreview.docs.pyansys.com/version/stable/getting_started/index.html
