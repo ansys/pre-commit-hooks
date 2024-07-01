@@ -228,6 +228,26 @@ def test_bad_version(tmp_path: pytest.TempPathFactory, capsys):
 
 
 @pytest.mark.tech_review
+def test_dev_version(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when the project does not use semantic versioning."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    # Replace the version in the pyproject.toml file to be invalid
+    search = 'version = "0.1.0"'
+    replace = 'version = "11.1.dev1"'
+    replace_line(tmp_path, "pyproject.toml", search, replace)
+
+    assert hook.main() == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Project version does not follow semantic versioning" not in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
 def test_bad_author_maint_name_email(tmp_path: pytest.TempPathFactory, capsys):
     """Test the error message appears when author and maintainers name and emails do not exist."""
     tmp_path = tmp_path / "pytechreview"

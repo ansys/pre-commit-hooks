@@ -229,8 +229,9 @@ def check_pyproject_toml(
             try:
                 version = semver.Version.parse(project_version)
             except ValueError:
-                is_compliant = False
-                print("Project version does not follow semantic versioning")
+                if not bool(re.match(r"^[0-9]+.[0-9]+.dev[0-9]+$", project_version)):
+                    is_compliant = False
+                    print("Project version does not follow semantic versioning")
 
         # Check the project author and maintainer names and emails match argument input
         category, metadata = ["authors", "maintainers"], ["name", "email"]
