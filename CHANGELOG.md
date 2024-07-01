@@ -6,6 +6,31 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.4.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.0) - 2024-07-01
+
+
+### Added
+
+- feat: technical review hook [#183](https://github.com/ansys/pre-commit-hooks/pull/183)
+
+
+### Changed
+
+- chore: update CHANGELOG for v0.3.2 [#186](https://github.com/ansys/pre-commit-hooks/pull/186)
+
+
+### Dependencies
+
+- build(deps): bump importlib-metadata from 7.1.0 to 7.2.1 [#187](https://github.com/ansys/pre-commit-hooks/pull/187)
+- build(deps): bump sphinx-autodoc-typehints from 2.1.1 to 2.2.2 [#188](https://github.com/ansys/pre-commit-hooks/pull/188)
+- build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.5 to 0.16.6 [#189](https://github.com/ansys/pre-commit-hooks/pull/189)
+- build(deps): bump importlib-metadata from 7.2.1 to 8.0.0 [#192](https://github.com/ansys/pre-commit-hooks/pull/192)
+
+
+### Miscellaneous
+
+- [pre-commit.ci] pre-commit autoupdate [#190](https://github.com/ansys/pre-commit-hooks/pull/190)
+
 ## [0.3.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.2) - 2024-06-20
 
 
