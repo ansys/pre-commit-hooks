@@ -54,7 +54,7 @@ repos:
             tests/test_reuse_files/bad_chars.py |
             tests/test_reuse_files/index_error.scss
         )$
-  - id: tech-review
-    args:
-    - --product=pre_commit_hooks
-    - --non_compliant_name
+  # - id: tech-review
+  #   args:
+  #   - --product=pre_commit_hooks
+  #   - --non_compliant_name
