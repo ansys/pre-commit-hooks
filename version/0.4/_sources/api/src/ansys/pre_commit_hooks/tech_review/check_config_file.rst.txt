@@ -1,0 +1,48 @@
+src.ansys.pre_commit_hooks.tech_review.check_config_file
+========================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.check_config_file(repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool, non_compliant_name: bool) -> bool
+
+   
+   Check naming convention, version, author, and maintainer information.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **author_maint_name: str**
+           Project author and maintainer's name.
+
+       **author_maint_email: str**
+           Project author and maintainer's email.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **non_compliant_name: bool**
+           ``True`` if the repository's name is not in the form ansys-*-* and it is permitted.
+           ``False`` if the repository's name is in the form ansys-*-*.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if all files exist and contain the correct content.
+           ``False`` if a file was created or did not contain the correct content.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

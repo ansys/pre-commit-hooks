@@ -1,0 +1,37 @@
+src.ansys.pre_commit_hooks.tech_review.download_license_json
+============================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.download_license_json(url: str, json_file: str) -> bool
+
+   
+   Download the licenses.json file and restructure it to only include the license ID and name.
+
+
+   :Parameters:
+
+       **url: str**
+           The URL to the licenses.json file that is downloaded.
+
+       **json_file: str**
+           The path of the json_file to be written to and updated.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the license file was downloaded and updated.
+           ``False`` if there was an issue downloading the license file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

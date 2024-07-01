@@ -1,0 +1,368 @@
+
+
+
+
+
+
+The ``tech_review.py`` module
+=============================
+
+.. py:module:: src.ansys.pre_commit_hooks.tech_review
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: tech_review
+.. tab-set::
+
+
+
+
+
+    .. tab-item:: Enums
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.Filenames`
+            - Enum of files to check.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.Directories`
+            - Enum of directories to check.
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_dirs_exist`
+            - Check folders exist in the root of the git repository.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_config_file`
+            - Check naming convention, version, author, and maintainer information.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_pyproject_toml`
+            - Check pyproject.toml file for correct naming convention, version, author, and maintainer.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_auth_maint`
+            - Check if the author and maintainer names and emails are the same.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_setup_py`
+            - Check setup.py file for correct naming convention, version, author, and maintainer.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.download_license_json`
+            - Download the licenses.json file and restructure it to only include the license ID and name.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.restructure_json`
+            - Remove extra information from licenses.json file.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_file_exists`
+            - Check files exist. If they do not exist, create them using jinja templates.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.generate_file_from_jinja`
+            - Generate file using jinja templates.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.write_content`
+            - Write generated content from jinja template to a file.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.check_file_content`
+            - Check the file content of the LICENSE and CONTRIBUTORS.md files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.main`
+            - Check files for technical review.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~HOOK_PATH`
+            - Location of the pre-commit hook on your system.
+
+
+          * - :py:obj:`~LICENSES_JSON`
+            - JSON file containing licenses information.
+
+
+          * - :py:obj:`~DEFAULT_AUTHOR_MAINT_NAME`
+            - Default name of project authors and maintainers.
+
+
+          * - :py:obj:`~DEFAULT_AUTHOR_MAINT_EMAIL`
+            - Default email of project authors and maintainers.
+
+
+          * - :py:obj:`~DEFAULT_START_YEAR`
+            - Default start year of the repository.
+
+
+          * - :py:obj:`~DEFAULT_LICENSE`
+            - Default license of the repository
+
+
+          * - :py:obj:`~JSON_URL`
+            - URL to retrieve list of license IDs and names.
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_enum"></span> Filenames</api/src/ansys/pre_commit_hooks/tech_review/Filenames>
+    <span class="nf nf-cod-symbol_enum"></span> Directories</api/src/ansys/pre_commit_hooks/tech_review/Directories>
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-md-function_variant"></span> check_dirs_exist</api/src/ansys/pre_commit_hooks/tech_review/check_dirs_exist>
+    <span class="nf nf-md-function_variant"></span> check_config_file</api/src/ansys/pre_commit_hooks/tech_review/check_config_file>
+    <span class="nf nf-md-function_variant"></span> check_pyproject_toml</api/src/ansys/pre_commit_hooks/tech_review/check_pyproject_toml>
+    <span class="nf nf-md-function_variant"></span> check_auth_maint</api/src/ansys/pre_commit_hooks/tech_review/check_auth_maint>
+    <span class="nf nf-md-function_variant"></span> check_setup_py</api/src/ansys/pre_commit_hooks/tech_review/check_setup_py>
+    <span class="nf nf-md-function_variant"></span> download_license_json</api/src/ansys/pre_commit_hooks/tech_review/download_license_json>
+    <span class="nf nf-md-function_variant"></span> restructure_json</api/src/ansys/pre_commit_hooks/tech_review/restructure_json>
+    <span class="nf nf-md-function_variant"></span> check_file_exists</api/src/ansys/pre_commit_hooks/tech_review/check_file_exists>
+    <span class="nf nf-md-function_variant"></span> generate_file_from_jinja</api/src/ansys/pre_commit_hooks/tech_review/generate_file_from_jinja>
+    <span class="nf nf-md-function_variant"></span> write_content</api/src/ansys/pre_commit_hooks/tech_review/write_content>
+    <span class="nf nf-md-function_variant"></span> check_file_content</api/src/ansys/pre_commit_hooks/tech_review/check_file_content>
+    <span class="nf nf-md-function_variant"></span> main</api/src/ansys/pre_commit_hooks/tech_review/main>
+
+
+
+
+
+
+Description
+-----------
+
+Module for checking if a repository is compliant with required files in the technical review.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:data:: HOOK_PATH
+
+   
+   Location of the pre-commit hook on your system.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: LICENSES_JSON
+
+   
+   JSON file containing licenses information.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_AUTHOR_MAINT_NAME
+   :value: 'ANSYS, Inc.'
+
+
+   
+   Default name of project authors and maintainers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_AUTHOR_MAINT_EMAIL
+   :value: 'pyansys.core@ansys.com'
+
+
+   
+   Default email of project authors and maintainers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_START_YEAR
+
+   
+   Default start year of the repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_LICENSE
+   :value: 'MIT'
+
+
+   
+   Default license of the repository
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: JSON_URL
+   :value: 'https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json'
+
+
+   
+   URL to retrieve list of license IDs and names.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+

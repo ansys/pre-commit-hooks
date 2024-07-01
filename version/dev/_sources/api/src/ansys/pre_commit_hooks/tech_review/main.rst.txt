@@ -1,0 +1,25 @@
+src.ansys.pre_commit_hooks.tech_review.main
+===========================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.main()
+
+   
+   Check files for technical review.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

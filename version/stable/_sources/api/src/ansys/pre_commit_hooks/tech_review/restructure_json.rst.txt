@@ -1,0 +1,29 @@
+src.ansys.pre_commit_hooks.tech_review.restructure_json
+=======================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.restructure_json(file: str)
+
+   
+   Remove extra information from licenses.json file.
+
+
+   :Parameters:
+
+       **file: str**
+           The path of the json_file to be updated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
