@@ -19,6 +19,8 @@ repos:
   rev: v2.3.0
   hooks:
   - id: codespell
+    additional_dependencies:
+      - tomli
 
 - repo: https://github.com/pycqa/pydocstyle
   rev: 6.3.0
@@ -33,6 +35,7 @@ repos:
   - id: check-merge-conflict
   - id: debug-statements
   - id: check-yaml
+    exclude: templates/dependabot.yml
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema

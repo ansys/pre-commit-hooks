@@ -36,8 +36,8 @@ Currently, these hooks are available:
 * ``add-license-headers``: Add missing license headers to files by using
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
-
-|
+* ``tech-review``: Do a technical review of your repository according to
+  `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_`
 
 ``add-license-headers`` setup
 -----------------------------
@@ -159,6 +159,59 @@ In .pre-commit-config.yaml:
 * ``(.folder1|folder2)/.*`` excludes directories named .folder1 and folder2.
 * ``.*\.js`` excludes all .js files in all directories.
 * ``\..*`` excludes all hidden files.
+
+``tech-review`` setup
+---------------------
+
+These are the default values for the arguments of the tech-review hook:
+
+* --author_maint_name=ANSYS, Inc.
+* --author_maint_email=pyansys.core@ansys.com
+* --license=MIT
+* --url=https://github.com/ansys/{repo-name}, replacing ``repo-name`` with the name of the repository
+
+The ``--author_maint_name`` is the name of the author and maintainer in the ``pyproject.toml`` file.
+By default, it is "Ansys, Inc.".
+
+The ``--author_maint_email`` is the email of the author and maintainer in the ``pyproject.toml`` file.
+By default, it is "pyansys.core@ansys.com".
+
+The ``--license`` argument is the license that is being used by your repository. By default, it is
+MIT.
+
+The ``--url`` argument is automatically rendered based on the repository name. If your repository
+is not in the Ansys organization, please add this argument to your configuration in
+.pre-commit-config.yaml.
+
+The ``--product`` argument is required if a ``README.rst`` or ``README.md`` file does not
+exist in your repository and you want the template to render correctly. The product
+for ``PyMechanical`` would be ``mechanical``, for example.
+
+The ``--non_compliant_name`` flag can be used if your repository does not follow the typical
+naming convention of ``ansys-*-*``.
+
+Technical review hook in ``ansys/pre-commit-hooks``' .pre-commit-config.yaml file:
+
+.. code:: yaml
+
+  - repo: https://github.com/ansys/pre-commit-hooks
+    rev: v0.4.0
+    hooks:
+    - id: tech-review
+      args:
+      - --product=pre_commit_hooks
+      - --non_compliant_name
+
+Technical review hook in ``PyMechanical``'s .pre-commit-config.yaml file:
+
+.. code:: yaml
+
+  - repo: https://github.com/ansys/pre-commit-hooks
+    rev: v0.4.0
+    hooks:
+    - id: tech-review
+      args:
+      - --product=mechanical
 
 
 How to install
