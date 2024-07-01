@@ -354,6 +354,7 @@ def download_license_json(url: str, json_file: str) -> bool:
             restructure_json(json_file)
         except requests.exceptions.ConnectionError:
             print("There was a problem downloading license.json. Skipping LICENSE content check")
+            return False
 
     return True
 
