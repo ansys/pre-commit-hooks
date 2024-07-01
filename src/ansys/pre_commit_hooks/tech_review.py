@@ -229,8 +229,9 @@ def check_pyproject_toml(
             try:
                 version = semver.Version.parse(project_version)
             except ValueError:
-                is_compliant = False
-                print("Project version does not follow semantic versioning")
+                if not bool(re.match(r"^[0-9]+.[0-9]+.dev[0-9]+$", project_version)):
+                    is_compliant = False
+                    print("Project version does not follow semantic versioning")
 
         # Check the project author and maintainer names and emails match argument input
         category, metadata = ["authors", "maintainers"], ["name", "email"]
@@ -342,17 +343,16 @@ def download_license_json(url: str, json_file: str) -> bool:
     """
     # If the licenses.json file does not exist in the hook's folder
     if not pathlib.Path.exists(json_file):
-        # Download licenses.json
-        r = requests.get(url)
-        status_code = r.status_code
-        if status_code == 200:
+        try:
+            # Download licenses.json
+            r = requests.get(url)
             # If it was successfully downloaded, write content to file
             with open(json_file, "w", encoding="utf-8") as f:
                 f.write(r.text)
 
             # Restructure json file to use "licenseID: name"
             restructure_json(json_file)
-        else:
+        except requests.exceptions.ConnectionError:
             print("There was a problem downloading license.json. Skipping LICENSE content check")
             return False
 
