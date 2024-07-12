@@ -23,6 +23,7 @@
 import argparse
 from datetime import date as dt
 from enum import Enum
+import filecmp
 from itertools import product
 import json
 import pathlib
@@ -34,8 +35,6 @@ from jinja2 import Environment, FileSystemLoader
 import requests
 import semver
 import toml
-
-from ansys.pre_commit_hooks.add_license_headers import check_same_content
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
@@ -606,8 +605,10 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
     with open(generated_file, "w") as f:
         f.write(generated_content)
 
+    same_files = True if filecmp.cmp(file, generated_file, shallow=False) == True else False
+
     # Check if CONTRIBUTORS.md content has been changed from template
-    if file.name in Filenames.CONTRIBUTORS.value and check_same_content(file, generated_file):
+    if file.name in Filenames.CONTRIBUTORS.value and same_files:
         is_compliant = False
         print("Please update your CONTRIBUTORS.md file.")
     # Check if the license phrase is in LICENSE (by default, MIT)
