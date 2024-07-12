@@ -32,20 +32,21 @@ class CustomDevelopCommand(develop):
         download_license_json(JSON_URL, LICENSES_JSON)
 
 
-# Get the long description from the README file
 HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
+    version = f.read().strip()
+
+# Get the long description from the README file
 with open(os.path.join(HERE, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
-# packages=find_namespace_packages(where="src", include="ansys*"),
-# print(packages)
 
 setup(
     name="ansys-pre-commit-hooks",
     packages=find_namespace_packages(where="src", include="ansys*"),
     package_dir={"": "src"},
-    version="0.4.0",
+    version=version,
     description=description,
     long_description=long_description,
     license="MIT",
@@ -101,8 +102,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "add-license-headers = ansys.pre_commit_hooks.add_license_headers:main",
-            "tech-review = ansys.pre_commit_hooks.tech_review:main",
-        ]
+            "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
+            "tech-review=ansys.pre_commit_hooks.tech_review:main",
+        ],
     },
 )

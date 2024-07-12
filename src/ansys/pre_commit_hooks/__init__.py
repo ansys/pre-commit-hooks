@@ -22,9 +22,9 @@
 
 """Module for initializing package-level imports for Ansys pre-commit hooks."""
 
-try:
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:  # pragma: no cover
-    import importlib_metadata
+import pathlib
 
-__version__ = importlib_metadata.version(__name__.replace(".", "-").replace("_", "-"))
+__all__ = ["__version__"]
+
+with open(pathlib.Path(__file__).parent / "VERSION", encoding="utf-8") as f:
+    __version__ = f.read().strip()
