@@ -33,7 +33,7 @@ class CustomDevelopCommand(develop):
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(HERE, "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
+with open(os.path.join(HERE, "src", "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
     version = f.read().strip()
 
 # Get the long description from the README file
