@@ -55,49 +55,50 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12']
     steps:
-      # - uses: ansys/actions/build-wheelhouse@v6
-      #   with:
-      #     library-name: ${{ env.LIBRARY_NAME }}
-      #     operating-system: ${{ matrix.os }}
-      #     python-version: ${{ matrix.python-version }}
-      - name: "Install Git and clone project"
-        uses: actions/checkout@v4
-
-      - name: "Set up Python ${{ matrix.python-version }}"
-        uses: ansys/actions/_setup-python@main
+      - uses: ansys/actions/build-wheelhouse@v6
         with:
+          library-name: ${{ env.LIBRARY_NAME }}
+          operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
-          use-cache: true
 
-      - name: "Update pip and install the build and wheel libraries"
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip build wheel
+      # - name: "Install Git and clone project"
+      #   uses: actions/checkout@v4
 
-      - name: "Install the library"
-        shell: bash
-        run: |
-          python -m pip install . --verbose
+      # - name: "Set up Python ${{ matrix.python-version }}"
+      #   uses: ansys/actions/_setup-python@main
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      #     use-cache: true
 
-      - name: "Verify library is properly installed and get its version number"
-        shell: bash
-        run: |
-          library_name=${{ env.LIBRARY_NAME }}
+      # - name: "Update pip and install the build and wheel libraries"
+      #   shell: bash
+      #   run: |
+      #     python -m pip install --upgrade pip build wheel
 
-          version=$(python -c "import importlib.metadata as importlib_metadata; print(importlib_metadata.version('$library_name'))")
+      # - name: "Install the library"
+      #   shell: bash
+      #   run: |
+      #     python -m pip install . --verbose
 
-          if [ -z "$version" ]; then
-              echo "Problem getting the library version"
-              exit 1;
-          else
-              echo "The library version is: $version";
-          fi;
-          echo "library_version=$version" >> $GITHUB_ENV
+      # - name: "Verify library is properly installed and get its version number"
+      #   shell: bash
+      #   run: |
+      #     library_name=${{ env.LIBRARY_NAME }}
 
-      - name: "Generate the wheelhouse"
-        shell: bash
-        run: |
-          python -m pip wheel . -w wheelhouse
+      #     version=$(python -c "import importlib.metadata as importlib_metadata; print(importlib_metadata.version('$library_name'))")
+
+      #     if [ -z "$version" ]; then
+      #         echo "Problem getting the library version"
+      #         exit 1;
+      #     else
+      #         echo "The library version is: $version";
+      #     fi;
+      #     echo "library_version=$version" >> $GITHUB_ENV
+
+      # - name: "Generate the wheelhouse"
+      #   shell: bash
+      #   run: |
+      #     python -m pip wheel . -w wheelhouse
 
   tests:
     name: "Tests"
