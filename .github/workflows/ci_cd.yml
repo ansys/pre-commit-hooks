@@ -72,12 +72,19 @@ jobs:
       - name: "Update pip and install the build and wheel libraries"
         shell: bash
         run: |
-          python -m pip install --upgrade pip build wheel
+          python -m pip install --upgrade pip build
+          # wheel
 
-      - name: "Install the library"
-        shell: bash
-        run: |
-          python -m pip install . --verbose
+      - name: Build
+        run: python -m build
+
+      - name: Install
+        run: pip install dist/*.whl
+
+      # - name: "Install the library"
+      #   shell: bash
+      #   run: |
+      #     python -m pip install . --verbose
 
       - name: "Verify library is properly installed and get its version number"
         shell: bash
