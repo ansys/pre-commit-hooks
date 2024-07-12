@@ -1,14 +1,14 @@
 [build-system]
 requires = [
     "setuptools>=42.0",
-    "wheel",
     "GitPython==3.1.43",
     "Jinja2==3.1.4",
     "requests==2.32.3",
     "semver==3.0.2",
-    "toml==0.10.2"
+    "toml==0.10.2",
+    "wheel",
 ]
-build-backend = "setuptools.build_meta:__legacy__"
+build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 100

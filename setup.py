@@ -3,7 +3,7 @@
 import os
 import sys
 
-from setuptools import find_namespace_packages, setup
+from setuptools import setup  # find_namespace_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
@@ -38,10 +38,14 @@ with open(os.path.join(HERE, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
+# packages=find_namespace_packages(where="src", include="ansys*"),
+# print(packages)
 
 setup(
     name="ansys-pre-commit-hooks",
-    packages=find_namespace_packages(where="src", include="ansys*"),
+    packages=(
+        ["ansys", "ansys.pre_commit_hooks"]
+    ),  # find_namespace_packages(where="src", include="ansys*"),
     package_dir={"": "src"},
     version="0.4.0",
     description=description,
