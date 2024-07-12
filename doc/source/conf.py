@@ -13,8 +13,14 @@ from ansys.pre_commit_hooks import __version__
 project = "ansys-pre-commit-hooks"
 copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS, Inc."
-release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "pre-commit-hooks.docs.ansys.com")
+
+# # Read version from VERSION file in base root directory
+# source_dir = Path(__file__).parent.resolve().absolute()
+# version_file = source_dir / "../../src/ansys/pre_commit_hooks/VERSION"
+# with open(str(version_file), "r") as file:
+#     __version__ = file.read().splitlines()[0]
+release = version = __version__
 
 # Select desired logo, theme, and declare the html title
 html_logo = logo
