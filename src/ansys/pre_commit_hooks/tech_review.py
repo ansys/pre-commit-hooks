@@ -23,6 +23,7 @@
 import argparse
 from datetime import date as dt
 from enum import Enum
+import filecmp
 from itertools import product
 import json
 import pathlib
@@ -34,8 +35,6 @@ from jinja2 import Environment, FileSystemLoader
 import requests
 import semver
 import toml
-
-from ansys.pre_commit_hooks.add_license_headers import check_same_content
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
@@ -149,17 +148,20 @@ def check_config_file(
     """
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
-    if has_pyproject:
-        config_file = "pyproject"
-        # Check pyproject.toml information
-        is_compliant, project_name = check_pyproject_toml(
-            repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
-        )
-    elif has_setup:
+
+    # If pyproject.toml and setup.py exist or only setup.py exists, check setup.py
+    if (has_pyproject and has_setup) or (has_setup and not has_pyproject):
         config_file = "setuptools"
         # Check setup.py information
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
+        )
+    # If pyproject.toml exists and not setup.py
+    elif has_pyproject and not has_setup:
+        config_file = "pyproject"
+        # Check pyproject.toml information
+        is_compliant, project_name = check_pyproject_toml(
+            repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     else:
         # Ignore config file check
@@ -229,8 +231,9 @@ def check_pyproject_toml(
             try:
                 version = semver.Version.parse(project_version)
             except ValueError:
-                is_compliant = False
-                print("Project version does not follow semantic versioning")
+                if not bool(re.match(r"^[0-9]+.[0-9]+.dev[0-9]+$", project_version)):
+                    is_compliant = False
+                    print("Project version does not follow semantic versioning")
 
         # Check the project author and maintainer names and emails match argument input
         category, metadata = ["authors", "maintainers"], ["name", "email"]
@@ -606,8 +609,10 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
     with open(generated_file, "w") as f:
         f.write(generated_content)
 
+    same_files = True if filecmp.cmp(file, generated_file, shallow=False) == True else False
+
     # Check if CONTRIBUTORS.md content has been changed from template
-    if file.name in Filenames.CONTRIBUTORS.value and check_same_content(file, generated_file):
+    if file.name in Filenames.CONTRIBUTORS.value and same_files:
         is_compliant = False
         print("Please update your CONTRIBUTORS.md file.")
     # Check if the license phrase is in LICENSE (by default, MIT)

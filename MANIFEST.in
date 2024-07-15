@@ -1,0 +1,2 @@
+# MANIFEST.in
+graft src/ansys/pre_commit_hooks

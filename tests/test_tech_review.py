@@ -139,6 +139,34 @@ def test_setup_py(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.tech_review
+def test_setup_py_and_pyproject(tmp_path: pytest.TempPathFactory):
+    """Test setup.py file is not implemented and some files are generated."""
+    custom_args = ["--product=techreview"]
+    tmp_path = tmp_path / "pytechreview"
+
+    pathlib.Path.mkdir(tmp_path)
+    os.chdir(tmp_path)
+
+    # Initialize repository
+    repo = init_repo(tmp_path)
+
+    # Create setup.py file with no configurations
+    config_files = ["setup.py", "pyproject.toml"]
+    for file in config_files:
+        config_file = tmp_path / file
+        with open(config_file, "w") as setup_file:
+            setup_file.write("# Empty file")
+
+    assert run_main(custom_args) == 1
+
+    # Check the dependabot.yml file was generated for setup.py
+    file_list = ["dependabot.yml"]
+    check_generated_files(tmp_path, file_list, "setuptools")
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
 def test_no_config_files(tmp_path: pytest.TempPathFactory, capsys):
     """Test output message and files that are generated when no configuration files exist."""
     tmp_path = tmp_path / "pytechreview"
@@ -223,6 +251,26 @@ def test_bad_version(tmp_path: pytest.TempPathFactory, capsys):
     # Check error message is printed
     output = capsys.readouterr()
     assert "Project version does not follow semantic versioning" in output.out
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_dev_version(tmp_path: pytest.TempPathFactory, capsys):
+    """Test the error message appears when the project does not use semantic versioning."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+
+    # Replace the version in the pyproject.toml file to be invalid
+    search = 'version = "0.1.0"'
+    replace = 'version = "11.1.dev1"'
+    replace_line(tmp_path, "pyproject.toml", search, replace)
+
+    assert hook.main() == 1
+
+    # Check error message is printed
+    output = capsys.readouterr()
+    assert "Project version does not follow semantic versioning" not in output.out
 
     os.chdir(REPO_PATH)
 
