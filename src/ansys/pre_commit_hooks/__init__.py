@@ -22,13 +22,10 @@
 
 """Module for initializing package-level imports for Ansys pre-commit hooks."""
 
-# import pathlib
-
-from ._version import version
+import pathlib
 
 __all__ = ["__version__"]
 
-__version__ = version
 
-# with open(pathlib.Path(__file__).parent / "VERSION", encoding="utf-8") as f:
-#     __version__ = f.read().strip()
+with open(pathlib.Path(__file__).parent / "VERSION", encoding="utf-8") as f:
+    __version__ = f.read().strip()

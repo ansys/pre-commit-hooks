@@ -11,7 +11,6 @@ SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "an
 
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-from ansys.pre_commit_hooks._version import version
 from ansys.pre_commit_hooks.tech_review import JSON_URL, LICENSES_JSON, download_license_json
 
 
@@ -34,6 +33,9 @@ class CustomDevelopCommand(develop):
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, "src", "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
+    version = f.read().strip()
+
 # Get the long description from the README file
 with open(os.path.join(HERE, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()

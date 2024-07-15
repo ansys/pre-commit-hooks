@@ -148,17 +148,17 @@ def check_config_file(
     """
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
-    if has_pyproject:
-        config_file = "pyproject"
-        # Check pyproject.toml information
-        is_compliant, project_name = check_pyproject_toml(
-            repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
-        )
-    elif has_setup:
+    if has_setup:
         config_file = "setuptools"
         # Check setup.py information
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
+        )
+    elif has_pyproject:
+        config_file = "pyproject"
+        # Check pyproject.toml information
+        is_compliant, project_name = check_pyproject_toml(
+            repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
         )
     else:
         # Ignore config file check
@@ -342,16 +342,17 @@ def download_license_json(url: str, json_file: str) -> bool:
     """
     # If the licenses.json file does not exist in the hook's folder
     if not pathlib.Path.exists(json_file):
-        try:
-            # Download licenses.json
-            r = requests.get(url)
+        # Download licenses.json
+        r = requests.get(url)
+        status_code = r.status_code
+        if status_code == 200:
             # If it was successfully downloaded, write content to file
             with open(json_file, "w", encoding="utf-8") as f:
                 f.write(r.text)
 
             # Restructure json file to use "licenseID: name"
             restructure_json(json_file)
-        except requests.exceptions.ConnectionError:
+        else:
             print("There was a problem downloading license.json. Skipping LICENSE content check")
             return False
 

@@ -7,19 +7,17 @@ from pathlib import Path
 from ansys_sphinx_theme import get_autoapi_templates_dir_relative_path, get_version_match
 from ansys_sphinx_theme import pyansys_logo_black as logo
 
-from ansys.pre_commit_hooks import __version__
-
 # Project information
 project = "ansys-pre-commit-hooks"
 copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS, Inc."
 cname = os.getenv("DOCUMENTATION_CNAME", "pre-commit-hooks.docs.ansys.com")
 
-# # Read version from VERSION file in base root directory
-# source_dir = Path(__file__).parent.resolve().absolute()
-# version_file = source_dir / "../../src/ansys/pre_commit_hooks/VERSION"
-# with open(str(version_file), "r") as file:
-#     __version__ = file.read().splitlines()[0]
+# Read version from VERSION file in base root directory
+source_dir = Path(__file__).parent.resolve().absolute()
+version_file = source_dir / "../../src/ansys/pre_commit_hooks/VERSION"
+with open(str(version_file), "r") as file:
+    __version__ = file.read().splitlines()[0]
 release = version = __version__
 
 # Select desired logo, theme, and declare the html title
