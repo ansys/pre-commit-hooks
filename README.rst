@@ -37,7 +37,7 @@ Currently, these hooks are available:
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
 * ``tech-review``: Do a technical review of your repository according to
-  `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_`
+  `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_
 
 ``add-license-headers`` setup
 -----------------------------
