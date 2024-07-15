@@ -6,6 +6,28 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.4.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.1) - 2024-07-15
+
+
+### Changed
+
+- chore: update CHANGELOG for v0.4.0 [#193](https://github.com/ansys/pre-commit-hooks/pull/193)
+
+
+### Fixed
+
+- Fix semantic versioning check in tech-review hook [#194](https://github.com/ansys/pre-commit-hooks/pull/194)
+
+
+### Dependencies
+
+- build(deps): bump sphinx from 7.3.7 to 7.4.0 [#198](https://github.com/ansys/pre-commit-hooks/pull/198)
+
+
+### Miscellaneous
+
+- [pre-commit.ci] pre-commit autoupdate [#196](https://github.com/ansys/pre-commit-hooks/pull/196)
+
 ## [0.4.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.0) - 2024-07-01
 
 
