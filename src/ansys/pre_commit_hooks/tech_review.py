@@ -148,13 +148,16 @@ def check_config_file(
     """
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
-    if has_setup:
+
+    # If pyproject.toml and setup.py exist or only setup.py exists, check setup.py
+    if (has_pyproject and has_setup) or (has_setup and not has_pyproject):
         config_file = "setuptools"
         # Check setup.py information
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
         )
-    elif has_pyproject:
+    # If pyproject.toml exists and not setup.py
+    elif has_pyproject and not has_setup:
         config_file = "pyproject"
         # Check pyproject.toml information
         is_compliant, project_name = check_pyproject_toml(
