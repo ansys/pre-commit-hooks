@@ -81,7 +81,7 @@ setup(
             "ansys-sphinx-theme[autoapi]==0.16.6",
             "numpydoc==1.7.0",
             "sphinx==7.4.7",
-            "sphinx-autodoc-typehints==2.2.2",
+            "sphinx-autodoc-typehints==2.2.3",
             "sphinx-copybutton==0.5.1",
         ],
         "tests": [
