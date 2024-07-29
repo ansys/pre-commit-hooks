@@ -343,7 +343,7 @@ def download_license_json(url: str, json_file: str) -> bool:
     # If the licenses.json file does not exist in the hook's folder
     if not pathlib.Path.exists(json_file):
         # Download licenses.json
-        r = requests.get(url)
+        r = requests.get(url, timeout=60)
         status_code = r.status_code
         if status_code == 200:
             # If it was successfully downloaded, write content to file
@@ -542,7 +542,7 @@ def generate_file_from_jinja(
     """
     # Load the templates from the hook path
     loader = FileSystemLoader(searchpath=pathlib.PurePath.joinpath(HOOK_PATH, "templates"))
-    env = Environment(loader=loader)
+    env = Environment(loader=loader)  # nosec
     # Get the template for the specified file
     template = env.get_template(file)
     # Generate the file content from the template
