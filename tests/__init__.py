@@ -19,13 +19,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-"""Module for initializing package-level imports for Ansys pre-commit hooks."""
-
-import pathlib
-
-__all__ = ["__version__"]
-
-
-with open(pathlib.Path(__file__).parent / "VERSION", encoding="utf-8") as f:
-    __version__ = f.read().strip()

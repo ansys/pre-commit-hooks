@@ -1,67 +1,15 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
-
-[project]
-# Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
-name = "ansys-pre-commit-hooks"
-version = "0.4.0"
-description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
-readme = "README.rst"
-requires-python = ">=3.9,<4"
-license = {file = "LICENSE"}
-authors = [
-    {name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},
-]
-maintainers = [
-    {name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},
-]
-
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
-dependencies = [
+requires = [
+    "setuptools>=42.0",
     "GitPython==3.1.43",
-    "importlib-metadata==8.0.0",
     "Jinja2==3.1.4",
     "reuse==3.0.2",
     "requests==2.32.3",
     "semver==3.0.2",
     "toml==0.10.2",
+    "wheel",
 ]
-
-[project.optional-dependencies]
-tests = [
-    "pytest==8.2.2",
-    "pytest-cov==5.0.0",
-]
-doc = [
-    "ansys-sphinx-theme[autoapi]==0.16.6",
-    "numpydoc==1.7.0",
-    "sphinx==7.3.7",
-    "sphinx-autodoc-typehints==2.2.2",
-    "sphinx-copybutton==0.5.1",
-]
-
-
-[tool.flit.module]
-name = "ansys.pre_commit_hooks"
-
-[project.scripts]
-add-license-headers = "ansys.pre_commit_hooks.add_license_headers:main"
-tech-review = "ansys.pre_commit_hooks.tech_review:main"
-
-[project.urls]
-Source = "https://github.com/ansys/pre-commit-hooks"
-Tracker = "https://github.com/ansys/pre-commit-hooks/issues"
-Homepage = "https://github.com/ansys/pre-commit-hooks"
-Documentation = "https://pre-commit-hooks.docs.ansys.com"
+build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 100
