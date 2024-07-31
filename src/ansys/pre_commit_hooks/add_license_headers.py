@@ -97,7 +97,10 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
     parser.add_argument("--no_multiprocessing", action="store_true")
-    lint.add_arguments(parser)
+
+    # Option for printing lint output
+    mutex_group = parser.add_mutually_exclusive_group()
+    mutex_group.add_argument("-q", "--quiet", action="store_true")
 
     return parser.parse_args()
 
@@ -241,7 +244,7 @@ def set_header_args(
         args.year = [current_year]
     else:
         args.year = [int(start_year), current_year]
-    args.copyright_style = "string-c"
+    args.copyright_prefix = "string-c"
     args.copyright = [copyright]
     args.merge_copyrights = True
     args.template = template
@@ -697,7 +700,7 @@ def find_files_missing_header() -> int:
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing
-    # header.add_arguments(parser)
+    print(args)
     _annotate.add_arguments(parser)
 
     # Link the default template and/or license from the assets folder to your git repo.

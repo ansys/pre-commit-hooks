@@ -184,8 +184,7 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
     count = 0
     for line in file:
         count += 1
-        # Assert the copyright line's time range is
-        # from 2023 to the current year
+        # Assert the copyright line's time range is from 2023 to the current year
         if count == 1:
             assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in line
         if count > 1:
