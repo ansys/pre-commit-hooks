@@ -700,7 +700,6 @@ def find_files_missing_header() -> int:
     # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
     # multi-line, explicit-license, force-dot-license, recursive, no-replace,
     # skip-unrecognized, and skip-existing
-    print(args)
     _annotate.add_arguments(parser)
 
     # Link the default template and/or license from the assets folder to your git repo.
