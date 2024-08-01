@@ -6,6 +6,29 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.4.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.2) - 2024-08-01
+
+
+### Changed
+
+- chore: update CHANGELOG for v0.4.1 [#201](https://github.com/ansys/pre-commit-hooks/pull/201)
+- Bump version to v0.4.1 and uncomment tech review hook [#202](https://github.com/ansys/pre-commit-hooks/pull/202)
+- chore: adjust add-license-headers script to work with reuse 4.0.3 [#211](https://github.com/ansys/pre-commit-hooks/pull/211)
+
+
+### Dependencies
+
+- build(deps-dev): bump sphinx from 7.4.0 to 7.4.7 [#204](https://github.com/ansys/pre-commit-hooks/pull/204)
+- build(deps-dev): bump pytest from 8.2.2 to 8.3.1 [#206](https://github.com/ansys/pre-commit-hooks/pull/206)
+- build(deps): bump importlib-metadata from 8.0.0 to 8.2.0 [#207](https://github.com/ansys/pre-commit-hooks/pull/207)
+- build(deps-dev): bump pytest from 8.3.1 to 8.3.2 [#208](https://github.com/ansys/pre-commit-hooks/pull/208)
+
+
+### Miscellaneous
+
+- chore: update code base to fix bandit warnings [#209](https://github.com/ansys/pre-commit-hooks/pull/209)
+- [pre-commit.ci] pre-commit autoupdate [#210](https://github.com/ansys/pre-commit-hooks/pull/210)
+
 ## [0.4.1](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.1) - 2024-07-15
 
 
