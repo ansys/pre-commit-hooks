@@ -36,9 +36,18 @@ from platform import python_version
 import shutil
 import sys
 from tempfile import NamedTemporaryFile
+import re
 
 import git
 from reuse import _annotate, _util, lint, project
+
+from reuse import _IGNORE_DIR_PATTERNS
+
+OWN_IGNORES = [
+    re.compile(r"^\.venv$"),
+]
+_IGNORE_DIR_PATTERNS.extend(OWN_IGNORES)
+
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -183,17 +192,13 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
         List of the files that are missing license headers.
     """
     # Create a temporary file containing lint.run json output
-    filename = None
-    with NamedTemporaryFile(mode="w", delete=False) as tmp:
-        args.json = True
-        lint.run(args, proj, tmp)
-        filename = tmp.name
+    from io import StringIO
 
-    # Open the temporary file, load the JSON file, and find files that
-    # are missing license headers.
-    lint_json = None
-    with open(filename, "rb") as file:
-        lint_json = json.load(file)
+    buffer = StringIO()
+    args.json = True  # Output as json
+    lint.run(args, proj, buffer)
+    lint_json = json.loads(buffer.getvalue())
+    buffer.close()
 
     # Get files missing copyright information
     missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
@@ -202,9 +207,6 @@ def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> 
     if not args.ignore_license_check:
         missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
         missing_headers = missing_headers.union(missing_licensing_info)
-
-    # Remove temporary file
-    os.remove(filename)
 
     return missing_headers
 
