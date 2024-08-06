@@ -33,15 +33,13 @@ import json
 import os
 import pathlib
 from platform import python_version
+import re
 import shutil
 import sys
 from tempfile import NamedTemporaryFile
-import re
 
 import git
-from reuse import _annotate, _util, lint, project
-
-from reuse import _IGNORE_DIR_PATTERNS
+from reuse import _IGNORE_DIR_PATTERNS, _annotate, _util, lint, project
 
 OWN_IGNORES = [
     re.compile(r"^\.venv$"),
