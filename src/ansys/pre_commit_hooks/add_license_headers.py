@@ -39,6 +39,7 @@ from tempfile import NamedTemporaryFile
 
 import git
 from reuse import _annotate, _util, lint, project
+from reuse.vcs import VCSStrategyGit
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -706,7 +707,7 @@ def find_files_missing_header() -> int:
     link_assets(assets, os_git_root, args)
 
     # Project to run `REUSE <https://reuse.software/>`_ on
-    proj = project.Project(git_root)
+    proj = project.Project(git_root, vcs_strategy=VCSStrategyGit)
 
     # Get files missing headers (copyright and/or license information)
     missing_headers = list(list_noncompliant_files(args, proj))
