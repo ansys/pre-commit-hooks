@@ -1,0 +1,44 @@
+src.ansys.pre_commit_hooks.tech_review.check_file_content
+=========================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.check_file_content(file: str, generated_content: str, is_compliant: bool, license: str) -> bool
+
+   
+   Check the file content of the LICENSE and CONTRIBUTORS.md files.
+
+
+   :Parameters:
+
+       **file: str**
+           The file that the template is being created for.
+
+       **generated_content: str**
+           Content of the template that was generated.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **license: str**
+           The license the repository uses.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if LICENSE and CONTRIBUTORS.md files had the correct content.
+           ``False`` if LICENSE and CONTRIBUTORS.md files had the incorrect content.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

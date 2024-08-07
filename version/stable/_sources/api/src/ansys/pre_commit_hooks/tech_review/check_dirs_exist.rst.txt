@@ -1,0 +1,41 @@
+src.ansys.pre_commit_hooks.tech_review.check_dirs_exist
+=======================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.check_dirs_exist(repo_path: str, is_compliant: bool, directories: list) -> bool
+
+   
+   Check folders exist in the root of the git repository.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **directories: list**
+           List of directories to check if they exist in the repository.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if all directories exist.
+           ``False`` if a directory did not exist and was created.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

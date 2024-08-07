@@ -1,0 +1,44 @@
+src.ansys.pre_commit_hooks.tech_review.check_auth_maint
+=======================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.check_auth_maint(project_value: str, arg_value: str, err_string: str, is_compliant: bool)
+
+   
+   Check if the author and maintainer names and emails are the same.
+
+
+   :Parameters:
+
+       **project_value: str**
+           The author or maintainer's name or email retrieved from the pyproject.toml file.
+
+       **arg_value: str**
+           The author or maintainer's name or email retrieved from the argument passed into the hook.
+
+       **err_str: str**
+           The message that is printed when an author or maintainer's name or email is incorrect.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the author and maintainer's name and email are correct.
+           ``False`` if the author or maintainer's name or email is incorrect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
