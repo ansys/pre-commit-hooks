@@ -6,6 +6,18 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.4.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.3) - 2024-08-07
+
+
+### Added
+
+- feat: leverage reuse vcs Git strategy [#217](https://github.com/ansys/pre-commit-hooks/pull/217)
+
+
+### Maintenance
+
+- [pre-commit.ci] pre-commit autoupdate [#213](https://github.com/ansys/pre-commit-hooks/pull/213)
+
 ## [0.4.2](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.2) - 2024-08-01
 
 
