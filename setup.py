@@ -78,7 +78,7 @@ setup(
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==0.16.6",
+            "ansys-sphinx-theme[autoapi]==1.0.3",
             "numpydoc==1.7.0",
             "sphinx==7.4.7",
             "sphinx-autodoc-typehints==2.2.3",
