@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 
 from ansys_sphinx_theme import get_autoapi_templates_dir_relative_path, get_version_match
-from ansys_sphinx_theme import pyansys_logo_black as logo
 
 # Project information
 project = "ansys-pre-commit-hooks"
@@ -20,13 +19,13 @@ with open(str(version_file), "r") as file:
     __version__ = file.read().splitlines()[0]
 release = version = __version__
 
-# Select desired logo, theme, and declare the html title
-html_logo = logo
+# Select desired theme, and declare the html title
 html_theme = "ansys_sphinx_theme"
 html_short_title = html_title = "ansys-pre-commit-hooks"
 
 # specify the location of your github repo
 html_theme_options = {
+    "logo": "pyansys",
     "github_url": "https://github.com/ansys/pre-commit-hooks",
     "show_prev_next": False,
     "show_breadcrumbs": True,
