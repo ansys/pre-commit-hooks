@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 from pathlib import Path
 
-from ansys_sphinx_theme import get_autoapi_templates_dir_relative_path, get_version_match
+from ansys_sphinx_theme import get_version_match
 
 # Project information
 project = "ansys-pre-commit-hooks"
@@ -36,13 +36,16 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": get_version_match(__version__),
     },
+    "ansys_sphinx_theme_autoapi": {
+        "project": project,
+    },
 }
 
 # Sphinx extensions
 extensions = [
+    "ansys_sphinx_theme.extension.autoapi",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "autoapi.extension",
     "sphinx_autodoc_typehints",
     "numpydoc",
     "sphinx.ext.intersphinx",
@@ -96,19 +99,3 @@ source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
-
-# Configuration for Sphinx autoapi
-autoapi_type = "python"
-autoapi_dirs = ["../../src/"]
-autoapi_root = "api"
-autoapi_options = [
-    "members",
-    "undoc-members",
-    "show-inheritance",
-    "show-module-summary",
-    "imported-members",
-]
-autoapi_template_dir = get_autoapi_templates_dir_relative_path(Path(__file__))
-autoapi_python_use_implicit_namespaces = True
-autoapi_keep_files = True
-autoapi_own_page_level = "method"
