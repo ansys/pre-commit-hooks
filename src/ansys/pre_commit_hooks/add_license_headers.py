@@ -514,7 +514,30 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def update_license_file(arg_dict):
+def replace_windows_line_endings(license_file: str) -> None:
+    """
+    Replace Windows line endings with Unix line endings if applicable.
+
+    Parameters
+    ----------
+    license_file: str
+        The license file to check.
+    """
+    windows_line_ending = b"\r\n"
+    # Get text of license_file
+    with open(license_file, "rb") as file:
+        text = file.read()
+
+    if windows_line_ending in text:
+        # Replace Windows line endings with Unix line endings
+        text = text.replace(windows_line_ending, b"\n")
+
+        # Overwrite the license file with Unix line endings
+        with open(license_file, "wb") as file:
+            file.write(text)
+
+
+def update_license_file(arg_dict: dict) -> int:
     """
     Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
 
@@ -583,18 +606,20 @@ def update_license_file(arg_dict):
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
-                    print(line.rstrip().replace("\r\n", "\n"))
+                    print(line.rstrip())
                 else:
                     if "-" in line:
                         # If there is a year range in the existing LICENSE file, but the
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
-                    print(line.rstrip().replace("\r\n", "\n"))
+                    print(line.rstrip())
             else:
-                print(line.rstrip().replace("\r\n", "\n"))
+                print(line.rstrip())
 
     fileinput.close()
+
+    replace_windows_line_endings(repo_license_loc)
 
     # If the year changed, print a message that the LICENSE file was changed
     if not check_same_content(save_repo_license, repo_license_loc):
