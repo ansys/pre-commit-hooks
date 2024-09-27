@@ -583,16 +583,16 @@ def update_license_file(arg_dict):
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
-                    print(line.rstrip())
+                    print(line.rstrip().replace("\r\n", "\n"))
                 else:
                     if "-" in line:
                         # If there is a year range in the existing LICENSE file, but the
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
-                    print(line.rstrip())
+                    print(line.rstrip().replace("\r\n", "\n"))
             else:
-                print(line.rstrip())
+                print(line.rstrip().replace("\r\n", "\n"))
 
     fileinput.close()
 
