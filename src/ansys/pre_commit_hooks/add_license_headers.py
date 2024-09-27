@@ -514,7 +514,30 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def update_license_file(arg_dict):
+def replace_windows_line_endings(license_file: str) -> None:
+    """
+    Replace Windows line endings with Unix line endings if applicable.
+
+    Parameters
+    ----------
+    license_file: str
+        The license file to check.
+    """
+    windows_line_ending = b"\r\n"
+    # Get text of license_file
+    with open(license_file, "rb") as file:
+        text = file.read()
+
+    if windows_line_ending in text:
+        # Replace Windows line endings with Unix line endings
+        text = text.replace(windows_line_ending, b"\n")
+
+        # Overwrite the license file with Unix line endings
+        with open(license_file, "wb") as file:
+            file.write(text)
+
+
+def update_license_file(arg_dict: dict) -> int:
     """
     Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
 
@@ -595,6 +618,8 @@ def update_license_file(arg_dict):
                 print(line.rstrip())
 
     fileinput.close()
+
+    replace_windows_line_endings(repo_license_loc)
 
     # If the year changed, print a message that the LICENSE file was changed
     if not check_same_content(save_repo_license, repo_license_loc):
