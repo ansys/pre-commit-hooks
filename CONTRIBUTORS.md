@@ -1,10 +1,10 @@
 # Contributors
 
-## Project leads
+## Project Lead
 
 * [Kerry McAdams](https://github.com/klmcadams)
 
-## Individual contributors
+## Individual Contributors
 
 * [Maxime Rey](https://github.com/MaxJPRey)
 * [Roberto Pastor](https://github.com/RobPasMue)
