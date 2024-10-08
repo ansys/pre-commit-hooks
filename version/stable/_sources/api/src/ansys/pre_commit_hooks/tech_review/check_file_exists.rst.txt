@@ -1,0 +1,62 @@
+src.ansys.pre_commit_hooks.tech_review.check_file_exists
+========================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.check_file_exists(repo_path: str, files: list, project_name: str, start_year: str, is_compliant: bool, license: str, repository_url: str, product: str, config_file: str, doc_repo_name: str) -> bool
+
+   
+   Check files exist. If they do not exist, create them using jinja templates.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **files: list**
+           List of files to check if they exist and their content.
+
+       **project_name: str**
+           The name of the project.
+
+       **start_year: str**
+           The start year of the repository.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **license: str**
+           The license the repository uses.
+
+       **repository_url: str**
+           The URL of the repository.
+
+       **product: str**
+           The Ansys product the repository is based on.
+
+       **config_file: str**
+           If the project's config file is "setuptools" or "pyproject".
+
+       **doc_repo_name: str**
+           The name of the repository to use in documentation.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the files exist and content was correct.
+           ``False`` if a file was created and/or its content was incorrect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
