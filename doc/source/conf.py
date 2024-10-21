@@ -105,4 +105,3 @@ master_doc = "index"
 linkcheck_ignore = [
     "https://opensource.org/licenses/MIT",
 ]
-
