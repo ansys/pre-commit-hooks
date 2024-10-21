@@ -100,3 +100,9 @@ source_suffix = {".rst": "restructuredtext"}
 
 # The master toctree document.
 master_doc = "index"
+
+# Ignore links
+linkcheck_ignore = [
+    "https://opensource.org/licenses/MIT",
+]
+
