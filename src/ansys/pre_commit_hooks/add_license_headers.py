@@ -466,7 +466,7 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
         if _util.contains_reuse_info(line):
             count += 1
             found_reuse_info = True
-            print(line.rstrip().encode())
+            file.write(line.rstrip().encode())
         else:
             if found_reuse_info:
                 try:
@@ -475,18 +475,18 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
                     # This happens when a comment changes from one line to
                     # multiline
                     if line != before_hook_lines[count]:
-                        print(line.rstrip().encode())
+                        file.write(line.rstrip().encode())
                 except IndexError:
                     pass
 
                 # Copy the rest of the file after the reuse information
                 for line_after_reuse_info in before_hook_lines[count:]:
-                    print(line_after_reuse_info.rstrip().encode())
+                    file.write(line_after_reuse_info.rstrip().encode())
                 break
             # Copy the header lines before reuse information is found
             else:
                 count += 1
-                print(line.rstrip().encode())
+                file.write(line.rstrip().encode())
     fileinput.close()
 
 
@@ -585,16 +585,16 @@ def update_license_file(arg_dict):
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
-                    print(line.rstrip().encode())
+                    file.write(line.rstrip().encode())
                 else:
                     if "-" in line:
                         # If there is a year range in the existing LICENSE file, but the
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
-                    print(line.rstrip().encode())
+                    file.write(line.rstrip().encode())
             else:
-                print(line.rstrip().encode())
+                file.write(line.rstrip().encode())
 
     fileinput.close()
 
