@@ -446,26 +446,27 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
         Path to file after add-license-headers was run.
     """
     count = 0
-    before_hook_file = open(before_hook, "r", encoding="utf8")
+    before_hook_file = open(before_hook, "rb", encoding="utf8")
     before_hook_lines = before_hook_file.readlines()
     found_reuse_info = False
 
     # Check if python version is 3.9 since fileinput.input()
     # does not support the "encoding" keyword
     if "3.9" in python_version():
-        file = fileinput.input(after_hook, inplace=True)
+        file = fileinput.input(after_hook, inplace=True, mode="rb")
     else:
-        file = fileinput.input(after_hook, inplace=True, encoding="utf8")
+        file = fileinput.input(after_hook, inplace=True, mode="rb", encoding="utf8")
 
     # Copy file content before add-license-header was run into
     # the file after add-license-header was run.
     # stdout is redirected into the file if inplace is True
-    for line in file:
+    for line_b in file:
+        line = line_b.decode()
         # Copy the new reuse lines into the file
         if _util.contains_reuse_info(line):
             count += 1
             found_reuse_info = True
-            print(line.rstrip())
+            print(line.rstrip().encode())
         else:
             if found_reuse_info:
                 try:
@@ -474,18 +475,18 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
                     # This happens when a comment changes from one line to
                     # multiline
                     if line != before_hook_lines[count]:
-                        print(line.rstrip())
+                        print(line.rstrip().encode())
                 except IndexError:
                     pass
 
                 # Copy the rest of the file after the reuse information
                 for line_after_reuse_info in before_hook_lines[count:]:
-                    print(line_after_reuse_info.rstrip())
+                    print(line_after_reuse_info.rstrip().encode())
                 break
             # Copy the header lines before reuse information is found
             else:
                 count += 1
-                print(line.rstrip())
+                print(line.rstrip().encode())
     fileinput.close()
 
 
@@ -544,15 +545,16 @@ def update_license_file(arg_dict):
     # Check if custom_license is MIT
     if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
         if "3.9" in python_version():
-            file = fileinput.input(repo_license_loc, inplace=True)
+            file = fileinput.input(repo_license_loc, inplace=True, mode="rb")
         else:
-            file = fileinput.input(repo_license_loc, inplace=True, encoding="utf8")
+            file = fileinput.input(repo_license_loc, inplace=True, mode="rb", encoding="utf8")
 
         copyright = arg_dict["copyright"]
         start_year = str(arg_dict["start_year"])
         current_year = str(arg_dict["current_year"])
 
-        for line in file:
+        for line_b in file:
+            line = line_b.decode()
             if copyright in line:
                 # Copyright line: "Copyright (c) 2023 - 2024 ANSYS, Inc. and/or its affiliates."
                 # Get the index of the closing parenthesis of the copyright line
@@ -583,16 +585,16 @@ def update_license_file(arg_dict):
                     else:
                         # Replace the existing copyright years with the new year_range
                         line = line.replace(line[paren_index:cpright_index], year_range)
-                    print(line.rstrip())
+                    print(line.rstrip().encode())
                 else:
                     if "-" in line:
                         # If there is a year range in the existing LICENSE file, but the
                         # start_year and current_year are the same, remove the year range
                         # and replace it with the current year
                         line = line.replace(line[paren_index:cpright_index], current_year)
-                    print(line.rstrip())
+                    print(line.rstrip().encode())
             else:
-                print(line.rstrip())
+                print(line.rstrip().encode())
 
     fileinput.close()
 
