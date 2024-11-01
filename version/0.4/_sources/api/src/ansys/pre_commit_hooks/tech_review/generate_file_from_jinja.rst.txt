@@ -1,0 +1,51 @@
+src.ansys.pre_commit_hooks.tech_review.generate_file_from_jinja
+===============================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.tech_review.generate_file_from_jinja(file: str, project_name: str, year_str: str, repo_url: str, product: str, config_file: str, doc_repo_name: str) -> str
+
+   
+   Generate file using jinja templates.
+
+
+   :Parameters:
+
+       **file: str**
+           The file that the template is being created for.
+
+       **project_name: str**
+           The name of the project.
+
+       **year_str: str**
+           The start year of the repository.
+
+       **repo_url: str**
+           The URL of the repository.
+
+       **product: str**
+           The Ansys product the repository is based on.
+
+       **config_file: str**
+           If the project's config file is "setuptools" or "pyproject".
+
+       **doc_repo_name: str**
+           The name of the repository to use in documentation.
+
+   :Returns:
+
+       :class:`python:str`
+           Content of the template that was generated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
