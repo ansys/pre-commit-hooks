@@ -33,6 +33,7 @@ import json
 import os
 import pathlib
 from platform import python_version
+import re
 import shutil
 import sys
 from tempfile import NamedTemporaryFile
@@ -514,27 +515,32 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def replace_windows_line_endings(license_file: str) -> None:
-    """
-    Replace Windows line endings with Unix line endings if applicable.
+def update_year_range(user_start_year, match_start_year, current_year, match_end_year):
+    """Update the year or year range in the LICENSE file.
 
     Parameters
     ----------
-    license_file: str
-        The license file to check.
+    user_start_year: str
+       The start year supplied by the user in the pre-commit hook configuration.
+    match_start_year: str
+        The start year of the year range in the LICENSE file. For example, the LICENSE file
+        contains the range "2023 - 2024", so match_start_year is 2023.
+    current_year: str
+        The current year based on the datetime module.
+    match_end_year: str
+        The end year of the year range in the LICENSE file. For example, the LICENSE file
+        contains the range "2023 - 2024", so match_end_year is 2024.
     """
-    windows_line_ending = b"\r\n"
-    # Get text of license_file
-    with open(license_file, "rb") as file:
-        text = file.read()
+    # If the user start year from the pre-commit hook is less than the match start year,
+    # set the match_start_year as the user_start_year
+    if user_start_year < match_start_year:
+        match_start_year = user_start_year
+    # If the match end year is less than the current year, set the match_end_year to the
+    # current year
+    if match_end_year < current_year:
+        match_end_year = current_year
 
-    if windows_line_ending in text:
-        # Replace Windows line endings with Unix line endings
-        text = text.replace(windows_line_ending, b"\n")
-
-        # Overwrite the license file with Unix line endings
-        with open(license_file, "wb") as file:
-            file.write(text)
+    return match_start_year, match_end_year
 
 
 def update_license_file(arg_dict: dict) -> int:
@@ -564,62 +570,43 @@ def update_license_file(arg_dict: dict) -> int:
     # 0 is unchanged, 1 is changed
     changed = 0
 
+    user_start_year = str(arg_dict["start_year"])
+    current_year = str(arg_dict["current_year"])
+    # Span or single year
+    year_regex = r"(\d{4}) - (\d{4})|\d{4}"
+
     # Check if custom_license is MIT
     if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
-        if "3.9" in python_version():
-            file = fileinput.input(repo_license_loc, inplace=True)
+        with pathlib.Path(repo_license_loc).open(encoding="utf-8", newline="", mode="r") as file:
+            lines = file.readlines()
+            content = "".join(lines)
+
+        # Get the first instance of the year range, either one year or a range of years
+        year_range_match = re.search(year_regex, content)
+        # Get the group from the year_range_match
+        year_range = year_range_match.group()
+        updated_year_range = ""
+
+        # Fix the start and end years in the range
+        if "-" in year_range:
+            match_start_yr, match_end_yr = update_year_range(
+                user_start_year, year_range_match.group(1), current_year, year_range_match.group(2)
+            )
         else:
-            file = fileinput.input(repo_license_loc, inplace=True, encoding="utf8")
+            match_start_yr, match_end_yr = update_year_range(
+                user_start_year, year_range, current_year, year_range
+            )
 
-        copyright = arg_dict["copyright"]
-        start_year = str(arg_dict["start_year"])
-        current_year = str(arg_dict["current_year"])
+        # Update the content if the start and end years are different
+        if match_start_yr != match_end_yr:
+            updated_year_range = f"{match_start_yr} - {match_end_yr}"
+            # print(f"Replacing {year_range} with {updated_year_range}")
+            content = re.sub(year_regex, updated_year_range, content)
 
-        for line in file:
-            if copyright in line:
-                # Copyright line: "Copyright (c) 2023 - 2024 ANSYS, Inc. and/or its affiliates."
-                # Get the index of the closing parenthesis of the copyright line
-                paren_index = line.index(")") + 2
-                # Get the index of the start of the copyright statement
-                cpright_index = line.index(copyright) - 1
-                # Create the year string to be replaced in the copyright line
-                # For example, "2024", or "2023 - 2024"
-                year_range = (
-                    f"{start_year} - {current_year}"
-                    if (start_year != current_year)
-                    else current_year
-                )
-
-                # If the start and end year are different
-                if start_year != current_year:
-                    if "-" in line:
-                        # Get the index of the dash in the year range of the LICENSE file
-                        dash_index = line.index("-") - 1
-                        # Get the start year of the existing copyright line in the LICENSE file
-                        existing_start_year = line[paren_index:dash_index]
-                        # If the start year argument and the existing start year are different,
-                        # replace the existing start year with the new one.
-                        # For example, the existing start year is 2023, but the start_year
-                        # argument is 2022.
-                        if start_year != existing_start_year:
-                            line = line.replace(existing_start_year, start_year)
-                    else:
-                        # Replace the existing copyright years with the new year_range
-                        line = line.replace(line[paren_index:cpright_index], year_range)
-                    print(line.rstrip())
-                else:
-                    if "-" in line:
-                        # If there is a year range in the existing LICENSE file, but the
-                        # start_year and current_year are the same, remove the year range
-                        # and replace it with the current year
-                        line = line.replace(line[paren_index:cpright_index], current_year)
-                    print(line.rstrip())
-            else:
-                print(line.rstrip())
-
-    fileinput.close()
-
-    replace_windows_line_endings(repo_license_loc)
+            with pathlib.Path(repo_license_loc).open(
+                encoding="utf-8", newline="", mode="w"
+            ) as file:
+                file.write(content)
 
     # If the year changed, print a message that the LICENSE file was changed
     if not check_same_content(save_repo_license, repo_license_loc):

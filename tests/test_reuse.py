@@ -584,12 +584,6 @@ def check_license_year(license_file, copyright, start_year, current_year):
         return
 
 
-def check_line_endings(license_file):
-    with open(license_file, "rb") as file:
-        content = file.read()
-        assert b"\r\n" not in content
-
-
 @pytest.mark.license_headers
 def test_license_year_update(tmp_path: pytest.TempPathFactory):
     """Tests if the year in the license header is updated."""
@@ -632,7 +626,6 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
         check_license_year(
             tmp_license, values["copyright"], values["start_year"], values["current_year"]
         )
-        check_line_endings(tmp_license)
 
     os.chdir(REPO_PATH)
 
