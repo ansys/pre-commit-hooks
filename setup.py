@@ -78,15 +78,15 @@ setup(
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.0.11",
+            "ansys-sphinx-theme[autoapi]==1.2.0",
             "numpydoc==1.8.0",
-            "sphinx==8.0.2",
-            "sphinx-autodoc-typehints==2.4.4",
+            "sphinx==8.1.3",
+            "sphinx-autodoc-typehints==2.5.0",
             "sphinx-copybutton==0.5.1",
         ],
         "tests": [
             "pytest==8.3.3",
-            "pytest-cov==5.0.0",
+            "pytest-cov==6.0.0",
         ],
     },
     project_urls={
