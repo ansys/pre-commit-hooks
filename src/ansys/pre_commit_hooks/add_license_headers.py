@@ -28,11 +28,9 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
-import fileinput
 import json
 import os
 import pathlib
-from platform import python_version
 import re
 import shutil
 import sys
@@ -447,47 +445,43 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
         Path to file after add-license-headers was run.
     """
     count = 0
-    before_hook_file = open(before_hook, "r", encoding="utf8")
-    before_hook_lines = before_hook_file.readlines()
     found_reuse_info = False
 
-    # Check if python version is 3.9 since fileinput.input()
-    # does not support the "encoding" keyword
-    if "3.9" in python_version():
-        file = fileinput.input(after_hook, inplace=True)
-    else:
-        file = fileinput.input(after_hook, inplace=True, encoding="utf8")
+    before_hook_file = pathlib.Path(before_hook).open(encoding="utf-8", newline="", mode="r")
+    before_hook_lines = before_hook_file.readlines()
 
-    # Copy file content before add-license-header was run into
-    # the file after add-license-header was run.
-    # stdout is redirected into the file if inplace is True
-    for line in file:
-        # Copy the new reuse lines into the file
-        if _util.contains_reuse_info(line):
-            count += 1
-            found_reuse_info = True
-            print(line.rstrip())
-        else:
-            if found_reuse_info:
-                try:
-                    # Check the lines after the reuse info are the same
-                    # If not, print the line after the reuse info
-                    # This happens when a comment changes from one line to
-                    # multiline
-                    if line != before_hook_lines[count]:
-                        print(line.rstrip())
-                except IndexError:
-                    pass
+    after_hook_file = pathlib.Path(after_hook).open(encoding="utf-8", newline="", mode="r")
+    after_hook_lines = after_hook_file.readlines()
 
-                # Copy the rest of the file after the reuse information
-                for line_after_reuse_info in before_hook_lines[count:]:
-                    print(line_after_reuse_info.rstrip())
-                break
-            # Copy the header lines before reuse information is found
-            else:
+    with pathlib.Path(after_hook).open(encoding="utf-8", newline="", mode="w") as file:
+        # Copy file content before add-license-header was run into
+        # the file after add-license-header was run.
+        for line in after_hook_lines:
+            # Copy the new reuse lines into the file
+            if _util.contains_reuse_info(line):
                 count += 1
-                print(line.rstrip())
-    fileinput.close()
+                found_reuse_info = True
+                file.write(line)
+            else:
+                if found_reuse_info:
+                    try:
+                        # Check the lines after the reuse info are the same
+                        # If not, print the line after the reuse info
+                        # This happens when a comment changes from one line to
+                        # multiline
+                        if line != before_hook_lines[count]:
+                            file.write(line)
+                    except IndexError:
+                        pass
+
+                    # Copy the rest of the file after the reuse information
+                    for line_after_reuse_info in before_hook_lines[count:]:
+                        file.write(line_after_reuse_info)
+                    break
+                # Copy the header lines before reuse information is found
+                else:
+                    count += 1
+                    file.write(line)
 
 
 def get_full_paths(file_list: list) -> list:
