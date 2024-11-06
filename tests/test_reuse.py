@@ -414,7 +414,7 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     add_argv_run(repo, new_files, custom_args)
 
     # Change jinja file
-    orig_jinja = Path(tmp_path) / ".reuse" / "templates" / template_name
+    orig_jinja = os.path.join(tmp_path, ".reuse", "templates", template_name)
     tmp_jinja = open("tmp_jinja", "w")
 
     with open(orig_jinja, "r+") as f:
