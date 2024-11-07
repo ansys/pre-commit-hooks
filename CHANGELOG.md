@@ -6,6 +6,58 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.4.4](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.4) - November 07, 2024
+
+
+### Fixed
+
+- fix: there is no "owner" of libraries [#233](https://github.com/ansys/pre-commit-hooks/pull/233)
+- fix: LICENSE line endings [#236](https://github.com/ansys/pre-commit-hooks/pull/236)
+- fix: AUTHORS and CONTRIBUTORS.md files [#240](https://github.com/ansys/pre-commit-hooks/pull/240)
+
+
+### Dependencies
+
+- build(deps-dev): bump sphinx from 7.4.7 to 8.0.2 [#212](https://github.com/ansys/pre-commit-hooks/pull/212)
+- build(deps-dev): bump numpydoc from 1.7.0 to 1.8.0 [#218](https://github.com/ansys/pre-commit-hooks/pull/218)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.3 to 1.0.5 [#222](https://github.com/ansys/pre-commit-hooks/pull/222)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.5 to 1.0.7 [#223](https://github.com/ansys/pre-commit-hooks/pull/223)
+- build(deps): bump importlib-metadata from 8.2.0 to 8.4.0 [#224](https://github.com/ansys/pre-commit-hooks/pull/224)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.7 to 1.0.8 [#227](https://github.com/ansys/pre-commit-hooks/pull/227)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.3.0 to 2.4.0 [#228](https://github.com/ansys/pre-commit-hooks/pull/228)
+- build(deps): bump importlib-metadata from 8.4.0 to 8.5.0 [#229](https://github.com/ansys/pre-commit-hooks/pull/229)
+- build(deps-dev): bump pytest from 8.3.2 to 8.3.3 [#230](https://github.com/ansys/pre-commit-hooks/pull/230)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.4.0 to 2.4.1 [#231](https://github.com/ansys/pre-commit-hooks/pull/231)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.8 to 1.0.11 [#234](https://github.com/ansys/pre-commit-hooks/pull/234)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.4.1 to 2.4.4 [#235](https://github.com/ansys/pre-commit-hooks/pull/235)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.11 to 1.1.2 [#242](https://github.com/ansys/pre-commit-hooks/pull/242)
+- build(deps-dev): bump sphinx from 8.0.2 to 8.1.3 [#246](https://github.com/ansys/pre-commit-hooks/pull/246)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.2 to 1.1.3 [#247](https://github.com/ansys/pre-commit-hooks/pull/247)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.4.4 to 2.5.0 [#248](https://github.com/ansys/pre-commit-hooks/pull/248)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.6 to 1.1.7 [#252](https://github.com/ansys/pre-commit-hooks/pull/252)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.7 to 1.2.0 [#255](https://github.com/ansys/pre-commit-hooks/pull/255)
+- build(deps-dev): bump pytest-cov from 5.0.0 to 6.0.0 [#256](https://github.com/ansys/pre-commit-hooks/pull/256)
+
+
+### Miscellaneous
+
+- [pre-commit.ci] pre-commit autoupdate [#221](https://github.com/ansys/pre-commit-hooks/pull/221), [#225](https://github.com/ansys/pre-commit-hooks/pull/225), [#237](https://github.com/ansys/pre-commit-hooks/pull/237), [#245](https://github.com/ansys/pre-commit-hooks/pull/245), [#249](https://github.com/ansys/pre-commit-hooks/pull/249)
+- chore: update CONTRIBUTORS.md to match guide lines [#254](https://github.com/ansys/pre-commit-hooks/pull/254)
+
+
+### Documentation
+
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 0.16.6 to 1.0.3 [#219](https://github.com/ansys/pre-commit-hooks/pull/219)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.2.3 to 2.3.0 [#226](https://github.com/ansys/pre-commit-hooks/pull/226)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.3 to 1.1.6 [#251](https://github.com/ansys/pre-commit-hooks/pull/251)
+
+
+### Maintenance
+
+- build(deps): bump ansys/actions from 6 to 7 [#220](https://github.com/ansys/pre-commit-hooks/pull/220)
+- CHORE: Add hacktoberfest labels [#241](https://github.com/ansys/pre-commit-hooks/pull/241)
+- build(deps): bump ansys/actions from 7 to 8 [#243](https://github.com/ansys/pre-commit-hooks/pull/243)
+
 ## [0.4.3](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.3) - 2024-08-07
 
 
