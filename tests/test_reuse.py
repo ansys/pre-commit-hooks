@@ -23,6 +23,7 @@
 import argparse
 from datetime import date as dt
 import os
+from pathlib import Path
 import shutil
 import sys
 from tempfile import NamedTemporaryFile
@@ -32,7 +33,7 @@ import pytest
 
 import ansys.pre_commit_hooks.add_license_headers as hook
 
-git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 START_YEAR = "2023"
 
@@ -70,12 +71,12 @@ def init_repo(tmp_path):
 def make_asset_dirs(tmp_path, template_path, template_name, license_path, license_name):
     """Make asset directories if using a custom license or template."""
     if template_name != "ansys.jinja2":
-        reuse_dir = os.path.join(tmp_path, ".reuse", "templates")
+        reuse_dir = Path(tmp_path) / ".reuse" / "templates"
         os.makedirs(reuse_dir)
         shutil.copyfile(template_path, f"{reuse_dir}/{template_name}")
 
     if license_name != "MIT.txt":
-        license_dir = os.path.join(tmp_path, "LICENSES")
+        license_dir = Path(tmp_path) / "LICENSES"
         os.makedirs(license_dir)
         shutil.copyfile(license_path, f"{license_dir}/{license_name}")
 
@@ -83,8 +84,8 @@ def make_asset_dirs(tmp_path, template_path, template_name, license_path, licens
 def cp_LICENSE_file(tmp_path):
     # Create LICENSE file in tmp_path repo
     license = "LICENSE"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
-    tmp_license = os.path.join(tmp_path, license)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "LICENSES" / license
+    tmp_license = Path(tmp_path) / license
 
     os.chdir(tmp_path)
 
@@ -94,8 +95,8 @@ def cp_LICENSE_file(tmp_path):
 
 def create_test_file(tmp_path):
     """Create temporary file for reuse testing."""
-    with NamedTemporaryFile(mode="w", delete=False, dir=tmp_path) as tmp:
-        tmp.write("# test message")
+    with NamedTemporaryFile(mode="w", delete=False, dir=tmp_path, newline="") as tmp:
+        tmp.write(f"# test message\n")
         tmp.close()
         filename = tmp.name
 
@@ -140,8 +141,8 @@ def test_custom_start_year(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -171,8 +172,8 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -200,8 +201,8 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -244,8 +245,8 @@ def test_multiple_files(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -279,8 +280,8 @@ def test_main_fails(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -319,8 +320,8 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "copyright_only.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -355,8 +356,8 @@ def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -394,8 +395,8 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -482,8 +483,8 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
     bad_chars_name = "bad_chars.py"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Change dir to tmp_path
     os.chdir(tmp_path)
@@ -499,9 +500,7 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     cp_LICENSE_file(tmp_path)
 
     # Copy file with bad characters to git repository
-    shutil.copyfile(
-        os.path.join(REPO_PATH, "tests", "test_reuse_files", bad_chars_name), bad_chars_name
-    )
+    shutil.copyfile(Path(REPO_PATH) / "tests" / "test_reuse_files" / bad_chars_name, bad_chars_name)
 
     # Assert the hook failed
     assert add_argv_run(repo, bad_chars_name, [bad_chars_name]) == 1
@@ -518,8 +517,8 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     template_name = "copyright_only.jinja2"
     license_name = "MIT.txt"
     test_filename = "index_error.scss"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Change dir to tmp_path
     os.chdir(tmp_path)
@@ -535,9 +534,7 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     cp_LICENSE_file(tmp_path)
 
     # Copy file that will cause an IndexError to git repository
-    shutil.copyfile(
-        os.path.join(REPO_PATH, "tests", "test_reuse_files", test_filename), test_filename
-    )
+    shutil.copyfile(Path(REPO_PATH) / "tests" / "test_reuse_files" / test_filename, test_filename)
 
     custom_args = [
         test_filename,
@@ -589,8 +586,8 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     """Tests if the year in the license header is updated."""
     # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
     license = "LICENSE"
-    template_path = os.path.join(REPO_PATH, "tests", "test_reuse_files", "LICENSES", license)
-    tmp_license = os.path.join(tmp_path, license)
+    template_path = Path(REPO_PATH) / "tests" / "test_reuse_files" / "LICENSES" / license
+    tmp_license = Path(tmp_path) / license
     custom_args = []
 
     os.chdir(tmp_path)
@@ -630,6 +627,7 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
+@pytest.mark.license_headers
 def test_no_recursion(tmp_path: pytest.TempPathFactory):
     """Test license headers with function that does not use recursion."""
     # Set template and license names
@@ -640,8 +638,8 @@ def test_no_recursion(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
     license_name = "MIT.txt"
-    template_path = os.path.join(REPO_PATH, ".reuse", "templates", template_name)
-    license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -669,5 +667,53 @@ def test_no_recursion(tmp_path: pytest.TempPathFactory):
     # Check headers are correct in all tmp_files
     for file in new_files:
         check_ansys_header(file)
+
+    os.chdir(REPO_PATH)
+
+
+def get_line_endings(tmp_file):
+    """Get the line endings from the file."""
+    with open(tmp_file, "rb") as file:
+        # Read the file
+        content = file.read()
+        # Determine which line endings are in the content
+        if b"\r\n" in content:
+            return "Windows"
+        elif b"\n" in content:
+            return "Linux"
+        elif b"\r" in content:
+            return "Mac"
+
+
+@pytest.mark.license_headers
+def test_line_endings(tmp_path: pytest.TempPathFactory):
+    """Test line endings remain the same before and after running the hook."""
+    # List of files to be git added
+    new_files = []
+
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    tmp_license = Path(tmp_path) / "LICENSE"
+    new_files.append(tmp_file)
+
+    # Get the line endings from the file before the hook is run
+    file_line_endings_before = get_line_endings(tmp_file)
+    license_line_endings_before = get_line_endings(tmp_license)
+
+    # Add header to tmp_file
+    add_argv_run(repo, new_files, new_files)
+
+    # Update header file that has no changes
+    assert add_argv_run(repo, new_files, new_files) == 0
+
+    # Assert line endings haven't changed
+    assert file_line_endings_before == get_line_endings(tmp_file)
+    assert license_line_endings_before == get_line_endings(tmp_license)
 
     os.chdir(REPO_PATH)
