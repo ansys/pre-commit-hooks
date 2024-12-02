@@ -85,7 +85,7 @@ setup(
             "sphinx-copybutton==0.5.1",
         ],
         "tests": [
-            "pytest==8.3.3",
+            "pytest==8.3.4",
             "pytest-cov==6.0.0",
         ],
     },
