@@ -28,7 +28,6 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
-import json
 import os
 import pathlib
 import re
@@ -37,8 +36,9 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import _annotate, _util, lint, project
-from reuse.vcs import VCSStrategyGit
+from reuse import extract
+from reuse.cli import common
+from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info, get_template
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -166,95 +166,81 @@ def mkdirs_and_link(
     os.symlink(src, dest)
 
 
-def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
-    """
-    Get a list of the files that are missing license headers.
+def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) -> tuple:
+    """Set variables to run `REUSE <https://reuse.software/>`_ on the project.
 
     Parameters
     ----------
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+    values: dict
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
     args: argparse.Namespace
         Namespace of arguments with their values.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-
     Returns
     -------
-    list
-        List of the files that are missing license headers.
+    tuple
+        Tuple containing the project, template, commented, license, files, copyright, and years.
     """
-    # Create a temporary file containing lint.run json output
-    filename = None
-    with NamedTemporaryFile(mode="w", delete=False) as tmp:
-        args.json = True
-        lint.run(args, proj, tmp)
-        filename = tmp.name
+    project = obj.project
+    template, commented = get_template(values["template"], project)
 
-    # Open the temporary file, load the JSON file, and find files that
-    # are missing license headers.
-    lint_json = None
-    with open(filename, "rb") as file:
-        lint_json = json.load(file)
+    license = [] if args.ignore_license_check else [values["license"]]
+    files = values["files"]
+    copyright = [values["copyright"]]
+    years = (
+        f"{values['start_year']} - {values['current_year']}"
+        if values["start_year"] != values["current_year"]
+        else f"{values['current_year']}"
+    )
 
-    # Get files missing copyright information
-    missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
-
-    # If ignore_license_check is False, check files for missing licensing information
-    if not args.ignore_license_check:
-        missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
-        missing_headers = missing_headers.union(missing_licensing_info)
-
-    # Remove temporary file
-    os.remove(filename)
-
-    return missing_headers
+    return project, template, commented, license, files, copyright, years
 
 
-def set_header_args(
-    parser: argparse.ArgumentParser,
-    start_year: str,
-    current_year: int,
-    file_path: str,
-    copyright: str,
-    template: str,
-) -> argparse.Namespace:
-    """
-    Set arguments for `REUSE <https://reuse.software/>`_.
+def add_file_header(
+    copyright: str, license: str, years: str, file: str, template: str, commented: bool
+) -> tuple:
+    """Add the license header to the file.
 
     Parameters
     ----------
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
-    year: int
-        Current year retrieved by datetime.
-    file_path: str
-        Specific file path to create license headers.
     copyright: str
-        Copyright line for license headers.
+        The copyright line for the license header. For example,
+        "ANSYS, Inc. and/or its affiliates."
+    license: str
+        The license for the license header. For example, "MIT".
+    years: str
+        The year span in the license header. For example, "2024" or "2023 - 2024".
+    file: str
+        The file path to add the license header to.
     template: str
-        Name of the template for license headers (name.jinja2).
-
-    Returns
-    -------
-    argparse.Namespace
-        Namespace of arguments with their values.
+        The template to use for the license header. For example, "ansys.jinja2".
+    commented: bool
+        Whether the template is commented or not.
     """
-    # Provide values for license header arguments
-    args = parser.parse_args([file_path])
-    if start_year == current_year:
-        args.year = [current_year]
-    else:
-        args.year = [int(start_year), current_year]
-    args.copyright_prefix = "string-c"
-    args.copyright = [copyright]
-    args.merge_copyrights = True
-    args.template = template
-    args.skip_unrecognised = True
-    args.parser = parser
+    reuse_info = get_reuse_info(
+        copyrights=copyright,
+        licenses=license,
+        copyright_prefix="string-c",
+        year=years,
+        contributors="",
+    )
 
-    return args
+    add_header_to_file(
+        path=file,
+        reuse_info=reuse_info,
+        template=template,
+        template_is_commented=commented,
+        style=f"{get_comment_style(file).SHORTHAND}",
+        merge_copyrights=True,
+        out=sys.stdout,
+    )
 
 
-def non_recursive_file_check(changed_headers, parser, values, proj, missing_headers):
+def non_recursive_file_check(
+    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace
+) -> int:
     """
     Check if the committed file is missing its header.
 
@@ -263,16 +249,13 @@ def non_recursive_file_check(changed_headers, parser, values, proj, missing_head
     changed_headers: int
         ``0`` if no headers were added or updated.
         ``1`` if headers were added or updated.
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
     values: dict
         Dictionary containing the values of files, copyright,
         template, license, changed_headers, year, and git_repo.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-    missing_headers: list
-        Committed files that are missing copyright and/or
-        license information in their headers.
+    args: argparse.Namespace
+        Namespace of arguments with their values.
 
     Returns
     -------
@@ -280,23 +263,23 @@ def non_recursive_file_check(changed_headers, parser, values, proj, missing_head
         ``0`` if all files contain headers and are up to date.
         ``1`` if ``REUSE`` changed all noncompliant files.
     """
-    files = values["files"]
-    start_year = values["start_year"]
-    current_year = values["current_year"]
-    copyright = values["copyright"]
-    template = values["template"]
+    project, template, commented, license, pre_commit_files, copyright, years = set_variables(
+        obj, values, args
+    )
 
-    for file in files:
-        args = set_header_args(parser, start_year, current_year, file, copyright, template)
-        # If the committed file is in missing_headers
-        if (file in missing_headers) or (os.path.getsize(file) == 0):
+    for file in pre_commit_files:
+        # Get the reuse information of the file
+        file_reuse_info = project.reuse_info_of(file)
+
+        # If the file is empty or does not contain reuse information
+        if (not file_reuse_info) or (os.path.getsize(file) == 0):
             changed_headers = 1
-            # Run REUSE on the file
-            if not args.ignore_license_check:
-                args.license = [values["license"]]
+            add_file_header(copyright, license, years, file, template, commented)
+        elif file_reuse_info:
+            # license = [] if the file header already contains SPDX-License-Identifier
+            # This prevents SPDX-License-Identifier from being added twice
+            license = []
 
-            _annotate.run(args, proj)
-        else:
             # Save current copy of file
             before_hook = NamedTemporaryFile(mode="w", delete=False).name
             shutil.copyfile(file, before_hook)
@@ -304,7 +287,7 @@ def non_recursive_file_check(changed_headers, parser, values, proj, missing_head
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                _annotate.run(args, proj, tmp)
+                add_file_header(copyright, license, years, file, template, commented)
 
             # Check if the file before add-license-headers was run is the same as the one
             # after add-license-headers was run. If not, apply the syntax changes
@@ -324,25 +307,23 @@ def non_recursive_file_check(changed_headers, parser, values, proj, missing_head
     return changed_headers
 
 
-def recursive_file_check(changed_headers, parser, values, proj, missing_headers, count):
-    """
-    Check if the committed file is missing its header.
+def recursive_file_check(
+    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace, count: int
+) -> int:
+    """Check if the committed file is missing its header.
 
     Parameters
     ----------
     changed_headers: int
         ``0`` if no headers were added or updated.
         ``1`` if headers were added or updated.
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
     values: dict
         Dictionary containing the values of files, copyright,
         template, license, changed_headers, year, and git_repo.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-    missing_headers: list
-        Committed files that are missing copyright and/or
-        license information in their headers.
+    args: argparse.Namespace
+        Namespace of arguments with their values.
     count: int
         Integer of the location in the files array.
 
@@ -352,29 +333,27 @@ def recursive_file_check(changed_headers, parser, values, proj, missing_headers,
         ``0`` if all files contain headers and are up to date.
         ``1`` if ``REUSE`` changed all noncompliant files.
     """
-    files = values["files"]
-    start_year = values["start_year"]
-    current_year = values["current_year"]
-    copyright = values["copyright"]
-    template = values["template"]
+    project, template, commented, license, pre_commit_files, copyright, years = set_variables(
+        obj, values, args
+    )
 
-    if count < len(files):
-        # If the committed file is in missing_headers
-        file = files[count]
+    if count < len(pre_commit_files):
+        # Get the file name at count from pre_commit_files
+        file = pre_commit_files[count]
+        # Get the reuse information of the file
+        file_reuse_info = project.reuse_info_of(file)
 
-        if (file in missing_headers) or (os.path.getsize(file) == 0):
+        if (not file_reuse_info) or (os.path.getsize(file) == 0):
             changed_headers = 1
-            # Run REUSE on the file
-            args = set_header_args(parser, start_year, current_year, file, copyright, template)
-            if not args.ignore_license_check:
-                args.license = [values["license"]]
-            _annotate.run(args, proj)
+            add_file_header(copyright, license, years, file, template, commented)
 
             # Check if the next file is in missing_headers
-            return recursive_file_check(
-                changed_headers, parser, values, proj, missing_headers, count + 1
-            )
-        else:
+            return recursive_file_check(changed_headers, obj, values, args, count + 1)
+        elif file_reuse_info:
+            # license = [] if the file header already contains SPDX-License-Identifier
+            # This prevents SPDX-License-Identifier from being added twice
+            license = []
+
             # Save current copy of file
             before_hook = NamedTemporaryFile(mode="w", delete=False).name
             shutil.copyfile(file, before_hook)
@@ -382,8 +361,7 @@ def recursive_file_check(changed_headers, parser, values, proj, missing_headers,
             # Update the header
             # tmp captures the stdout of the header.run() function
             with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                args = set_header_args(parser, start_year, current_year, file, copyright, template)
-                _annotate.run(args, proj, tmp)
+                add_file_header(copyright, license, years, file, template, commented)
 
             # Check if the file before add-license-headers was run is the same as the one
             # after add-license-headers was run. If not, apply the syntax changes
@@ -400,14 +378,12 @@ def recursive_file_check(changed_headers, parser, values, proj, missing_headers,
 
             os.remove(before_hook)
 
-            return recursive_file_check(
-                changed_headers, parser, values, proj, missing_headers, count + 1
-            )
+            return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
     return changed_headers
 
 
-def check_same_content(before_hook, after_hook):
+def check_same_content(before_hook: str, after_hook: str) -> bool:
     """
     Check if file before the hook ran is the same as after the hook ran.
 
@@ -458,7 +434,7 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
         # the file after add-license-header was run.
         for line in after_hook_lines:
             # Copy the new reuse lines into the file
-            if _util.contains_reuse_info(line):
+            if extract.contains_reuse_info(line):
                 count += 1
                 found_reuse_info = True
                 file.write(line)
@@ -509,7 +485,9 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def update_year_range(user_start_year, match_start_year, current_year, match_end_year):
+def update_year_range(
+    user_start_year: str, match_start_year: str, current_year: str, match_end_year: str
+) -> tuple:
     """Update the year or year range in the LICENSE file.
 
     Parameters
@@ -524,6 +502,11 @@ def update_year_range(user_start_year, match_start_year, current_year, match_end
     match_end_year: str
         The end year of the year range in the LICENSE file. For example, the LICENSE file
         contains the range "2023 - 2024", so match_end_year is 2024.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the updated start and end years.
     """
     # If the user start year from the pre-commit hook is less than the match start year,
     # set the match_start_year as the user_start_year
@@ -634,9 +617,9 @@ def cleanup(assets: dict, os_git_root: str) -> None:
                 shutil.rmtree(key)
 
 
-def find_files_missing_header() -> int:
+def run_hook() -> int:
     """
-    Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+    Add and update file headers with `REUSE <https://reuse.software/>`_.
 
     Returns
     -------
@@ -703,31 +686,18 @@ def find_files_missing_header() -> int:
         },
     }
 
-    # Add header arguments to parser. Arguments are: copyright, license, contributor,
-    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
-    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing
-    _annotate.add_arguments(parser)
-
     # Link the default template and/or license from the assets folder to your git repo.
     link_assets(assets, os_git_root, args)
 
-    # Project to run `REUSE <https://reuse.software/>`_ on
-    proj = project.Project(git_root, vcs_strategy=VCSStrategyGit)
-
-    # Get files missing headers (copyright and/or license information)
-    missing_headers = list(list_noncompliant_files(args, proj))
+    # Create click object for the project
+    obj = common.ClickObj(git_root)
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
     if len(values["files"]) <= (sys.getrecursionlimit() - 2):
-        file_return_code = recursive_file_check(
-            changed_headers, parser, values, proj, missing_headers, 0
-        )
+        file_return_code = recursive_file_check(changed_headers, obj, values, args, 0)
     else:
-        file_return_code = non_recursive_file_check(
-            changed_headers, parser, values, proj, missing_headers
-        )
+        file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, os_git_root)
@@ -738,8 +708,8 @@ def find_files_missing_header() -> int:
 
 
 def main():
-    """Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them."""
-    return find_files_missing_header()
+    """Add and update file headers with `REUSE <https://reuse.software/>`_."""
+    return run_hook()
 
 
 if __name__ == "__main__":
