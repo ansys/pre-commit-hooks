@@ -71,7 +71,7 @@ setup(
         "GitPython==3.1.43",
         "importlib-metadata==8.5.0",
         "Jinja2==3.1.4",
-        "reuse==4.0.3",
+        "reuse==5.0.2",
         "requests==2.32.3",
         "semver==3.0.2",
         "toml==0.10.2",
