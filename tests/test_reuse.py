@@ -36,6 +36,7 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 START_YEAR = "2023"
+DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 
 
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
@@ -295,12 +296,27 @@ def test_main_fails(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.license_headers
-def test_main_passes():
+def test_main_passes(tmp_path: pytest.TempPathFactory):
     """Test all files are compliant."""
-    sys.argv[1:] = [f"--start_year={START_YEAR}"]
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
-    # Assert main runs successfully
-    assert hook.main() == 0
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    tmp_license = Path(tmp_path) / "LICENSE"
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
+
+    # Run hook on tmp_file and git add tmp_file
+    add_argv_run(repo, tmp_file, custom_args) == 1
+    repo.index.add([tmp_file, tmp_license])
+
+    # Run hook on tmp_file
+    assert add_argv_run(repo, tmp_file, custom_args) == 0
+
+    check_ansys_header(tmp_file)
 
     os.chdir(REPO_PATH)
 
@@ -570,10 +586,11 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
 
 
 def check_license_year(license_file, copyright, start_year, current_year):
-    f = open(license_file, "r")
+    file = open(license_file, "r")
 
-    for line in f:
+    for line in file:
         if copyright in line:
+            # print(line)
             if start_year != current_year:
                 assert f"{start_year} - {current_year}" in line
             else:
@@ -625,6 +642,35 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
         )
 
     os.chdir(REPO_PATH)
+
+
+@pytest.mark.license_headers
+def test_date_update(tmp_path: pytest.TempPathFactory):
+    """Test the date is correctly updated in the license header."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
+
+    # Years to update the LICENSE file
+    years = ["2022", "2023", str(dt.today().year)]
+
+    # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}"
+    # and "{current_year}"
+    for year in years:
+        print(f"new year {year}")
+        custom_args = [tmp_file, f"--start_year={year}"]
+        # Git add tmp_file and run hook with custom arguments
+        assert add_argv_run(repo, tmp_file, custom_args) == 1
+        # hook.update_license_file(values)
+        check_license_year(tmp_file, DEFAULT_COPYRIGHT, year, str(dt.today().year))
+        # Add file with updated header
+        repo.index.add([tmp_file])
 
 
 @pytest.mark.license_headers
