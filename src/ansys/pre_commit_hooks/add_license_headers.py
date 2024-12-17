@@ -28,7 +28,6 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
-import json
 import os
 import pathlib
 import re
@@ -37,8 +36,9 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
-from reuse import _annotate, _util, lint, project
-from reuse.vcs import VCSStrategyGit
+from reuse import extract
+from reuse.cli import common
+from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info, get_template
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -47,6 +47,9 @@ DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 DEFAULT_START_YEAR = dt.today().year
+"""Default start year for license headers."""
+YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
+"""Year regex to match year or year range in files."""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -105,6 +108,78 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     return parser.parse_args()
 
 
+def get_full_paths(file_list: list) -> list:
+    """
+    Update file paths to be absolute paths with system separators.
+
+    Parameters
+    ----------
+    file_list: list
+        List containing committed files.
+
+    Returns
+    -------
+    list
+        List containing the full paths of committed files.
+    """
+    full_path_files = []
+    for file in file_list:
+        if "win" in sys.platform:
+            split_str = file.split("/")
+            full_path_files.append(os.path.abspath(os.path.join(*split_str)))
+        else:
+            full_path_files.append(os.path.abspath(file))
+
+    return full_path_files
+
+
+def update_license_file(arg_dict: dict) -> int:
+    """
+    Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+
+    Parameters
+    ----------
+    arg_dict: dict
+        Dictionary containing the committed files, custom copyright, template, license,
+        changed_headers, start & end year, and git_repo
+    """
+    # Get location of LICENSE file in the repository the hook runs on
+    git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
+    repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
+    save_repo_license = shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save")
+
+    # Get the location of MIT.txt in the hook's assets folder
+    hook_loc = pathlib.Path(__file__).parent.resolve()
+    hook_license_file = os.path.join(hook_loc, "assets", "LICENSES", f"{DEFAULT_LICENSE}.txt")
+
+    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+        shutil.copyfile(hook_license_file, repo_license_loc)
+
+    # Whether or not the year in LICENSE was updated
+    # 0 is unchanged, 1 is changed
+    changed = 0
+
+    user_start_year = str(arg_dict["start_year"])
+    current_year = str(arg_dict["current_year"])
+
+    # Check if custom_license is MIT
+    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+        changed = update_year_range(
+            changed, repo_license_loc, YEAR_REGEX, user_start_year, current_year
+        )
+
+    # If the year changed, print a message that the LICENSE file was changed
+    if not check_same_content(save_repo_license, repo_license_loc):
+        changed = 1
+        print(f"Successfully updated year in {repo_license_loc}")
+
+    # Remove the temporary file
+    os.remove(save_repo_license)
+
+    return changed
+
+
 def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     """
     Link the default template and/or license from the assets folder to your git repo.
@@ -121,9 +196,11 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
 
+    # Get the location of the hook in the file system
     hook_loc = pathlib.Path(__file__).parent.resolve()
 
     for key, value in assets.items():
+        # Get the location of the hook's "assets" folder
         hook_asset_dir = os.path.join(hook_loc, "assets", value["path"])
         repo_asset_dir = os.path.join(git_root, value["path"])
 
@@ -166,183 +243,23 @@ def mkdirs_and_link(
     os.symlink(src, dest)
 
 
-def list_noncompliant_files(args: argparse.Namespace, proj: project.Project) -> list:
-    """
-    Get a list of the files that are missing license headers.
+def recursive_file_check(
+    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace, count: int
+) -> int:
+    """Check if the committed file is missing its header.
 
     Parameters
     ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+    values: dict
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
     args: argparse.Namespace
         Namespace of arguments with their values.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-
-    Returns
-    -------
-    list
-        List of the files that are missing license headers.
-    """
-    # Create a temporary file containing lint.run json output
-    filename = None
-    with NamedTemporaryFile(mode="w", delete=False) as tmp:
-        args.json = True
-        lint.run(args, proj, tmp)
-        filename = tmp.name
-
-    # Open the temporary file, load the JSON file, and find files that
-    # are missing license headers.
-    lint_json = None
-    with open(filename, "rb") as file:
-        lint_json = json.load(file)
-
-    # Get files missing copyright information
-    missing_headers = set(lint_json["non_compliant"]["missing_copyright_info"])
-
-    # If ignore_license_check is False, check files for missing licensing information
-    if not args.ignore_license_check:
-        missing_licensing_info = set(lint_json["non_compliant"]["missing_licensing_info"])
-        missing_headers = missing_headers.union(missing_licensing_info)
-
-    # Remove temporary file
-    os.remove(filename)
-
-    return missing_headers
-
-
-def set_header_args(
-    parser: argparse.ArgumentParser,
-    start_year: str,
-    current_year: int,
-    file_path: str,
-    copyright: str,
-    template: str,
-) -> argparse.Namespace:
-    """
-    Set arguments for `REUSE <https://reuse.software/>`_.
-
-    Parameters
-    ----------
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
-    year: int
-        Current year retrieved by datetime.
-    file_path: str
-        Specific file path to create license headers.
-    copyright: str
-        Copyright line for license headers.
-    template: str
-        Name of the template for license headers (name.jinja2).
-
-    Returns
-    -------
-    argparse.Namespace
-        Namespace of arguments with their values.
-    """
-    # Provide values for license header arguments
-    args = parser.parse_args([file_path])
-    if start_year == current_year:
-        args.year = [current_year]
-    else:
-        args.year = [int(start_year), current_year]
-    args.copyright_prefix = "string-c"
-    args.copyright = [copyright]
-    args.merge_copyrights = True
-    args.template = template
-    args.skip_unrecognised = True
-    args.parser = parser
-
-    return args
-
-
-def non_recursive_file_check(changed_headers, parser, values, proj, missing_headers):
-    """
-    Check if the committed file is missing its header.
-
-    Parameters
-    ----------
-    changed_headers: int
-        ``0`` if no headers were added or updated.
-        ``1`` if headers were added or updated.
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
-    values: dict
-        Dictionary containing the values of files, copyright,
-        template, license, changed_headers, year, and git_repo.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-    missing_headers: list
-        Committed files that are missing copyright and/or
-        license information in their headers.
-
-    Returns
-    -------
-    int
-        ``0`` if all files contain headers and are up to date.
-        ``1`` if ``REUSE`` changed all noncompliant files.
-    """
-    files = values["files"]
-    start_year = values["start_year"]
-    current_year = values["current_year"]
-    copyright = values["copyright"]
-    template = values["template"]
-
-    for file in files:
-        args = set_header_args(parser, start_year, current_year, file, copyright, template)
-        # If the committed file is in missing_headers
-        if (file in missing_headers) or (os.path.getsize(file) == 0):
-            changed_headers = 1
-            # Run REUSE on the file
-            if not args.ignore_license_check:
-                args.license = [values["license"]]
-
-            _annotate.run(args, proj)
-        else:
-            # Save current copy of file
-            before_hook = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(file, before_hook)
-
-            # Update the header
-            # tmp captures the stdout of the header.run() function
-            with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                _annotate.run(args, proj, tmp)
-
-            # Check if the file before add-license-headers was run is the same as the one
-            # after add-license-headers was run. If not, apply the syntax changes
-            # from other hooks before add-license-headers was run to the file
-            if check_same_content(before_hook, file) == False:
-                add_hook_changes(before_hook, file)
-
-            # Check if the file content before add-license-headers was run has been changed
-            # Assuming the syntax was fixed in the above if statement, this check is
-            # solely for the file's content
-            if check_same_content(before_hook, file) == False:
-                changed_headers = 1
-                print(f"Successfully changed header of {file}")
-
-            os.remove(before_hook)
-
-    return changed_headers
-
-
-def recursive_file_check(changed_headers, parser, values, proj, missing_headers, count):
-    """
-    Check if the committed file is missing its header.
-
-    Parameters
-    ----------
-    changed_headers: int
-        ``0`` if no headers were added or updated.
-        ``1`` if headers were added or updated.
-    parser: argparse.ArgumentParser
-        Parser containing default license header arguments.
-    values: dict
-        Dictionary containing the values of files, copyright,
-        template, license, changed_headers, year, and git_repo.
-    proj: project.Project
-        Project to run `REUSE <https://reuse.software/>`_ on.
-    missing_headers: list
-        Committed files that are missing copyright and/or
-        license information in their headers.
     count: int
         Integer of the location in the files array.
 
@@ -352,62 +269,229 @@ def recursive_file_check(changed_headers, parser, values, proj, missing_headers,
         ``0`` if all files contain headers and are up to date.
         ``1`` if ``REUSE`` changed all noncompliant files.
     """
-    files = values["files"]
-    start_year = values["start_year"]
-    current_year = values["current_year"]
-    copyright = values["copyright"]
-    template = values["template"]
+    project, template, commented, license, pre_commit_files, copyright, years = set_variables(
+        obj, values, args
+    )
 
-    if count < len(files):
-        # If the committed file is in missing_headers
-        file = files[count]
+    if count < len(pre_commit_files):
+        # Get the file name at count from pre_commit_files
+        file = pre_commit_files[count]
+        # Get the reuse information of the file
+        file_reuse_info = project.reuse_info_of(file)
 
-        if (file in missing_headers) or (os.path.getsize(file) == 0):
+        if (not file_reuse_info) or (os.path.getsize(file) == 0):
             changed_headers = 1
-            # Run REUSE on the file
-            args = set_header_args(parser, start_year, current_year, file, copyright, template)
-            if not args.ignore_license_check:
-                args.license = [values["license"]]
-            _annotate.run(args, proj)
-
+            # Add the header to the file
+            add_header(copyright, license, years, file, template, commented)
             # Check if the next file is in missing_headers
-            return recursive_file_check(
-                changed_headers, parser, values, proj, missing_headers, count + 1
-            )
-        else:
-            # Save current copy of file
-            before_hook = NamedTemporaryFile(mode="w", delete=False).name
-            shutil.copyfile(file, before_hook)
-
+            return recursive_file_check(changed_headers, obj, values, args, count + 1)
+        elif file_reuse_info:
             # Update the header
-            # tmp captures the stdout of the header.run() function
-            with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                args = set_header_args(parser, start_year, current_year, file, copyright, template)
-                _annotate.run(args, proj, tmp)
+            changed_headers = update_header(
+                changed_headers, file, copyright, license, years, template, commented
+            )
+            return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
-            # Check if the file before add-license-headers was run is the same as the one
-            # after add-license-headers was run. If not, apply the syntax changes
-            # from other hooks before add-license-headers was run to the file
-            if check_same_content(before_hook, file) == False:
-                add_hook_changes(before_hook, file)
+    return changed_headers
 
-            # Check if the file content before add-license-headers was run has been changed
-            # Assuming the syntax was fixed in the above if statement, this check is
-            # solely for the file's content
-            if check_same_content(before_hook, file) == False:
-                changed_headers = 1
-                print(f"Successfully changed header of {file}")
 
-            os.remove(before_hook)
+def non_recursive_file_check(
+    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace
+) -> int:
+    """
+    Check if the committed file is missing its header.
 
-            return recursive_file_check(
-                changed_headers, parser, values, proj, missing_headers, count + 1
+    Parameters
+    ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+    values: dict
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+
+    Returns
+    -------
+    int
+        ``0`` if all files contain headers and are up to date.
+        ``1`` if ``REUSE`` changed all noncompliant files.
+    """
+    project, template, commented, license, pre_commit_files, copyright, years = set_variables(
+        obj, values, args
+    )
+
+    for file in pre_commit_files:
+        # Get the reuse information of the file
+        file_reuse_info = project.reuse_info_of(file)
+
+        # If the file is empty or does not contain reuse information
+        if (not file_reuse_info) or (os.path.getsize(file) == 0):
+            changed_headers = 1
+            add_header(copyright, license, years, file, template, commented)
+        elif file_reuse_info:
+            changed_headers = update_header(
+                changed_headers, file, copyright, license, years, template, commented
             )
 
     return changed_headers
 
 
-def check_same_content(before_hook, after_hook):
+def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) -> tuple:
+    """Set variables to run `REUSE <https://reuse.software/>`_ on the project.
+
+    Parameters
+    ----------
+    obj: common.ClickObj
+        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+    values: dict
+        Dictionary containing the values of files, copyright,
+        template, license, changed_headers, year, and git_repo.
+    args: argparse.Namespace
+        Namespace of arguments with their values.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the project, template, commented, license, files, copyright, and years.
+    """
+    project = obj.project
+    template, commented = get_template(values["template"], project)
+
+    license = [] if args.ignore_license_check else [values["license"]]
+    files = values["files"]
+    copyright = [values["copyright"]]
+    years = (
+        f"{values['start_year']} - {values['current_year']}"
+        if values["start_year"] != values["current_year"]
+        else f"{values['current_year']}"
+    )
+
+    return project, template, commented, license, files, copyright, years
+
+
+def update_header(
+    changed_headers: int,
+    file: str,
+    copyright: str,
+    license: str,
+    years: str,
+    template: str,
+    commented: bool,
+) -> int:
+    """Update the license header of the file.
+
+    Parameters
+    ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    file: str
+        The file whose header is being updated.
+    copyright: str
+        The copyright string of the header. For example, "ANSYS, Inc. and/or its affiliates."
+    license: str
+        The license of the header. For example, "MIT".
+    years: str
+        The year span of the header. For example, "2024" or "2023 - 2024".
+    template: str
+        The template to use for the header. For example, "ansys" for "ansys.jinja2".
+    commented: bool
+        Whether the template is commented or not.
+
+    Returns
+    -------
+    int
+        ``0`` if all files contain headers and are up to date.
+        ``1`` if ``REUSE`` changed all noncompliant files.
+    """
+    # The license array is empty if the file header already contains SPDX-License-Identifier
+    # This prevents SPDX-License-Identifier from being added twice
+    license = []
+
+    # Save current copy of file
+    before_hook = NamedTemporaryFile(mode="w", delete=False).name
+    shutil.copyfile(file, before_hook)
+
+    # Update the header
+    # tmp captures the stdout of the header.run() function
+    with NamedTemporaryFile(mode="w", delete=True) as tmp:
+        add_header(copyright, license, years, file, template, commented)
+
+    # Check if the file before add-license-headers was run is the same as the one
+    # after add-license-headers was run. If not, apply the syntax changes
+    # from other hooks before add-license-headers was run to the file
+    if check_same_content(before_hook, file) == False:
+        apply_hook_changes(before_hook, file)
+
+    years_list = years.split(" - ")
+    if len(years_list) == 1:
+        if years_list != DEFAULT_START_YEAR:
+            years_list.append(DEFAULT_START_YEAR)
+        else:
+            years_list.append(years_list)
+    changed_headers = update_year_range(
+        changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
+    )
+
+    # Check if the file content before add-license-headers was run has been changed
+    # Assuming the syntax was fixed in the above if statement, this check is
+    # solely for the file's content
+    if check_same_content(before_hook, file) == False:
+        changed_headers = 1
+        print(f"Successfully changed header of {file}")
+
+    os.remove(before_hook)
+
+    return changed_headers
+
+
+def add_header(
+    copyright: str, license: str, years: str, file: str, template: str, commented: bool
+) -> None:
+    """Add the license header to the file.
+
+    Parameters
+    ----------
+    copyright: str
+        The copyright line for the license header. For example,
+        "ANSYS, Inc. and/or its affiliates."
+    license: str
+        The license for the license header. For example, "MIT".
+    years: str
+        The year span in the license header. For example, "2024" or "2023 - 2024".
+    file: str
+        The file path to add the license header to.
+    template: str
+        The template to use for the license header. For example, "ansys.jinja2".
+    commented: bool
+        Whether the template is commented or not.
+    """
+    # Get the REUSE information from the file.
+    reuse_info = get_reuse_info(
+        copyrights=copyright,
+        licenses=license,
+        copyright_prefix="string-c",
+        year=years,
+        contributors="",
+    )
+
+    # Add or update the header in the file with the REUSE information.
+    add_header_to_file(
+        path=file,
+        reuse_info=reuse_info,
+        template=template,
+        template_is_commented=commented,
+        style=f"{get_comment_style(file).SHORTHAND}",
+        merge_copyrights=True,
+        out=sys.stdout,
+    )
+
+
+def check_same_content(before_hook: str, after_hook: str) -> bool:
     """
     Check if file before the hook ran is the same as after the hook ran.
 
@@ -433,7 +517,7 @@ def check_same_content(before_hook, after_hook):
         return True
 
 
-def add_hook_changes(before_hook: str, after_hook: str) -> None:
+def apply_hook_changes(before_hook: str, after_hook: str) -> None:
     """
     Add earlier hook changes to updated file with header.
 
@@ -447,18 +531,15 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
     count = 0
     found_reuse_info = False
 
-    before_hook_file = pathlib.Path(before_hook).open(encoding="utf-8", newline="", mode="r")
-    before_hook_lines = before_hook_file.readlines()
-
-    after_hook_file = pathlib.Path(after_hook).open(encoding="utf-8", newline="", mode="r")
-    after_hook_lines = after_hook_file.readlines()
+    before_hook_lines = get_content(before_hook)
+    after_hook_lines = get_content(after_hook)
 
     with pathlib.Path(after_hook).open(encoding="utf-8", newline="", mode="w") as file:
         # Copy file content before add-license-header was run into
         # the file after add-license-header was run.
         for line in after_hook_lines:
             # Copy the new reuse lines into the file
-            if _util.contains_reuse_info(line):
+            if extract.contains_reuse_info(line):
                 count += 1
                 found_reuse_info = True
                 file.write(line)
@@ -484,133 +565,108 @@ def add_hook_changes(before_hook: str, after_hook: str) -> None:
                     file.write(line)
 
 
-def get_full_paths(file_list: list) -> list:
-    """
-    Update file paths to be absolute paths with system separators.
+def get_content(file: str) -> str:
+    """Read a file and return its content.
 
     Parameters
     ----------
-    file_list: list
-        List containing committed files.
+    file: str
+        Path to the file to read.
 
     Returns
     -------
-    list
-        List containing the full paths of committed files.
+    str
+        Content of the file.
     """
-    full_path_files = []
-    for file in file_list:
-        if "win" in sys.platform:
-            split_str = file.split("/")
-            full_path_files.append(os.path.abspath(os.path.join(*split_str)))
-        else:
-            full_path_files.append(os.path.abspath(file))
+    read_file = pathlib.Path(file).open(encoding="utf-8", newline="", mode="r")
+    content = read_file.readlines()
 
-    return full_path_files
+    return content
 
 
-def update_year_range(user_start_year, match_start_year, current_year, match_end_year):
-    """Update the year or year range in the LICENSE file.
+def update_year_range(
+    changed_headers: int, file: str, year_regex: str, user_start_year: str, current_year: str
+) -> int:
+    """Update the year in the copyright statement of a file.
 
     Parameters
     ----------
+    changed_headers: int
+        ``0`` if no headers were added or updated.
+        ``1`` if headers were added or updated.
+    file: str
+        The file to update the year in the header.
+    year_regex: str
+        The regex to match the year or year range in the file.
     user_start_year: str
-       The start year supplied by the user in the pre-commit hook configuration.
-    match_start_year: str
-        The start year of the year range in the LICENSE file. For example, the LICENSE file
-        contains the range "2023 - 2024", so match_start_year is 2023.
+        The start year provided by the user.
     current_year: str
-        The current year based on the datetime module.
-    match_end_year: str
-        The end year of the year range in the LICENSE file. For example, the LICENSE file
-        contains the range "2023 - 2024", so match_end_year is 2024.
+        The current year.
+
+    Returns
+    -------
+    int
+        ``0`` if the year is up to date.
+        ``1`` if the year was updated.
     """
-    # If the user start year from the pre-commit hook is less than the match start year,
-    # set the match_start_year as the user_start_year
-    if user_start_year < match_start_year:
-        match_start_year = user_start_year
-    # If the match end year is less than the current year, set the match_end_year to the
-    # current year
-    if match_end_year < current_year:
-        match_end_year = current_year
+    # Open the file and read its content
+    with pathlib.Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+        lines = read_file.readlines()
+        content = "".join(lines)
+
+    # Get the existing start and end years from the copyright line in the file
+    match_start_year, match_end_year = get_years_from_file(content, year_regex)
+
+    # Set the year spans for the user input and the years found in the file (match year span)
+    user_year_span = (
+        f"{user_start_year} - {current_year}"
+        if str(user_start_year) != str(current_year)
+        else user_start_year
+    )
+    match_year_span = (
+        f"{match_start_year} - {match_end_year}"
+        if str(match_start_year) != str(match_end_year)
+        else match_start_year
+    )
+
+    # If the user input year span does not match the year span in the file and
+    # the year span in the file isn't the current year, update the header
+    if (user_year_span != match_year_span) and (match_year_span != current_year):
+        changed_headers = 1
+        content = re.sub(year_regex, user_year_span, content)
+
+        # Update the file with the new year span
+        with pathlib.Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
+            write_file.write(content)
+
+    return changed_headers
+
+
+def get_years_from_file(content: str, year_regex: str) -> tuple:
+    """Get the start and end years from the year range in the file.
+
+    Parameters
+    ----------
+    content: str
+        The content of the file.
+    year_regex: str
+        The regex to match the year or year range in the file.
+    """
+    # Get the first instance of the year range, either one year or a range of years
+    year_range_match = re.search(year_regex, content)
+    # Get the group from the year_range_match
+    year_range = year_range_match.group()
+
+    # Set the match start & end years depending on if the year range is a
+    # single year or a range of years
+    if "-" in year_range:
+        match_start_year = year_range_match.group(1)
+        match_end_year = year_range_match.group(2)
+    else:
+        match_start_year = year_range
+        match_end_year = year_range
 
     return match_start_year, match_end_year
-
-
-def update_license_file(arg_dict: dict) -> int:
-    """
-    Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
-
-    Parameters
-    ----------
-    arg_dict: dict
-        Dictionary containing the committed files, custom copyright, template, license,
-        changed_headers, start & end year, and git_repo
-    """
-    # Get location of LICENSE file in the repository the hook runs on
-    git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
-    repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
-    save_repo_license = shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save")
-
-    # Get the location of MIT.txt in the hook's assets folder
-    hook_loc = pathlib.Path(__file__).parent.resolve()
-    hook_license_file = os.path.join(hook_loc, "assets", "LICENSES", f"{DEFAULT_LICENSE}.txt")
-
-    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
-    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
-        shutil.copyfile(hook_license_file, repo_license_loc)
-
-    # Whether or not the year in LICENSE was updated
-    # 0 is unchanged, 1 is changed
-    changed = 0
-
-    user_start_year = str(arg_dict["start_year"])
-    current_year = str(arg_dict["current_year"])
-    # Span or single year
-    year_regex = r"(\d{4}) - (\d{4})|\d{4}"
-
-    # Check if custom_license is MIT
-    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
-        with pathlib.Path(repo_license_loc).open(encoding="utf-8", newline="", mode="r") as file:
-            lines = file.readlines()
-            content = "".join(lines)
-
-        # Get the first instance of the year range, either one year or a range of years
-        year_range_match = re.search(year_regex, content)
-        # Get the group from the year_range_match
-        year_range = year_range_match.group()
-        updated_year_range = ""
-
-        # Fix the start and end years in the range
-        if "-" in year_range:
-            match_start_yr, match_end_yr = update_year_range(
-                user_start_year, year_range_match.group(1), current_year, year_range_match.group(2)
-            )
-        else:
-            match_start_yr, match_end_yr = update_year_range(
-                user_start_year, year_range, current_year, year_range
-            )
-
-        # Update the content if the start and end years are different
-        if match_start_yr != match_end_yr:
-            updated_year_range = f"{match_start_yr} - {match_end_yr}"
-            # print(f"Replacing {year_range} with {updated_year_range}")
-            content = re.sub(year_regex, updated_year_range, content)
-
-            with pathlib.Path(repo_license_loc).open(
-                encoding="utf-8", newline="", mode="w"
-            ) as file:
-                file.write(content)
-
-    # If the year changed, print a message that the LICENSE file was changed
-    if not check_same_content(save_repo_license, repo_license_loc):
-        changed = 1
-        print(f"Successfully updated year in {repo_license_loc}")
-
-    # Remove the temporary file
-    os.remove(save_repo_license)
-
-    return changed
 
 
 def cleanup(assets: dict, os_git_root: str) -> None:
@@ -634,17 +690,15 @@ def cleanup(assets: dict, os_git_root: str) -> None:
                 shutil.rmtree(key)
 
 
-def find_files_missing_header() -> int:
+def main():
     """
-    Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+    Add and update file headers with `REUSE <https://reuse.software/>`_.
 
     Returns
     -------
     int
+        ``0`` if all files contain headers and are up to date.
         ``1`` if ``REUSE`` changed all noncompliant files.
-
-        ``2`` if the ``.reuse`` or location directory does not exist in the root path
-        of the GitHub repository.
     """
     # Set up argparse for location, parser, and lint
     # Lint contains four arguments: quiet, json, plain, and no_multiprocessing
@@ -685,10 +739,8 @@ def find_files_missing_header() -> int:
     # Update the year in the copyright line of the LICENSE file
     license_return_code = update_license_file(values)
 
-    # Run REUSE on root of the repository
+    # Get the root of the git repository and fix the line separators
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
-
-    # git_root with correct line separators for operating system
     os_git_root = git_root.replace("/", os.sep)
 
     # Dictionary containing the asset folder information
@@ -703,31 +755,18 @@ def find_files_missing_header() -> int:
         },
     }
 
-    # Add header arguments to parser. Arguments are: copyright, license, contributor,
-    # year, style, copyright-style, template, exclude-year, merge-copyrights, single-line,
-    # multi-line, explicit-license, force-dot-license, recursive, no-replace,
-    # skip-unrecognized, and skip-existing
-    _annotate.add_arguments(parser)
-
     # Link the default template and/or license from the assets folder to your git repo.
     link_assets(assets, os_git_root, args)
 
-    # Project to run `REUSE <https://reuse.software/>`_ on
-    proj = project.Project(git_root, vcs_strategy=VCSStrategyGit)
-
-    # Get files missing headers (copyright and/or license information)
-    missing_headers = list(list_noncompliant_files(args, proj))
+    # Create click object for the project
+    obj = common.ClickObj(git_root)
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
     if len(values["files"]) <= (sys.getrecursionlimit() - 2):
-        file_return_code = recursive_file_check(
-            changed_headers, parser, values, proj, missing_headers, 0
-        )
+        file_return_code = recursive_file_check(changed_headers, obj, values, args, 0)
     else:
-        file_return_code = non_recursive_file_check(
-            changed_headers, parser, values, proj, missing_headers
-        )
+        file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, os_git_root)
@@ -735,11 +774,6 @@ def find_files_missing_header() -> int:
     # Returns 1 if REUSE changes noncompliant files or the year was updated in LICENSE
     # Returns 0 if all files are compliant
     return 1 if (license_return_code or file_return_code) == 1 else 0
-
-
-def main():
-    """Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them."""
-    return find_files_missing_header()
 
 
 if __name__ == "__main__":
