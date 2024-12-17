@@ -28,8 +28,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
-import os
-import pathlib
+from pathlib import Path
 import re
 import shutil
 import sys
@@ -124,11 +123,7 @@ def get_full_paths(file_list: list) -> list:
     """
     full_path_files = []
     for file in file_list:
-        if "win" in sys.platform:
-            split_str = file.split("/")
-            full_path_files.append(os.path.abspath(os.path.join(*split_str)))
-        else:
-            full_path_files.append(os.path.abspath(file))
+        full_path_files.append(Path(file).resolve())
 
     return full_path_files
 
@@ -145,15 +140,15 @@ def update_license_file(arg_dict: dict) -> int:
     """
     # Get location of LICENSE file in the repository the hook runs on
     git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
-    repo_license_loc = os.path.join(git_root, "LICENSE").replace(os.sep, "/")
-    save_repo_license = shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save")
+    repo_license_loc = Path(git_root) / "LICENSE"
+    save_repo_license = Path(shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save"))
 
     # Get the location of MIT.txt in the hook's assets folder
-    hook_loc = pathlib.Path(__file__).parent.resolve()
-    hook_license_file = os.path.join(hook_loc, "assets", "LICENSES", f"{DEFAULT_LICENSE}.txt")
+    hook_loc = Path(__file__).parent.resolve()
+    hook_license_file = Path(hook_loc) / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
 
     # Copy MIT.txt from the assets folder to the LICENSE file in the repository
-    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+    if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
         shutil.copyfile(hook_license_file, repo_license_loc)
 
     # Whether or not the year in LICENSE was updated
@@ -164,7 +159,7 @@ def update_license_file(arg_dict: dict) -> int:
     current_year = str(arg_dict["current_year"])
 
     # Check if custom_license is MIT
-    if os.path.isfile(repo_license_loc) and (arg_dict["license"] == DEFAULT_LICENSE):
+    if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
         changed = update_year_range(
             changed, repo_license_loc, YEAR_REGEX, user_start_year, current_year
         )
@@ -175,7 +170,7 @@ def update_license_file(arg_dict: dict) -> int:
         print(f"Successfully updated year in {repo_license_loc}")
 
     # Remove the temporary file
-    os.remove(save_repo_license)
+    save_repo_license.unlink()
 
     return changed
 
@@ -197,12 +192,12 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     cleanup(assets, git_root)
 
     # Get the location of the hook in the file system
-    hook_loc = pathlib.Path(__file__).parent.resolve()
+    hook_loc = Path(__file__).parent.resolve()
 
     for key, value in assets.items():
         # Get the location of the hook's "assets" folder
-        hook_asset_dir = os.path.join(hook_loc, "assets", value["path"])
-        repo_asset_dir = os.path.join(git_root, value["path"])
+        hook_asset_dir = Path(hook_loc) / "assets" / value["path"]
+        repo_asset_dir = Path(git_root) / value["path"]
 
         # If key is .reuse and the custom template is being used
         if key == ".reuse" and args.custom_template == DEFAULT_TEMPLATE:
@@ -234,13 +229,13 @@ def mkdirs_and_link(
     filename: str
         Name of the file to be linked from the hook_asset_dir to the repo_asset_dir.
     """
-    src = os.path.join(hook_asset_dir, filename)
-    dest = os.path.join(repo_asset_dir, filename)
+    src = Path(hook_asset_dir) / filename
+    dest = Path(repo_asset_dir) / filename
     # If .reuse/templates or LICENSES directories do not exist, create them
-    if not os.path.isdir(asset_dir):
-        os.makedirs(asset_dir)
+    if not Path(asset_dir).is_dir():
+        Path(asset_dir).mkdir(parents=True)
     # Make symbolic links to files within the assets folder
-    os.symlink(src, dest)
+    dest.symlink_to(src)
 
 
 def recursive_file_check(
@@ -279,7 +274,7 @@ def recursive_file_check(
         # Get the reuse information of the file
         file_reuse_info = project.reuse_info_of(file)
 
-        if (not file_reuse_info) or (os.path.getsize(file) == 0):
+        if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             # Add the header to the file
             add_header(copyright, license, years, file, template, commented)
@@ -329,7 +324,7 @@ def non_recursive_file_check(
         file_reuse_info = project.reuse_info_of(file)
 
         # If the file is empty or does not contain reuse information
-        if (not file_reuse_info) or (os.path.getsize(file) == 0):
+        if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             add_header(copyright, license, years, file, template, commented)
         elif file_reuse_info:
@@ -444,7 +439,7 @@ def update_header(
         changed_headers = 1
         print(f"Successfully changed header of {file}")
 
-    os.remove(before_hook)
+    Path(before_hook).unlink()
 
     return changed_headers
 
@@ -534,7 +529,7 @@ def apply_hook_changes(before_hook: str, after_hook: str) -> None:
     before_hook_lines = get_content(before_hook)
     after_hook_lines = get_content(after_hook)
 
-    with pathlib.Path(after_hook).open(encoding="utf-8", newline="", mode="w") as file:
+    with Path(after_hook).open(encoding="utf-8", newline="", mode="w") as file:
         # Copy file content before add-license-header was run into
         # the file after add-license-header was run.
         for line in after_hook_lines:
@@ -578,7 +573,7 @@ def get_content(file: str) -> str:
     str
         Content of the file.
     """
-    read_file = pathlib.Path(file).open(encoding="utf-8", newline="", mode="r")
+    read_file = Path(file).open(encoding="utf-8", newline="", mode="r")
     content = read_file.readlines()
 
     return content
@@ -610,7 +605,7 @@ def update_year_range(
         ``1`` if the year was updated.
     """
     # Open the file and read its content
-    with pathlib.Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+    with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         lines = read_file.readlines()
         content = "".join(lines)
 
@@ -636,7 +631,7 @@ def update_year_range(
         content = re.sub(year_regex, user_year_span, content)
 
         # Update the file with the new year span
-        with pathlib.Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
+        with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
             write_file.write(content)
 
     return changed_headers
@@ -682,11 +677,11 @@ def cleanup(assets: dict, os_git_root: str) -> None:
     """
     # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
     for key, value in assets.items():
-        dest = os.path.join(os_git_root, value["path"], value["default_file"])
+        dest = Path(os_git_root) / value["path"] / value["default_file"]
         # If the default asset files exist, unlink and remove directory
-        if os.path.exists(dest):
-            os.remove(dest)
-            if not os.listdir(value["path"]):
+        if dest.exists():
+            dest.unlink()
+            if not Path(value["path"]).iterdir():
                 shutil.rmtree(key)
 
 
@@ -706,7 +701,7 @@ def main():
     args = set_lint_args(parser)
 
     # Get root directory of the git repository.
-    git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
+    git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 
     # Set changed_headers to zero by default
     changed_headers = 0
@@ -741,12 +736,12 @@ def main():
 
     # Get the root of the git repository and fix the line separators
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
-    os_git_root = git_root.replace("/", os.sep)
+    os_git_root = Path(git_root).resolve()
 
     # Dictionary containing the asset folder information
     assets = {
         ".reuse": {
-            "path": os.path.join(".reuse", "templates"),
+            "path": Path(".reuse") / "templates",
             "default_file": f"{DEFAULT_TEMPLATE}.jinja2",
         },
         "LICENSES": {
