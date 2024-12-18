@@ -145,7 +145,7 @@ def update_license_file(arg_dict: dict) -> int:
 
     # Get the location of MIT.txt in the hook's assets folder
     hook_loc = Path(__file__).parent.resolve()
-    hook_license_file = Path(hook_loc) / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
+    hook_license_file = hook_loc / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
 
     # Copy MIT.txt from the assets folder to the LICENSE file in the repository
     if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
