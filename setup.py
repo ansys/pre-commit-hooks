@@ -70,7 +70,7 @@ setup(
     install_requires=[
         "GitPython==3.1.43",
         "importlib-metadata==8.5.0",
-        "Jinja2==3.1.4",
+        "Jinja2==3.1.5",
         "reuse==5.0.2",
         "requests==2.32.3",
         "semver==3.0.2",
