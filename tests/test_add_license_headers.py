@@ -126,7 +126,6 @@ def check_ansys_header(file_name):
     file = open(file_name, "r", encoding="utf8")
     count = 0
     for line in file:
-        print(line)
         count += 1
         if count == 1:
             assert "ANSYS, Inc. and/or its affiliates" in line
@@ -610,7 +609,6 @@ def check_license_year(license_file, copyright, start_year, current_year):
 
     for line in file:
         if copyright in line:
-            # print(line)
             if start_year != current_year:
                 assert f"{start_year} - {current_year}" in line
             else:
@@ -685,7 +683,6 @@ def test_date_update(tmp_path: pytest.TempPathFactory):
     # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}"
     # and "{current_year}"
     for year in years:
-        print(f"new year {year}")
         custom_args = [tmp_file, f"--start_year={year}"]
         # Git add tmp_file and run hook with custom arguments
         assert add_argv_run(repo, tmp_file, custom_args) == 1
