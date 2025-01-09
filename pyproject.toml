@@ -36,7 +36,7 @@ testpaths = [
     "tests",
 ]
 markers = [
-    "license_headers: marks tests for add-license-headers hook",
+    "add_license_headers: marks tests for add-license-headers hook",
     "tech_review: marks tests for tech-review hook",
 ]
 
