@@ -604,29 +604,16 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-def check_license_year(license_file, copyright, start_year, current_year):
-    file = open(license_file, "r")
-
-    for line in file:
-        if copyright in line:
-            if start_year != current_year:
-                assert f"{start_year} - {current_year}" in line
-            else:
-                assert current_year in line
-        return
-
-
 @pytest.mark.add_license_headers
 def test_license_year_update(tmp_path: pytest.TempPathFactory):
     """Tests if the year in the license header is updated."""
-    # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
     license = "LICENSE"
     template_path = (
         Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license
     )
     tmp_license = Path(tmp_path) / license
-    custom_args = []
 
+    # Move to temporary directory
     os.chdir(tmp_path)
 
     # Copy the LICENSE file to the tmp_path
@@ -635,31 +622,19 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     # Set up git repository in tmp_path
     repo = init_repo(tmp_path)
 
-    # Add custom args & tmp_file
-    add_argv_run(repo, tmp_license, custom_args)
-
-    parser = argparse.ArgumentParser()
-    args = hook.set_lint_args(parser)
-
-    values = {
-        "copyright": args.custom_copyright,
-        "license": args.custom_license,
-        "start_year": START_YEAR,
-        "current_year": dt.today().year,
-        "git_repo": git_repo,
-    }
-
     # Years to update the LICENSE file
-    years = ["2022", dt.today().year, values["start_year"]]
+    years = ["2022", dt.today().year, START_YEAR]
 
     # Check the copyright line has "2022 - {current_year}", "{current_year}"
     # and "2023 - {current_year}"
     for year in years:
-        values["start_year"] = year
-        hook.update_license_file(values)
-        check_license_year(
-            tmp_license, values["copyright"], values["start_year"], values["current_year"]
-        )
+        custom_args = [f"--start_year={year}"]
+        # Run the hook on the tmp_license file
+        add_argv_run(repo, tmp_license, custom_args)
+        # Check the license year is correctly updated
+        check_license_year(tmp_license, DEFAULT_COPYRIGHT, START_YEAR, dt.today().year)
+        # Git add the updated tmp_license file
+        repo.index.add([tmp_license])
 
     os.chdir(REPO_PATH)
 
@@ -672,6 +647,9 @@ def test_date_update(tmp_path: pytest.TempPathFactory):
     license_name = "MIT.txt"
     template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
     license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Move to temporary directory
+    os.chdir(tmp_path)
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -686,10 +664,51 @@ def test_date_update(tmp_path: pytest.TempPathFactory):
         custom_args = [tmp_file, f"--start_year={year}"]
         # Git add tmp_file and run hook with custom arguments
         assert add_argv_run(repo, tmp_file, custom_args) == 1
-        # hook.update_license_file(values)
+        # Check the license year is correctly updated
         check_license_year(tmp_file, DEFAULT_COPYRIGHT, year, str(dt.today().year))
         # Add file with updated header
         repo.index.add([tmp_file])
+
+    os.chdir(REPO_PATH)
+
+
+def check_license_year(license_file, copyright, start_year, current_year):
+    file = open(license_file, "r")
+
+    for line in file:
+        if copyright in line:
+            if start_year != current_year:
+                assert f"{start_year} - {current_year}" in line
+            else:
+                assert current_year in line
+        return
+
+
+def test_invalid_start_year(tmp_path: pytest.TempPathFactory):
+    """Test exceptions or errors are raised when the start year is invalid."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Move to temporary directory
+    os.chdir(tmp_path)
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    # custom_args = [tmp_file, f"--start_year={START_YEAR}"]
+
+    # Years to update the LICENSE file
+    start_years = ["not a year", "1941", str(dt.today().year + 1)]
+
+    # Check the exceptions are raised when the start year is invalid
+    for year in start_years:
+        custom_args = [tmp_file, f"--start_year={year}"]
+        # Assert an exception is raised if the start year is invalid
+        with pytest.raises(Exception):
+            add_argv_run(repo, tmp_file, custom_args)
+
+    os.chdir(REPO_PATH)
 
 
 @pytest.mark.add_license_headers
