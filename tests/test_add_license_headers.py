@@ -85,7 +85,9 @@ def make_asset_dirs(tmp_path, template_path, template_name, license_path, licens
 def cp_LICENSE_file(tmp_path):
     # Create LICENSE file in tmp_path repo
     license = "LICENSE"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license
+    )
     tmp_license = Path(tmp_path) / license
 
     os.chdir(tmp_path)
@@ -203,8 +205,12 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
-    license_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license_name
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    )
+    license_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license_name
+    )
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -337,7 +343,9 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "copyright_only.jinja2"
     license_name = "MIT.txt"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    )
     license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Set up git repository in tmp_path with temporary file
@@ -412,8 +420,12 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "test_template.jinja2"
     license_name = "ECL-1.0.txt"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
-    license_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license_name
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    )
+    license_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license_name
+    )
 
     # Set up git repository in tmp_path with temporary file
     repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
@@ -517,7 +529,10 @@ def test_bad_chars(tmp_path: pytest.TempPathFactory):
     cp_LICENSE_file(tmp_path)
 
     # Copy file with bad characters to git repository
-    shutil.copyfile(Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / bad_chars_name, bad_chars_name)
+    shutil.copyfile(
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / bad_chars_name,
+        bad_chars_name,
+    )
 
     # Assert the hook failed
     assert add_argv_run(repo, bad_chars_name, [bad_chars_name]) == 1
@@ -534,7 +549,9 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     template_name = "copyright_only.jinja2"
     license_name = "MIT.txt"
     test_filename = "index_error.scss"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "templates" / template_name
+    )
     license_path = Path(REPO_PATH) / "LICENSES" / license_name
 
     # Change dir to tmp_path
@@ -551,7 +568,9 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
     cp_LICENSE_file(tmp_path)
 
     # Copy file that will cause an IndexError to git repository
-    shutil.copyfile(Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / test_filename, test_filename)
+    shutil.copyfile(
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / test_filename, test_filename
+    )
 
     custom_args = [
         test_filename,
@@ -604,7 +623,9 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     """Tests if the year in the license header is updated."""
     # license_path = os.path.join(REPO_PATH, "LICENSES", license_name)
     license = "LICENSE"
-    template_path = Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license
+    template_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license
+    )
     tmp_license = Path(tmp_path) / license
     custom_args = []
 
