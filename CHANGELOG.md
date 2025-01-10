@@ -6,6 +6,32 @@ This project uses [towncrier](https://towncrier.readthedocs.io/) and the changes
 
 <!-- towncrier release notes start -->
 
+## [0.5.0](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.0) - January 10, 2025
+
+
+### Dependencies
+
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.0 to 1.2.1 [#257](https://github.com/ansys/pre-commit-hooks/pull/257)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.1 to 1.2.2 [#259](https://github.com/ansys/pre-commit-hooks/pull/259)
+- build(deps-dev): bump pytest from 8.3.3 to 8.3.4 [#260](https://github.com/ansys/pre-commit-hooks/pull/260)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.2 to 1.2.3 [#264](https://github.com/ansys/pre-commit-hooks/pull/264)
+- build(deps): bump jinja2 from 3.1.4 to 3.1.5 [#267](https://github.com/ansys/pre-commit-hooks/pull/267)
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.3 to 1.2.4 [#268](https://github.com/ansys/pre-commit-hooks/pull/268)
+- build(deps): bump gitpython from 3.1.43 to 3.1.44 [#269](https://github.com/ansys/pre-commit-hooks/pull/269)
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.5.0 to 3.0.0 [#270](https://github.com/ansys/pre-commit-hooks/pull/270)
+
+
+### Miscellaneous
+
+- [pre-commit.ci] pre-commit autoupdate [#261](https://github.com/ansys/pre-commit-hooks/pull/261)
+
+
+### Maintenance
+
+- chore: Update code for reuse v5.0.2 [#263](https://github.com/ansys/pre-commit-hooks/pull/263)
+- chore: Use `pathlib.Path` instead of `os` in add_license_headers.py [#266](https://github.com/ansys/pre-commit-hooks/pull/266)
+- fix: Update license headers and fix broken tests [#271](https://github.com/ansys/pre-commit-hooks/pull/271)
+
 ## [0.4.4](https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.4) - November 07, 2024
 
 
