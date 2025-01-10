@@ -51,8 +51,8 @@ repos:
     - --start_year=2023
     exclude: |
         (?x)^(
-            tests/test_reuse_files/bad_chars.py |
-            tests/test_reuse_files/index_error.scss
+            tests/test_add_license_headers_files/bad_chars.py |
+            tests/test_add_license_headers_files/index_error.scss
         )$
   - id: tech-review
     args:

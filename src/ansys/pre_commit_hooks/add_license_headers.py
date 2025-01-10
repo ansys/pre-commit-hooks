@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -35,6 +35,7 @@ import sys
 from tempfile import NamedTemporaryFile
 
 import git
+from jinja2 import Environment, FileSystemLoader
 from reuse import extract
 from reuse.cli import common
 from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info, get_template
@@ -130,7 +131,7 @@ def get_full_paths(file_list: list) -> list:
 
 def update_license_file(arg_dict: dict) -> int:
     """
-    Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+    Update the LICENSE file to match MIT.txt, adjusting the year span for each repository.
 
     Parameters
     ----------
@@ -149,7 +150,7 @@ def update_license_file(arg_dict: dict) -> int:
 
     # Copy MIT.txt from the assets folder to the LICENSE file in the repository
     if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
-        shutil.copyfile(hook_license_file, repo_license_loc)
+        generate_license_file(hook_license_file.parent, arg_dict["current_year"], repo_license_loc)
 
     # Whether or not the year in LICENSE was updated
     # 0 is unchanged, 1 is changed
@@ -209,7 +210,35 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             and args.custom_license == DEFAULT_LICENSE
             and not args.ignore_license_check
         ):
-            mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
+            hook_license_file = hook_loc / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
+            repo_license_file = repo_asset_dir / value["default_file"]
+            if not repo_asset_dir.is_dir():
+                repo_asset_dir.mkdir(parents=True)
+            generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+
+
+def generate_license_file(template_parent_dir, current_year, license_file_name) -> None:
+    """Generate the MIT.txt file from the assets/LICENSES/MIT.txt template.
+
+    Parameters
+    ----------
+    template_parent_dir: str
+        Path to the parent directory of the template file.
+    current_year: int
+        The current year.
+    license_file_name: str
+        Path to the license file in the repository to generate.
+    """
+    loader = FileSystemLoader(searchpath=template_parent_dir)
+    env = Environment(loader=loader)  # nosec
+    # Get the template for the specified file
+    template = env.get_template(f"{DEFAULT_LICENSE}.txt")
+    # Generate the file content from the template
+    file_content = template.render(current_year=current_year)
+
+    # Write the file content to the LICENSE file in the repository
+    with license_file_name.open("w") as file:
+        file.write(file_content)
 
 
 def mkdirs_and_link(
@@ -707,17 +736,15 @@ def main():
     changed_headers = 0
 
     # Check start_year is valid
-    try:
+    if str(args.start_year).isdigit():
         # Check the start year is not later than the current year
         if int(args.start_year) > dt.today().year:
-            print("Please provide a start year less than or equal to the current year.")
-            exit(1)
+            raise Exception("Please provide a start year less than or equal to the current year.")
         # Check the start year isn't earlier than when computers were created :)
-        if int(args.start_year) < 1942:
-            print("Please provide a start year greater than or equal to 1942.")
-            exit(1)
-    except ValueError:
-        print("Please ensure the start year is a number.")
+        elif int(args.start_year) < 1942:
+            raise Exception("Please provide a start year greater than or equal to 1942.")
+    else:
+        raise Exception("Please ensure the start year is a number.")
 
     # Create dictionary containing the committed files, custom copyright,
     # template, license, changed_headers, year, and git_repo
