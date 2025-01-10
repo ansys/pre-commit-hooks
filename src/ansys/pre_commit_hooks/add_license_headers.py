@@ -129,49 +129,46 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def update_license_file(arg_dict: dict) -> int:
+def update_license_file(repo_license_loc: Path, start_year: int, current_year: int) -> int:
     """
     Update the LICENSE file to match MIT.txt, adjusting the year span for each repository.
 
     Parameters
     ----------
-    arg_dict: dict
-        Dictionary containing the committed files, custom copyright, template, license,
-        changed_headers, start & end year, and git_repo
+    repo_license_loc: Path
+        Path to the LICENSE file in the repository.
+    start_year: int
+        The start year for the license header.
+    current_year: int
+        The current year for the license header.
+
+    Returns
+    -------
+    int
+        ``0`` if the year in the LICENSE file was not updated.
+        ``1`` if the year in the LICENSE file was updated.
     """
-    # Get location of LICENSE file in the repository the hook runs on
-    git_root = arg_dict["git_repo"].git.rev_parse("--show-toplevel")
-    repo_license_loc = Path(git_root) / "LICENSE"
-    save_repo_license = Path(shutil.copyfile(repo_license_loc, f"{repo_license_loc}_save"))
+    # Whether or not the year in LICENSE was updated
+    # 0 is unchanged, 1 is changed
+    changed = 0
+
+    temp_file = NamedTemporaryFile(mode="w", delete=False).name
+    shutil.copy2(repo_license_loc, temp_file)
 
     # Get the location of MIT.txt in the hook's assets folder
     hook_loc = Path(__file__).parent.resolve()
     hook_license_file = hook_loc / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
 
-    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
-    if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
-        generate_license_file(hook_license_file.parent, arg_dict["current_year"], repo_license_loc)
-
-    # Whether or not the year in LICENSE was updated
-    # 0 is unchanged, 1 is changed
-    changed = 0
-
-    user_start_year = str(arg_dict["start_year"])
-    current_year = str(arg_dict["current_year"])
-
-    # Check if custom_license is MIT
-    if repo_license_loc.is_file() and (arg_dict["license"] == DEFAULT_LICENSE):
-        changed = update_year_range(
-            changed, repo_license_loc, YEAR_REGEX, user_start_year, current_year
-        )
+    generate_license_file(
+        hook_license_file.parent, f"{start_year} - {current_year}", repo_license_loc
+    )
 
     # If the year changed, print a message that the LICENSE file was changed
-    if not check_same_content(save_repo_license, repo_license_loc):
+    if not check_same_content(temp_file, repo_license_loc):
         changed = 1
         print(f"Successfully updated year in {repo_license_loc}")
 
-    # Remove the temporary file
-    save_repo_license.unlink()
+    Path(temp_file).unlink()
 
     return changed
 
@@ -230,7 +227,7 @@ def generate_license_file(template_parent_dir, current_year, license_file_name) 
         Path to the license file in the repository to generate.
     """
     loader = FileSystemLoader(searchpath=template_parent_dir)
-    env = Environment(loader=loader)  # nosec
+    env = Environment(loader=loader, keep_trailing_newline=True)  # nosec
     # Get the template for the specified file
     template = env.get_template(f"{DEFAULT_LICENSE}.txt")
     # Generate the file content from the template
@@ -758,12 +755,19 @@ def main():
         "git_repo": git_repo,
     }
 
-    # Update the year in the copyright line of the LICENSE file
-    license_return_code = update_license_file(values)
-
     # Get the root of the git repository and fix the line separators
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
     os_git_root = Path(git_root).resolve()
+
+    # Get the location of the LICENSE file in the repository
+    repo_license_loc = Path(git_root) / "LICENSE"
+    license_return_code = 0
+    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
+    if repo_license_loc.is_file() and (values["license"] == DEFAULT_LICENSE):
+        # Update the year in the copyright line of the LICENSE file
+        license_return_code = update_license_file(
+            repo_license_loc, values["start_year"], values["current_year"]
+        )
 
     # Dictionary containing the asset folder information
     assets = {
