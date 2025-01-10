@@ -1,0 +1,32 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.find_files_missing_header`
+===================================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.find_files_missing_header() -> int
+
+   
+   Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``1`` if ``REUSE`` changed all noncompliant files.
+           
+           ``2`` if the ``.reuse`` or location directory does not exist in the root path
+           of the GitHub repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
