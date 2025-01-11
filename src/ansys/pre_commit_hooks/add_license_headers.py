@@ -227,7 +227,7 @@ def generate_license_file(template_parent_dir, current_year, license_file_name) 
         Path to the license file in the repository to generate.
     """
     loader = FileSystemLoader(searchpath=template_parent_dir)
-    env = Environment(loader=loader, keep_trailing_newline=True)  # nosec
+    env = Environment(loader=loader)  # nosec
     # Get the template for the specified file
     template = env.get_template(f"{DEFAULT_LICENSE}.txt")
     # Generate the file content from the template
