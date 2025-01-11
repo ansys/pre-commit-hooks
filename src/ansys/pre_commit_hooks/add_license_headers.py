@@ -213,12 +213,6 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
                 repo_asset_dir.mkdir(parents=True)
             generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
 
-        for item in repo_asset_dir.rglob("*"):
-            if item.is_dir():
-                print(f"Directory: {item}")
-            else:
-                print(f"  File: {item}")
-
 
 def generate_license_file(template_parent_dir, current_year, license_file_name) -> None:
     """Generate the MIT.txt file from the assets/LICENSES/MIT.txt template.
@@ -696,7 +690,7 @@ def get_years_from_file(content: str, year_regex: str) -> tuple:
     return match_start_year, match_end_year
 
 
-def cleanup(assets: dict, os_git_root: Path) -> None:
+def cleanup(assets: dict, os_git_root: str) -> None:
     """
     Unlink the default asset files, and remove directories if empty.
 
@@ -704,20 +698,16 @@ def cleanup(assets: dict, os_git_root: Path) -> None:
     ----------
     assets: dict
         Dictionary containing assets information
-    os_git_root: Path
+    os_git_root: str
         Full path of the repository's root directory.
     """
     # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
     for key, value in assets.items():
-        hook_asset_file = os_git_root / value["path"] / value["default_file"]
+        dest = Path(os_git_root) / value["path"] / value["default_file"]
         # If the default asset files exist, unlink and remove directory
-        if hook_asset_file.exists():
-            hook_asset_file.unlink()
-            # Get the number of files in the reuse directories (.reuse/templates and LICENSES)
-            reuse_dir = os_git_root / value["path"]
-            file_count = len(list(reuse_dir.glob("*")))
-            # Remove empty directories (.reuse and LICENSES)
-            if file_count == 0:
+        if dest.exists():
+            dest.unlink()
+            if not Path(value["path"]).iterdir():
                 shutil.rmtree(key)
 
 
