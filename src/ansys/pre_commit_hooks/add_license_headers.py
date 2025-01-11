@@ -153,7 +153,7 @@ def update_license_file(repo_license_loc: Path, start_year: int, current_year: i
     changed = 0
 
     temp_file = NamedTemporaryFile(mode="w", delete=False).name
-    shutil.copy2(repo_license_loc, temp_file)
+    shutil.copyfile(repo_license_loc, temp_file)
 
     # Get the location of MIT.txt in the hook's assets folder
     hook_loc = Path(__file__).parent.resolve()
@@ -212,6 +212,12 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
             generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+
+        for item in repo_asset_dir.rglob("*"):
+            if item.is_dir():
+                print(f"Directory: {item}")
+            else:
+                print(f"  File: {item}")
 
 
 def generate_license_file(template_parent_dir, current_year, license_file_name) -> None:
@@ -690,7 +696,7 @@ def get_years_from_file(content: str, year_regex: str) -> tuple:
     return match_start_year, match_end_year
 
 
-def cleanup(assets: dict, os_git_root: str) -> None:
+def cleanup(assets: dict, os_git_root: Path) -> None:
     """
     Unlink the default asset files, and remove directories if empty.
 
@@ -698,16 +704,20 @@ def cleanup(assets: dict, os_git_root: str) -> None:
     ----------
     assets: dict
         Dictionary containing assets information
-    os_git_root: str
+    os_git_root: Path
         Full path of the repository's root directory.
     """
     # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
     for key, value in assets.items():
-        dest = Path(os_git_root) / value["path"] / value["default_file"]
+        hook_asset_file = os_git_root / value["path"] / value["default_file"]
         # If the default asset files exist, unlink and remove directory
-        if dest.exists():
-            dest.unlink()
-            if not Path(value["path"]).iterdir():
+        if hook_asset_file.exists():
+            hook_asset_file.unlink()
+            # Get the number of files in the reuse directories (.reuse/templates and LICENSES)
+            reuse_dir = os_git_root / value["path"]
+            file_count = len(list(reuse_dir.glob("*")))
+            # Remove empty directories (.reuse and LICENSES)
+            if file_count == 0:
                 shutil.rmtree(key)
 
 
@@ -759,16 +769,6 @@ def main():
     git_root = values["git_repo"].git.rev_parse("--show-toplevel")
     os_git_root = Path(git_root).resolve()
 
-    # Get the location of the LICENSE file in the repository
-    repo_license_loc = Path(git_root) / "LICENSE"
-    license_return_code = 0
-    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
-    if repo_license_loc.is_file() and (values["license"] == DEFAULT_LICENSE):
-        # Update the year in the copyright line of the LICENSE file
-        license_return_code = update_license_file(
-            repo_license_loc, values["start_year"], values["current_year"]
-        )
-
     # Dictionary containing the asset folder information
     assets = {
         ".reuse": {
@@ -783,6 +783,16 @@ def main():
 
     # Link the default template and/or license from the assets folder to your git repo.
     link_assets(assets, os_git_root, args)
+
+    # Get the location of the LICENSE file in the repository
+    repo_license_loc = Path(git_root) / "LICENSE"
+    license_return_code = 0
+    # Copy MIT.txt from the assets folder to the LICENSE file in the repository
+    if repo_license_loc.is_file() and (values["license"] == DEFAULT_LICENSE):
+        # Update the year in the copyright line of the LICENSE file
+        license_return_code = update_license_file(
+            repo_license_loc, values["start_year"], values["current_year"]
+        )
 
     # Create click object for the project
     obj = common.ClickObj(git_root)
