@@ -507,7 +507,7 @@ def add_header(
     license: str
         The license for the license header. For example, "MIT".
     years: str
-        The year span in the license header. For example, "2023 - 2025" or "2023 - 2025".
+        The year span in the license header. For example, "2024" or "2023 - 2025".
     file: str
         The file path to add the license header to.
     template: str
