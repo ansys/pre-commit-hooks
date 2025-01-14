@@ -169,7 +169,8 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
 
         # Replace the current year span with the updated year span
         if year_range != year_span:
-            content = re.sub(year_regex, year_span, content)
+            # Update the year span in the LICENSE file. "1" is the max number of replacements
+            content = re.sub(year_regex, year_span, content, 1)
 
             with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
                 file.write(content)
@@ -432,7 +433,7 @@ def update_header(
     license: str
         The license of the header. For example, "MIT".
     years: str
-        The year span of the header. For example, "2023 - 2025" or "2023 - 2025".
+        The year span of the header. For example, "2024" or "2023 - 2025".
     template: str
         The template to use for the header. For example, "ansys" for "ansys.jinja2".
     commented: bool
@@ -679,7 +680,8 @@ def update_year_range(
     # the year span in the file isn't the current year, update the header
     if (user_year_span != match_year_span) and (match_year_span != current_year):
         changed_headers = 1
-        content = re.sub(year_regex, user_year_span, content)
+        # Update the year span in the header. "1" is the max number of replacements
+        content = re.sub(year_regex, user_year_span, content, 1)
 
         # Update the file with the new year span
         with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -760,8 +762,8 @@ def main():
         if int(args.start_year) > dt.today().year:
             raise Exception("Please provide a start year less than or equal to the current year.")
         # Check the start year isn't earlier than when computers were created :)
-        elif int(args.start_year) < 2023 - 2025:
-            raise Exception("Please provide a start year greater than or equal to 2023 - 2025.")
+        elif int(args.start_year) < 1942:
+            raise Exception("Please provide a start year greater than or equal to 1942.")
     else:
         raise Exception("Please ensure the start year is a number.")
 
