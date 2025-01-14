@@ -43,30 +43,10 @@ repos:
   hooks:
     - id: check-github-workflows
 
-# - repo: https://github.com/ansys/pre-commit-hooks
-#   rev: v0.4.4
-#   hooks:
-#   - id: add-license-headers
-#     args:
-#     - --start_year=2023
-#     exclude: |
-#         (?x)^(
-#             tests/test_add_license_headers_files/bad_chars.py |
-#             tests/test_add_license_headers_files/index_error.scss
-#         )$
-#   - id: tech-review
-#     args:
-#     - --product=pre_commit_hooks
-#     - --non_compliant_name
-
-- repo: local
+- repo: https://github.com/ansys/pre-commit-hooks
+  rev: v0.4.4
   hooks:
   - id: add-license-headers
-    name: "Add License Headers"
-    entry: add-license-headers
-    language: python
-    files: '(src|examples|tests)/.*\.(py)|\.(proto)'
-    require_serial: true
     args:
     - --start_year=2023
     exclude: |
@@ -74,3 +54,7 @@ repos:
             tests/test_add_license_headers_files/bad_chars.py |
             tests/test_add_license_headers_files/index_error.scss
         )$
+  - id: tech-review
+    args:
+    - --product=pre_commit_hooks
+    - --non_compliant_name
