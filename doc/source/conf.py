@@ -18,6 +18,7 @@ version_file = source_dir / "../../src/ansys/pre_commit_hooks/VERSION"
 with open(str(version_file), "r") as file:
     __version__ = file.read().splitlines()[0]
 release = version = __version__
+switcher_version = get_version_match(version)
 
 # Select desired theme, and declare the html title
 html_theme = "ansys_sphinx_theme"
@@ -105,3 +106,10 @@ master_doc = "index"
 linkcheck_ignore = [
     "https://opensource.org/licenses/MIT",
 ]
+
+# If we are on a release, we have to ignore the "release" URLs, since it is not
+# available until the release is published.
+if switcher_version != "dev":
+    linkcheck_ignore.append(
+        f"https://github.com/ansys/pre-commit-hooks/releases/tag/v{__version__}"
+    )
