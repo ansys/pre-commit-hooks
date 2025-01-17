@@ -84,7 +84,7 @@ Set custom arguments
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.5.0
+     rev: v0.5.1
      hooks:
      - id: add-license-headers
        args: ["--custom_copyright", "custom copyright phrase", "--custom_template", "template_name", "--custom_license", "license_name", "--ignore_license_check", "--start_year", "2023"]
@@ -129,7 +129,7 @@ the hook should run on, add the necessary regex to the ``files`` line in your
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.5.0
+     rev: v0.5.1
      hooks:
      - id: add-license-headers
        files: '(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)'
@@ -142,7 +142,7 @@ In .pre-commit-config.yaml:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.5.0
+    rev: v0.5.1
     hooks:
     - id: add-license-headers
       exclude: |
@@ -195,7 +195,7 @@ Technical review hook in ``ansys/pre-commit-hooks``' .pre-commit-config.yaml fil
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.5.0
+    rev: v0.5.1
     hooks:
     - id: tech-review
       args:
@@ -207,7 +207,7 @@ Technical review hook in ``PyMechanical``'s .pre-commit-config.yaml file:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.5.0
+    rev: v0.5.1
     hooks:
     - id: tech-review
       args:
