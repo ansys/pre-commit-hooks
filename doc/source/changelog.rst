@@ -9,6 +9,42 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.5.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.1>`_ - January 17, 2025
+===========================================================================================
+
+Fixed
+^^^^^
+
+- fix: Update license headers and fix broken tests `#271 <https://github.com/ansys/pre-commit-hooks/pull/271>`_
+- fix: Fix "success" statements being printed and LICENSE file updates `#273 <https://github.com/ansys/pre-commit-hooks/pull/273>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.0 to 1.2.1 `#257 <https://github.com/ansys/pre-commit-hooks/pull/257>`_
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.1 to 1.2.2 `#259 <https://github.com/ansys/pre-commit-hooks/pull/259>`_
+- build(deps-dev): bump pytest from 8.3.3 to 8.3.4 `#260 <https://github.com/ansys/pre-commit-hooks/pull/260>`_
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.2 to 1.2.3 `#264 <https://github.com/ansys/pre-commit-hooks/pull/264>`_
+- build(deps): bump jinja2 from 3.1.4 to 3.1.5 `#267 <https://github.com/ansys/pre-commit-hooks/pull/267>`_
+- build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.3 to 1.2.4 `#268 <https://github.com/ansys/pre-commit-hooks/pull/268>`_
+- build(deps): bump gitpython from 3.1.43 to 3.1.44 `#269 <https://github.com/ansys/pre-commit-hooks/pull/269>`_
+- build(deps-dev): bump sphinx-autodoc-typehints from 2.5.0 to 3.0.0 `#270 <https://github.com/ansys/pre-commit-hooks/pull/270>`_
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+
+- [pre-commit.ci] pre-commit autoupdate `#272 <https://github.com/ansys/pre-commit-hooks/pull/272>`_
+
+
+Maintenance
+^^^^^^^^^^^
+
+- chore: Update code for reuse v5.0.2 `#263 <https://github.com/ansys/pre-commit-hooks/pull/263>`_
+- chore: Use `pathlib.Path` instead of `os` in add_license_headers.py `#266 <https://github.com/ansys/pre-commit-hooks/pull/266>`_
+- Update changelog file and fragment files `#275 <https://github.com/ansys/pre-commit-hooks/pull/275>`_
+
 `0.4.4 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.4>`_ - November 07, 2024
 ============================================================================================
 
