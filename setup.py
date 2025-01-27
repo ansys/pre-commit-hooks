@@ -73,7 +73,7 @@ setup(
         "Jinja2==3.1.5",
         "reuse==5.0.2",
         "requests==2.32.3",
-        "semver==3.0.2",
+        "semver==3.0.4",
         "toml==0.10.2",
     ],
     extras_require={
