@@ -6,7 +6,7 @@ Known issues and limitations
 
     The hook will skip files that are not recognized by `REUSE <https://reuse.software/>`_.
     If you see this message, the file type is not supported by the hook. See the
-    `EXTENSION_COMMENT_STYLE_MAP <https://github.com/fsfe/reuse-tool/blob/v5.0.2/src/reuse/comment.py#L576>`_
+    `EXTENSION_COMMENT_STYLE_MAP <https://github.com/fsfe/reuse-tool/blob/v5.0.2/src/reuse/comment.py>`_
     in the `reuse-tool <https://github.com/fsfe/reuse-tool/tree/v5.0.2>`_ repository for a list of
     supported file types.
 
