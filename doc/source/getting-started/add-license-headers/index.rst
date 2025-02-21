@@ -52,17 +52,42 @@ The template contains the following variables:
 - ``{{ copyright_line }}``: By default, contains the current year and the phrase "ANSYS, Inc. and/or its affiliates."
 - ``{{ expression }}``: The SPDX-License-Identifier expression, which is "MIT" by default.
 
-.. include:: customize-hook.rst
+``add-license-headers`` hook arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 20 60
+    :width: 100%
+
+    * - Argument
+      - Default value
+      - Description
+    * - ``--custom_copyright``
+      - ``ANSYS, Inc. and/or its affiliates.``
+      - The copyright line you want to include in the license header.
+    * - ``--custom_template``
+      - ``ansys``
+      - The name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
+    * - ``--custom_license``
+      - ``MIT``
+      - The SPDX-License-Identifier expression you want to include in the license header. To view
+        the list of valid SPDX license expressions, see the
+        `SPDX License List <https://github.com/spdx/license-list-data/tree/main/text>`_.
+    * - ``--start_year``
+      - ``2023``
+      - The year the first file was committed to the repository.
+    * - ``--ignore_license_check``
+      - ``False``
+      - Whether or not to check for the license in the header.
 
 .. include:: faq.rst
 
 .. include:: issues-limitations.rst
 
-
 .. toctree::
    :hidden:
    :maxdepth: 3
 
-   customize-hook
    faq
    issues-limitations

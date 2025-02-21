@@ -25,21 +25,11 @@ Ansys-developed pre-commit hooks for performing checks on repositories.
 
       :bdg-primary-line:`Develop` :bdg-primary-line:`Test`
 
-   .. grid-item-card:: Frequently asked questions :fa:`fa-solid fa-circle-question`
-      :padding: 2 2 2 2
-      :link: faq
-      :link-type: doc
-
-      Find answers to frequently asked questions.
-
-      :bdg-primary-line:`FAQ` :bdg-primary-line:`Issues`
-
 .. toctree::
    :hidden:
    :maxdepth: 3
 
    getting-started/index
    contribute/index
-   faq
    api/index
    changelog

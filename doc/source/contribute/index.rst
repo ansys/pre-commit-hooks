@@ -7,7 +7,16 @@ How to contribute to the Ansys Pre-Commit Hooks repository.
 
 .. grid:: 3
 
-    .. grid-item-card:: Testing :octicon:`note`
+    .. grid-item-card:: Create a pre-commit hook :octicon:`code-square`
+        :padding: 2 2 2 2
+        :link: add-hook
+        :link-type: doc
+
+        How to add a pre-commit hook to the ``ansys/pre-commit-hooks`` repository
+
+        :bdg-primary-line:`Create new hook`
+
+    .. grid-item-card:: Test a pre-commit hook :octicon:`note`
         :padding: 2 2 2 2
         :link: testing
         :link-type: doc
@@ -20,4 +29,5 @@ How to contribute to the Ansys Pre-Commit Hooks repository.
    :hidden:
    :maxdepth: 3
 
+   add-hook
    testing

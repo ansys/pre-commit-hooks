@@ -11,4 +11,5 @@ Known issues and limitations
     supported file types.
 
     If you would like to add support for the unrecognized file type, please open an
-    `issue <https://github.com/ansys/pre-commit-hooks/issues>` in the ansys-pre-commit-hooks repository.
+    `issue <https://github.com/ansys/pre-commit-hooks/issues>`_ in the ``ansys/pre-commit-hooks``
+    repository.

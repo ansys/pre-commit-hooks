@@ -13,7 +13,7 @@ Click the following cards to learn how to set up the available pre-commit hooks:
         :link-type: doc
 
         A hook that adds and updates license headers in specified directories and file types
-        using `REUSE <https://reuse.software/>`_.
+        using the ``REUSE`` repository.
 
         :bdg-primary-line:`Set-up`
 
@@ -23,7 +23,7 @@ Click the following cards to learn how to set up the available pre-commit hooks:
         :link-type: doc
 
         A hook that performs a brief technical review on repositories based on the
-        `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_.
+        Ansys repository requirements.
 
         :bdg-primary-line:`Set-up`
 
