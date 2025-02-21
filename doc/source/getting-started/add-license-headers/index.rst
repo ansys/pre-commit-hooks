@@ -27,7 +27,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
     hooks:
     - id: add-license-headers
 
-The hook will run on proto files in any directory, as well as python files within directories named
+The hook runs on protocol buffer files in any directory, as well as Python files within directories named
 ``src``, ``examples``, and ``tests``.
 
 If your repository was created before the current year, add the ``--start_year`` argument with the

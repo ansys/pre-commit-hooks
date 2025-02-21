@@ -10,10 +10,10 @@ The hook checks the following aspects of your repository:
 - The ``AUTHORS``, ``CODE_OF_CONDUCT.md``, ``CONTRIBUTING.md``, ``CONTRIBUTORS.md``, ``LICENSE``,
   ``README.{rst|md}``, and ``.github/dependabot.yml`` files exist.
 
-If any of the files are missing, the hook will fail and add the missing files to the repository
+If any of the files are missing, the hook fails and add the missing files to the repository
 using `jinja templates <https://github.com/ansys/pre-commit-hooks/tree/main/src/ansys/pre_commit_hooks/templates>`_.
 
-If any of the directories are missing, the hook will fail and add the missing directories to the
+If any of the directories are missing, the hook fails and add the missing directories to the
 repository.
 
 To get started, add the hook to your ``.pre-commit-config.yaml`` file:
