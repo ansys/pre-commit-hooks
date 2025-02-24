@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-  MAIN_PYTHON_VERSION: '3.10'
+  MAIN_PYTHON_VERSION: '3.12'
   DOCUMENTATION_CNAME: 'pre-commit-hooks.docs.ansys.com'
   LIBRARY_NAME: 'ansys-pre-commit-hooks'
 
