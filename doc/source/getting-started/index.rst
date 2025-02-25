@@ -3,7 +3,7 @@
 Getting started
 ===============
 
-Click the following cards to learn how to set up the available pre-commit hooks:
+Learn how to set up the available pre-commit hooks:
 
 .. grid:: 3
 

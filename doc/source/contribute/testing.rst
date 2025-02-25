@@ -65,5 +65,5 @@ expected. For example, in ``test_new_hook.py``:
         # Assert main passes
         assert hook.main() == 0
 
-See the `pytest documentation <https://docs.pytest.org/en/stable/>`_ for more information on
-writing tests.
+For more information on writing tests, see the
+`pytest documentation <https://docs.pytest.org/en/stable/>`_.

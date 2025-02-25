@@ -34,10 +34,10 @@ Creating a pre-commit hook
         entry: new-hook
         language: python
 
-   Additional information about the hook can be added to the ``.pre-commit-hooks.yaml`` file, such as the
-   ``files``, ``requires-serial``, or ``pass_filenames`` fields. See the
-   `pre-commit documentation <https://pre-commit.com/#creating-new-hooks>`_ for more information
-   on the available fields.
+   In the ``.pre-commit-hooks.yaml`` file, you can include additional information about the hook
+   in the ``files``, ``requires-serial``, or ``pass_filenames`` fields. For more information, see
+   the `Creating new hooks <https://pre-commit.com/#creating-new-hooks>`_ page in the
+   ``pre-commit`` documentation.
 
 4. Add the hook to the ``entry_points`` dictionary in the ``setup.py`` file:
 

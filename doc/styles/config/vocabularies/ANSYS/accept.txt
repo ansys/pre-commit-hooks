@@ -4,5 +4,5 @@ Ansys
 ansys
 maint
 DNE
-jinja
+[Jj]inja
 pytest

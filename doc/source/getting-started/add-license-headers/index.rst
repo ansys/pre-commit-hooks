@@ -27,11 +27,11 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
     hooks:
     - id: add-license-headers
 
-The hook runs on protocol buffer files in any directory, as well as Python files within directories named
-``src``, ``examples``, and ``tests``.
+The hook runs on protocol buffer (PROTO) files in any directory, as well as Python files within
+directories named ``src``, ``examples``, and ``tests``.
 
 If your repository was created before the current year, add the ``--start_year`` argument with the
-year your first file was committed. The ``ansys-pre-commit-hooks`` repository started in 2023,
+year that your first file was committed. The ``ansys-pre-commit-hooks`` repository started in 2023,
 so the ``.pre-commit-config.yaml`` file looks like this:
 
 .. code:: yaml
@@ -49,8 +49,9 @@ template is used to generate the license headers for files.
 
 The template contains the following variables:
 
-- ``{{ copyright_line }}``: By default, contains the current year and the phrase "ANSYS, Inc. and/or its affiliates."
-- ``{{ expression }}``: The SPDX-License-Identifier expression, which is "MIT" by default.
+- ``{{ copyright_line }}``: Contains the current year and the phrase
+  "ANSYS, Inc. and/or its affiliates." by default.
+- ``{{ expression }}``: Contains the SPDX-License-Identifier expression, which is "MIT" by default.
 
 ``add-license-headers`` hook arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,21 +66,21 @@ The template contains the following variables:
       - Description
     * - ``--custom_copyright``
       - ``ANSYS, Inc. and/or its affiliates.``
-      - The copyright line you want to include in the license header.
+      - Copyright line to include in the license header.
     * - ``--custom_template``
       - ``ansys``
-      - The name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
+      - Name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
     * - ``--custom_license``
       - ``MIT``
-      - The SPDX-License-Identifier expression you want to include in the license header. To view
+      - SPDX-License-Identifier expression to include in the license header. To view
         the list of valid SPDX license expressions, see the
         `SPDX License List <https://github.com/spdx/license-list-data/tree/main/text>`_.
     * - ``--start_year``
       - ``2023``
-      - The year the first file was committed to the repository.
+      - Year that the first file was committed to the repository.
     * - ``--ignore_license_check``
       - ``False``
-      - Whether or not to check for the license in the header.
+      - Whether to check for the license in the header.
 
 .. include:: faq.rst
 

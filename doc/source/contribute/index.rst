@@ -3,7 +3,7 @@
 Contribute
 ==========
 
-How to contribute to the Ansys Pre-Commit Hooks repository.
+Learn how to contribute to the Ansys Pre-Commit Hooks repository.
 
 .. grid:: 3
 
@@ -12,7 +12,7 @@ How to contribute to the Ansys Pre-Commit Hooks repository.
         :link: add-hook
         :link-type: doc
 
-        How to add a pre-commit hook to the ``ansys/pre-commit-hooks`` repository
+        How to add a pre-commit hook to the repository
 
         :bdg-primary-line:`Create new hook`
 

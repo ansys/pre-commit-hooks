@@ -1,8 +1,9 @@
 ``tech-review`` setup
 =====================
 
-The ``tech-review`` hook performs a brief technical review on repositories based on Ansys'
-`technical review checklist <https://dev.docs.pyansys.com/getting-started/administration.html#technical>`_.
+The ``tech-review`` hook performs a brief technical review on repositories based on the Ansys
+`technical part of the PyAnsys approval and public release process <https://dev.docs.pyansys.com/getting-started/administration.html#technical>`_
+described in the *PyAnsys developer's guide*.
 
 The hook checks the following aspects of your repository:
 
@@ -10,11 +11,11 @@ The hook checks the following aspects of your repository:
 - The ``AUTHORS``, ``CODE_OF_CONDUCT.md``, ``CONTRIBUTING.md``, ``CONTRIBUTORS.md``, ``LICENSE``,
   ``README.{rst|md}``, and ``.github/dependabot.yml`` files exist.
 
-If any of the files are missing, the hook fails and add the missing files to the repository
-using `jinja templates <https://github.com/ansys/pre-commit-hooks/tree/main/src/ansys/pre_commit_hooks/templates>`_.
-
-If any of the directories are missing, the hook fails and add the missing directories to the
+If any of the directories are missing, the hook fails, and the missing directories are added to the
 repository.
+
+If any of the files are missing, the hook fails, and add the missing files are added to the repository
+using `Jinja templates <https://github.com/ansys/pre-commit-hooks/tree/main/src/ansys/pre_commit_hooks/templates>`_.
 
 To get started, add the hook to your ``.pre-commit-config.yaml`` file:
 
@@ -51,8 +52,8 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
             - --product={product}
             - --non_compliant_name
 
-     Where ``{product}`` is the ``name`` variable under ``[tool.flit.module]`` in the
-     ``pyproject.toml`` file. For example, for ``ansys-pre-commit-hooks`` the ``{product}`` is
+     In the preceding code, ``{product}`` is the ``name`` variable under ``[tool.flit.module]`` in
+     the ``pyproject.toml`` file. For example, for ``ansys-pre-commit-hooks`` the ``{product}`` is
      ``pre_commit_hooks``.
 
      The ``--non_compliant_name`` flag is used if the repository does not follow the typical naming
@@ -71,19 +72,19 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
       - Description
     * - ``--author_maint_name``
       - ``ANSYS, Inc.``
-      - The name of the author and maintainer in the ``pyproject.toml`` file.
+      - Name of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--author_maint_email``
       - ``pyansys.core@ansys.com``
-      - The email of the author and maintainer in the ``pyproject.toml`` file.
+      - Email of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--license``
       - ``MIT``
-      - The license that is being used by your repository.
+      - License that is being used by your repository.
     * - ``--url``
       - ``https://github.com/ansys/{repo-name}``, replacing ``{repo-name}`` with the name of the repository
-      - The URL of the repository.
+      - URL of the repository.
     * - ``--product``
-      - The name of the repository's product. For example, ``mechanical`` for ``PyMechanical``.
-      - The product for the repository.
+      - Name of the repository's product. For example, ``mechanical`` for ``PyMechanical``.
+      - Product for the repository.
     * - ``--non_compliant_name``
       - N/A
       - Flag to use if the repository does not follow the typical naming convention of ``ansys-*-*``.
