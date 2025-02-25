@@ -83,6 +83,7 @@ setup(
             "sphinx==8.2.1",
             "sphinx-autodoc-typehints==3.1.0",
             "sphinx-copybutton==0.5.1",
+            "sphinx_design==0.6.1",
         ],
         "tests": [
             "pytest==8.3.4",
