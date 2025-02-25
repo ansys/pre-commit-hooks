@@ -3,7 +3,7 @@
 Ansys pre-commit hooks
 ======================
 
-This repository provides pre-commit hooks for performing checks on PyAnsys repositories.
+This repository provides pre-commit hooks for performing checks on Ansys repositories.
 
 .. grid:: 3
 
