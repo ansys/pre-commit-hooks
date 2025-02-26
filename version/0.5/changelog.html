@@ -1,0 +1,1267 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Release notes &#8212; ansys-pre-commit-hooks</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/css/ansys_sphinx_theme.css?v=0909a4fa" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="_static/documentation_options.js?v=f909c4a4"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=5eb1bb1e"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pre-commit-hooks.docs.ansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Directories" href="api/src/ansys/pre_commit_hooks/tech_review/Directories.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.5.2" />
+  <link rel="canonical" href="https://pre-commit-hooks.docs.ansys.com/version/stable/changelog.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="ansys-pre-commit-hooks - Home"/>
+    <img src="_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="ansys-pre-commit-hooks - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Release notes</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="release-notes">
+<span id="ref-release-notes"></span><h1>Release notes<a class="headerlink" href="#release-notes" title="Link to this heading">#</a></h1>
+<p>This document contains the release notes for the project.</p>
+<section id="february-26-2025">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.2">0.5.2</a> - February 26, 2025<a class="headerlink" href="#february-26-2025" title="Link to this heading">#</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Dependencies</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p>bump ansys-sphinx-theme[autoapi] from 1.2.4 to 1.2.6</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/279">#279</a></p></td>
+</tr>
+<tr class="row-even"><td><p>bump sphinx-autodoc-typehints from 3.0.0 to 3.0.1</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/281">#281</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>bump importlib-metadata from 8.5.0 to 8.6.1</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/283">#283</a></p></td>
+</tr>
+<tr class="row-even"><td><p>bump semver from 3.0.2 to 3.0.4</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/284">#284</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>bump ansys-sphinx-theme[autoapi] from 1.2.6 to 1.3.1</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/287">#287</a></p></td>
+</tr>
+<tr class="row-even"><td><p>bump sphinx-autodoc-typehints from 3.0.1 to 3.1.0</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/290">#290</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>bump ansys-sphinx-theme[autoapi] from 1.3.1 to 1.3.2</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/291">#291</a></p></td>
+</tr>
+<tr class="row-even"><td><p>bump sphinx from 8.1.3 to 8.2.1</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/292">#292</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Documentation</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p>Improve documentation</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/289">#289</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Maintenance</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p>Bump <cite>ansys-pre-commit-hooks</cite> from 0.4.4 to 0.5.1</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/276">#276</a></p></td>
+</tr>
+<tr class="row-even"><td><p>pre-commit automatic update</p></td>
+<td><p><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/285">#285</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/286">#286</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/288">#288</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/293">#293</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="january-17-2025">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.1">0.5.1</a> - January 17, 2025<a class="headerlink" href="#january-17-2025" title="Link to this heading">#</a></h2>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>fix: Update license headers and fix broken tests <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/271">#271</a></p></li>
+<li><p>fix: Fix “success” statements being printed and LICENSE file updates <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/273">#273</a></p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.0 to 1.2.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/257">#257</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.1 to 1.2.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/259">#259</a></p></li>
+<li><p>build(deps-dev): bump pytest from 8.3.3 to 8.3.4 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/260">#260</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.2 to 1.2.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/264">#264</a></p></li>
+<li><p>build(deps): bump jinja2 from 3.1.4 to 3.1.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/267">#267</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.2.3 to 1.2.4 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/268">#268</a></p></li>
+<li><p>build(deps): bump gitpython from 3.1.43 to 3.1.44 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/269">#269</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.5.0 to 3.0.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/270">#270</a></p></li>
+</ul>
+</section>
+<section id="miscellaneous">
+<h3>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/272">#272</a></p></li>
+</ul>
+</section>
+<section id="maintenance">
+<h3>Maintenance<a class="headerlink" href="#maintenance" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: Update code for reuse v5.0.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/263">#263</a></p></li>
+<li><p>chore: Use <cite>pathlib.Path</cite> instead of <cite>os</cite> in add_license_headers.py <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/266">#266</a></p></li>
+<li><p>Update changelog file and fragment files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/275">#275</a></p></li>
+</ul>
+</section>
+</section>
+<section id="november-07-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.4">0.4.4</a> - November 07, 2024<a class="headerlink" href="#november-07-2024" title="Link to this heading">#</a></h2>
+<section id="id32">
+<h3>Fixed<a class="headerlink" href="#id32" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>fix: there is no “owner” of libraries <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/233">#233</a></p></li>
+<li><p>fix: LICENSE line endings <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/236">#236</a></p></li>
+<li><p>fix: AUTHORS and CONTRIBUTORS.md files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/240">#240</a></p></li>
+</ul>
+</section>
+<section id="id36">
+<h3>Dependencies<a class="headerlink" href="#id36" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps-dev): bump sphinx from 7.4.7 to 8.0.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/212">#212</a></p></li>
+<li><p>build(deps-dev): bump numpydoc from 1.7.0 to 1.8.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/218">#218</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.3 to 1.0.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/222">#222</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.5 to 1.0.7 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/223">#223</a></p></li>
+<li><p>build(deps): bump importlib-metadata from 8.2.0 to 8.4.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/224">#224</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.7 to 1.0.8 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/227">#227</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.3.0 to 2.4.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/228">#228</a></p></li>
+<li><p>build(deps): bump importlib-metadata from 8.4.0 to 8.5.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/229">#229</a></p></li>
+<li><p>build(deps-dev): bump pytest from 8.3.2 to 8.3.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/230">#230</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.4.0 to 2.4.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/231">#231</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.8 to 1.0.11 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/234">#234</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.4.1 to 2.4.4 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/235">#235</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.0.11 to 1.1.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/242">#242</a></p></li>
+<li><p>build(deps-dev): bump sphinx from 8.0.2 to 8.1.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/246">#246</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.2 to 1.1.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/247">#247</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.4.4 to 2.5.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/248">#248</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.6 to 1.1.7 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/252">#252</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.7 to 1.2.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/255">#255</a></p></li>
+<li><p>build(deps-dev): bump pytest-cov from 5.0.0 to 6.0.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/256">#256</a></p></li>
+</ul>
+</section>
+<section id="id56">
+<h3>Miscellaneous<a class="headerlink" href="#id56" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/221">#221</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/225">#225</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/237">#237</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/245">#245</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/249">#249</a></p></li>
+<li><p>chore: update CONTRIBUTORS.md to match guide lines <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/254">#254</a></p></li>
+</ul>
+</section>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 0.16.6 to 1.0.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/219">#219</a></p></li>
+<li><p>build(deps-dev): bump sphinx-autodoc-typehints from 2.2.3 to 2.3.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/226">#226</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme[autoapi] from 1.1.3 to 1.1.6 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/251">#251</a></p></li>
+</ul>
+</section>
+<section id="id66">
+<h3>Maintenance<a class="headerlink" href="#id66" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps): bump ansys/actions from 6 to 7 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/220">#220</a></p></li>
+<li><p>CHORE: Add hacktoberfest labels <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/241">#241</a></p></li>
+<li><p>build(deps): bump ansys/actions from 7 to 8 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/243">#243</a></p></li>
+</ul>
+</section>
+</section>
+<section id="august-07-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.3">0.4.3</a> - August 07, 2024<a class="headerlink" href="#august-07-2024" title="Link to this heading">#</a></h2>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>feat: leverage reuse vcs Git strategy <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/217">#217</a></p></li>
+</ul>
+</section>
+<section id="id72">
+<h3>Maintenance<a class="headerlink" href="#id72" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/213">#213</a></p></li>
+</ul>
+</section>
+</section>
+<section id="august-01-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.2">0.4.2</a> - August 01, 2024<a class="headerlink" href="#august-01-2024" title="Link to this heading">#</a></h2>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: update CHANGELOG for v0.4.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/201">#201</a></p></li>
+<li><p>Bump version to v0.4.1 and uncomment tech review hook <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/202">#202</a></p></li>
+<li><p>chore: adjust add-license-headers script to work with reuse 4.0.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/211">#211</a></p></li>
+</ul>
+</section>
+<section id="id78">
+<h3>Dependencies<a class="headerlink" href="#id78" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps-dev): bump sphinx from 7.4.0 to 7.4.7 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/204">#204</a></p></li>
+<li><p>build(deps-dev): bump pytest from 8.2.2 to 8.3.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/206">#206</a></p></li>
+<li><p>build(deps): bump importlib-metadata from 8.0.0 to 8.2.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/207">#207</a></p></li>
+<li><p>build(deps-dev): bump pytest from 8.3.1 to 8.3.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/208">#208</a></p></li>
+</ul>
+</section>
+<section id="id83">
+<h3>Miscellaneous<a class="headerlink" href="#id83" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: update code base to fix bandit warnings <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/209">#209</a></p></li>
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/210">#210</a></p></li>
+</ul>
+</section>
+</section>
+<section id="july-15-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.1">0.4.1</a> - July 15, 2024<a class="headerlink" href="#july-15-2024" title="Link to this heading">#</a></h2>
+<section id="id87">
+<h3>Changed<a class="headerlink" href="#id87" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: update CHANGELOG for v0.4.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/193">#193</a></p></li>
+</ul>
+</section>
+<section id="id89">
+<h3>Fixed<a class="headerlink" href="#id89" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix semantic versioning check in tech-review hook <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/194">#194</a></p></li>
+</ul>
+</section>
+<section id="id91">
+<h3>Dependencies<a class="headerlink" href="#id91" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps): bump sphinx from 7.3.7 to 7.4.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/198">#198</a></p></li>
+</ul>
+</section>
+<section id="id93">
+<h3>Miscellaneous<a class="headerlink" href="#id93" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/196">#196</a></p></li>
+</ul>
+</section>
+</section>
+<section id="july-01-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.4.0">0.4.0</a> - July 01, 2024<a class="headerlink" href="#july-01-2024" title="Link to this heading">#</a></h2>
+<section id="id96">
+<h3>Added<a class="headerlink" href="#id96" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>feat: technical review hook <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/183">#183</a></p></li>
+</ul>
+</section>
+<section id="id98">
+<h3>Changed<a class="headerlink" href="#id98" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: update CHANGELOG for v0.3.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/186">#186</a></p></li>
+</ul>
+</section>
+<section id="id100">
+<h3>Dependencies<a class="headerlink" href="#id100" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps): bump importlib-metadata from 7.1.0 to 7.2.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/187">#187</a></p></li>
+<li><p>build(deps): bump sphinx-autodoc-typehints from 2.1.1 to 2.2.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/188">#188</a></p></li>
+<li><p>build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.5 to 0.16.6 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/189">#189</a></p></li>
+<li><p>build(deps): bump importlib-metadata from 7.2.1 to 8.0.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/192">#192</a></p></li>
+</ul>
+</section>
+<section id="id105">
+<h3>Miscellaneous<a class="headerlink" href="#id105" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/190">#190</a></p></li>
+</ul>
+</section>
+</section>
+<section id="june-20-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.2">0.3.2</a> - June 20, 2024<a class="headerlink" href="#june-20-2024" title="Link to this heading">#</a></h2>
+<section id="id108">
+<h3>Fixed<a class="headerlink" href="#id108" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>fix: add recursive argument and code to add-license-headers <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/185">#185</a></p></li>
+</ul>
+</section>
+<section id="id110">
+<h3>Dependencies<a class="headerlink" href="#id110" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps): bump pytest from 8.1.1 to 8.2.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/172">#172</a></p></li>
+<li><p>build(deps): bump ansys-sphinx-theme[autoapi] from 0.15.2 to 0.16.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/175">#175</a></p></li>
+<li><p>build(deps): bump pytest from 8.2.0 to 8.2.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/176">#176</a></p></li>
+<li><p>build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.0 to 0.16.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/178">#178</a></p></li>
+<li><p>build(deps): bump ansys-sphinx-theme[autoapi] from 0.16.2 to 0.16.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/180">#180</a></p></li>
+<li><p>build(deps): bump pytest from 8.2.1 to 8.2.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/181">#181</a></p></li>
+<li><p>build(deps): bump sphinx-autodoc-typehints from 2.1.0 to 2.1.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/182">#182</a></p></li>
+</ul>
+</section>
+<section id="id118">
+<h3>Miscellaneous<a class="headerlink" href="#id118" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/173">#173</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/174">#174</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/177">#177</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/179">#179</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/184">#184</a></p></li>
+</ul>
+</section>
+</section>
+<section id="april-23-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.1">0.3.1</a> - April 23, 2024<a class="headerlink" href="#april-23-2024" title="Link to this heading">#</a></h2>
+<section id="id125">
+<h3>Changed<a class="headerlink" href="#id125" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>chore: update CHANGELOG for v0.3.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/167">#167</a></p></li>
+<li><p>build(deps): bump ansys/actions from 5 to 6 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/170">#170</a></p></li>
+</ul>
+</section>
+<section id="id128">
+<h3>Dependencies<a class="headerlink" href="#id128" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps): bump sphinx from 7.2.6 to 7.3.7 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/168">#168</a></p></li>
+<li><p>build(deps): bump sphinx-autodoc-typehints from 2.0.1 to 2.1.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/169">#169</a></p></li>
+</ul>
+</section>
+</section>
+<section id="april-18-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.3.0">0.3.0</a> - April 18, 2024<a class="headerlink" href="#april-18-2024" title="Link to this heading">#</a></h2>
+<section id="id132">
+<h3>Added<a class="headerlink" href="#id132" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>feat: add doc-changelog and doc-deploy-changelog actions <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/164">#164</a></p></li>
+</ul>
+</section>
+<section id="id134">
+<h3>Changed<a class="headerlink" href="#id134" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>maint: bump reuse to v3.0.2 in add-license-headers <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/163">#163</a></p></li>
+</ul>
+</section>
+</section>
+<section id="february-16-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.9">0.2.9</a> - February 16, 2024<a class="headerlink" href="#february-16-2024" title="Link to this heading">#</a></h2>
+<section id="id137">
+<h3>Changed<a class="headerlink" href="#id137" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Pinned all dependencies</p></li>
+</ul>
+</section>
+</section>
+<section id="january-17-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.8">0.2.8</a> - January 17, 2024<a class="headerlink" href="#january-17-2024" title="Link to this heading">#</a></h2>
+<section id="id139">
+<h3>Fixed<a class="headerlink" href="#id139" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Add upper limit to reuse dependency</p></li>
+</ul>
+</section>
+</section>
+<section id="january-16-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.7">0.2.7</a> - January 16, 2024<a class="headerlink" href="#january-16-2024" title="Link to this heading">#</a></h2>
+<section id="id141">
+<h3>Fixed<a class="headerlink" href="#id141" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix pytest python versions and fileinput <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/118">#118</a></p></li>
+</ul>
+</section>
+<section id="id143">
+<h3>Dependencies<a class="headerlink" href="#id143" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bump <cite>gitpython</cite> from 3.1.40 to 3.1.41 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/120">#120</a></p></li>
+<li><p>Bump <cite>ansys-sphinx-theme</cite> from 0.13.0 to 0.13.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/121">#121</a></p></li>
+</ul>
+</section>
+</section>
+<section id="january-11-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.6">0.2.6</a> - January 11, 2024<a class="headerlink" href="#january-11-2024" title="Link to this heading">#</a></h2>
+<section id="id147">
+<h3>Added<a class="headerlink" href="#id147" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Add full header to file if empty <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/116">#116</a></p></li>
+</ul>
+</section>
+</section>
+<section id="january-10-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.5">0.2.5</a> - January 10, 2024<a class="headerlink" href="#january-10-2024" title="Link to this heading">#</a></h2>
+<section id="id150">
+<h3>Added<a class="headerlink" href="#id150" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added custom argument for the copyright’s start year &amp; updated add_hook_changes <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/111">#111</a></p></li>
+</ul>
+</section>
+</section>
+<section id="january-4-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.4">0.2.4</a> - January 4, 2024<a class="headerlink" href="#january-4-2024" title="Link to this heading">#</a></h2>
+<section id="id153">
+<h3>Fixed<a class="headerlink" href="#id153" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Apply hook changes after add-license-headers runs <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/108">#108</a></p></li>
+</ul>
+</section>
+</section>
+<section id="january-2-2024">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.3">0.2.3</a> - January 2, 2024<a class="headerlink" href="#january-2-2024" title="Link to this heading">#</a></h2>
+<section id="id156">
+<h3>Changed<a class="headerlink" href="#id156" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Remove python 3.8 and add python 3.12 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/106">#106</a></p></li>
+<li><p>Update year to 2024 in license files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/107">#107</a></p></li>
+</ul>
+</section>
+<section id="id159">
+<h3>Dependencies<a class="headerlink" href="#id159" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><cite>pre-commit</cite> autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/97">#97</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/99">#99</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/100">#100</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/103">#103</a></p></li>
+<li><p>Bump <cite>actions/labeler</cite> from 4 to 5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/98">#98</a></p></li>
+<li><p>Bump <cite>ansys/actions</cite> from 4 to 5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/102">#102</a></p></li>
+<li><p>Bump <cite>pytest</cite> from 7.4.3 to 7.4.4 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/104">#104</a></p></li>
+</ul>
+</section>
+</section>
+<section id="november-15-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.2">0.2.2</a> - November 15, 2023<a class="headerlink" href="#november-15-2023" title="Link to this heading">#</a></h2>
+<section id="id168">
+<h3>Added<a class="headerlink" href="#id168" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Add headers to tests and examples <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/85">#85</a></p></li>
+<li><p>Add typehints to add-license-headers functions <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/93">#93</a></p></li>
+</ul>
+</section>
+<section id="id171">
+<h3>Fixed<a class="headerlink" href="#id171" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix add-license-headers to keep edits from previously run hooks <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/88">#88</a></p></li>
+</ul>
+</section>
+<section id="id173">
+<h3>Changed<a class="headerlink" href="#id173" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Remove dep5 files from repository <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/89">#89</a></p></li>
+<li><p>Remove .reuse and LICENSES folders <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/95">#95</a></p></li>
+</ul>
+</section>
+<section id="id176">
+<h3>Dependencies<a class="headerlink" href="#id176" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bump <cite>sphinx-autodoc-typehints</cite> from 1.24.0 to 1.25.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/86">#86</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/90">#90</a></p></li>
+<li><p><cite>pre-commit</cite> autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/87">#87</a>, <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/94">#94</a></p></li>
+<li><p>Bump <cite>ansys-sphinx-theme</cite> from 0.12.4 to 0.12.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/91">#91</a></p></li>
+</ul>
+</section>
+</section>
+<section id="october-31-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.1">0.2.1</a> - October 31, 2023<a class="headerlink" href="#october-31-2023" title="Link to this heading">#</a></h2>
+<section id="id183">
+<h3>Added<a class="headerlink" href="#id183" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added difference check between original file and updated file <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/77">#77</a></p></li>
+</ul>
+</section>
+<section id="id185">
+<h3>Dependencies<a class="headerlink" href="#id185" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><cite>pre-commit</cite> autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/76">#76</a></p></li>
+<li><p>Bump <cite>ansys-sphinx-theme</cite> from 0.12.3 to 0.12.4 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/80">#80</a></p></li>
+<li><p>Bump <cite>pytest</cite> from 7.4.2 to 7.4.3 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/81">#81</a></p></li>
+</ul>
+</section>
+</section>
+<section id="october-17-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.2.0">0.2.0</a> - October 17, 2023<a class="headerlink" href="#october-17-2023" title="Link to this heading">#</a></h2>
+<section id="id190">
+<h3>Added<a class="headerlink" href="#id190" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added check_license argument <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/64">#64</a></p></li>
+<li><p>Run hook on specific directories and files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/65">#65</a></p></li>
+<li><p>Update headers &amp; improve unit tests <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/69">#69</a></p></li>
+<li><p>Create assets folder with common REUSE templates <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/72">#72</a></p></li>
+<li><p>Run add-license-headers hook serially <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/74">#74</a></p></li>
+</ul>
+</section>
+<section id="id196">
+<h3>Changed<a class="headerlink" href="#id196" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Removed loc argument &amp; passed in committed files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/57">#57</a></p></li>
+</ul>
+</section>
+<section id="id198">
+<h3>Dependencies<a class="headerlink" href="#id198" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Bump <cite>ansys-sphinx-theme</cite> from 0.12.1 to 0.12.2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/70">#70</a></p></li>
+<li><p>Bump <cite>pre-commit</cite> from v4.4.0 to v4.5.0 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/71">#71</a></p></li>
+</ul>
+</section>
+</section>
+<section id="september-8-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.3">0.1.3</a> - September 8, 2023<a class="headerlink" href="#september-8-2023" title="Link to this heading">#</a></h2>
+<section id="id202">
+<h3>Added<a class="headerlink" href="#id202" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Create custom flags for add-license-header <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/44">#44</a></p></li>
+</ul>
+</section>
+<section id="id204">
+<h3>Changed<a class="headerlink" href="#id204" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Update descriptions for add-license-headers in README <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/40">#40</a></p></li>
+</ul>
+</section>
+</section>
+<section id="september-5-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.2">0.1.2</a> - September 5, 2023<a class="headerlink" href="#september-5-2023" title="Link to this heading">#</a></h2>
+<section id="id207">
+<h3>Dependencies<a class="headerlink" href="#id207" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>[pre-commit.ci] pre-commit autoupdate <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/39">#39</a></p></li>
+</ul>
+</section>
+</section>
+<section id="september-4-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.1">0.1.1</a> - September 4, 2023<a class="headerlink" href="#september-4-2023" title="Link to this heading">#</a></h2>
+<section id="id210">
+<h3>Added<a class="headerlink" href="#id210" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Directory checks &amp; print statement updates <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/34">#34</a></p></li>
+</ul>
+</section>
+<section id="id212">
+<h3>Dependencies<a class="headerlink" href="#id212" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>build(deps-dev): bump gitpython from 3.1.32 to 3.1.34 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/35">#35</a></p></li>
+<li><p>build(deps-dev): bump pytest from 7.3.0 to 7.4.1 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/38">#38</a></p></li>
+<li><p>build(deps-dev): bump sphinx from 7.2.4 to 7.2.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/37">#37</a></p></li>
+<li><p>build(deps-dev): bump ansys-sphinx-theme from 0.10.4 to 0.10.5 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/36">#36</a></p></li>
+</ul>
+</section>
+</section>
+<section id="september-1-2023">
+<h2><a class="reference external" href="https://github.com/ansys/pre-commit-hooks/releases/tag/v0.1.0">0.1.0</a> - September 1, 2023<a class="headerlink" href="#september-1-2023" title="Link to this heading">#</a></h2>
+<section id="id218">
+<h3>Added<a class="headerlink" href="#id218" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Create pre-commit hook to add license header to all files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/7">#7</a></p></li>
+<li><p>Default args in pre-commit-hooks.yaml <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/11">#11</a></p></li>
+<li><p>feat: ignore links (temp) <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/20">#20</a></p></li>
+</ul>
+</section>
+<section id="id222">
+<h3>Changed<a class="headerlink" href="#id222" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Update the readme file <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/21">#21</a></p></li>
+<li><p>Edits to RST and PY files <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/28">#28</a></p></li>
+</ul>
+</section>
+<section id="id225">
+<h3>Fixed<a class="headerlink" href="#id225" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Fix add-license-headers for reuse version &gt;=2 <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/10">#10</a></p></li>
+<li><p>Fix reuse 2.0 implementation <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/pull/17">#17</a></p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#february-26-2025">0.5.2 - February 26, 2025</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-17-2025">0.5.1 - January 17, 2025</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fixed">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#miscellaneous">Miscellaneous</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#maintenance">Maintenance</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#november-07-2024">0.4.4 - November 07, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id32">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id36">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id56">Miscellaneous</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id66">Maintenance</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#august-07-2024">0.4.3 - August 07, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#added">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id72">Maintenance</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#august-01-2024">0.4.2 - August 01, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#changed">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id78">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id83">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#july-15-2024">0.4.1 - July 15, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id87">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id89">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id91">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id93">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#july-01-2024">0.4.0 - July 01, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id96">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id98">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id100">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id105">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#june-20-2024">0.3.2 - June 20, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id108">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id110">Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id118">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#april-23-2024">0.3.1 - April 23, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id125">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id128">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#april-18-2024">0.3.0 - April 18, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id132">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id134">Changed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#february-16-2024">0.2.9 - February 16, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id137">Changed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-17-2024">0.2.8 - January 17, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id139">Fixed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-16-2024">0.2.7 - January 16, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id141">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id143">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-11-2024">0.2.6 - January 11, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id147">Added</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-10-2024">0.2.5 - January 10, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id150">Added</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-4-2024">0.2.4 - January 4, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id153">Fixed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#january-2-2024">0.2.3 - January 2, 2024</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id156">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id159">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#november-15-2023">0.2.2 - November 15, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id168">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id171">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id173">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id176">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#october-31-2023">0.2.1 - October 31, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id183">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id185">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#october-17-2023">0.2.0 - October 17, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id190">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id196">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id198">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#september-8-2023">0.1.3 - September 8, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id202">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id204">Changed</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#september-5-2023">0.1.2 - September 5, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id207">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#september-4-2023">0.1.1 - September 4, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id210">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id212">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#september-1-2023">0.1.0 - September 1, 2023</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id218">Added</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id222">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id225">Fixed</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+<!-- If there is no fix edit button function, use the PyData edit-this-button-->
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <ul class="this-page-menu">
+      <li><a href="_sources/changelog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "_static/search.json";
+</script>
+
+
+<script src="_static/js/search.js"></script>
+  
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright (c) 2025 ANSYS, Inc. All rights reserved.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the
+  <a href="https://sphinxdocs.ansys.com/version/stable/index.html"
+    >Ansys Sphinx Theme</a
+  >
+  1.3.2. <br />Last updated on
+  <span id="ast_build_date"></span>
+</p>
+<script>
+  var options = { day: "numeric", month: "long", year: "numeric" };
+  var ast_lastModifiedDate = new Date(document.lastModified);
+  var ast_build_date = ast_lastModifiedDate.toLocaleDateString("en-US", options);
+  document.getElementById("ast_build_date").innerHTML = ast_build_date;
+</script></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
