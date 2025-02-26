@@ -10,7 +10,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: add-license-headers
             files: '(src|examples|tests|doc)/.*\.(py|rst)|\.(proto|cpp)'
@@ -35,7 +35,7 @@ Frequently asked questions
    .. code:: yaml
 
       - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.5.1
+        rev: v0.5.2
         hooks:
         - id: add-license-headers
           exclude: |
@@ -62,7 +62,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: add-license-headers
             args:
@@ -79,7 +79,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: add-license-headers
             args:
@@ -109,7 +109,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: add-license-headers
             args:
@@ -139,7 +139,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: add-license-headers
             args:

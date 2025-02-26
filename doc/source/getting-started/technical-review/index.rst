@@ -29,7 +29,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
      .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: tech-review
             args:
@@ -45,7 +45,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
      .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.1
+          rev: v0.5.2
           hooks:
           - id: tech-review
             args:
