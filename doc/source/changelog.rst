@@ -13,61 +13,61 @@ This document contains the release notes for the project.
 ============================================================================================
 
 .. tab-set::
-  
+
   .. tab-item:: Dependencies
 
     .. list-table::
         :header-rows: 0
         :widths: auto
 
-    
+
         * - bump ansys-sphinx-theme[autoapi] from 1.2.4 to 1.2.6
           - `#279 <https://github.com/ansys/pre-commit-hooks/pull/279>`_
-    
+
         * - bump sphinx-autodoc-typehints from 3.0.0 to 3.0.1
           - `#281 <https://github.com/ansys/pre-commit-hooks/pull/281>`_
-    
+
         * - bump importlib-metadata from 8.5.0 to 8.6.1
           - `#283 <https://github.com/ansys/pre-commit-hooks/pull/283>`_
-    
+
         * - bump semver from 3.0.2 to 3.0.4
           - `#284 <https://github.com/ansys/pre-commit-hooks/pull/284>`_
-    
+
         * - bump ansys-sphinx-theme[autoapi] from 1.2.6 to 1.3.1
           - `#287 <https://github.com/ansys/pre-commit-hooks/pull/287>`_
-    
+
         * - bump sphinx-autodoc-typehints from 3.0.1 to 3.1.0
           - `#290 <https://github.com/ansys/pre-commit-hooks/pull/290>`_
-    
+
         * - bump ansys-sphinx-theme[autoapi] from 1.3.1 to 1.3.2
           - `#291 <https://github.com/ansys/pre-commit-hooks/pull/291>`_
-    
+
         * - bump sphinx from 8.1.3 to 8.2.1
           - `#292 <https://github.com/ansys/pre-commit-hooks/pull/292>`_
-      
+
   .. tab-item:: Documentation
 
     .. list-table::
         :header-rows: 0
         :widths: auto
 
-    
+
         * - Improve documentation
           - `#289 <https://github.com/ansys/pre-commit-hooks/pull/289>`_
-      
+
   .. tab-item:: Maintenance
 
     .. list-table::
         :header-rows: 0
         :widths: auto
 
-    
+
         * - Bump `ansys-pre-commit-hooks` from 0.4.4 to 0.5.1
           - `#276 <https://github.com/ansys/pre-commit-hooks/pull/276>`_
-    
+
         * - pre-commit automatic update
           - `#285 <https://github.com/ansys/pre-commit-hooks/pull/285>`_, `#286 <https://github.com/ansys/pre-commit-hooks/pull/286>`_, `#288 <https://github.com/ansys/pre-commit-hooks/pull/288>`_, `#293 <https://github.com/ansys/pre-commit-hooks/pull/293>`_
-      
+
 `0.5.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.1>`_ - January 17, 2025
 ===========================================================================================
 
