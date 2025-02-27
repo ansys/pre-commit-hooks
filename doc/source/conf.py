@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 from pathlib import Path
 
-from ansys_sphinx_theme import get_version_match
+from ansys_sphinx_theme import get_version_match, ansys_favicon
 
 # Project information
 project = "ansys-pre-commit-hooks"
@@ -23,6 +23,7 @@ switcher_version = get_version_match(version)
 # Select desired theme, and declare the html title
 html_theme = "ansys_sphinx_theme"
 html_short_title = html_title = "ansys-pre-commit-hooks"
+html_favicon = ansys_favicon
 
 # specify the location of your github repo
 html_theme_options = {
