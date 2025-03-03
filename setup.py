@@ -86,7 +86,7 @@ setup(
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==8.3.4",
+            "pytest==8.3.5",
             "pytest-cov==6.0.0",
         ],
     },
