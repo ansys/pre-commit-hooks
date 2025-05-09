@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-  MAIN_PYTHON_VERSION: '3.12'
+  MAIN_PYTHON_VERSION: '3.13'
   DOCUMENTATION_CNAME: 'pre-commit-hooks.docs.ansys.com'
   LIBRARY_NAME: 'ansys-pre-commit-hooks'
 
@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: ansys/actions/build-wheelhouse@v9
         with:
@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
        os: [ubuntu-latest, windows-latest]
-       python-version: ['3.10', '3.11', '3.12']
+       python-version: ['3.10', '3.11', '3.12', '3.13']
       fail-fast: false
     steps:
       - uses: ansys/actions/tests-pytest@v9
@@ -128,6 +128,7 @@ jobs:
         uses: ansys/actions/release-github@v9
         with:
           library-name: ${{ env.LIBRARY_NAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   doc-deploy-stable:
     name: "Deploy stable documentation"
