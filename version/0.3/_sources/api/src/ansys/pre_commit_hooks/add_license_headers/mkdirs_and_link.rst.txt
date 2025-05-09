@@ -1,0 +1,38 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.mkdirs_and_link`
+=========================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.mkdirs_and_link(asset_dir: str, hook_asset_dir: str, repo_asset_dir: str, filename: str) -> None
+
+   
+   Make .reuse or LICENSES directory and create symbolic link to file.
+
+
+   :Parameters:
+
+       **asset_dir: str**
+           Path of the asset directory required for REUSE (.reuse/templates or LICENSES).
+
+       **hook_asset_dir: str**
+           Full path of the hook's asset directory.
+
+       **repo_asset_dir: str**
+           Full path of the git repository's asset directory.
+
+       **filename: str**
+           Name of the file to be linked from the hook_asset_dir to the repo_asset_dir.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
