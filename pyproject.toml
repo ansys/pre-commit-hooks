@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ansys-pre-commit-hooks"
-version = "0.5.dev3"
+version = "0.5.2"
 description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
 readme = "README.rst"
 requires-python = ">=3.10,<4"
