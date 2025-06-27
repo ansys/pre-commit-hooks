@@ -13,24 +13,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ansys-pre-commit-hooks"
-version = "0.5.2"
-description = "A Python wrapper to create Ansys-tailored pre-commit hooks"
-readme = "README.rst"
+dynamic = ["version", "classifiers", "description", "readme", "scripts"]
 requires-python = ">=3.10,<4"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-]
 dependencies = [
     "GitPython==3.1.44",
     "importlib-metadata==8.7.0",
@@ -40,6 +28,21 @@ dependencies = [
     "semver==3.0.4",
     "toml==0.10.2",
 ]
+
+[tool.setuptools.dynamic]
+version = {file = "src/ansys/pre_commit_hooks/VERSION"}
+readme = {file = ["README.rst"]}
+description = {file = "A Python wrapper to create Ansys-tailored pre-commit hooks"}
+classifiers = {file = """
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+"""}
 
 [project.optional-dependencies]
 doc = [
