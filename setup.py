@@ -72,13 +72,13 @@ setup(
         "importlib-metadata==8.7.0",
         "Jinja2==3.1.6",
         "reuse==5.0.2",
-        "requests==2.32.3",
+        "requests==2.32.4",
         "semver==3.0.4",
         "toml==0.10.2",
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.5.0",
+            "ansys-sphinx-theme[autoapi]==1.5.2",
             "numpydoc==1.8.0",
             "sphinx==8.2.3",
             "sphinx-autodoc-typehints==3.1.0",
@@ -86,8 +86,8 @@ setup(
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==8.3.5",
-            "pytest-cov==6.1.1",
+            "pytest==8.4.1",
+            "pytest-cov==6.2.1",
         ],
     },
     project_urls={
