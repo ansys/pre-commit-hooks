@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=42.0",
-    "GitPython==3.1.44",
+    "GitPython==3.1.45",
     "Jinja2==3.1.6",
     "reuse==5.0.2",
     "requests==2.32.4",
@@ -20,7 +20,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
-    "GitPython==3.1.44",
+    "GitPython==3.1.45",
     "importlib-metadata==8.7.0",
     "Jinja2==3.1.6",
     "reuse==5.0.2",
