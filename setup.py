@@ -86,7 +86,7 @@ setup(
         ],
         "tests": [
             "pytest==8.4.1",
-            "pytest-cov==6.2.1",
+            "pytest-cov==6.3.0",
         ],
     },
     project_urls={
