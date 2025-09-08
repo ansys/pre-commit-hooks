@@ -70,7 +70,7 @@ setup(
         "GitPython==3.1.45",
         "importlib-metadata==8.7.0",
         "Jinja2==3.1.6",
-        "reuse==5.0.2",
+        "reuse==5.1.1",
         "requests==2.32.5",
         "semver==3.0.4",
         "toml==0.10.2",
@@ -85,7 +85,7 @@ setup(
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==8.4.1",
+            "pytest==8.4.2",
             "pytest-cov==6.3.0",
         ],
     },
