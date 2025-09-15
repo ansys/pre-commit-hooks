@@ -1,0 +1,116 @@
+
+
+
+
+
+
+:class:`Filenames`
+==================
+
+.. py:class:: src.ansys.pre_commit_hooks.tech_review.Filenames(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   
+   Enum of files to check.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+.. py:currentmodule:: Filenames
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~AUTHORS`
+            - 
+          * - :py:attr:`~CODE_OF_CONDUCT`
+            - 
+          * - :py:attr:`~CONTRIBUTING`
+            - 
+          * - :py:attr:`~CONTRIBUTORS`
+            - 
+          * - :py:attr:`~LICENSE`
+            - 
+          * - :py:attr:`~README`
+            - 
+          * - :py:attr:`~DEPENDABOT`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.tech_review import Filenames
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: AUTHORS
+   :value: 'AUTHORS'
+
+
+.. py:attribute:: CODE_OF_CONDUCT
+   :value: 'CODE_OF_CONDUCT.md'
+
+
+.. py:attribute:: CONTRIBUTING
+   :value: 'CONTRIBUTING.md'
+
+
+.. py:attribute:: CONTRIBUTORS
+   :value: 'CONTRIBUTORS.md'
+
+
+.. py:attribute:: LICENSE
+   :value: 'LICENSE'
+
+
+.. py:attribute:: README
+   :value: 'README'
+
+
+.. py:attribute:: DEPENDABOT
+   :value: 'dependabot.yml'
+
+
+
+
+
+
