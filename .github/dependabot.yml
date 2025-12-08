@@ -1,6 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     directory: "/"
     schedule:
       interval: "weekly"
@@ -9,6 +14,8 @@ updates:
       - "dependencies"
 
   - package-ecosystem: "github-actions"
+    cooldown:
+      default-days: 5
     directory: "/"
     schedule:
       interval: "weekly"
