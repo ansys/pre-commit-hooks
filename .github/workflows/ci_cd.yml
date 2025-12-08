@@ -25,8 +25,8 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Needed to create the changelog fragment file
-      pull-requests: write  # Needed to commit to PR
+      contents: write  # Needed to combine changelog fragments into changelog file
+      pull-requests: write  # Needed to commit to the release branch/tag
     steps:
       - uses: ansys/actions/doc-deploy-changelog@eb7d0fc873deeee6d4740774675ce1741cb6f154 # v10.2.2
         with:
