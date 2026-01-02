@@ -68,7 +68,7 @@ setup(
     python_requires=">=3.10,<4",
     install_requires=[
         "GitPython==3.1.45",
-        "importlib-metadata==8.7.0",
+        "importlib-metadata==8.7.1",
         "Jinja2==3.1.6",
         "reuse==5.1.1",
         "requests==2.32.5",
