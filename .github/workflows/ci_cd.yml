@@ -135,7 +135,9 @@ jobs:
       - shell: bash
         name: "Run pre-commit hooks"
         run: |
-          echo $(pwd)
+          # Configure git username & email
+          git config user.name ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          git config user.email ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
           # Make and initialize test repo
           mkdir test-repo
