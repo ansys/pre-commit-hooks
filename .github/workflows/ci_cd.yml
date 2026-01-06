@@ -136,8 +136,8 @@ jobs:
         name: "Run pre-commit hooks"
         run: |
           # Configure git username & email
-          git config user.name ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
-          git config user.email ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+          git config user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL }}"
 
           # Make and initialize test repo
           mkdir test-repo
