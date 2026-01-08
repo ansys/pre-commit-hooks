@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """
 Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
 
@@ -47,6 +46,8 @@ DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
+SUPPORTED_LICENSES = ["MIT", "Apache-2.0"]
+"""Licenses that the hook supports."""
 DEFAULT_START_YEAR = dt.today().year
 """Default start year for license headers."""
 YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
@@ -87,7 +88,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser.add_argument(
         "--custom_license",
         type=str,
-        help="Default license for headers.",
+        help="License for headers. The hook currently has templates for the following licenses: {}. By default, MIT is used.".format(", ".join(SUPPORTED_LICENSES)),
         default=DEFAULT_LICENSE,
     )
     # Get the start year
@@ -130,7 +131,7 @@ def get_full_paths(file_list: list) -> list:
     return full_path_files
 
 
-def update_license_file(repo_license_path: Path, year_span: str) -> int:
+def update_license_file(repo_license_path: Path, repo_asset_license_path: Path, license_name: str, year_span: str, copyright: str) -> int:
     """
     Update the LICENSE file to match MIT.txt, adjusting the year span for each repository.
 
@@ -138,8 +139,14 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
     ----------
     repo_license_path: Path
         Path to the LICENSE file in the repository.
+    repo_asset_license_path: Path
+        Path to the LICENSE file in the assets folder copied to the repository from the hook.
+    license_name: str
+        The name of the license being used.
     year_span: str
         The user start year to the current year. If they are the same, default to the current year.
+    copyright: str
+        The copyright statement for the license header. For example, "ANSYS, Inc. and/or its affiliates."
 
     Returns
     -------
@@ -155,25 +162,34 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
     temp_file = NamedTemporaryFile(mode="w", delete=False).name
     shutil.copyfile(repo_license_path, temp_file)
 
-    # The year regex to match the year or year range in the LICENSE file
-    year_regex = r"(\d{4}) - (\d{4})|\d{4}"
-
+    # Read the LICENSE file content in the repository the hook is running on
     with Path(repo_license_path).open(encoding="utf-8", newline="", mode="r") as file:
         lines = file.readlines()
         content = "".join(lines)
 
-        # Get the first instance of the year range, either one year or a range of years
-        year_range_match = re.search(year_regex, content)
-        # Get the group from the year_range_match
-        year_range = year_range_match.group()
+    # If the content of the LICENSE file does not match the requested license
+    formatted_license_name = f"{license_name.split("-")[0].strip()} License"
+    if formatted_license_name not in content:
+        # Open the license file from the assets folder that was temporarily copied to the repo
+        with repo_asset_license_path.open(encoding="utf-8", newline="", mode="r") as file:
+            lines = file.readlines()
+            content = "".join(lines)
 
-        # Replace the current year span with the updated year span
-        if year_range != year_span:
-            # Update the year span in the LICENSE file. "1" is the max number of replacements
-            content = re.sub(year_regex, year_span, content, 1)
+    # Find the line with the year range and copyright statement
+    year_copyright_match = re.search(fr"{YEAR_REGEX} {copyright}", content)
+    year_copyright = year_copyright_match.group()
 
-            with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
-                file.write(content)
+    # Get the year from the line with the year range and copyright statement
+    year_range_match = re.search(YEAR_REGEX, year_copyright)
+    existing_year_range = year_range_match.group()
+
+    if existing_year_range != year_span:
+        # Replace the current year span with the updated year span in the copyright statement
+        content = content.replace(year_copyright, year_copyright.replace(existing_year_range, year_span))
+
+    # Replace the content in the LICENSE file with the new content
+    with Path(repo_license_path).open(encoding="utf-8", newline="", mode="w") as file:
+        file.write(content)
 
     # If the year changed, print a message that the LICENSE file was changed
     if not check_same_content(temp_file, repo_license_path):
@@ -186,7 +202,7 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
     return changed
 
 
-def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
+def link_assets(assets: dict, git_root: str, values: dict) -> None:
     """
     Link the default template and/or license from the assets folder to your git repo.
 
@@ -196,8 +212,8 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
         Dictionary containing the asset folder information.
     git_root: str
         Full path of the repository's root directory.
-    args: argparse.Namespace
-        Namespace of arguments with their values.
+    values: dict
+        Dictionary containing the values to use for linking assets.
     """
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
@@ -211,24 +227,24 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
         repo_asset_dir = Path(git_root) / value["path"]
 
         # If key is .reuse and the custom template is being used
-        if key == ".reuse" and args.custom_template == DEFAULT_TEMPLATE:
+        if key == ".reuse" and values["template"] == DEFAULT_TEMPLATE:
             mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
 
-        # If key is LICENSES, the default license is being used, and ignore_license_check is False
+        # If key is LICENSES, a supported license is being used, and ignore_license_check is False
         if (
             key == "LICENSES"
-            and args.custom_license == DEFAULT_LICENSE
-            and not args.ignore_license_check
+            and values["license"] in SUPPORTED_LICENSES
+            and not values["ignore_license_check"]
         ):
-            hook_license_file = hook_loc / "assets" / "LICENSES" / f"{DEFAULT_LICENSE}.txt"
-            repo_license_file = repo_asset_dir / value["default_file"]
+            hook_license_file = hook_loc / "assets" / "LICENSES" / f"{values['license']}.txt"
+            repo_license_file = repo_asset_dir / value["default_file"][values["license"]]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+            generate_license_file(hook_license_file.parent, dt.today().year, values["license"], repo_license_file)
 
 
 def generate_license_file(
-    template_parent_dir: Path, year_span: int, license_file_name: Path
+    template_parent_dir: Path, year_span: int, license_name: str, license_file_name: Path
 ) -> None:
     """Generate the MIT.txt file from the assets/LICENSES/MIT.txt template.
 
@@ -238,14 +254,16 @@ def generate_license_file(
         Path to the parent directory of the template file.
     year_span: int
         The user start year to the current year. If they are the same, default to the current year.
-        For example, "2024" or "2023 - 2025".
+        For example, "2024" or "2023 - 2026".
+    license_name: str
+        The name of the license being used.
     license_file_name: Path
         Path to the license file in the repository to generate.
     """
     loader = FileSystemLoader(searchpath=template_parent_dir)
     env = Environment(loader=loader)  # nosec
     # Get the template for the specified file
-    template = env.get_template(f"{DEFAULT_LICENSE}.txt")
+    template = env.get_template(f"{license_name}.txt")
     # Generate the file content from the template
     file_content = template.render(year_span=year_span)
 
@@ -398,7 +416,7 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     project = obj.project
     template, commented = get_template(values["template"], project)
 
-    license = [] if args.ignore_license_check else [values["license"]]
+    license = [] if values["ignore_license_check"] else [values["license"]]
     files = values["files"]
     copyright = [values["copyright"]]
     years = (
@@ -517,6 +535,7 @@ def add_header(
     tmp: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
+    print(f"license: {license}")
     # Get the REUSE information from the file.
     reuse_info = get_reuse_info(
         copyrights=copyright,
@@ -728,14 +747,26 @@ def cleanup(assets: dict, os_git_root: str) -> None:
     os_git_root: str
         Full path of the repository's root directory.
     """
-    # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
+    # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt, LICENSES/Apache-2.0.txt)
     for key, value in assets.items():
-        dest = Path(os_git_root) / value["path"] / value["default_file"]
-        # If the default asset files exist, unlink and remove directory
-        if dest.exists():
-            dest.unlink()
-            if not Path(value["path"]).iterdir():
-                shutil.rmtree(key)
+        asset_path = Path(os_git_root) / value["path"]
+        
+        # Handle different types of default_file values
+        if isinstance(value["default_file"], dict):
+            # For LICENSES dictionary: {"MIT": "MIT.txt", "Apache-2.0": "Apache-2.0.txt"}
+            for license_files in value["default_file"].values():
+                dest = asset_path / license_files
+                if dest.exists():
+                    dest.unlink()
+        else:
+            # For simple string values like "ansys.jinja2"
+            dest = asset_path / value["default_file"]
+            if dest.exists():
+                dest.unlink()
+        
+        # Remove directory if empty
+        if asset_path.exists() and not any(asset_path.iterdir()):
+            shutil.rmtree(asset_path)
 
 
 def main():
@@ -778,7 +809,8 @@ def main():
         "files": get_full_paths(args.files),
         "copyright": args.custom_copyright,
         "template": args.custom_template,
-        "license": args.custom_license,
+        "license": args.custom_license.lower().capitalize() if args.custom_license.lower() == "apache-2.0" else args.custom_license,
+        "ignore_license_check": args.ignore_license_check,
         "start_year": args.start_year,
         "current_year": dt.today().year,
         "git_repo": git_repo,
@@ -792,20 +824,22 @@ def main():
         },
         "LICENSES": {
             "path": "LICENSES",
-            "default_file": f"{DEFAULT_LICENSE}.txt",
+            "default_file": {license: f"{license}.txt" for license in SUPPORTED_LICENSES}
         },
     }
 
     # Link the default template and/or license from the assets folder to your git repo.
-    link_assets(assets, git_root, args)
+    link_assets(assets, git_root, values)
 
     # Set the license return code to zero by default
     license_return_code = 0
+    # Repo asset license path
+    repo_asset_license_path = git_root / assets["LICENSES"]["path"] / assets["LICENSES"]["default_file"][values["license"]]
     # Get the path to the LICENSE file in the repository
     repo_license_path = git_root / "LICENSE"
 
     # Update the year span in the LICENSE file if necessary
-    if repo_license_path.is_file() and (args.custom_license == DEFAULT_LICENSE):
+    if repo_license_path.is_file() and (values["license"] in SUPPORTED_LICENSES):
         # Create a year span based on user input and the current year
         user_start_year = str(values["start_year"])
         current_year = str(values["current_year"])
@@ -816,7 +850,7 @@ def main():
         )
 
         # Update the year span in the LICENSE file
-        license_return_code = update_license_file(repo_license_path, year_span)
+        license_return_code = update_license_file(repo_license_path, repo_asset_license_path, values["license"], year_span, values["copyright"])
 
     # Create click object for the project
     obj = common.ClickObj(git_root)

@@ -115,12 +115,30 @@ Frequently asked questions
             args:
             - --custom_template=template_name
 
-.. dropdown:: How do you use a custom license?
+.. dropdown:: How do I change the license from MIT to Apache-2.0?
     :animate: fade-in-slide-down
+
+    The hook has templates for the ``MIT`` and ``Apache-2.0`` licenses. You can change
+    the license to ``Apache-2.0`` by adding the ``--custom_license`` argument to the hook
+    in your ``.pre-commit-config.yaml`` file:
+
+    .. code:: yaml
+
+        - repo: https://github.com/ansys/pre-commit-hooks
+          rev: v0.5.2
+          hooks:
+          - id: add-license-headers
+            args:
+            - --custom_license=Apache-2.0
+
+.. dropdown:: How do you use a custom license that isn't MIT or Apache-2.0?
+    :animate: fade-in-slide-down
+
+    The hook has templates for the ``MIT`` and ``Apache-2.0`` licenses by default.
 
     To use a custom license, create the ``LICENSES`` directory in the root of your
     repository and add the license to that directory. The custom license cannot be named
-    ``MIT.txt``. Otherwise, it would be removed after the hook is done running.
+    ``MIT.txt`` or ``Apache-2.0.txt``. Otherwise, it would be removed after the hook is done running.
 
     ::
 
