@@ -25,6 +25,7 @@ Module for running `REUSE <https://reuse.software/>`_ to add missing license hea
 
 A license header consists of the Ansys copyright statement and licensing information.
 """
+
 import argparse
 from datetime import date as dt
 import filecmp

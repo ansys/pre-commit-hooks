@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """Module for checking if a repository is compliant with required files in the technical review."""
+
 import argparse
 from datetime import date as dt
 from enum import Enum
