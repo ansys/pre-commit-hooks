@@ -1,9 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    directory: "/requirements"
     cooldown:
       default-days: 10 # Fallback cooldown if no specific rule applies
-    directory: "/requirements"
     schedule:
       interval: "weekly"
     labels:

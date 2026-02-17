@@ -1,9 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    {% if config_file != "setuptools" %}directory: "/"{% else %}directory: "/requirements"{% endif %}
     cooldown:
       default-days: 10 # Fallback cooldown if no specific rule applies
-    {% if config_file != "setuptools" %}directory: "/"{% else %}directory: "/requirements"{% endif %}
     schedule:
       interval: "weekly"
     labels:
