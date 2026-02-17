@@ -67,8 +67,8 @@ setup(
     url="https://github.com/ansys/pre-commit-hooks",
     python_requires=">=3.10,<4",
     install_requires=[
-        "GitPython==3.1.45",
-        "importlib-metadata==8.7.0",
+        "GitPython==3.1.46",
+        "importlib-metadata==8.7.1",
         "Jinja2==3.1.6",
         "reuse==6.2.0",
         "requests==2.32.5",
@@ -77,15 +77,15 @@ setup(
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.6.3",
-            "numpydoc==1.9.0",
+            "ansys-sphinx-theme[autoapi]==1.7.0",
+            "numpydoc==1.10.0",
             "sphinx==8.2.3",
             "sphinx-autodoc-typehints==3.1.0",
             "sphinx-copybutton==0.5.1",
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==9.0.0",
+            "pytest==9.0.2",
             "pytest-cov==7.0.0",
         ],
     },

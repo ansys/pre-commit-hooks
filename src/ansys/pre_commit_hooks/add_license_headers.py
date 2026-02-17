@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2025 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,6 +25,7 @@ Module for running `REUSE <https://reuse.software/>`_ to add missing license hea
 
 A license header consists of the Ansys copyright statement and licensing information.
 """
+
 import argparse
 from datetime import date as dt
 import filecmp

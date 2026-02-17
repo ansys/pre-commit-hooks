@@ -6,7 +6,7 @@ ci:
 repos:
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 25.11.0
+  rev: 26.1.0
   hooks:
   - id: black
 
@@ -44,7 +44,7 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.34.1
+  rev: 0.36.2
   hooks:
     - id: check-github-workflows
 
