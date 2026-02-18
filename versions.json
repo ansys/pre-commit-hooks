@@ -1,0 +1,27 @@
+[
+  {
+    "name": "dev",
+    "version": "dev",
+    "url": "https://pre-commit-hooks.docs.ansys.com/version/dev/"
+  },
+  {
+    "name": "0.5 (stable)",
+    "version": "0.5",
+    "url": "https://pre-commit-hooks.docs.ansys.com/version/stable/"
+  },
+  {
+    "name": "0.4",
+    "version": "0.4",
+    "url": "https://pre-commit-hooks.docs.ansys.com/version/0.4/"
+  },
+  {
+    "name": "0.3",
+    "version": "0.3",
+    "url": "https://pre-commit-hooks.docs.ansys.com/version/0.3/"
+  },
+  {
+    "name": "Older versions",
+    "version": "N/A",
+    "url": "https://pre-commit-hooks.docs.ansys.com/version/"
+  }
+]

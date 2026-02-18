@@ -1,0 +1,49 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.check_exists`
+======================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.check_exists(changed_headers: int, parser: argparse.ArgumentParser, values: dict, proj: reuse.project.Project, missing_headers: list, i: int) -> int
+
+   
+   Check if the committed file is missing its header.
+
+
+   :Parameters:
+
+       **changed_headers: int**
+           ``0`` if no headers were added or updated.
+           ``1`` if headers were added or updated.
+
+       **parser: argparse.ArgumentParser**
+           Parser containing default license header arguments.
+
+       **values: dict**
+           Dictionary containing the values of files, copyright,
+           template, license, changed_headers, year, and git_repo.
+
+       **proj: project.Project**
+           Project to run `REUSE <https://reuse.software/>`_ on.
+
+       **missing_headers: list**
+           Committed files that are missing copyright and/or
+           license information in their headers.
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if all files contain headers and are up to date.
+           ``1`` if ``REUSE`` changed all noncompliant files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

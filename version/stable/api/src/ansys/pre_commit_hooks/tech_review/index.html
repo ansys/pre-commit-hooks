@@ -1,0 +1,1099 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The tech_review.py module &#8212; ansys-pre-commit-hooks</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/css/ansys_sphinx_theme.css?v=0909a4fa" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+
+  <!-- Include desired assets -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+
+  
+    <link href="../../../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../../../_static/documentation_options.js?v=f909c4a4"></script>
+    <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../../_static/copybutton.js?v=5eb1bb1e"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/src/ansys/pre_commit_hooks/tech_review/index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pre-commit-hooks.docs.ansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Filenames" href="Filenames.html" />
+    <link rel="prev" title="The add_license_headers.py module" href="../add_license_headers/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.5.2" />
+  <link rel="canonical" href="https://pre-commit-hooks.docs.ansys.com/version/stable/api/src/ansys/pre_commit_hooks/tech_review/index.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="ansys-pre-commit-hooks - Home"/>
+    <img src="../../../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark pst-js-only" alt="ansys-pre-commit-hooks - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../../../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../contribute/index.html">
+    Contribute
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../../../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html"><span class="nf nf-md-package"></span> src.ansys.pre_commit_hooks</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../add_license_headers/index.html"> <span class="nf nf-fa-file"></span> add_license_headers</a></li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#"> <span class="nf nf-fa-file"></span> tech_review</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="Filenames.html"> <span class="nf nf-cod-symbol_enum"></span> Filenames</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Directories.html"> <span class="nf nf-cod-symbol_enum"></span> Directories</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../../../index.html" class="nav-link">API reference</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../index.html" class="nav-link">The <code class="docutils literal notranslate"><span class="pre">src.ansys.pre_commit_hooks</span></code> library</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">The <code class="docutils literal notranslate"><span class="pre">tech_review.py</span></code> module</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-src.ansys.pre_commit_hooks.tech_review">
+<span id="the-tech-review-py-module"></span><h1>The <code class="docutils literal notranslate"><span class="pre">tech_review.py</span></code> module<a class="headerlink" href="#module-src.ansys.pre_commit_hooks.tech_review" title="Link to this heading">#</a></h1>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Enums</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="Filenames.html#src.ansys.pre_commit_hooks.tech_review.Filenames" title="src.ansys.pre_commit_hooks.tech_review.Filenames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Filenames</span></code></a></p></td>
+<td><p>Enum of files to check.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="Directories.html#src.ansys.pre_commit_hooks.tech_review.Directories" title="src.ansys.pre_commit_hooks.tech_review.Directories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Directories</span></code></a></p></td>
+<td><p>Enum of directories to check.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Functions</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.check_dirs_exist" title="tech_review.check_dirs_exist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_dirs_exist</span></code></a></p></td>
+<td><p>Check folders exist in the root of the git repository.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.check_config_file" title="tech_review.check_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_config_file</span></code></a></p></td>
+<td><p>Check naming convention, version, author, and maintainer information.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.check_pyproject_toml" title="tech_review.check_pyproject_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_pyproject_toml</span></code></a></p></td>
+<td><p>Check pyproject.toml file for correct naming convention, version, author, and maintainer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.check_auth_maint" title="tech_review.check_auth_maint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_auth_maint</span></code></a></p></td>
+<td><p>Check if the author and maintainer names and emails are the same.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.check_setup_py" title="tech_review.check_setup_py"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_setup_py</span></code></a></p></td>
+<td><p>Check setup.py file for correct naming convention, version, author, and maintainer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.download_license_json" title="tech_review.download_license_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_license_json</span></code></a></p></td>
+<td><p>Download the licenses.json file and restructure it to only include the license ID and name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.restructure_json" title="tech_review.restructure_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restructure_json</span></code></a></p></td>
+<td><p>Remove extra information from licenses.json file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.check_file_exists" title="tech_review.check_file_exists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_file_exists</span></code></a></p></td>
+<td><p>Check files exist. If they do not exist, create them using jinja templates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.generate_file_from_jinja" title="tech_review.generate_file_from_jinja"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_file_from_jinja</span></code></a></p></td>
+<td><p>Generate file using jinja templates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.write_content" title="tech_review.write_content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_content</span></code></a></p></td>
+<td><p>Write generated content from jinja template to a file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.check_file_content" title="tech_review.check_file_content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_file_content</span></code></a></p></td>
+<td><p>Check the file content of the LICENSE and CONTRIBUTORS.md files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.main" title="tech_review.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a></p></td>
+<td><p>Check files for technical review.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Constants</label><div class="sd-tab-content docutils">
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.HOOK_PATH" title="tech_review.HOOK_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HOOK_PATH</span></code></a></p></td>
+<td><p>Location of the pre-commit hook on your system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.LICENSES_JSON" title="tech_review.LICENSES_JSON"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LICENSES_JSON</span></code></a></p></td>
+<td><p>JSON file containing licenses information.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.DEFAULT_AUTHOR_MAINT_NAME" title="tech_review.DEFAULT_AUTHOR_MAINT_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_AUTHOR_MAINT_NAME</span></code></a></p></td>
+<td><p>Default name of project authors and maintainers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.DEFAULT_AUTHOR_MAINT_EMAIL" title="tech_review.DEFAULT_AUTHOR_MAINT_EMAIL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_AUTHOR_MAINT_EMAIL</span></code></a></p></td>
+<td><p>Default email of project authors and maintainers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.DEFAULT_START_YEAR" title="tech_review.DEFAULT_START_YEAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_START_YEAR</span></code></a></p></td>
+<td><p>Default start year of the repository.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tech_review.DEFAULT_LICENSE" title="tech_review.DEFAULT_LICENSE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_LICENSE</span></code></a></p></td>
+<td><p>Default license of the repository</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tech_review.JSON_URL" title="tech_review.JSON_URL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JSON_URL</span></code></a></p></td>
+<td><p>URL to retrieve list of license IDs and names.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Link to this heading">#</a></h2>
+<p>Module for checking if a repository is compliant with required files in the technical review.</p>
+</section>
+<section id="module-detail">
+<h2>Module detail<a class="headerlink" href="#module-detail" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_dirs_exist">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_dirs_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">directories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tech_review.check_dirs_exist" title="Link to this definition">#</a></dt>
+<dd><p>Check folders exist in the root of the git repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>repo_path: str</strong></dt><dd><p>Path of the repository being checked.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><strong>directories: list</strong></dt><dd><p>List of directories to check if they exist in the repository.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if all directories exist.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if a directory did not exist and was created.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_config_file">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author_maint_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author_maint_email</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_compliant_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tech_review.check_config_file" title="Link to this definition">#</a></dt>
+<dd><p>Check naming convention, version, author, and maintainer information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>repo_path: str</strong></dt><dd><p>Path of the repository being checked.</p>
+</dd>
+<dt><strong>author_maint_name: str</strong></dt><dd><p>Project author and maintainer’s name.</p>
+</dd>
+<dt><strong>author_maint_email: str</strong></dt><dd><p>Project author and maintainer’s email.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><strong>non_compliant_name: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository’s name is not in the form ansys-<em>-</em> and it is permitted.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository’s name is in the form ansys-<em>-</em>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if all files exist and contain the correct content.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if a file was created or did not contain the correct content.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_pyproject_toml">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_pyproject_toml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author_maint_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author_maint_email</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_compliant_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a></span></span><a class="headerlink" href="#tech_review.check_pyproject_toml" title="Link to this definition">#</a></dt>
+<dd><p>Check pyproject.toml file for correct naming convention, version, author, and maintainer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>repo_path: str</strong></dt><dd><p>Path of the repository being checked.</p>
+</dd>
+<dt><strong>author_maint_name: str</strong></dt><dd><p>Project author and maintainer’s name.</p>
+</dd>
+<dt><strong>author_maint_email: str</strong></dt><dd><p>Project author and maintainer’s email.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><strong>non_compliant_name: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository’s name is not in the form ansys-<em>-</em> and it is permitted.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository’s name is in the form ansys-<em>-</em>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the pyproject.toml file’s information was correct.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the pyproject.toml file had missing or incorrect information.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>Name of the project from the pyproject.toml file.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_auth_maint">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_auth_maint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tech_review.check_auth_maint" title="Link to this definition">#</a></dt>
+<dd><p>Check if the author and maintainer names and emails are the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>project_value: str</strong></dt><dd><p>The author or maintainer’s name or email retrieved from the pyproject.toml file.</p>
+</dd>
+<dt><strong>arg_value: str</strong></dt><dd><p>The author or maintainer’s name or email retrieved from the argument passed into the hook.</p>
+</dd>
+<dt><strong>err_str: str</strong></dt><dd><p>The message that is printed when an author or maintainer’s name or email is incorrect.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the author and maintainer’s name and email are correct.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the author or maintainer’s name or email is incorrect.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_setup_py">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_setup_py</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">author_maint_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">author_maint_email</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a></span></span><a class="headerlink" href="#tech_review.check_setup_py" title="Link to this definition">#</a></dt>
+<dd><p>Check setup.py file for correct naming convention, version, author, and maintainer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>author_maint_name: str</strong></dt><dd><p>Project author and maintainer’s name.</p>
+</dd>
+<dt><strong>author_maint_email: str</strong></dt><dd><p>Project author and maintainer’s email.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>An empty string since the setup.py check is not implemented.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.download_license_json">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">download_license_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tech_review.download_license_json" title="Link to this definition">#</a></dt>
+<dd><p>Download the licenses.json file and restructure it to only include the license ID and name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>url: str</strong></dt><dd><p>The URL to the licenses.json file that is downloaded.</p>
+</dd>
+<dt><strong>json_file: str</strong></dt><dd><p>The path of the json_file to be written to and updated.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the license file was downloaded and updated.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if there was an issue downloading the license file.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.restructure_json">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">restructure_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tech_review.restructure_json" title="Link to this definition">#</a></dt>
+<dd><p>Remove extra information from licenses.json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>file: str</strong></dt><dd><p>The path of the json_file to be updated.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_file_exists">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_file_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">license</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">repository_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tech_review.check_file_exists" title="Link to this definition">#</a></dt>
+<dd><p>Check files exist. If they do not exist, create them using jinja templates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>repo_path: str</strong></dt><dd><p>Path of the repository being checked.</p>
+</dd>
+<dt><strong>files: list</strong></dt><dd><p>List of files to check if they exist and their content.</p>
+</dd>
+<dt><strong>project_name: str</strong></dt><dd><p>The name of the project.</p>
+</dd>
+<dt><strong>start_year: str</strong></dt><dd><p>The start year of the repository.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><strong>license: str</strong></dt><dd><p>The license the repository uses.</p>
+</dd>
+<dt><strong>repository_url: str</strong></dt><dd><p>The URL of the repository.</p>
+</dd>
+<dt><strong>product: str</strong></dt><dd><p>The Ansys product the repository is based on.</p>
+</dd>
+<dt><strong>config_file: str</strong></dt><dd><p>If the project’s config file is “setuptools” or “pyproject”.</p>
+</dd>
+<dt><strong>doc_repo_name: str</strong></dt><dd><p>The name of the repository to use in documentation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the files exist and content was correct.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if a file was created and/or its content was incorrect.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.generate_file_from_jinja">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">generate_file_from_jinja</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">year_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_repo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#tech_review.generate_file_from_jinja" title="Link to this definition">#</a></dt>
+<dd><p>Generate file using jinja templates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>file: str</strong></dt><dd><p>The file that the template is being created for.</p>
+</dd>
+<dt><strong>project_name: str</strong></dt><dd><p>The name of the project.</p>
+</dd>
+<dt><strong>year_str: str</strong></dt><dd><p>The start year of the repository.</p>
+</dd>
+<dt><strong>repo_url: str</strong></dt><dd><p>The URL of the repository.</p>
+</dd>
+<dt><strong>product: str</strong></dt><dd><p>The Ansys product the repository is based on.</p>
+</dd>
+<dt><strong>config_file: str</strong></dt><dd><p>If the project’s config file is “setuptools” or “pyproject”.</p>
+</dd>
+<dt><strong>doc_repo_name: str</strong></dt><dd><p>The name of the repository to use in documentation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>Content of the template that was generated.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.write_content">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">write_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tech_review.write_content" title="Link to this definition">#</a></dt>
+<dd><p>Write generated content from jinja template to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>message: str</strong></dt><dd><p>The message that details which file is being created.</p>
+</dd>
+<dt><strong>file_path: str</strong></dt><dd><p>The path of the file to write the content to.</p>
+</dd>
+<dt><strong>file_content: str</strong></dt><dd><p>The file content that was generated from the jinja templates.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.check_file_content">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">check_file_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">generated_content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compliant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">license</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#tech_review.check_file_content" title="Link to this definition">#</a></dt>
+<dd><p>Check the file content of the LICENSE and CONTRIBUTORS.md files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>file: str</strong></dt><dd><p>The file that the template is being created for.</p>
+</dd>
+<dt><strong>generated_content: str</strong></dt><dd><p>Content of the template that was generated.</p>
+</dd>
+<dt><strong>is_compliant: bool</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the repository is compliant.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if the repository is not compliant.</p>
+</dd>
+<dt><strong>license: str</strong></dt><dd><p>The license the repository uses.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.13)"><span class="xref std std-ref">bool</span></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if LICENSE and CONTRIBUTORS.md files had the correct content.
+<code class="docutils literal notranslate"><span class="pre">False</span></code> if LICENSE and CONTRIBUTORS.md files had the incorrect content.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tech_review.main">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tech_review.main" title="Link to this definition">#</a></dt>
+<dd><p>Check files for technical review.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.HOOK_PATH">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">HOOK_PATH</span></span><a class="headerlink" href="#tech_review.HOOK_PATH" title="Link to this definition">#</a></dt>
+<dd><p>Location of the pre-commit hook on your system.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.LICENSES_JSON">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">LICENSES_JSON</span></span><a class="headerlink" href="#tech_review.LICENSES_JSON" title="Link to this definition">#</a></dt>
+<dd><p>JSON file containing licenses information.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.DEFAULT_AUTHOR_MAINT_NAME">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_AUTHOR_MAINT_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ANSYS,</span> <span class="pre">Inc.'</span></em><a class="headerlink" href="#tech_review.DEFAULT_AUTHOR_MAINT_NAME" title="Link to this definition">#</a></dt>
+<dd><p>Default name of project authors and maintainers.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.DEFAULT_AUTHOR_MAINT_EMAIL">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_AUTHOR_MAINT_EMAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyansys.core&#64;ansys.com'</span></em><a class="headerlink" href="#tech_review.DEFAULT_AUTHOR_MAINT_EMAIL" title="Link to this definition">#</a></dt>
+<dd><p>Default email of project authors and maintainers.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.DEFAULT_START_YEAR">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_START_YEAR</span></span><a class="headerlink" href="#tech_review.DEFAULT_START_YEAR" title="Link to this definition">#</a></dt>
+<dd><p>Default start year of the repository.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.DEFAULT_LICENSE">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_LICENSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MIT'</span></em><a class="headerlink" href="#tech_review.DEFAULT_LICENSE" title="Link to this definition">#</a></dt>
+<dd><p>Default license of the repository</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tech_review.JSON_URL">
+<span class="sig-prename descclassname"><span class="pre">tech_review.</span></span><span class="sig-name descname"><span class="pre">JSON_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json'</span></em><a class="headerlink" href="#tech_review.JSON_URL" title="Link to this definition">#</a></dt>
+<dd><p>URL to retrieve list of license IDs and names.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#description">Description</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-detail">Module detail</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_dirs_exist"><code class="docutils literal notranslate"><span class="pre">check_dirs_exist()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_config_file"><code class="docutils literal notranslate"><span class="pre">check_config_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_pyproject_toml"><code class="docutils literal notranslate"><span class="pre">check_pyproject_toml()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_auth_maint"><code class="docutils literal notranslate"><span class="pre">check_auth_maint()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_setup_py"><code class="docutils literal notranslate"><span class="pre">check_setup_py()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.download_license_json"><code class="docutils literal notranslate"><span class="pre">download_license_json()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.restructure_json"><code class="docutils literal notranslate"><span class="pre">restructure_json()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_file_exists"><code class="docutils literal notranslate"><span class="pre">check_file_exists()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.generate_file_from_jinja"><code class="docutils literal notranslate"><span class="pre">generate_file_from_jinja()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.write_content"><code class="docutils literal notranslate"><span class="pre">write_content()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.check_file_content"><code class="docutils literal notranslate"><span class="pre">check_file_content()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.HOOK_PATH"><code class="docutils literal notranslate"><span class="pre">HOOK_PATH</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.LICENSES_JSON"><code class="docutils literal notranslate"><span class="pre">LICENSES_JSON</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.DEFAULT_AUTHOR_MAINT_NAME"><code class="docutils literal notranslate"><span class="pre">DEFAULT_AUTHOR_MAINT_NAME</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.DEFAULT_AUTHOR_MAINT_EMAIL"><code class="docutils literal notranslate"><span class="pre">DEFAULT_AUTHOR_MAINT_EMAIL</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.DEFAULT_START_YEAR"><code class="docutils literal notranslate"><span class="pre">DEFAULT_START_YEAR</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.DEFAULT_LICENSE"><code class="docutils literal notranslate"><span class="pre">DEFAULT_LICENSE</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tech_review.JSON_URL"><code class="docutils literal notranslate"><span class="pre">JSON_URL</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+<!-- If there is no fix edit button function, use the PyData edit-this-button-->
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <ul class="this-page-menu">
+      <li><a href="../../../../../_sources/api/src/ansys/pre_commit_hooks/tech_review/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+
+  <!-- Include desired assets -->
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../../../_static/search.json";
+</script>
+
+
+<script src="../../../../../_static/js/search.js"></script>
+  
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright (c) 2025 ANSYS, Inc. All rights reserved.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.1.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the
+  <a href="https://sphinxdocs.ansys.com/version/stable/index.html"
+    >Ansys Sphinx Theme</a
+  >
+  1.3.2. <br />Last updated on
+  <span id="ast_build_date"></span>
+</p>
+<script>
+  var options = { day: "numeric", month: "long", year: "numeric" };
+  var ast_lastModifiedDate = new Date(document.lastModified);
+  var ast_build_date = ast_lastModifiedDate.toLocaleDateString("en-US", options);
+  document.getElementById("ast_build_date").innerHTML = ast_build_date;
+</script></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

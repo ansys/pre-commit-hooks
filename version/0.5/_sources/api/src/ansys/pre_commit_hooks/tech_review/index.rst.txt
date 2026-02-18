@@ -1,0 +1,837 @@
+
+
+
+
+
+
+The ``tech_review.py`` module
+=============================
+
+.. py:module:: src.ansys.pre_commit_hooks.tech_review
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: tech_review
+.. tab-set::
+
+
+
+
+
+    .. tab-item:: Enums
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.Filenames`
+            - Enum of files to check.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review.Directories`
+            - Enum of directories to check.
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~check_dirs_exist`
+            - Check folders exist in the root of the git repository.
+
+
+          * - :py:obj:`~check_config_file`
+            - Check naming convention, version, author, and maintainer information.
+
+
+          * - :py:obj:`~check_pyproject_toml`
+            - Check pyproject.toml file for correct naming convention, version, author, and maintainer.
+
+
+          * - :py:obj:`~check_auth_maint`
+            - Check if the author and maintainer names and emails are the same.
+
+
+          * - :py:obj:`~check_setup_py`
+            - Check setup.py file for correct naming convention, version, author, and maintainer.
+
+
+          * - :py:obj:`~download_license_json`
+            - Download the licenses.json file and restructure it to only include the license ID and name.
+
+
+          * - :py:obj:`~restructure_json`
+            - Remove extra information from licenses.json file.
+
+
+          * - :py:obj:`~check_file_exists`
+            - Check files exist. If they do not exist, create them using jinja templates.
+
+
+          * - :py:obj:`~generate_file_from_jinja`
+            - Generate file using jinja templates.
+
+
+          * - :py:obj:`~write_content`
+            - Write generated content from jinja template to a file.
+
+
+          * - :py:obj:`~check_file_content`
+            - Check the file content of the LICENSE and CONTRIBUTORS.md files.
+
+
+          * - :py:obj:`~main`
+            - Check files for technical review.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~HOOK_PATH`
+            - Location of the pre-commit hook on your system.
+
+
+          * - :py:obj:`~LICENSES_JSON`
+            - JSON file containing licenses information.
+
+
+          * - :py:obj:`~DEFAULT_AUTHOR_MAINT_NAME`
+            - Default name of project authors and maintainers.
+
+
+          * - :py:obj:`~DEFAULT_AUTHOR_MAINT_EMAIL`
+            - Default email of project authors and maintainers.
+
+
+          * - :py:obj:`~DEFAULT_START_YEAR`
+            - Default start year of the repository.
+
+
+          * - :py:obj:`~DEFAULT_LICENSE`
+            - Default license of the repository
+
+
+          * - :py:obj:`~JSON_URL`
+            - URL to retrieve list of license IDs and names.
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_enum"></span> Filenames</api/src/ansys/pre_commit_hooks/tech_review/Filenames>
+    <span class="nf nf-cod-symbol_enum"></span> Directories</api/src/ansys/pre_commit_hooks/tech_review/Directories>
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Module for checking if a repository is compliant with required files in the technical review.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: check_dirs_exist(repo_path: str, is_compliant: bool, directories: list) -> bool
+
+   
+   Check folders exist in the root of the git repository.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **directories: list**
+           List of directories to check if they exist in the repository.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if all directories exist.
+           ``False`` if a directory did not exist and was created.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_config_file(repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool, non_compliant_name: bool) -> bool
+
+   
+   Check naming convention, version, author, and maintainer information.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **author_maint_name: str**
+           Project author and maintainer's name.
+
+       **author_maint_email: str**
+           Project author and maintainer's email.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **non_compliant_name: bool**
+           ``True`` if the repository's name is not in the form ansys-*-* and it is permitted.
+           ``False`` if the repository's name is in the form ansys-*-*.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if all files exist and contain the correct content.
+           ``False`` if a file was created or did not contain the correct content.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_pyproject_toml(repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool, non_compliant_name: bool) -> tuple
+
+   
+   Check pyproject.toml file for correct naming convention, version, author, and maintainer.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **author_maint_name: str**
+           Project author and maintainer's name.
+
+       **author_maint_email: str**
+           Project author and maintainer's email.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **non_compliant_name: bool**
+           ``True`` if the repository's name is not in the form ansys-*-* and it is permitted.
+           ``False`` if the repository's name is in the form ansys-*-*.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the pyproject.toml file's information was correct.
+           ``False`` if the pyproject.toml file had missing or incorrect information.
+
+       :class:`python:str`
+           Name of the project from the pyproject.toml file.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_auth_maint(project_value: str, arg_value: str, err_string: str, is_compliant: bool)
+
+   
+   Check if the author and maintainer names and emails are the same.
+
+
+   :Parameters:
+
+       **project_value: str**
+           The author or maintainer's name or email retrieved from the pyproject.toml file.
+
+       **arg_value: str**
+           The author or maintainer's name or email retrieved from the argument passed into the hook.
+
+       **err_str: str**
+           The message that is printed when an author or maintainer's name or email is incorrect.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the author and maintainer's name and email are correct.
+           ``False`` if the author or maintainer's name or email is incorrect.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_setup_py(author_maint_name: str, author_maint_email: str, is_compliant: bool) -> tuple
+
+   
+   Check setup.py file for correct naming convention, version, author, and maintainer.
+
+
+   :Parameters:
+
+       **author_maint_name: str**
+           Project author and maintainer's name.
+
+       **author_maint_email: str**
+           Project author and maintainer's email.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       :class:`python:str`
+           An empty string since the setup.py check is not implemented.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: download_license_json(url: str, json_file: str) -> bool
+
+   
+   Download the licenses.json file and restructure it to only include the license ID and name.
+
+
+   :Parameters:
+
+       **url: str**
+           The URL to the licenses.json file that is downloaded.
+
+       **json_file: str**
+           The path of the json_file to be written to and updated.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the license file was downloaded and updated.
+           ``False`` if there was an issue downloading the license file.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: restructure_json(file: str)
+
+   
+   Remove extra information from licenses.json file.
+
+
+   :Parameters:
+
+       **file: str**
+           The path of the json_file to be updated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_file_exists(repo_path: str, files: list, project_name: str, start_year: str, is_compliant: bool, license: str, repository_url: str, product: str, config_file: str, doc_repo_name: str) -> bool
+
+   
+   Check files exist. If they do not exist, create them using jinja templates.
+
+
+   :Parameters:
+
+       **repo_path: str**
+           Path of the repository being checked.
+
+       **files: list**
+           List of files to check if they exist and their content.
+
+       **project_name: str**
+           The name of the project.
+
+       **start_year: str**
+           The start year of the repository.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **license: str**
+           The license the repository uses.
+
+       **repository_url: str**
+           The URL of the repository.
+
+       **product: str**
+           The Ansys product the repository is based on.
+
+       **config_file: str**
+           If the project's config file is "setuptools" or "pyproject".
+
+       **doc_repo_name: str**
+           The name of the repository to use in documentation.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the files exist and content was correct.
+           ``False`` if a file was created and/or its content was incorrect.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: generate_file_from_jinja(file: str, project_name: str, year_str: str, repo_url: str, product: str, config_file: str, doc_repo_name: str) -> str
+
+   
+   Generate file using jinja templates.
+
+
+   :Parameters:
+
+       **file: str**
+           The file that the template is being created for.
+
+       **project_name: str**
+           The name of the project.
+
+       **year_str: str**
+           The start year of the repository.
+
+       **repo_url: str**
+           The URL of the repository.
+
+       **product: str**
+           The Ansys product the repository is based on.
+
+       **config_file: str**
+           If the project's config file is "setuptools" or "pyproject".
+
+       **doc_repo_name: str**
+           The name of the repository to use in documentation.
+
+
+
+   :Returns:
+
+       :class:`python:str`
+           Content of the template that was generated.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: write_content(message: str, file_path: str, file_content: str)
+
+   
+   Write generated content from jinja template to a file.
+
+
+   :Parameters:
+
+       **message: str**
+           The message that details which file is being created.
+
+       **file_path: str**
+           The path of the file to write the content to.
+
+       **file_content: str**
+           The file content that was generated from the jinja templates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_file_content(file: str, generated_content: str, is_compliant: bool, license: str) -> bool
+
+   
+   Check the file content of the LICENSE and CONTRIBUTORS.md files.
+
+
+   :Parameters:
+
+       **file: str**
+           The file that the template is being created for.
+
+       **generated_content: str**
+           Content of the template that was generated.
+
+       **is_compliant: bool**
+           ``True`` if the repository is compliant.
+           ``False`` if the repository is not compliant.
+
+       **license: str**
+           The license the repository uses.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if LICENSE and CONTRIBUTORS.md files had the correct content.
+           ``False`` if LICENSE and CONTRIBUTORS.md files had the incorrect content.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: main()
+
+   
+   Check files for technical review.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: HOOK_PATH
+
+   
+   Location of the pre-commit hook on your system.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: LICENSES_JSON
+
+   
+   JSON file containing licenses information.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_AUTHOR_MAINT_NAME
+   :value: 'ANSYS, Inc.'
+
+
+   
+   Default name of project authors and maintainers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_AUTHOR_MAINT_EMAIL
+   :value: 'pyansys.core@ansys.com'
+
+
+   
+   Default email of project authors and maintainers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_START_YEAR
+
+   
+   Default start year of the repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_LICENSE
+   :value: 'MIT'
+
+
+   
+   Default license of the repository
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: JSON_URL
+   :value: 'https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json'
+
+
+   
+   URL to retrieve list of license IDs and names.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+

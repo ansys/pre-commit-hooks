@@ -1,0 +1,33 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.set_lint_args`
+=======================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace
+
+   
+   Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **parser: argparse.ArgumentParser**
+           Parser without any lint arguments.
+
+   :Returns:
+
+       :obj:`argparse.Namespace`
+           Parser namespace containing lint arguments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

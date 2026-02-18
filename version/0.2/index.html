@@ -1,0 +1,816 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Ansys pre-commit hooks &#8212; ansys-pre-commit-hooks</title>
+
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/css/ansys_sphinx_theme.css?v=7b6abe20" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+ 
+<link href="_static/css/breadcrumbs.css" rel="stylesheet" />
+
+    <script src="_static/documentation_options.js?v=76f2d925"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=5eb1bb1e"></script>
+    <script src="_static/js/table.js?v=b64f5182"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pre-commit-hooks.docs.ansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API reference" href="autoapi/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <link rel="canonical" href="https://pre-commit-hooks.docs.ansys.com/version/stable/index.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container"><!-- Debugging: html_theme_options =  -->
+
+<!-- If there is no MiliSearch enabled, use the PyData search -->
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+   
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="ansys-pre-commit-hooks - Home"/>
+    <script>document.write(`<img src="_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="ansys-pre-commit-hooks - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="autoapi/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="autoapi/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="#"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+      
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="ansys-pre-commit-hooks">
+<h1>Ansys pre-commit hooks<a class="headerlink" href="#ansys-pre-commit-hooks" title="Link to this heading">#</a></h1>
+<p><a class="reference external" href="https://docs.pyansys.com/"><img alt="PyAnsys" src="https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC" /></a> <a class="reference external" href="https://pypi.org/project/ansys-pre-commit-hooks/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/ansys-pre-commit-hooks?logo=pypi" /></a> <a class="reference external" href="https://pypi.org/project/ansys-pre-commit-hooks"><img alt="PyPI" src="https://img.shields.io/pypi/v/ansys-pre-commit-hooks.svg?logo=python&amp;logoColor=white" /></a> <a class="reference external" href="https://github.com/ansys/pre-commit-hooks/actions/workflows/ci_cd.yml"><img alt="GH-CI" src="https://github.com/ansys/pre-commit-hooks/actions/workflows/ci_cd.yml/badge.svg" /></a> <a class="reference external" href="https://opensource.org/licenses/MIT"><img alt="MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a> <a class="reference external" href="https://github.com/psf/black"><img alt="Black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat" /></a> <a class="reference external" href="https://results.pre-commit.ci/latest/github/ansys/pre-commit-hooks/main"><img alt="pre-commit.ci status" src="https://results.pre-commit.ci/badge/github/ansys/pre-commit-hooks/main.svg" /></a></p>
+<p>This Ansys repository contains <a class="reference external" href="https://pre-commit.com/">pre-commit</a> hooks for different purposes.
+Currently, these hooks are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add-license-headers</span></code>: Add missing license headers to files by using
+<a class="reference external" href="https://reuse.software/">REUSE</a> . To use this hook, you must
+have <code class="docutils literal notranslate"><span class="pre">REUSE</span></code> implemented in your repository.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="add-license-headers-setup">
+<h2><code class="docutils literal notranslate"><span class="pre">add-license-headers</span></code> setup<a class="headerlink" href="#add-license-headers-setup" title="Link to this heading">#</a></h2>
+<section id="add-required-directories">
+<h3>Add required directories<a class="headerlink" href="#add-required-directories" title="Link to this heading">#</a></h3>
+<p>If you are using the ansys.jinja2 template and MIT.txt license, skip this step. By default, the hook will make symbolic links
+from its “assets” directory containing LICENSES/MIT.txt and .reuse/templates/ansys.jinja2
+to your repository when the hook runs. The .reuse and LICENSES directories will be deleted once the hook is
+done running.</p>
+<p>If you are using a custom template, create a directory named <code class="docutils literal notranslate"><span class="pre">.reuse</span></code>, and if you are using a custom license, create a directory
+named <code class="docutils literal notranslate"><span class="pre">LICENSES</span></code> in the root of your repository. The custom template cannot be named <code class="docutils literal notranslate"><span class="pre">ansys.jinja2</span></code>, otherwise it will be removed
+after the hook is done running. The custom license cannot be named <code class="docutils literal notranslate"><span class="pre">MIT.txt</span></code> for the same reason. The <code class="docutils literal notranslate"><span class="pre">.reuse</span></code> and/or <code class="docutils literal notranslate"><span class="pre">LICENSES</span></code>
+directories will have to be committed to your repository and will not be removed once the hook is done running as long as there
+are custom templates or licenses in those directories. Your project should have the following layout:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span>project
+├── LICENCES
+│   └── license_name.txt
+├── .reuse
+│   └── templates
+│       └── template_name.jinja2
+├── src
+├── examples
+├── tests
+├── .pre-commit-config.yaml
+├── pyproject.toml
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where <code class="docutils literal notranslate"><span class="pre">license_name</span></code> is the name of the license that is being used, for example, MIT.txt, and
+<code class="docutils literal notranslate"><span class="pre">template_name</span></code> is the name of the custom template being used. The jinja2 file contains the
+template for the license headers that are added to the files.</p>
+<p>Licenses that are supported by <code class="docutils literal notranslate"><span class="pre">REUSE</span></code> can be found in the
+<a class="reference external" href="https://github.com/spdx/license-list-data/tree/main/text">spdx/license-list-data</a> repository.
+Please select a license text file from that repository, and copy it to the LICENSES directory.</p>
+</section>
+<section id="set-custom-arguments">
+<h3>Set custom arguments<a class="headerlink" href="#set-custom-arguments" title="Link to this heading">#</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/ansys/pre-commit-hooks</span>
+<span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.2.9</span>
+<span class="nt">hooks</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add-license-headers</span>
+<span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;--custom_copyright&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;custom</span><span class="nv"> </span><span class="s">copyright</span><span class="nv"> </span><span class="s">phrase&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--custom_template&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;template_name&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--custom_license&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;license_name&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--ignore_license_check&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--start_year&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;2023&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">args</span></code> can also be formatted as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">args</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--custom_copyright=custom copyright phrase</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--custom_template=template_name</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--custom_license=license_name</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--ignore_license_check</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--start_year=2023</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">custom</span> <span class="pre">copyright</span> <span class="pre">phrase</span></code> is the copyright line you want to include in the license
+header. By default, it uses <code class="docutils literal notranslate"><span class="pre">&quot;ANSYS,</span> <span class="pre">Inc.</span> <span class="pre">and/or</span> <span class="pre">its</span> <span class="pre">affiliates.&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">template_name</span></code> is the name of the .jinja2 file located in <code class="docutils literal notranslate"><span class="pre">.reuse/templates/</span></code>.
+By default, it uses <code class="docutils literal notranslate"><span class="pre">ansys</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">license_name</span></code> is the name of the license being used. For example, MIT, ECL-1.0, etc.
+To view a list of licenses that are supported by <code class="docutils literal notranslate"><span class="pre">REUSE</span></code>, see
+<a class="github reference external" href="https://github.com/spdx/license-list-data/tree/main/text">spdx/license-list-data</a>. By default it uses <code class="docutils literal notranslate"><span class="pre">MIT</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_license_check</span></code> is whether or not to check for the license in the header. By default,
+it is <code class="docutils literal notranslate"><span class="pre">False</span></code>, meaning the files are checked for both the copyright and licensing information
+in the header. Add <code class="docutils literal notranslate"><span class="pre">--ignore_license_check</span></code> to ignore checking for licensing information
+in the files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start_year</span></code> is the start year of the copyright statement. By default, the <code class="docutils literal notranslate"><span class="pre">start_year</span></code> is
+the current year, making the copyright statement
+“Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.” If you are adding license headers
+to packages released before the current year, add the <code class="docutils literal notranslate"><span class="pre">start_year</span></code> argument with the year your
+package was released. For example, if <code class="docutils literal notranslate"><span class="pre">start_year</span></code> is 2023, the copyright statement would be
+“Copyright (C) 2023 - 2024 ANSYS, Inc. and/or its affiliates.” assuming the current year is 2024.</p></li>
+</ul>
+</section>
+<section id="specify-directories-to-run-the-hook-on">
+<h3>Specify directories to run the hook on<a class="headerlink" href="#specify-directories-to-run-the-hook-on" title="Link to this heading">#</a></h3>
+<p>By default, the hook will run on proto files in any directory, as well as python files within
+directories named <code class="docutils literal notranslate"><span class="pre">src</span></code>, <code class="docutils literal notranslate"><span class="pre">examples</span></code>, and <code class="docutils literal notranslate"><span class="pre">tests</span></code>. To specify additional files and/or directories
+the hook should run on, add the necessary regex to the <code class="docutils literal notranslate"><span class="pre">files</span></code> line in your
+.pre-commit-config.yaml file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/ansys/pre-commit-hooks</span>
+<span class="w">  </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.2.9</span>
+<span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add-license-headers</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;(src|examples|tests|newFolder)/.*\.(py|newExtension)|\.(proto|newExtension)&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="ignore-specific-files-or-file-types">
+<h3>Ignore specific files or file types<a class="headerlink" href="#ignore-specific-files-or-file-types" title="Link to this heading">#</a></h3>
+<p>In .pre-commit-config.yaml:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/ansys/pre-commit-hooks</span>
+<span class="w">  </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.2.9</span>
+<span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add-license-headers</span>
+<span class="w">    </span><span class="nt">exclude</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">(?x)^(</span>
+<span class="w">            </span><span class="no">path/to/file1.py |</span>
+<span class="w">            </span><span class="no">path/to/.*\.(ts|cpp) |</span>
+<span class="w">            </span><span class="no">(.folder1|folder2)/.* |</span>
+<span class="w">            </span><span class="no">.*\.js |</span>
+<span class="w">            </span><span class="no">\..* |</span>
+<span class="w">        </span><span class="no">)$</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">path/to/file1.py</span></code> excludes the stated file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path/to/.*\.(ts|cpp)</span></code> excludes all .ts and .cpp files within the <code class="docutils literal notranslate"><span class="pre">path/to</span></code> directory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(.folder1|folder2)/.*</span></code> excludes directories named .folder1 and folder2.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.*\.js</span></code> excludes all .js files in all directories.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">\..*</span></code> excludes all hidden files.</p></li>
+</ul>
+</section>
+</section>
+<section id="how-to-install">
+<h2>How to install<a class="headerlink" href="#how-to-install" title="Link to this heading">#</a></h2>
+<p>The following sections provide instructions for installing the <code class="docutils literal notranslate"><span class="pre">ansys-pre-commit-hooks</span></code>
+package in two installation modes: user and developer.</p>
+<section id="for-users">
+<h3>For users<a class="headerlink" href="#for-users" title="Link to this heading">#</a></h3>
+<p>Before installing the package, to ensure that you
+have the latest version of <a class="reference external" href="https://pypi.org/project/pip/">pip</a>, run this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pip
+</pre></div>
+</div>
+<p>Then, to install the package, run this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ansys-pre-commit-hooks
+</pre></div>
+</div>
+</section>
+<section id="for-developers">
+<h3>For developers<a class="headerlink" href="#for-developers" title="Link to this heading">#</a></h3>
+<p>Installing the package in developer mode allows you to modify and
+enhance the source code.</p>
+<p>Before contributing to the project, ensure that you are familiar with
+the <a class="reference external" href="https://dev.docs.pyansys.com/">PyAnsys Developer’s Guide</a>.</p>
+<p>For a developer installation, you must follow these steps:</p>
+<ol class="arabic">
+<li><p>Clone the repository with this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ansys/pre-commit-hooks
+</pre></div>
+</div>
+</li>
+<li><p>Create a fresh-clean Python environment and activate it with these commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a virtual environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+
+<span class="c1"># Activate it in a POSIX system</span>
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+
+<span class="c1"># Activate it in Windows CMD environment</span>
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate.bat
+
+<span class="c1"># Activate it in Windows Powershell</span>
+.venv<span class="se">\S</span>cripts<span class="se">\A</span>ctivate.ps1
+</pre></div>
+</div>
+</li>
+<li><p>Ensure that you have the latest required build system tools by
+running this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pip<span class="w"> </span>flit<span class="w"> </span>tox<span class="w"> </span>twine
+</pre></div>
+</div>
+</li>
+<li><p>Install the project in editable mode by running one of these commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install the minimum requirements</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+
+<span class="c1"># Install the minimum + tests requirements</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>tests<span class="o">]</span>
+
+<span class="c1"># Install the minimum + doc requirements</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>doc<span class="o">]</span>
+
+<span class="c1"># Install all requirements</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>tests,doc<span class="o">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Verify your development installation by running this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tox
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="how-to-test-it">
+<h2>How to test it<a class="headerlink" href="#how-to-test-it" title="Link to this heading">#</a></h2>
+<p>This project takes advantage of <a class="reference external" href="https://tox.wiki/">tox</a>. This tool automates common
+development tasks (similar to Makefile), but it is oriented towards
+Python development.</p>
+<section id="using-tox">
+<h3>Using <code class="docutils literal notranslate"><span class="pre">tox</span></code><a class="headerlink" href="#using-tox" title="Link to this heading">#</a></h3>
+<p>While Makefile has rules, <code class="docutils literal notranslate"><span class="pre">tox</span></code> has environments. In fact, <code class="docutils literal notranslate"><span class="pre">tox</span></code> creates its
+own virtual environment so that anything being tested is isolated from the project
+to guarantee the project’s integrity.</p>
+<p>These environment commands are provided:</p>
+<ul class="simple">
+<li><p><strong>tox -e style</strong>: Checks for coding style quality.</p></li>
+<li><p><strong>tox -e py</strong>: Checks for unit tests.</p></li>
+<li><p><strong>tox -e py-coverage</strong>: Checks for unit testing and code coverage.</p></li>
+<li><p><strong>tox -e doc</strong>: Checks for successfully building the documentation.</p></li>
+</ul>
+</section>
+<section id="raw-testing">
+<h3>Raw testing<a class="headerlink" href="#raw-testing" title="Link to this heading">#</a></h3>
+<p>If required, you can always call style commands, such as <a class="reference external" href="https://github.com/psf/black">black</a>, <a class="reference external" href="https://github.com/PyCQA/isort">isort</a>,
+and <a class="reference external" href="https://flake8.pycqa.org/en/latest/">flake8</a>, or unit testing commands, such as <a class="reference external" href="https://docs.pytest.org/en/stable/">pytest</a>, from the command line.
+However, calling these commands does not guarantee that your project is
+being tested in an isolated environment, which is the reason why tools like
+<code class="docutils literal notranslate"><span class="pre">tox</span></code> exist.</p>
+</section>
+<section id="a-note-on-pre-commit">
+<h3>A note on <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code><a class="headerlink" href="#a-note-on-pre-commit" title="Link to this heading">#</a></h3>
+<p>The style checks take advantage of <a class="reference external" href="https://pre-commit.com/">pre-commit</a>. Developers are not forced but
+encouraged to install this tool by running this command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pre-commit<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+</section>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h2>
+<p>For building documentation, you can run the usual rules provided in the
+<a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> Makefile with a command that is formatted like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-C<span class="w"> </span>doc/<span class="w"> </span>html<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>your_browser_name<span class="w"> </span>doc/html/index.html
+</pre></div>
+</div>
+<p>However, the recommended way of checking documentation integrity is by
+running <code class="docutils literal notranslate"><span class="pre">tox</span></code> with a command that is formatted like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tox<span class="w"> </span>-e<span class="w"> </span>doc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>your_browser_name<span class="w"> </span>.tox/doc_out/index.html
+</pre></div>
+</div>
+</section>
+<section id="distributing">
+<h2>Distributing<a class="headerlink" href="#distributing" title="Link to this heading">#</a></h2>
+<p>If you would like to create either source or wheel files, install
+the building requirements and then execute the build module with these commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
+python<span class="w"> </span>-m<span class="w"> </span>build
+python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </span>check<span class="w"> </span>dist/*
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-license-headers-setup"><code class="docutils literal notranslate"><span class="pre">add-license-headers</span></code> setup</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-required-directories">Add required directories</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-custom-arguments">Set custom arguments</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-directories-to-run-the-hook-on">Specify directories to run the hook on</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ignore-specific-files-or-file-types">Ignore specific files or file types</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-install">How to install</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#for-users">For users</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#for-developers">For developers</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-test-it">How to test it</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-tox">Using <code class="docutils literal notranslate"><span class="pre">tox</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#raw-testing">Raw testing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-note-on-pre-commit">A note on <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#distributing">Distributing</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+<!-- If there is no fix edit button function, use the PyData edit-this-button-->
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the
+  <a href="https://sphinxdocs.ansys.com/version/stable/index.html"
+    >Ansys Sphinx Theme</a
+  >
+  0.13.3. <br />Last updated on
+  <span id="date"></span>
+</p>
+<script>
+  var options = { day: "numeric", month: "long", year: "numeric" };
+  var lastModifiedDate = new Date(document.lastModified);
+  var date = lastModifiedDate.toLocaleDateString("en-US", options);
+  document.getElementById("date").innerHTML = date;
+</script></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

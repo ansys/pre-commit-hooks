@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pre_commit_hooks.add_license_headers &#8212; ansys-pre-commit-hooks</title>
+
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=649a27d8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/ansys_sphinx_theme.css?v=62c9ccaa" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+ 
+<link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+
+    <script src="../../../_static/documentation_options.js?v=1807f793"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=5eb1bb1e"></script>
+    <script src="../../../_static/js/table.js?v=b64f5182"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/pre_commit_hooks/add_license_headers/index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://pre-commit-hooks.docs.ansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.1';
+        </script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="prev" title="pre_commit_hooks" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <link rel="canonical" href="https://pre-commit-hooks.docs.ansys.com/version/stable/autoapi/pre_commit_hooks/add_license_headers/index.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container"><!-- Debugging: html_theme_options =  -->
+
+<!-- If there is no MiliSearch enabled, use the PyData search -->
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+   
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      0.1  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>   <div class="container-xl">
+  <div class="row">
+    <div class="col-12 col-md-3" id="breadcrumbs-spacer"></div>
+    <div class="col-12 col-md-11 col-xl-9" id="breadcrumbs">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul> 
+<li class="nav-item nav-item-additional-breadcrumb">
+  <a href="https://docs.pyansys.com/">PyAnsys</a> » 
+</li>
+ 
+<li class="nav-item nav-item-0">
+  <a href="../../../index.html">ansys-pre-commit-hooks</a> » 
+</li>
+ 
+          <li class="nav-item nav-item-1"><a href="../../index.html" >API reference</a> » </li>
+          <li class="nav-item nav-item-2"><a href="../index.html" accesskey="U"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pre_commit_hooks</span></code></a> » </li>
+        <li class="nav-item nav-item-this"><a href=""><code class="xref py py-mod docutils literal notranslate"><span class="pre">pre_commit_hooks.add_license_headers</span></code></a></li> 
+      </ul>
+    </div></div>
+  </div>
+</div>
+ 
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      0.1  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pre-commit-hooks" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pre_commit_hooks</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pre_commit_hooks.add_license_headers</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-pre_commit_hooks.add_license_headers">
+<span id="pre-commit-hooks-add-license-headers"></span><h1><a class="reference internal" href="#module-pre_commit_hooks.add_license_headers" title="pre_commit_hooks.add_license_headers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pre_commit_hooks.add_license_headers</span></code></a><a class="headerlink" href="#module-pre_commit_hooks.add_license_headers" title="Link to this heading">#</a></h1>
+<p>Module for running <a class="reference external" href="https://reuse.software/">REUSE</a> to add missing license headers to files.</p>
+<p>A license header consists of the Ansys copyright statement and licensing information.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.set_lint_args" title="pre_commit_hooks.add_license_headers.set_lint_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_lint_args</span></code></a>(parser)</p></td>
+<td><p><p>Add lint arguments to the parser for <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.repo_path" title="pre_commit_hooks.add_license_headers.repo_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repo_path</span></code></a>()</p></td>
+<td><p>Get the path to the root of the git repository.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.check_dir_exists" title="pre_commit_hooks.add_license_headers.check_dir_exists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_dir_exists</span></code></a>(→ bool)</p></td>
+<td><p>Check if the <code class="docutils literal notranslate"><span class="pre">.reuse</span></code> or the location directory exist in the root path of the git repo.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.list_noncompliant_files" title="pre_commit_hooks.add_license_headers.list_noncompliant_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_noncompliant_files</span></code></a>(args, proj)</p></td>
+<td><p>Get a list of the files that are missing license headers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.set_header_args" title="pre_commit_hooks.add_license_headers.set_header_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_header_args</span></code></a>(parser, loc, year, path, copyright, ...)</p></td>
+<td><p><p>Set arguments for <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.run_reuse" title="pre_commit_hooks.add_license_headers.run_reuse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_reuse</span></code></a>(args)</p></td>
+<td><p><p>Run <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.find_files_missing_header" title="pre_commit_hooks.add_license_headers.find_files_missing_header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_files_missing_header</span></code></a>()</p></td>
+<td><p><p>Find files that are missing license headers and run <a class="reference external" href="https://reuse.software/">REUSE</a> on them.</p>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.main" title="pre_commit_hooks.add_license_headers.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<td><p><p>Find files missing license headers and run <a class="reference external" href="https://reuse.software/">REUSE</a> on them.</p>
+</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY" title="pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SOURCE_CODE_DIRECTORY</span></code></a></p></td>
+<td><p>Default directory to check files for license headers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE" title="pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE</span></code></a></p></td>
+<td><p>Default template to use for license headers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT" title="pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_COPYRIGHT</span></code></a></p></td>
+<td><p>Default copyright line for license headers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pre_commit_hooks.add_license_headers.DEFAULT_LICENSE" title="pre_commit_hooks.add_license_headers.DEFAULT_LICENSE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_LICENSE</span></code></a></p></td>
+<td><p>Default license for headers.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_SOURCE_CODE_DIRECTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'src'</span></em><a class="headerlink" href="#pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY" title="Link to this definition">#</a></dt>
+<dd><p>Default directory to check files for license headers.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_TEMPLATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ansys'</span></em><a class="headerlink" href="#pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE" title="Link to this definition">#</a></dt>
+<dd><p>Default template to use for license headers.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_COPYRIGHT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ANSYS,</span> <span class="pre">Inc.</span> <span class="pre">and/or</span> <span class="pre">its</span> <span class="pre">affiliates.'</span></em><a class="headerlink" href="#pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT" title="Link to this definition">#</a></dt>
+<dd><p>Default copyright line for license headers.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.DEFAULT_LICENSE">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_LICENSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MIT'</span></em><a class="headerlink" href="#pre_commit_hooks.add_license_headers.DEFAULT_LICENSE" title="Link to this definition">#</a></dt>
+<dd><p>Default license for headers.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.set_lint_args">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">set_lint_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.set_lint_args" title="Link to this definition">#</a></dt>
+<dd><p>Add lint arguments to the parser for <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>parser: argparse.ArgumentParser</strong></dt><dd><p>Parser without any lint arguments.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.Namespace</span></code></a></dt><dd><p>Parser namespace containing lint arguments.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.repo_path">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">repo_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.repo_path" title="Link to this definition">#</a></dt>
+<dd><p>Get the path to the root of the git repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>Path to the root of the git repository.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.check_dir_exists">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">check_dir_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_name</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.check_dir_exists" title="Link to this definition">#</a></dt>
+<dd><p>Check if the <code class="docutils literal notranslate"><span class="pre">.reuse</span></code> or the location directory exist in the root path of the git repo.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>folder_name: str</strong></dt><dd><p>Folder to check if it exists.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.11)"><span class="xref std std-ref">bool</span></a></dt><dd><p>Returns <code class="docutils literal notranslate"><span class="pre">False</span></code> if  the <code class="docutils literal notranslate"><span class="pre">.reuse</span></code> or <code class="docutils literal notranslate"><span class="pre">{folder_name}</span></code> directory do
+not exist in the root path of the git repository. Otherwise, <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.list_noncompliant_files">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">list_noncompliant_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.list_noncompliant_files" title="Link to this definition">#</a></dt>
+<dd><p>Get a list of the files that are missing license headers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>args: argparse.Namespace</strong></dt><dd><p>Namespace of arguments with their values.</p>
+</dd>
+<dt><strong>proj: project.Project</strong></dt><dd><p>Project to run <a class="reference external" href="https://reuse.software/">REUSE</a> on.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></dt><dd><p>List of the files that are missing license headers.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.set_header_args">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">set_header_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copyright</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.set_header_args" title="Link to this definition">#</a></dt>
+<dd><p>Set arguments for <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>parser: argparse.ArgumentParser</strong></dt><dd><p>Parser containing default license header arguments.</p>
+</dd>
+<dt><strong>loc: str</strong></dt><dd><p>Location to search for files that are missing license headers.</p>
+</dd>
+<dt><strong>year: int</strong></dt><dd><p>Current year retrieved by datetime.</p>
+</dd>
+<dt><strong>path: str</strong></dt><dd><p>Directory to update license headers, or a specific file path to
+create license headers.</p>
+</dd>
+<dt><strong>copyright: str</strong></dt><dd><p>Copyright line for license headers.</p>
+</dd>
+<dt><strong>template: str</strong></dt><dd><p>Name of the template for license headers (name.jinja2).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.run_reuse">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">run_reuse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.run_reuse" title="Link to this definition">#</a></dt>
+<dd><p>Run <a class="reference external" href="https://reuse.software/">REUSE</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>args: argparse.Namespace</strong></dt><dd><p>Namespace of arguments with their values.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.find_files_missing_header">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">find_files_missing_header</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.find_files_missing_header" title="Link to this definition">#</a></dt>
+<dd><p>Find files that are missing license headers and run <a class="reference external" href="https://reuse.software/">REUSE</a> on them.</p>
+<dl class="field-list">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">1</span></code> if <code class="docutils literal notranslate"><span class="pre">REUSE</span></code> changed all noncompliant files.</p>
+<p><code class="docutils literal notranslate"><span class="pre">2</span></code> if the <code class="docutils literal notranslate"><span class="pre">.reuse</span></code> or location directory does not exist in the root path
+of the GitHub repository.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pre_commit_hooks.add_license_headers.main">
+<span class="sig-prename descclassname"><span class="pre">pre_commit_hooks.add_license_headers.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pre_commit_hooks.add_license_headers.main" title="Link to this definition">#</a></dt>
+<dd><p>Find files missing license headers and run <a class="reference external" href="https://reuse.software/">REUSE</a> on them.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY"><code class="docutils literal notranslate"><span class="pre">DEFAULT_SOURCE_CODE_DIRECTORY</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE"><code class="docutils literal notranslate"><span class="pre">DEFAULT_TEMPLATE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT"><code class="docutils literal notranslate"><span class="pre">DEFAULT_COPYRIGHT</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.DEFAULT_LICENSE"><code class="docutils literal notranslate"><span class="pre">DEFAULT_LICENSE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.set_lint_args"><code class="docutils literal notranslate"><span class="pre">set_lint_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.repo_path"><code class="docutils literal notranslate"><span class="pre">repo_path()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.check_dir_exists"><code class="docutils literal notranslate"><span class="pre">check_dir_exists()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.list_noncompliant_files"><code class="docutils literal notranslate"><span class="pre">list_noncompliant_files()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.set_header_args"><code class="docutils literal notranslate"><span class="pre">set_header_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.run_reuse"><code class="docutils literal notranslate"><span class="pre">run_reuse()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.find_files_missing_header"><code class="docutils literal notranslate"><span class="pre">find_files_missing_header()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pre_commit_hooks.add_license_headers.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+<!-- If there is no fix edit button function, use the PyData edit-this-button--></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/pre_commit_hooks/add_license_headers/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright (c) 2023 ANSYS, Inc. All rights reserved.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the
+  <a href="https://sphinxdocs.ansys.com/version/stable/index.html"
+    >Ansys Sphinx Theme</a
+  >
+  0.10.5. <br />Last updated on
+  <span id="date"></span>
+</p>
+<script>
+  var options = { day: "numeric", month: "long", year: "numeric" };
+  var lastModifiedDate = new Date(document.lastModified);
+  var date = lastModifiedDate.toLocaleDateString("en-US", options);
+  document.getElementById("date").innerHTML = date;
+</script></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
