@@ -795,6 +795,9 @@ def main():
     global DEFAULT_TEMPLATE
     if args.use_internal_template:
         DEFAULT_TEMPLATE = "ansys-internal"
+        # Update custom_template if it was using the default value
+        if args.custom_template == "ansys":
+            args.custom_template = "ansys-internal"
 
     # Set changed_headers to zero by default
     changed_headers = 0
