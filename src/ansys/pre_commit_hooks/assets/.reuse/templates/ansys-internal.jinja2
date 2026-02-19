@@ -1,3 +1,6 @@
 {% for copyright_line in copyright_lines %}
 {{ copyright_line.replace("Copyright (C)", "©") }}
 {% endfor %}
+{% for expression in spdx_expressions %}
+SPDX-License-Identifier: {{ expression }}
+{% endfor %}

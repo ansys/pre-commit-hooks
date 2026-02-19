@@ -113,7 +113,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser.add_argument(
         "--use_internal_template",
         action="store_true",
-        help="Use ansys-internal template instead of ansys template.",
+        help="Use ansys-internal template for proprietary code. Must be used with --ignore_license_check.",
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
@@ -791,24 +791,12 @@ def main():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-    # Use internal template if specified
-    global DEFAULT_TEMPLATE
-    if args.use_internal_template:
-        DEFAULT_TEMPLATE = "ansys-internal"
-        # Update custom_template if it was using the default value
-        if args.custom_template == "ansys":
-            args.custom_template = "ansys-internal"
-
-    # Set changed_headers to zero by default
-    changed_headers = 0
-
-    # Validate and set end_year (defaults to current calendar year if not provided)
-    if args.end_year:
-        if not str(args.end_year).isdigit():
-            raise Exception("Please ensure the end year is a number.")
-        current_year = int(args.end_year)
-    else:
-        current_year = dt.today().year
+    # Validate argument combinations
+    if args.use_internal_template and not args.ignore_license_check:
+        raise Exception(
+            "Error: --use_internal_template requires --ignore_license_check. "
+            "Internal templates are for proprietary code without open-source licenses."
+        )
 
     # Validate start_year
     if not str(args.start_year).isdigit():
@@ -819,11 +807,31 @@ def main():
     if start_year < 1942:
         raise Exception("Please provide a start year greater than or equal to 1942.")
 
+    # Validate and set end_year (defaults to current calendar year if not provided)
+    if args.end_year:
+        if not str(args.end_year).isdigit():
+            raise Exception("Please ensure the end year is a number.")
+        current_year = int(args.end_year)
+    else:
+        current_year = dt.today().year
+
     if start_year > current_year:
         error_msg = (f"Start year ({start_year}) cannot be later than end year ({current_year})."
                      if args.end_year
                      else "Please provide a start year less than or equal to the current year.")
         raise Exception(error_msg)
+
+    # Use internal template if specified
+    global DEFAULT_TEMPLATE
+    if args.use_internal_template:
+        DEFAULT_TEMPLATE = "ansys-internal"
+        # Update custom_template if it was using the default value
+        if args.custom_template == "ansys":
+            args.custom_template = "ansys-internal"
+
+
+    # Set changed_headers to zero by default
+    changed_headers = 0
 
     # Get root directory of the git repository.
     git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
