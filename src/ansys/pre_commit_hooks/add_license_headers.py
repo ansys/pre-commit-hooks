@@ -99,6 +99,22 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="Start year for copyright line in headers.",
         default=DEFAULT_START_YEAR,
     )
+    parser.add_argument(
+        "--end_year",
+        type=str,
+        help="End year for copyright line in headers. Defaults to current year.",
+        default=None,  # None means use current year
+    )
+    parser.add_argument(
+        "--no_year_whitespace",
+        action="store_true",
+        help="Remove whitespace around dash in year range (e.g., '2023-2025' instead of '2023 - 2025').",
+    )
+    parser.add_argument(
+        "--use_internal_template",
+        action="store_true",
+        help="Use ansys-internal template instead of ansys template.",
+    )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -188,7 +204,7 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
     return changed
 
 
-def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
+def link_assets(assets: dict, git_root: str, args: argparse.Namespace, current_year: int) -> None:
     """
     Link the default template and/or license from the assets folder to your git repo.
 
@@ -200,6 +216,8 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
         Full path of the repository's root directory.
     args: argparse.Namespace
         Namespace of arguments with their values.
+    current_year: int
+        The end year to use for copyright headers.
     """
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
@@ -226,7 +244,7 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             repo_license_file = repo_asset_dir / value["default_file"]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+            generate_license_file(hook_license_file.parent, current_year, repo_license_file)
 
 
 def generate_license_file(
@@ -321,13 +339,13 @@ def recursive_file_check(
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             # Add the header to the file
-            add_header(copyright, license, years, file, template, commented, sys.stdout)
+            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace)
             # Check if the next file is in missing_headers
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
         elif file_reuse_info:
             # Update the header
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented
+                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace
             )
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
@@ -370,10 +388,10 @@ def non_recursive_file_check(
         # If the file is empty or does not contain reuse information
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
-            add_header(copyright, license, years, file, template, commented, sys.stdout)
+            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace)
         elif file_reuse_info:
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented
+                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace
             )
 
     return changed_headers
@@ -420,6 +438,7 @@ def update_header(
     years: str,
     template: str,
     commented: bool,
+    no_year_whitespace: bool = False,
 ) -> int:
     """Update the license header of the file.
 
@@ -458,7 +477,7 @@ def update_header(
     # Update the header
     # tmp captures the stdout of the header.run() function
     with NamedTemporaryFile(mode="w", delete=True) as tmp:
-        add_header(copyright, license, years, file, template, commented, tmp)
+        add_header(copyright, license, years, file, template, commented, tmp, no_year_whitespace)
 
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
@@ -467,6 +486,7 @@ def update_header(
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
+    # TODO: fix
     years_list = years.split(" - ")
     if len(years_list) == 1:
         if years_list != DEFAULT_START_YEAR:
@@ -498,6 +518,7 @@ def add_header(
     template: str,
     commented: bool,
     out: Union[NamedTemporaryFile, IO[str]],
+    no_year_whitespace: bool = False,
 ) -> None:
     """Add the license header to the file.
 
@@ -516,8 +537,10 @@ def add_header(
         The template to use for the license header. For example, "ansys.jinja2".
     commented: bool
         Whether the template is commented or not.
-    tmp: Union[NamedTemporaryFile, IO[str]]
+    out: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
+    no_year_whitespace: bool
+        Whether to remove whitespace around dash in year range.
     """
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
@@ -542,14 +565,15 @@ def add_header(
         out=out,
     )
 
-    # Add a space before and after the year range if there is not already one
-    with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
-        content = read_file.read()
-    content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
-
-    # Write the updated content back to the file
-    with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
-        write_file.write(content)
+    # Normalize year range format based on user preference
+    if not no_year_whitespace:
+        # Add a space before and after the year range if there is not already one
+        with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+            content = read_file.read()
+        content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
+        # Write the updated content back to the file
+        with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
+            write_file.write(content)
 
 
 def check_same_content(before_hook: str, after_hook: str) -> bool:
@@ -767,19 +791,36 @@ def main():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
+    # Use internal template if specified
+    global DEFAULT_TEMPLATE
+    if args.use_internal_template:
+        DEFAULT_TEMPLATE = "ansys-internal"
+
     # Set changed_headers to zero by default
     changed_headers = 0
 
-    # Check start_year is valid
-    if str(args.start_year).isdigit():
-        # Check the start year is not later than the current year
-        if int(args.start_year) > dt.today().year:
-            raise Exception("Please provide a start year less than or equal to the current year.")
-        # Check the start year isn't earlier than when computers were created :)
-        elif int(args.start_year) < 1942:
-            raise Exception("Please provide a start year greater than or equal to 1942.")
+    # Validate and set end_year (defaults to current calendar year if not provided)
+    if args.end_year:
+        if not str(args.end_year).isdigit():
+            raise Exception("Please ensure the end year is a number.")
+        current_year = int(args.end_year)
     else:
+        current_year = dt.today().year
+
+    # Validate start_year
+    if not str(args.start_year).isdigit():
         raise Exception("Please ensure the start year is a number.")
+
+    start_year = int(args.start_year)
+
+    if start_year < 1942:
+        raise Exception("Please provide a start year greater than or equal to 1942.")
+
+    if start_year > current_year:
+        error_msg = (f"Start year ({start_year}) cannot be later than end year ({current_year})."
+                     if args.end_year
+                     else "Please provide a start year less than or equal to the current year.")
+        raise Exception(error_msg)
 
     # Get root directory of the git repository.
     git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
@@ -794,11 +835,12 @@ def main():
         "template": args.custom_template,
         "license": args.custom_license,
         "start_year": args.start_year,
-        "current_year": dt.today().year,
+        "current_year": current_year,
         "git_repo": git_repo,
     }
 
     # Dictionary containing the asset folder information
+    # Note: DEFAULT_TEMPLATE may have been modified above if --use_internal_template is set
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
@@ -811,7 +853,7 @@ def main():
     }
 
     # Link the default template and/or license from the assets folder to your git repo.
-    link_assets(assets, git_root, args)
+    link_assets(assets, git_root, args, current_year)
 
     # Set the license return code to zero by default
     license_return_code = 0
