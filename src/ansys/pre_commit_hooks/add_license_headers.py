@@ -788,6 +788,7 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
+    # Set global variables for whitespace and copyright symbol flags based on user input
     global no_year_whitespace, use_copyright_symbol
     no_year_whitespace = args.no_year_whitespace
     use_copyright_symbol = args.use_copyright_symbol
