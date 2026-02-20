@@ -202,7 +202,7 @@ def update_license_file(repo_license_path: Path, year_span: str) -> int:
     return changed
 
 
-def link_assets(assets: dict, git_root: str, args: argparse.Namespace, current_year: int) -> None:
+def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     """
     Link the default template and/or license from the assets folder to your git repo.
 
@@ -214,8 +214,6 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace, current_y
         Full path of the repository's root directory.
     args: argparse.Namespace
         Namespace of arguments with their values.
-    current_year: int
-        The end year to use for copyright headers.
     """
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
@@ -242,7 +240,7 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace, current_y
             repo_license_file = repo_asset_dir / value["default_file"]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, current_year, repo_license_file)
+            generate_license_file(hook_license_file.parent, int(args.copyright_end_year), repo_license_file)
 
 
 def generate_license_file(
@@ -343,7 +341,8 @@ def recursive_file_check(
         elif file_reuse_info:
             # Update the header
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented)
+                changed_headers, file, copyright, license, years, template, commented
+            )
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
     return changed_headers
@@ -388,7 +387,8 @@ def non_recursive_file_check(
             add_header(copyright, license, years, file, template, commented, sys.stdout)
         elif file_reuse_info:
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented)
+                changed_headers, file, copyright, license, years, template, commented
+            )
 
     return changed_headers
 
@@ -560,7 +560,7 @@ def add_header(
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
     if not no_year_whitespace:
-        # Add spaces around dash in year range (e.g., '2023-2025' -> '2023 - 2025')
+        # Add a space before and after the year range if there is not already one
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Replace 'Copyright (C)' with copyright symbol if requested
     if use_copyright_symbol:
