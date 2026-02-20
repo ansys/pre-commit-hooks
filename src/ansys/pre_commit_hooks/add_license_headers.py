@@ -792,11 +792,11 @@ def main():
     args = set_lint_args(parser)
 
     # Validate argument combinations
-    if args.use_internal_template and not args.ignore_license_check:
-        raise Exception(
-            "Error: --use_internal_template requires --ignore_license_check. "
-            "Internal templates are for proprietary code without open-source licenses."
-        )
+    # if args.use_internal_template and not args.ignore_license_check:
+    #     raise Exception(
+    #         "Error: --use_internal_template requires --ignore_license_check. "
+    #         "Internal templates are for proprietary code without open-source licenses."
+    #     )
 
     # Validate start_year
     if not str(args.start_year).isdigit():
