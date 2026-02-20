@@ -419,7 +419,7 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
     # Split copyright by newline to support multi-line copyright
-    copyright = values["copyright"].split("\\n")
+    copyright = values["copyright"].split("\n")
     years = (
         f"{values['start_year']} - {values['current_year']}"
         if values["start_year"] != values["current_year"]
