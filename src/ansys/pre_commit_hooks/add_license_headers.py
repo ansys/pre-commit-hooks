@@ -487,7 +487,6 @@ def update_header(
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
-    # TODO: fix
     years_list = years.split(" - ")
     if len(years_list) == 1:
         if years_list != DEFAULT_START_YEAR:
@@ -573,7 +572,7 @@ def add_header(
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
     if not no_year_whitespace:
-        # Add spaces around dash in year range (e.g., '2023-2025' -> '2023 - 2025')
+        # Add a space before and after the year range if there is not already one
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Replace 'Copyright (C)' with copyright symbol if requested
     if use_copyright_symbol:
