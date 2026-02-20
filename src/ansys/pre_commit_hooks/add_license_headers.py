@@ -842,7 +842,7 @@ def main():
     }
 
     # Link the default template and/or license from the assets folder to your git repo.
-    link_assets(assets, git_root, args, copyright_end_year)
+    link_assets(assets, git_root, args)
 
     # Set the license return code to zero by default
     license_return_code = 0
