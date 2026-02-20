@@ -53,8 +53,8 @@ DEFAULT_START_YEAR = dt.today().year
 """Default start year for license headers."""
 DEFAULT_CURRENT_YEAR = dt.today().year
 """Default current year for license headers."""
-YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
-"""Year regex to match year or year range in files."""
+YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
+"""Year regex to match year or year range in files (with or without spaces around dash)."""
 no_year_whitespace = False
 """Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
 use_copyright_symbol = False
