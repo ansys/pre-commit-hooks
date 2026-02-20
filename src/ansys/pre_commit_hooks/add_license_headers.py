@@ -59,7 +59,8 @@ no_year_whitespace = False
 """Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
 use_copyright_symbol = False
 """Whether to replace 'Copyright (C)' with the copyright symbol '©' in headers."""
-
+disable_merge_copyright = False
+"""Whether not to merge the copyright statements in the file header if there are multiple."""
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     """
@@ -113,6 +114,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     )
     parser.add_argument("--no_year_whitespace",action="store_true")
     parser.add_argument("--use_copyright_symbol", action="store_true")
+    parser.add_argument("--disable_merge_copyright", action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -552,7 +554,7 @@ def add_header(
         template=template,
         template_is_commented=commented,
         style=f"{get_comment_style(file).SHORTHAND}",
-        merge_copyrights=True,
+        merge_copyrights = not disable_merge_copyright,
         out=out,
     )
 
@@ -789,9 +791,10 @@ def main():
     changed_headers = 0
 
     # Set global variables for whitespace and copyright symbol flags based on user input
-    global no_year_whitespace, use_copyright_symbol
+    global no_year_whitespace, use_copyright_symbol, disable_merge_copyright
     no_year_whitespace = args.no_year_whitespace
     use_copyright_symbol = args.use_copyright_symbol
+    disable_merge_copyright = args.disable_merge_copyright
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
