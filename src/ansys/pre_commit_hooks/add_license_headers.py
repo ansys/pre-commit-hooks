@@ -51,8 +51,14 @@ DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 DEFAULT_START_YEAR = dt.today().year
 """Default start year for license headers."""
+DEFAULT_CURRENT_YEAR = dt.today().year
+"""Default current year for license headers."""
 YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
 """Year regex to match year or year range in files."""
+NO_YEAR_WHITESPACE = False
+"""Whether to remove whitespace around dash in year range (e.g., '2023-2025' instead of '2023 - 2025')."""
+USE_COPYRIGHT_SYMBOL = False
+"""Whether to replace 'Copyright (C)' with the copyright symbol '©'."""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -103,18 +109,10 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         "--copyright_end_year",
         type=str,
         help="End year for copyright line in headers. Defaults to current year.",
-        default=None,  # None means use current year
+        default=DEFAULT_CURRENT_YEAR,
     )
-    parser.add_argument(
-        "--no_year_whitespace",
-        action="store_true",
-        help="Remove whitespace around dash in year range (e.g., '2023-2025' instead of '2023 - 2025').",
-    )
-    parser.add_argument(
-        "--use_copyright_symbol",
-        action="store_true",
-        help="Use copyright symbol © instead of the word 'Copyright (C)' in the copyright line of the header.",
-    )
+    parser.add_argument("--no_year_whitespace",action="store_true")
+    parser.add_argument("--use_copyright_symbol", action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -339,14 +337,13 @@ def recursive_file_check(
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             # Add the header to the file
-            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace, args.use_copyright_symbol)
+            add_header(copyright, license, years, file, template, commented, sys.stdout)
             # Check if the next file is in missing_headers
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
         elif file_reuse_info:
             # Update the header
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace, args.use_copyright_symbol
-            )
+                changed_headers, file, copyright, license, years, template, commented)
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
     return changed_headers
@@ -388,11 +385,10 @@ def non_recursive_file_check(
         # If the file is empty or does not contain reuse information
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
-            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace, args.use_copyright_symbol)
+            add_header(copyright, license, years, file, template, commented, sys.stdout)
         elif file_reuse_info:
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace, args.use_copyright_symbol
-            )
+                changed_headers, file, copyright, license, years, template, commented)
 
     return changed_headers
 
@@ -438,8 +434,6 @@ def update_header(
     years: str,
     template: str,
     commented: bool,
-    no_year_whitespace: bool = False,
-    use_copyright_symbol: bool = False,
 ) -> int:
     """Update the license header of the file.
 
@@ -478,7 +472,7 @@ def update_header(
     # Update the header
     # tmp captures the stdout of the header.run() function
     with NamedTemporaryFile(mode="w", delete=True) as tmp:
-        add_header(copyright, license, years, file, template, commented, tmp, no_year_whitespace, use_copyright_symbol)
+        add_header(copyright, license, years, file, template, commented, tmp)
 
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
@@ -518,8 +512,6 @@ def add_header(
     template: str,
     commented: bool,
     out: Union[NamedTemporaryFile, IO[str]],
-    no_year_whitespace: bool = False,
-    use_copyright_symbol: bool = False,
 ) -> None:
     """Add the license header to the file.
 
@@ -540,10 +532,6 @@ def add_header(
         Whether the template is commented or not.
     out: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
-    no_year_whitespace: bool
-        Whether to remove whitespace around dash in year range.
-    use_copyright_symbol: bool
-        Whether to use copyright symbol © instead of 'Copyright (C)'.
     """
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
@@ -571,11 +559,11 @@ def add_header(
     # Read file and apply formatting changes
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
-    if not no_year_whitespace:
+    if not NO_YEAR_WHITESPACE:
         # Add a space before and after the year range if there is not already one
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Replace 'Copyright (C)' with copyright symbol if requested
-    if use_copyright_symbol:
+    if USE_COPYRIGHT_SYMBOL:
         content = re.sub(r"Copyright \(C\)", "©", content, flags=re.IGNORECASE)
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -801,22 +789,17 @@ def main():
     changed_headers = 0
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
-    if args.copyright_end_year:
-        if not str(args.copyright_end_year).isdigit():
-            raise Exception("Please ensure the end year is a number.")
-        current_year = int(args.copyright_end_year)
-        if current_year < 1942:
-            raise Exception("Please provide an end year greater than or equal to 1942.")
-    else:
-        current_year = dt.today().year
+    if not str(args.copyright_end_year).isdigit():
+        raise Exception("Please ensure the copyright end year is a number.")
+    if int(args.copyright_end_year) < 1942:
+        raise Exception("Please provide a copyright end year greater than or equal to 1942.")
+    copyright_end_year = int(args.copyright_end_year)
 
     # Check start_year is valid
     if str(args.start_year).isdigit():
         # Check the start year is not later than the current year
-        if int(args.start_year) > current_year:
-            error_msg = (f"Start year ({int(args.start_year)}) cannot be later than end year ({current_year})."
-                     if args.copyright_end_year
-                     else "Please provide a start year less than or equal to the current year.")
+        if int(args.start_year) > copyright_end_year:
+            error_msg = f"Please provide a start year ({int(args.start_year)}) less than or equal to the copyright end year ({copyright_end_year})."
             raise Exception(error_msg)
         # Check the start year isn't earlier than when computers were created :)
         elif int(args.start_year) < 1942:
@@ -837,7 +820,7 @@ def main():
         "template": args.custom_template,
         "license": args.custom_license,
         "start_year": args.start_year,
-        "current_year": current_year,
+        "current_year": args.copyright_end_year,
         "git_repo": git_repo,
     }
 
@@ -854,7 +837,7 @@ def main():
     }
 
     # Link the default template and/or license from the assets folder to your git repo.
-    link_assets(assets, git_root, args, current_year)
+    link_assets(assets, git_root, args, copyright_end_year)
 
     # Set the license return code to zero by default
     license_return_code = 0
