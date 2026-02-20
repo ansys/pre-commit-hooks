@@ -111,9 +111,9 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="Remove whitespace around dash in year range (e.g., '2023-2025' instead of '2023 - 2025').",
     )
     parser.add_argument(
-        "--use_internal_template",
+        "--use_copyright_symbol",
         action="store_true",
-        help="Use ansys-internal template for proprietary code. Must be used with --ignore_license_check.",
+        help="Use copyright symbol © instead of the word 'Copyright (C)' in the copyright line of the header.",
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
@@ -339,13 +339,13 @@ def recursive_file_check(
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             # Add the header to the file
-            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace)
+            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace, args.use_copyright_symbol)
             # Check if the next file is in missing_headers
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
         elif file_reuse_info:
             # Update the header
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace
+                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace, args.use_copyright_symbol
             )
             return recursive_file_check(changed_headers, obj, values, args, count + 1)
 
@@ -388,10 +388,10 @@ def non_recursive_file_check(
         # If the file is empty or does not contain reuse information
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
-            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace)
+            add_header(copyright, license, years, file, template, commented, sys.stdout, args.no_year_whitespace, args.use_copyright_symbol)
         elif file_reuse_info:
             changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace
+                changed_headers, file, copyright, license, years, template, commented, args.no_year_whitespace, args.use_copyright_symbol
             )
 
     return changed_headers
@@ -439,6 +439,7 @@ def update_header(
     template: str,
     commented: bool,
     no_year_whitespace: bool = False,
+    use_copyright_symbol: bool = False,
 ) -> int:
     """Update the license header of the file.
 
@@ -477,7 +478,7 @@ def update_header(
     # Update the header
     # tmp captures the stdout of the header.run() function
     with NamedTemporaryFile(mode="w", delete=True) as tmp:
-        add_header(copyright, license, years, file, template, commented, tmp, no_year_whitespace)
+        add_header(copyright, license, years, file, template, commented, tmp, no_year_whitespace, use_copyright_symbol)
 
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
@@ -519,6 +520,7 @@ def add_header(
     commented: bool,
     out: Union[NamedTemporaryFile, IO[str]],
     no_year_whitespace: bool = False,
+    use_copyright_symbol: bool = False,
 ) -> None:
     """Add the license header to the file.
 
@@ -541,6 +543,8 @@ def add_header(
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     no_year_whitespace: bool
         Whether to remove whitespace around dash in year range.
+    use_copyright_symbol: bool
+        Whether to use copyright symbol © instead of 'Copyright (C)'.
     """
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
@@ -565,15 +569,18 @@ def add_header(
         out=out,
     )
 
-    # Normalize year range format based on user preference
+    # Read file and apply formatting changes
+    with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+        content = read_file.read()
     if not no_year_whitespace:
-        # Add a space before and after the year range if there is not already one
-        with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
-            content = read_file.read()
+        # Add spaces around dash in year range (e.g., '2023-2025' -> '2023 - 2025')
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
-        # Write the updated content back to the file
-        with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
-            write_file.write(content)
+    # Replace 'Copyright (C)' with copyright symbol if requested
+    if use_copyright_symbol:
+        content = re.sub(r"Copyright \(C\)", "©", content, flags=re.IGNORECASE)
+    # Write the updated content back to the file
+    with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
+        write_file.write(content)
 
 
 def check_same_content(before_hook: str, after_hook: str) -> bool:
@@ -791,12 +798,6 @@ def main():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-    # Validate argument combinations
-    # if args.use_internal_template and not args.ignore_license_check:
-    #     raise Exception(
-    #         "Error: --use_internal_template requires --ignore_license_check. "
-    #         "Internal templates are for proprietary code without open-source licenses."
-    #     )
 
     # Validate start_year
     if not str(args.start_year).isdigit():
@@ -821,15 +822,6 @@ def main():
                      else "Please provide a start year less than or equal to the current year.")
         raise Exception(error_msg)
 
-    # Use internal template if specified
-    global DEFAULT_TEMPLATE
-    if args.use_internal_template:
-        DEFAULT_TEMPLATE = "ansys-internal"
-        # Update custom_template if it was using the default value
-        if args.custom_template == "ansys":
-            args.custom_template = "ansys-internal"
-
-
     # Set changed_headers to zero by default
     changed_headers = 0
 
@@ -851,7 +843,6 @@ def main():
     }
 
     # Dictionary containing the asset folder information
-    # Note: DEFAULT_TEMPLATE may have been modified above if --use_internal_template is set
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
