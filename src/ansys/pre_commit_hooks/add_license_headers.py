@@ -100,7 +100,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         default=DEFAULT_START_YEAR,
     )
     parser.add_argument(
-        "--end_year",
+        "--copyright_end_year",
         type=str,
         help="End year for copyright line in headers. Defaults to current year.",
         default=None,  # None means use current year
@@ -801,11 +801,11 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
-    # Validate and set end_year (defaults to current calendar year if not provided)
-    if args.end_year:
-        if not str(args.end_year).isdigit():
+    # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
+    if args.copyright_end_year:
+        if not str(args.copyright_end_year).isdigit():
             raise Exception("Please ensure the end year is a number.")
-        current_year = int(args.end_year)
+        current_year = int(args.copyright_end_year)
         if current_year < 1942:
             raise Exception("Please provide an end year greater than or equal to 1942.")
     else:
@@ -816,7 +816,7 @@ def main():
         # Check the start year is not later than the current year
         if int(args.start_year) > current_year:
             error_msg = (f"Start year ({int(args.start_year)}) cannot be later than end year ({current_year})."
-                     if args.end_year
+                     if args.copyright_end_year
                      else "Please provide a start year less than or equal to the current year.")
             raise Exception(error_msg)
         # Check the start year isn't earlier than when computers were created :)
