@@ -55,10 +55,10 @@ DEFAULT_CURRENT_YEAR = dt.today().year
 """Default current year for license headers."""
 YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
 """Year regex to match year or year range in files."""
-NO_YEAR_WHITESPACE = False
-"""Whether to remove whitespace around dash in year range (e.g., '2023-2025' instead of '2023 - 2025')."""
-USE_COPYRIGHT_SYMBOL = False
-"""Whether to replace 'Copyright (C)' with the copyright symbol '©'."""
+no_year_whitespace = False
+"""Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
+use_copyright_symbol = False
+"""Whether to replace 'Copyright (C)' with the copyright symbol '©' in headers."""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -559,11 +559,11 @@ def add_header(
     # Read file and apply formatting changes
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
-    if not NO_YEAR_WHITESPACE:
-        # Add a space before and after the year range if there is not already one
+    if not no_year_whitespace:
+        # Add spaces around dash in year range (e.g., '2023-2025' -> '2023 - 2025')
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Replace 'Copyright (C)' with copyright symbol if requested
-    if USE_COPYRIGHT_SYMBOL:
+    if use_copyright_symbol:
         content = re.sub(r"Copyright \(C\)", "©", content, flags=re.IGNORECASE)
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -787,6 +787,10 @@ def main():
 
     # Set changed_headers to zero by default
     changed_headers = 0
+
+    global no_year_whitespace, use_copyright_symbol
+    no_year_whitespace = args.no_year_whitespace
+    use_copyright_symbol = args.use_copyright_symbol
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
