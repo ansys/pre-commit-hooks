@@ -798,32 +798,32 @@ def main():
     parser = argparse.ArgumentParser()
     args = set_lint_args(parser)
 
-
-    # Validate start_year
-    if not str(args.start_year).isdigit():
-        raise Exception("Please ensure the start year is a number.")
-
-    start_year = int(args.start_year)
-
-    if start_year < 1942:
-        raise Exception("Please provide a start year greater than or equal to 1942.")
+    # Set changed_headers to zero by default
+    changed_headers = 0
 
     # Validate and set end_year (defaults to current calendar year if not provided)
     if args.end_year:
         if not str(args.end_year).isdigit():
             raise Exception("Please ensure the end year is a number.")
         current_year = int(args.end_year)
+        if current_year < 1942:
+            raise Exception("Please provide an end year greater than or equal to 1942.")
     else:
         current_year = dt.today().year
 
-    if start_year > current_year:
-        error_msg = (f"Start year ({start_year}) cannot be later than end year ({current_year})."
+    # Check start_year is valid
+    if str(args.start_year).isdigit():
+        # Check the start year is not later than the current year
+        if int(args.start_year) > current_year:
+            error_msg = (f"Start year ({int(args.start_year)}) cannot be later than end year ({current_year})."
                      if args.end_year
                      else "Please provide a start year less than or equal to the current year.")
-        raise Exception(error_msg)
-
-    # Set changed_headers to zero by default
-    changed_headers = 0
+            raise Exception(error_msg)
+        # Check the start year isn't earlier than when computers were created :)
+        elif int(args.start_year) < 1942:
+            raise Exception("Please provide a start year greater than or equal to 1942.")
+    else:
+        raise Exception("Please ensure the start year is a number.")
 
     # Get root directory of the git repository.
     git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
