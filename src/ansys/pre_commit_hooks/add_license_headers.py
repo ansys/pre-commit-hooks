@@ -481,12 +481,11 @@ def update_header(
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
+    # Extract start year and end year from years string
     years_list = years.split(" - ")
     if len(years_list) == 1:
-        if years_list != DEFAULT_START_YEAR:
-            years_list.append(DEFAULT_START_YEAR)
-        else:
-            years_list.append(years_list)
+        # Single year means start_year == current_year, append the same year
+        years_list.append(years_list[0])
     changed_headers = update_year_range(
         changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
     )
