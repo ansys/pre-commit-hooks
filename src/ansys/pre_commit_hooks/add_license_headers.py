@@ -59,6 +59,8 @@ no_year_whitespace = False
 """Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
 use_copyright_symbol = False
 """Whether to replace 'Copyright (C)' with the copyright symbol '©' in headers."""
+mutiple_lines_copyright = False
+"""Whether to handle multiple lines of copyright in headers."""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -113,6 +115,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     )
     parser.add_argument("--no_year_whitespace",action="store_true")
     parser.add_argument("--use_copyright_symbol", action="store_true")
+    parser.add_argument("--mutiple_lines_copyright", action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -417,7 +420,7 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
     #copyright = [values["copyright"]]
-    copyright = values["copyright"].split("\n")
+    copyright = values["copyright"].split("\n") if mutiple_lines_copyright else [values["copyright"]]
     years = (
         f"{values['start_year']} - {values['current_year']}"
         if values["start_year"] != values["current_year"]
@@ -790,9 +793,10 @@ def main():
     changed_headers = 0
 
     # Set global variables for whitespace and copyright symbol flags based on user input
-    global no_year_whitespace, use_copyright_symbol
+    global no_year_whitespace, use_copyright_symbol, mutiple_lines_copyright
     no_year_whitespace = args.no_year_whitespace
     use_copyright_symbol = args.use_copyright_symbol
+    mutiple_lines_copyright = args.mutiple_lines_copyright
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
