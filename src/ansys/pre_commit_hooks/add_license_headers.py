@@ -493,9 +493,9 @@ def update_header(
             years_list.append(DEFAULT_START_YEAR)
         else:
             years_list.append(years_list)
-    changed_headers = update_year_range(
-        changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
-    )
+    # changed_headers = update_year_range(
+    #     changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
+    # )
 
     # Check if the file content before add-license-headers was run has been changed
     # Assuming the syntax was fixed in the above if statement, this check is
