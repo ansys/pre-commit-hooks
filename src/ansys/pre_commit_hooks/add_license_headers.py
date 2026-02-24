@@ -769,6 +769,26 @@ def cleanup(assets: dict, os_git_root: str) -> None:
             if not Path(value["path"]).iterdir():
                 shutil.rmtree(key)
 
+def cleanup_duplicate_internal_headers(files: list[str]) -> None:
+    """
+    Remove duplicate copyright line in the header if the ansysinternal template is used.
+
+    Parameters
+    ----------
+    file: str
+        The file to check for duplicate copyright lines.
+    """
+    target="#Unauthorized use, distribution, or duplication is prohibited."
+    for file in files:
+        with open(file, 'r+', encoding='utf-8', newline='') as f:
+            lines=f.readlines()
+            for i in range(1, min(len(lines), 10)):
+                if lines[i-1].strip() == target and lines[i].strip() == target:
+                    del lines[i]
+                    f.seek(0)
+                    f.writelines(lines)
+                    f.truncate()
+                    break
 
 def main():
     """
@@ -857,7 +877,7 @@ def main():
     repo_license_path = git_root / "LICENSE"
 
     # Update the year span in the LICENSE file if necessary
-    if repo_license_path.is_file() and (args.custom_license == DEFAULT_LICENSE):
+    if repo_license_path.is_file() and (args.custom_license == DEFAULT_LICENSE) and not args.ansys_internal_template:
         # Create a year span based on user input and the current year
         user_start_year = str(values["start_year"])
         current_year = str(values["current_year"])
@@ -879,6 +899,10 @@ def main():
         file_return_code = recursive_file_check(changed_headers, obj, values, args, 0)
     else:
         file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
+
+    # If the ansysinternal template is used, remove duplicate copyright lines in the header that can occur with this template
+    if args.ansys_internal_template:
+        cleanup_duplicate_internal_headers(values["files"])
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
