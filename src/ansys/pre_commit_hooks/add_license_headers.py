@@ -45,6 +45,8 @@ from reuse.copyright import YearRange
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
+INTERNAL_TEMPLATE = "ansysinternal"
+"""Default template to use for internal copyright headers."""
 DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
@@ -57,10 +59,8 @@ YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
 """Year regex to match year or year range in files (with or without spaces around dash)."""
 no_year_whitespace = False
 """Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
-use_copyright_symbol = False
-"""Whether to replace 'Copyright (C)' with the copyright symbol '©' in headers."""
-mutiple_lines_copyright = False
-"""Whether to handle multiple lines of copyright in headers."""
+ansys_internal_template = False
+"""Whether to use the ansysinternal.jinja2 template"""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -114,8 +114,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         default=DEFAULT_CURRENT_YEAR,
     )
     parser.add_argument("--no_year_whitespace",action="store_true")
-    parser.add_argument("--use_copyright_symbol", action="store_true")
-    parser.add_argument("--mutiple_lines_copyright", action="store_true")
+    parser.add_argument("--ansys_internal_template",action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -229,8 +228,9 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
         hook_asset_dir = Path(hook_loc) / "assets" / value["path"]
         repo_asset_dir = Path(git_root) / value["path"]
 
+        default_tem = INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE
         # If key is .reuse and the custom template is being used
-        if key == ".reuse" and args.custom_template == DEFAULT_TEMPLATE:
+        if key == ".reuse" and args.custom_template == default_tem:
             mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
 
         # If key is LICENSES, the default license is being used, and ignore_license_check is False
@@ -419,8 +419,7 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
 
     license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
-    #copyright = [values["copyright"]]
-    copyright = values["copyright"].split("\n") if mutiple_lines_copyright else [values["copyright"]]
+    copyright = [values["copyright"]]
     years = (
         f"{values['start_year']} - {values['current_year']}"
         if values["start_year"] != values["current_year"]
@@ -566,9 +565,6 @@ def add_header(
     if not no_year_whitespace:
         # Add a space before and after the year range if there is not already one
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
-    # Replace 'Copyright (C)' with copyright symbol if requested
-    if use_copyright_symbol:
-        content = re.sub(r"Copyright \(C\)", "©", content, flags=re.IGNORECASE)
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
         write_file.write(content)
@@ -792,11 +788,14 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
+    if args.ansys_internal_template and args.custom_template != INTERNAL_TEMPLATE:
+        raise Exception(
+            f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
+            )
+
     # Set global variables for whitespace and copyright symbol flags based on user input
-    global no_year_whitespace, use_copyright_symbol, mutiple_lines_copyright
+    global no_year_whitespace
     no_year_whitespace = args.no_year_whitespace
-    use_copyright_symbol = args.use_copyright_symbol
-    mutiple_lines_copyright = args.mutiple_lines_copyright
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
@@ -838,7 +837,7 @@ def main():
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
-            "default_file": f"{DEFAULT_TEMPLATE}.jinja2",
+            "default_file": f"{INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE}.jinja2",
         },
         "LICENSES": {
             "path": "LICENSES",

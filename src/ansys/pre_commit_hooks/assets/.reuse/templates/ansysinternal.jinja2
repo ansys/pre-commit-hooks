@@ -1,0 +1,7 @@
+{% for copyright_line in copyright_lines %}
+{{ copyright_line | replace("Copyright (C)", "©")}}
+{% endfor %}
+Unauthorized use, distribution, or duplication is prohibited.
+{% for expression in spdx_expressions %}
+SPDX-License-Identifier: {{ expression }}
+{% endfor %}
