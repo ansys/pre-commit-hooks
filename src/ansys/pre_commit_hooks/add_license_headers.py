@@ -778,7 +778,7 @@ def cleanup_duplicate_internal_headers(files: list[str]) -> None:
     file: str
         The file to check for duplicate copyright lines.
     """
-    target="#Unauthorized use, distribution, or duplication is prohibited."
+    target="# Unauthorized use, distribution, or duplication is prohibited."
     for file in files:
         with open(file, 'r+', encoding='utf-8', newline='') as f:
             lines=f.readlines()
