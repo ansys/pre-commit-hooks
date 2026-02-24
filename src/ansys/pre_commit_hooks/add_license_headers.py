@@ -788,10 +788,13 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
-    if args.ansys_internal_template and args.custom_template != INTERNAL_TEMPLATE:
-        raise Exception(
-            f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
-            )
+    if args.ansys_internal_template:
+        if args.custom_template != INTERNAL_TEMPLATE and args.custom_template != DEFAULT_TEMPLATE:
+            raise Exception(
+                f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
+                )
+        args.custom_template = INTERNAL_TEMPLATE
+
 
     # Set global variables for whitespace and copyright symbol flags based on user input
     global no_year_whitespace
