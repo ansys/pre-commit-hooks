@@ -70,14 +70,14 @@ setup(
         "GitPython==3.1.46",
         "importlib-metadata==8.7.1",
         "Jinja2==3.1.6",
-        "reuse==5.1.1",
+        "reuse==6.2.0",
         "requests==2.32.5",
         "semver==3.0.4",
         "toml==0.10.2",
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.6.4",
+            "ansys-sphinx-theme[autoapi]==1.7.0",
             "numpydoc==1.10.0",
             "sphinx==8.2.3",
             "sphinx-autodoc-typehints==3.1.0",

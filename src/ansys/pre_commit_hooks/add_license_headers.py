@@ -24,6 +24,7 @@ Module for running `REUSE <https://reuse.software/>`_ to add missing license hea
 
 A license header consists of the Ansys copyright statement and licensing information.
 """
+
 import argparse
 from datetime import date as dt
 import filecmp
@@ -39,6 +40,7 @@ from jinja2 import Environment, FileSystemLoader
 from reuse import extract
 from reuse.cli import common
 from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info, get_template
+from reuse.copyright import YearRange
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -536,12 +538,15 @@ def add_header(
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
     print(f"license: {license}")
+    # Create a YearRange object from the years string to pass into the get_reuse_info function
+    year_range = YearRange.tuple_from_string(years)
+
     # Get the REUSE information from the file.
     reuse_info = get_reuse_info(
         copyrights=copyright,
         licenses=license,
         copyright_prefix="string-c",
-        year=years,
+        years=year_range,
         contributors="",
     )
 
@@ -555,6 +560,15 @@ def add_header(
         merge_copyrights=True,
         out=out,
     )
+
+    # Add a space before and after the year range if there is not already one
+    with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+        content = read_file.read()
+    content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
+
+    # Write the updated content back to the file
+    with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
+        write_file.write(content)
 
 
 def check_same_content(before_hook: str, after_hook: str) -> bool:
