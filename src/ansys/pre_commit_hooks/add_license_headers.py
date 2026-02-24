@@ -113,7 +113,6 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="End year for copyright line in headers. Defaults to current year.",
         default=DEFAULT_CURRENT_YEAR,
     )
-    parser.add_argument("--no_year_whitespace",action="store_true")
     parser.add_argument("--ansys_internal_template",action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
@@ -713,7 +712,8 @@ def update_year_range(
     if (user_year_span != match_year_span) and (match_year_span != current_year):
         changed_headers = 1
         # Update the year span in the header. "1" is the max number of replacements
-        content = re.sub(year_regex, user_year_span, content, 1)
+        update_copyright = f"{user_start_year}-{current_year}" if no_year_whitespace else f" {user_year_span} "
+        content = re.sub(year_regex, update_copyright, content, 1)
 
         # Update the file with the new year span
         with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -814,11 +814,11 @@ def main():
                 f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
                 )
         args.custom_template = INTERNAL_TEMPLATE
-
+        args.ignore_license_check = True
 
     # Set global variables for whitespace and copyright symbol flags based on user input
     global no_year_whitespace
-    no_year_whitespace = args.no_year_whitespace
+    no_year_whitespace = args.ansys_internal_template
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
