@@ -419,11 +419,15 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
     copyright = [values["copyright"]]
-    years = (
-        f"{values['start_year']} - {values['current_year']}"
-        if values["start_year"] != values["current_year"]
-        else f"{values['current_year']}"
-    )
+
+    # Format years according to no_year_whitespace flag
+    if values["start_year"] != values["current_year"]:
+        if no_year_whitespace:
+            years = f"{values['start_year']}-{values['current_year']}"
+        else:
+            years = f"{values['start_year']} - {values['current_year']}"
+    else:
+        years = f"{values['current_year']}"
 
     return project, template, commented, license, files, copyright, years
 
@@ -483,7 +487,7 @@ def update_header(
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
-    years_list = years.split(" - ")
+    years_list = years.split(" - ") if " - " in years else years.split("-")
     if len(years_list) == 1:
         if years_list != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
@@ -696,24 +700,23 @@ def update_year_range(
     match_start_year, match_end_year = get_years_from_file(content, year_regex)
 
     # Set the year spans for the user input and the years found in the file (match year span)
-    user_year_span = (
-        f"{user_start_year} - {current_year}"
-        if str(user_start_year) != str(current_year)
-        else user_start_year
-    )
-    match_year_span = (
-        f"{match_start_year} - {match_end_year}"
-        if str(match_start_year) != str(match_end_year)
-        else match_start_year
-    )
+    # Format according to no_year_whitespace flag for consistent comparison
+    if str(user_start_year) != str(current_year):
+        user_year_span = f"{user_start_year}-{current_year}" if no_year_whitespace else f"{user_start_year} - {current_year}"
+    else:
+        user_year_span = user_start_year
+
+    if str(match_start_year) != str(match_end_year):
+        match_year_span = f"{match_start_year}-{match_end_year}" if no_year_whitespace else f"{match_start_year} - {match_end_year}"
+    else:
+        match_year_span = match_start_year
 
     # If the user input year span does not match the year span in the file and
     # the year span in the file isn't the current year, update the header
     if (user_year_span != match_year_span) and (match_year_span != current_year):
         changed_headers = 1
         # Update the year span in the header. "1" is the max number of replacements
-        update_copyright = f"{user_start_year}-{current_year}" if no_year_whitespace else f" {user_year_span} "
-        content = re.sub(year_regex, update_copyright, content, 1)
+        content = re.sub(year_regex, user_year_span, content, 1)
 
         # Update the file with the new year span
         with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -815,10 +818,9 @@ def main():
                 )
         args.custom_template = INTERNAL_TEMPLATE
         args.ignore_license_check = True
-
-    # Set global variables for whitespace and copyright symbol flags based on user input
-    global no_year_whitespace
-    no_year_whitespace = args.ansys_internal_template
+        # Set global variables for whitespace and copyright symbol flags based on user input
+        global no_year_whitespace
+        no_year_whitespace = True
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
