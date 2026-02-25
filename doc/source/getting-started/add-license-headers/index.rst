@@ -99,7 +99,7 @@ The template contains the following variables:
 ANSYS proprietary header template example
 -------------------------------------------------
 
-The ``ansysinternal`` template included in this project is provided solely as a reference format for ANSYS proprietary copyright headers. It is intended strictly for use in proprietary company projects.
+The ``ansysinternal`` template included in this project is a format for Ansys plus Synopsys proprietary copyright headers. It is intended for use in proprietary company projects.
 
 When the ``--ansys_internal_template`` argument is specified, the tool inserts the following fixed-format two-line header (with a year range such as ``2022-2026``, no spaces, and no license block):
 
