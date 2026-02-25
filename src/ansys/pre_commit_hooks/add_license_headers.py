@@ -111,7 +111,7 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="End year for copyright line in headers. Defaults to current year.",
         default=DEFAULT_CURRENT_YEAR,
     )
-    parser.add_argument("--ansys_internal_template",action="store_true")
+    parser.add_argument("--ansys_internal_template", action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -240,7 +240,9 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             repo_license_file = repo_asset_dir / value["default_file"]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, int(args.copyright_end_year), repo_license_file)
+            generate_license_file(
+                hook_license_file.parent, int(args.copyright_end_year), repo_license_file
+            )
 
 
 def generate_license_file(
@@ -700,12 +702,20 @@ def update_year_range(
     # Set the year spans for the user input and the years found in the file (match year span)
     # Format according to ansys_internal_template flag for consistent comparison
     if str(user_start_year) != str(current_year):
-        user_year_span = f"{user_start_year}-{current_year}" if ansys_internal_template else f"{user_start_year} - {current_year}"
+        user_year_span = (
+            f"{user_start_year}-{current_year}"
+            if ansys_internal_template
+            else f"{user_start_year} - {current_year}"
+        )
     else:
         user_year_span = user_start_year
 
     if str(match_start_year) != str(match_end_year):
-        match_year_span = f"{match_start_year}-{match_end_year}" if ansys_internal_template else f"{match_start_year} - {match_end_year}"
+        match_year_span = (
+            f"{match_start_year}-{match_end_year}"
+            if ansys_internal_template
+            else f"{match_start_year} - {match_end_year}"
+        )
     else:
         match_year_span = match_start_year
 
@@ -770,6 +780,7 @@ def cleanup(assets: dict, os_git_root: str) -> None:
             if not Path(value["path"]).iterdir():
                 shutil.rmtree(key)
 
+
 def cleanup_duplicate_internal_headers(files: list[str]) -> None:
     """
     Remove duplicate copyright line in the header if the ansysinternal template is used.
@@ -779,17 +790,18 @@ def cleanup_duplicate_internal_headers(files: list[str]) -> None:
     file: str
         The file to check for duplicate copyright lines.
     """
-    target="# Unauthorized use, distribution, or duplication is prohibited."
+    target = "# Unauthorized use, distribution, or duplication is prohibited."
     for file in files:
-        with open(file, 'r+', encoding='utf-8', newline='') as f:
-            lines=f.readlines()
+        with open(file, "r+", encoding="utf-8", newline="") as f:
+            lines = f.readlines()
             for i in range(1, min(len(lines), 10)):
-                if lines[i-1].strip() == target and lines[i].strip() == target:
+                if lines[i - 1].strip() == target and lines[i].strip() == target:
                     del lines[i]
                     f.seek(0)
                     f.writelines(lines)
                     f.truncate()
                     break
+
 
 def main():
     """
@@ -813,7 +825,7 @@ def main():
         if args.custom_template != INTERNAL_TEMPLATE and args.custom_template != DEFAULT_TEMPLATE:
             raise Exception(
                 f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
-                )
+            )
 
         ansys_internal_template = True
         args.custom_template = INTERNAL_TEMPLATE
@@ -876,7 +888,11 @@ def main():
     repo_license_path = git_root / "LICENSE"
 
     # Update the year span in the LICENSE file if necessary
-    if repo_license_path.is_file() and (args.custom_license == DEFAULT_LICENSE) and not args.ansys_internal_template:
+    if (
+        repo_license_path.is_file()
+        and (args.custom_license == DEFAULT_LICENSE)
+        and not args.ansys_internal_template
+    ):
         # Create a year span based on user input and the current year
         user_start_year = str(values["start_year"])
         current_year = str(values["current_year"])
