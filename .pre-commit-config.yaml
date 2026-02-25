@@ -6,36 +6,36 @@ ci:
 repos:
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 26.1.0
+  rev: ea488cebbfd88a5f50b8bd95d5c829d0bb76feb8  # frozen: 26.1.0
   hooks:
   - id: black
 
 - repo: https://github.com/pycqa/isort
-  rev: 8.0.0
+  rev: 3459bdee0962449aad91235273c3fd1306dfebe5  # frozen: 8.0.0
   hooks:
   - id: isort
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.3.0
+  rev: d93590f5be797aabb60e3b09f2f52dddb02f349f  # frozen: 7.3.0
   hooks:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: 63c8f8312b7559622c0d82815639671ae42132ac  # frozen: v2.4.1
   hooks:
   - id: codespell
     additional_dependencies:
       - tomli
 
 - repo: https://github.com/pycqa/pydocstyle
-  rev: 6.3.0
+  rev: 07f6707e2c5612960347f7c00125620457f490a7  # frozen: 6.3.0
   hooks:
   - id: pydocstyle
     additional_dependencies: [toml]
     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
@@ -44,12 +44,12 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.36.2
+  rev: ec368acd16deee9c560c105ab6d27db4ee19a5ec  # frozen: 0.36.2
   hooks:
     - id: check-github-workflows
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.5.2
+  rev: fd1d6b0b4baeb08e32d4de0909999576695c0433  # frozen: v0.5.2
   hooks:
   - id: add-license-headers
     args:
@@ -63,3 +63,13 @@ repos:
     args:
     - --product=pre_commit_hooks
     - --non_compliant_name
+
+- repo: local
+  hooks:
+   - id: hashed-pre-commit
+     name: Hashed Pre-Commit Versions
+     entry: hashed-pre-commit
+     language: python
+     files: '(\.pre-commit-config\.yaml)'
+     additional_dependencies:
+       - ansys-pre-commit-hooks@git+https://github.com/ansys/pre-commit-hooks@feat/check-precommit

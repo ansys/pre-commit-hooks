@@ -100,6 +100,11 @@ def main():
         if not check_pre_commit_config(filename):
             is_compliant = False
 
+    if not is_compliant:
+        print(
+            "\nOne or more .pre-commit-config.yaml files use non-hash revisions."
+            "Run `pre-commit autoupdated --freeze` to use full SHA-1 commit hashes."
+        )
     return 0 if is_compliant else 1
 
 
