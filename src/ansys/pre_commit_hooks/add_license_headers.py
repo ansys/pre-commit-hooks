@@ -58,7 +58,7 @@ DEFAULT_CURRENT_YEAR = dt.today().year
 YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
 """Year regex to match year or year range in files (with or without spaces around dash)."""
 ansys_internal_template = False
-"""Whether to use the ansysinternal.jinja2 template"""
+"""Global flag to indicate whether the ansys_internal_template is being used, which affects formatting of year spans."""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -814,6 +814,8 @@ def main():
             raise Exception(
                 f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
                 )
+
+        ansys_internal_template = True
         args.custom_template = INTERNAL_TEMPLATE
         args.ignore_license_check = True
 
@@ -857,7 +859,7 @@ def main():
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
-            "default_file": f"{INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE}.jinja2",
+            "default_file": f"{INTERNAL_TEMPLATE if ansys_internal_template else DEFAULT_TEMPLATE}.jinja2",
         },
         "LICENSES": {
             "path": "LICENSES",
