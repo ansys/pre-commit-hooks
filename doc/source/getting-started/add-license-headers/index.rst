@@ -88,7 +88,7 @@ The template contains the following variables:
     * - ``--ansys_internal_template``
       - ``False``
       - Use the ANSYS proprietary copyright header template.
-        This will override the default ``ansys`` template.
+        This overrides the default ``ansys`` template.
         See :ref:`ANSYS proprietary header template example <ansys_proprietary_header_template_example>` for details.
 
 
