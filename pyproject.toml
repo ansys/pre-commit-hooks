@@ -23,6 +23,7 @@ dependencies = [
     "GitPython==3.1.46",
     "importlib-metadata==8.7.1",
     "Jinja2==3.1.6",
+    "PyYAML>=6.0",
     "reuse==6.2.0",
     "requests==2.32.5",
     "semver==3.0.4",
@@ -91,6 +92,7 @@ testpaths = [
 ]
 markers = [
     "add_license_headers: marks tests for add-license-headers hook",
+    "hashed_pre_commit: marks tests for hashed-pre-commit hook",
     "tech_review: marks tests for tech-review hook",
 ]
 

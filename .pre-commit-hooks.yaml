@@ -11,3 +11,9 @@
   entry: tech-review
   language: python
   pass_filenames: false
+- id: "hashed-pre-commit"
+  name: "Hashed Pre-Commit Versions"
+  description: "Enforce hash-based versions in .pre-commit-config.yaml files"
+  entry: hashed-pre-commit
+  language: python
+  files: '(\.pre-commit-config\.yaml)'

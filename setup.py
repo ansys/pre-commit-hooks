@@ -70,6 +70,7 @@ setup(
         "GitPython==3.1.46",
         "importlib-metadata==8.7.1",
         "Jinja2==3.1.6",
+        "PyYAML>=6.0",
         "reuse==6.2.0",
         "requests==2.32.5",
         "semver==3.0.4",
@@ -105,6 +106,7 @@ setup(
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
+            "hashed-pre-commit=ansys.pre_commit_hooks.hashed_pre_commit:main",
             "tech-review=ansys.pre_commit_hooks.tech_review:main",
         ],
     },
