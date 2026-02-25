@@ -81,7 +81,7 @@ The template contains the following variables:
     * - ``--copyright_end_year``
       - ``Current year``
       - End year for the copyright line in headers. Defaults to the current year.
-      - Use this if you want to specify a fixed end year.
+        Use this if you want to specify a fixed end year.
     * - ``--ignore_license_check``
       - ``False``
       - Whether to check for the license in the header.
@@ -89,8 +89,8 @@ The template contains the following variables:
     * - ``--ansys_internal_template``
       - ``False``
       - Use the ANSYS proprietary copyright header template.
-      - This will override the default ``ansys`` template.
-      - See :ref:`ANSYS Proprietary Header Template Example <ansys_proprietary_header_template_example>` for details.
+        This will override the default ``ansys`` template.
+        See :ref:`ANSYS proprietary header template example <ansys_proprietary_header_template_example>` for details.
 
 
 
