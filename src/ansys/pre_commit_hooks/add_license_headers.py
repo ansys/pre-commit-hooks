@@ -58,7 +58,7 @@ DEFAULT_CURRENT_YEAR = dt.today().year
 YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
 """Year regex to match year or year range in files (with or without spaces around dash)."""
 ansys_internal_template = False
-"""Global flag to indicate whether the ansys_internal_template is being used, which affects formatting of year spans."""
+"""Global flag to indicate whether the ansys_internal_template is being used"""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -785,6 +785,9 @@ def cleanup_duplicate_internal_headers(files: list[str]) -> None:
     """
     Remove duplicate copyright line in the header if the ansysinternal template is used.
 
+    Target line is hardcoded in ansysinternal.jinja2 and added automatically by reuse.
+    Multiple lines can be added if the header is updated multiple times.
+
     Parameters
     ----------
     file: str
@@ -824,14 +827,16 @@ def main():
     if args.ansys_internal_template:
         if args.custom_template != INTERNAL_TEMPLATE and args.custom_template != DEFAULT_TEMPLATE:
             raise Exception(
-                f"The --ansys_internal_template flag cannot be used with a custom template. Please remove the --ansys_internal_template flag or set the --custom_template to '{INTERNAL_TEMPLATE}'."
+                "--ansys_internal_template cannot be used with a custom template.\n"
+                f"Remove --ansys_internal_template or --custom_template = '{INTERNAL_TEMPLATE}'."
             )
 
         ansys_internal_template = True
         args.custom_template = INTERNAL_TEMPLATE
         args.ignore_license_check = True
 
-    # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
+    # Validate and set current_year as copyright_end_year
+    # Defaults to current calendar year if not provided
     if not str(args.copyright_end_year).isdigit():
         raise Exception("Please ensure the copyright end year is a number.")
     if int(args.copyright_end_year) < 1942:
@@ -842,7 +847,10 @@ def main():
     if str(args.start_year).isdigit():
         # Check the start year is not later than the current year
         if int(args.start_year) > copyright_end_year:
-            error_msg = f"Please provide a start year ({int(args.start_year)}) less than or equal to the copyright end year ({copyright_end_year})."
+            error_msg = (
+                f"Please provide a start year ({int(args.start_year)}) "
+                f"less than or equal to the copyright end year ({copyright_end_year})."
+            )
             raise Exception(error_msg)
         # Check the start year isn't earlier than when computers were created :)
         elif int(args.start_year) < 1942:
@@ -871,7 +879,9 @@ def main():
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
-            "default_file": f"{INTERNAL_TEMPLATE if ansys_internal_template else DEFAULT_TEMPLATE}.jinja2",
+            "default_file": (
+                f"{INTERNAL_TEMPLATE if ansys_internal_template else DEFAULT_TEMPLATE}.jinja2"
+            ),
         },
         "LICENSES": {
             "path": "LICENSES",
@@ -915,7 +925,8 @@ def main():
     else:
         file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
 
-    # If the ansysinternal template is used, remove duplicate copyright lines in the header that can occur with this template
+    # If the ansysinternal template is used
+    # Remove duplicate copyright lines in the header that can occur with this template
     if args.ansys_internal_template:
         cleanup_duplicate_internal_headers(values["files"])
 
