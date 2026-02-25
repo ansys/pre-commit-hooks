@@ -81,7 +81,6 @@ The template contains the following variables:
     * - ``--copyright_end_year``
       - ``Current year``
       - End year for the copyright line in headers. Defaults to the current year.
-        Use this if you want to specify a fixed end year.
     * - ``--ignore_license_check``
       - ``False``
       - Whether to check for the license in the header.
