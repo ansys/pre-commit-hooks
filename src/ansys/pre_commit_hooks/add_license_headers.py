@@ -831,6 +831,7 @@ def main():
                 f"Remove --ansys_internal_template or --custom_template = '{INTERNAL_TEMPLATE}'."
             )
 
+        global ansys_internal_template
         ansys_internal_template = True
         args.custom_template = INTERNAL_TEMPLATE
         args.ignore_license_check = True
