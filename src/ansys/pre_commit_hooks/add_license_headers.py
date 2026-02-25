@@ -912,5 +912,4 @@ def main():
 
 
 if __name__ == "__main__":
-    #raise SystemExit(main())
-    main()  # pragma: no cover
+    raise SystemExit(main())
