@@ -78,9 +78,38 @@ The template contains the following variables:
     * - ``--start_year``
       - ``2023``
       - Year that the first file was committed to the repository.
+    * - ``--copyright_end_year``
+      - ``Current year``
+      - End year for the copyright line in headers. Defaults to the current year.
+      - Use this if you want to specify a fixed end year.
     * - ``--ignore_license_check``
       - ``False``
       - Whether to check for the license in the header.
+
+    * - ``--ansys_internal_template``
+      - ``False``
+      - Use the ANSYS proprietary copyright header template.
+      - This will override the default ``ansys`` template.
+      - See :ref:`ANSYS Proprietary Header Template Example <ansys_proprietary_header_template_example>` for details.
+
+
+
+
+.. _ansys_proprietary_header_template_example:
+
+ANSYS Proprietary Header Template Example
+-------------------------------------------------
+
+The ``ansysinternal`` template included in this project is provided solely as a reference format for ANSYS proprietary copyright headers. It is intended strictly for use in proprietary company projects.
+
+When the ``--ansys_internal_template`` argument is specified, the tool inserts the following fixed-format two-line header (with a year range such as ``2022-2026``, no spaces, and no license block):
+
+.. code-block:: python
+
+  # © 2022-2026 Synopsys, Inc. and ANSYS, Inc.
+  # Unauthorized use, distribution, or duplication is prohibited.
+
+This project only provides the template format and generation logic for reference. No confidential or proprietary content is included.
 
 .. include:: faq.rst
 
