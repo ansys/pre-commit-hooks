@@ -57,8 +57,6 @@ DEFAULT_CURRENT_YEAR = dt.today().year
 """Default current year for license headers."""
 YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
 """Year regex to match year or year range in files (with or without spaces around dash)."""
-no_year_whitespace = False
-"""Whether to add whitespace around the dash in a year range (e.g., '2023-2025' vs '2023 - 2025')."""
 ansys_internal_template = False
 """Whether to use the ansysinternal.jinja2 template"""
 
@@ -420,9 +418,9 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     files = values["files"]
     copyright = [values["copyright"]]
 
-    # Format years according to no_year_whitespace flag
+    # Format years according to ansys_internal_template flag
     if values["start_year"] != values["current_year"]:
-        if no_year_whitespace:
+        if ansys_internal_template:
             years = f"{values['start_year']}-{values['current_year']}"
         else:
             years = f"{values['start_year']} - {values['current_year']}"
@@ -565,7 +563,7 @@ def add_header(
     # Read file and apply formatting changes
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
-    if not no_year_whitespace:
+    if not ansys_internal_template:
         # Add a space before and after the year range if there is not already one
         content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Write the updated content back to the file
@@ -700,14 +698,14 @@ def update_year_range(
     match_start_year, match_end_year = get_years_from_file(content, year_regex)
 
     # Set the year spans for the user input and the years found in the file (match year span)
-    # Format according to no_year_whitespace flag for consistent comparison
+    # Format according to ansys_internal_template flag for consistent comparison
     if str(user_start_year) != str(current_year):
-        user_year_span = f"{user_start_year}-{current_year}" if no_year_whitespace else f"{user_start_year} - {current_year}"
+        user_year_span = f"{user_start_year}-{current_year}" if ansys_internal_template else f"{user_start_year} - {current_year}"
     else:
         user_year_span = user_start_year
 
     if str(match_start_year) != str(match_end_year):
-        match_year_span = f"{match_start_year}-{match_end_year}" if no_year_whitespace else f"{match_start_year} - {match_end_year}"
+        match_year_span = f"{match_start_year}-{match_end_year}" if ansys_internal_template else f"{match_start_year} - {match_end_year}"
     else:
         match_year_span = match_start_year
 
@@ -818,9 +816,6 @@ def main():
                 )
         args.custom_template = INTERNAL_TEMPLATE
         args.ignore_license_check = True
-        # Set global variables for whitespace and copyright symbol flags based on user input
-        global no_year_whitespace
-        no_year_whitespace = True
 
     # Validate and set current_year as copyright_end_year (defaults to current calendar year if not provided)
     if not str(args.copyright_end_year).isdigit():
