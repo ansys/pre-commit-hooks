@@ -97,7 +97,7 @@ The template contains the following variables:
 
 .. _ansys_proprietary_header_template_example:
 
-ANSYS Proprietary Header Template Example
+ANSYS proprietary header template example
 -------------------------------------------------
 
 The ``ansysinternal`` template included in this project is provided solely as a reference format for ANSYS proprietary copyright headers. It is intended strictly for use in proprietary company projects.
