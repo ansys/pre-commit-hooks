@@ -790,7 +790,7 @@ def cleanup_duplicate_internal_headers(files: list[str]) -> None:
 
     Parameters
     ----------
-    file: str
+    file: list[str]
         The file to check for duplicate copyright lines.
     """
     target = "# Unauthorized use, distribution, or duplication is prohibited."
