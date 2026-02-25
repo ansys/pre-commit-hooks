@@ -880,7 +880,7 @@ def main():
         ".reuse": {
             "path": Path(".reuse") / "templates",
             "default_file": (
-                f"{INTERNAL_TEMPLATE if ansys_internal_template else DEFAULT_TEMPLATE}.jinja2"
+                f"{INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE}.jinja2"
             ),
         },
         "LICENSES": {
