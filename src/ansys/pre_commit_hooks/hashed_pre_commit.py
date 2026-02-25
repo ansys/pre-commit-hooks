@@ -23,6 +23,7 @@
 
 import argparse
 import re
+import subprocess
 
 import yaml
 
@@ -101,10 +102,9 @@ def main():
             is_compliant = False
 
     if not is_compliant:
-        print(
-            "\nOne or more .pre-commit-config.yaml files use non-hash revisions."
-            "Run `pre-commit autoupdated --freeze` to use full SHA-1 commit hashes."
-        )
+        print("\nOne or more .pre-commit-config.yaml files use non-hash revisions. Fixing...")
+        subprocess.run(["pre-commit", "autoupdate", "--freeze"], check=True)
+        print("Fixed. Please stage the updated .pre-commit-config.yaml and re-run the hook.")
     return 0 if is_compliant else 1
 
 
