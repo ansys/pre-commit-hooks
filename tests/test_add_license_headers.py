@@ -801,3 +801,110 @@ def test_line_endings(tmp_path: pytest.TempPathFactory):
     assert license_line_endings_before == get_line_endings(tmp_license)
 
     os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_valid_custom_end_year(tmp_path: pytest.TempPathFactory):
+    """Test manually specifying a valid copyright_end_year."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Specify end year normally
+    end_year = str(int(START_YEAR) + 2)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", f"--copyright_end_year={end_year}"]
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+        assert f"{START_YEAR} - {end_year}" in first_line
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_invalid_custom_end_year(tmp_path: pytest.TempPathFactory):
+    """Test manually specifying invalid copyright_end_year values."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # end year less than start year, should raise exception
+    bad_end_year = str(int(START_YEAR) - 1)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", f"--copyright_end_year={bad_end_year}"]
+    with pytest.raises(Exception):
+        add_argv_run(repo, tmp_file, custom_args)
+
+    # end year is not a number, should raise exception
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", "--copyright_end_year=notayear"]
+    with pytest.raises(Exception):
+        add_argv_run(repo, tmp_file, custom_args)
+
+    # end year earlier than 1942, should raise exception
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", "--copyright_end_year=1941"]
+    with pytest.raises(Exception):
+        add_argv_run(repo, tmp_file, custom_args)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_default_end_year(tmp_path: pytest.TempPathFactory):
+    """Test copyright_end_year equals current year."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    current_year = str(dt.today().year)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+        # Should show only the current year, not a range
+        assert f"Copyright (C) {START_YEAR} - {current_year} ANSYS, Inc." in first_line
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_end_year_equals_current_year(tmp_path: pytest.TempPathFactory):
+    """Test copyright_end_year equals current year."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    current_year = str(dt.today().year)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", f"--copyright_end_year={current_year}"]
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+        # Should show only the current year, not a range
+        assert f"Copyright (C) {START_YEAR} - {current_year} ANSYS, Inc." in first_line
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_end_year_equals_start_year(tmp_path: pytest.TempPathFactory):
+    """Test copyright_end_year equals start_year."""
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, f"--start_year={START_YEAR}", f"--copyright_end_year={START_YEAR}"]
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+        assert f"Copyright (C) {START_YEAR} ANSYS, Inc." in first_line
+    os.chdir(REPO_PATH)

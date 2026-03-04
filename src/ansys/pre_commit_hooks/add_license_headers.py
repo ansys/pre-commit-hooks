@@ -45,14 +45,20 @@ from reuse.copyright import YearRange
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
+INTERNAL_TEMPLATE = "ansysinternal"
+"""Default template to use for internal copyright headers."""
 DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 DEFAULT_START_YEAR = dt.today().year
 """Default start year for license headers."""
-YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
-"""Year regex to match year or year range in files."""
+DEFAULT_CURRENT_YEAR = dt.today().year
+"""Default current year for license headers."""
+YEAR_REGEX = r"(\d{4})\s*-\s*(\d{4})|\d{4}"
+"""Year regex to match year or year range in files (with or without spaces around dash)."""
+ansys_internal_template = False
+"""Global flag to indicate whether the ansys_internal_template is being used"""
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -99,6 +105,13 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help="Start year for copyright line in headers.",
         default=DEFAULT_START_YEAR,
     )
+    parser.add_argument(
+        "--copyright_end_year",
+        type=str,
+        help="End year for copyright line in headers. Defaults to current year.",
+        default=DEFAULT_CURRENT_YEAR,
+    )
+    parser.add_argument("--ansys_internal_template", action="store_true")
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
     parser.add_argument("--parser")
@@ -212,8 +225,9 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
         hook_asset_dir = Path(hook_loc) / "assets" / value["path"]
         repo_asset_dir = Path(git_root) / value["path"]
 
+        default_tem = INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE
         # If key is .reuse and the custom template is being used
-        if key == ".reuse" and args.custom_template == DEFAULT_TEMPLATE:
+        if key == ".reuse" and args.custom_template == default_tem:
             mkdirs_and_link(value["path"], hook_asset_dir, repo_asset_dir, value["default_file"])
 
         # If key is LICENSES, the default license is being used, and ignore_license_check is False
@@ -226,7 +240,9 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             repo_license_file = repo_asset_dir / value["default_file"]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+            generate_license_file(
+                hook_license_file.parent, int(args.copyright_end_year), repo_license_file
+            )
 
 
 def generate_license_file(
@@ -403,11 +419,15 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
     copyright = [values["copyright"]]
-    years = (
-        f"{values['start_year']} - {values['current_year']}"
-        if values["start_year"] != values["current_year"]
-        else f"{values['current_year']}"
-    )
+
+    # Format years according to ansys_internal_template flag
+    if values["start_year"] != values["current_year"]:
+        if ansys_internal_template:
+            years = f"{values['start_year']}-{values['current_year']}"
+        else:
+            years = f"{values['start_year']} - {values['current_year']}"
+    else:
+        years = f"{values['current_year']}"
 
     return project, template, commented, license, files, copyright, years
 
@@ -467,7 +487,7 @@ def update_header(
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
-    years_list = years.split(" - ")
+    years_list = years.split(" - ") if " - " in years else years.split("-")
     if len(years_list) == 1:
         if years_list != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
@@ -516,7 +536,7 @@ def add_header(
         The template to use for the license header. For example, "ansys.jinja2".
     commented: bool
         Whether the template is commented or not.
-    tmp: Union[NamedTemporaryFile, IO[str]]
+    out: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
     # Create a YearRange object from the years string to pass into the get_reuse_info function
@@ -542,11 +562,12 @@ def add_header(
         out=out,
     )
 
-    # Add a space before and after the year range if there is not already one
+    # Read file and apply formatting changes
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
-    content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
-
+    if not ansys_internal_template:
+        # Add a space before and after the year range if there is not already one
+        content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
         write_file.write(content)
@@ -679,16 +700,24 @@ def update_year_range(
     match_start_year, match_end_year = get_years_from_file(content, year_regex)
 
     # Set the year spans for the user input and the years found in the file (match year span)
-    user_year_span = (
-        f"{user_start_year} - {current_year}"
-        if str(user_start_year) != str(current_year)
-        else user_start_year
-    )
-    match_year_span = (
-        f"{match_start_year} - {match_end_year}"
-        if str(match_start_year) != str(match_end_year)
-        else match_start_year
-    )
+    # Format according to ansys_internal_template flag for consistent comparison
+    if str(user_start_year) != str(current_year):
+        user_year_span = (
+            f"{user_start_year}-{current_year}"
+            if ansys_internal_template
+            else f"{user_start_year} - {current_year}"
+        )
+    else:
+        user_year_span = user_start_year
+
+    if str(match_start_year) != str(match_end_year):
+        match_year_span = (
+            f"{match_start_year}-{match_end_year}"
+            if ansys_internal_template
+            else f"{match_start_year} - {match_end_year}"
+        )
+    else:
+        match_year_span = match_start_year
 
     # If the user input year span does not match the year span in the file and
     # the year span in the file isn't the current year, update the header
@@ -752,6 +781,31 @@ def cleanup(assets: dict, os_git_root: str) -> None:
                 shutil.rmtree(key)
 
 
+def cleanup_duplicate_internal_headers(files: list[str]) -> None:
+    """
+    Remove duplicate copyright line in the header if the ansysinternal template is used.
+
+    Target line is hardcoded in ansysinternal.jinja2 and added automatically by reuse.
+    Multiple lines can be added if the header is updated multiple times.
+
+    Parameters
+    ----------
+    file: list[str]
+        The file to check for duplicate copyright lines.
+    """
+    target = "# Unauthorized use, distribution, or duplication is prohibited."
+    for file in files:
+        with open(file, "r+", encoding="utf-8", newline="") as f:
+            lines = f.readlines()
+            for i in range(1, min(len(lines), 10)):
+                if lines[i - 1].strip() == target and lines[i].strip() == target:
+                    del lines[i]
+                    f.seek(0)
+                    f.writelines(lines)
+                    f.truncate()
+                    break
+
+
 def main():
     """
     Add and update file headers with `REUSE <https://reuse.software/>`_.
@@ -770,11 +824,35 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
+    if args.ansys_internal_template:
+        if args.custom_template != INTERNAL_TEMPLATE and args.custom_template != DEFAULT_TEMPLATE:
+            raise Exception(
+                "--ansys_internal_template cannot be used with a custom template.\n"
+                f"Remove --ansys_internal_template or --custom_template = '{INTERNAL_TEMPLATE}'."
+            )
+
+        global ansys_internal_template
+        ansys_internal_template = True
+        args.custom_template = INTERNAL_TEMPLATE
+        args.ignore_license_check = True
+
+    # Validate and set current_year as copyright_end_year
+    # Defaults to current calendar year if not provided
+    if not str(args.copyright_end_year).isdigit():
+        raise Exception("Please ensure the copyright end year is a number.")
+    if int(args.copyright_end_year) < 1942:
+        raise Exception("Please provide a copyright end year greater than or equal to 1942.")
+    copyright_end_year = int(args.copyright_end_year)
+
     # Check start_year is valid
     if str(args.start_year).isdigit():
         # Check the start year is not later than the current year
-        if int(args.start_year) > dt.today().year:
-            raise Exception("Please provide a start year less than or equal to the current year.")
+        if int(args.start_year) > copyright_end_year:
+            error_msg = (
+                f"Please provide a start year ({int(args.start_year)}) "
+                f"less than or equal to the copyright end year ({copyright_end_year})."
+            )
+            raise Exception(error_msg)
         # Check the start year isn't earlier than when computers were created :)
         elif int(args.start_year) < 1942:
             raise Exception("Please provide a start year greater than or equal to 1942.")
@@ -794,7 +872,7 @@ def main():
         "template": args.custom_template,
         "license": args.custom_license,
         "start_year": args.start_year,
-        "current_year": dt.today().year,
+        "current_year": args.copyright_end_year,
         "git_repo": git_repo,
     }
 
@@ -802,7 +880,9 @@ def main():
     assets = {
         ".reuse": {
             "path": Path(".reuse") / "templates",
-            "default_file": f"{DEFAULT_TEMPLATE}.jinja2",
+            "default_file": (
+                f"{INTERNAL_TEMPLATE if args.ansys_internal_template else DEFAULT_TEMPLATE}.jinja2"
+            ),
         },
         "LICENSES": {
             "path": "LICENSES",
@@ -819,7 +899,11 @@ def main():
     repo_license_path = git_root / "LICENSE"
 
     # Update the year span in the LICENSE file if necessary
-    if repo_license_path.is_file() and (args.custom_license == DEFAULT_LICENSE):
+    if (
+        repo_license_path.is_file()
+        and (args.custom_license == DEFAULT_LICENSE)
+        and not args.ansys_internal_template
+    ):
         # Create a year span based on user input and the current year
         user_start_year = str(values["start_year"])
         current_year = str(values["current_year"])
@@ -841,6 +925,11 @@ def main():
         file_return_code = recursive_file_check(changed_headers, obj, values, args, 0)
     else:
         file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
+
+    # If the ansysinternal template is used
+    # Remove duplicate copyright lines in the header that can occur with this template
+    if args.ansys_internal_template:
+        cleanup_duplicate_internal_headers(values["files"])
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
