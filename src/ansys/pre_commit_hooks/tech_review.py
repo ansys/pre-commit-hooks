@@ -260,7 +260,9 @@ def check_pyproject_toml(
     return is_compliant, name
 
 
-def check_auth_maint(project_value: str, arg_value: str, err_string: str, is_compliant: bool):
+def check_auth_maint(
+    project_value: str, arg_value: str, err_string: str, is_compliant: bool
+) -> bool:
     """
     Check if the author and maintainer names and emails are the same.
 

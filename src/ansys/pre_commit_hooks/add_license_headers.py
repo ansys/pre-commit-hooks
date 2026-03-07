@@ -296,6 +296,38 @@ def mkdirs_and_link(
     dest.symlink_to(src)
 
 
+def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
+    """Fast check if the file already has the expected copyright and year range.
+
+    Reads only the first 1024 bytes to avoid the overhead of full REUSE parsing.
+    This is a heuristic — files that pass this check are very likely compliant
+    and don't need the expensive update_header flow.
+
+    Parameters
+    ----------
+    file_path: str
+        Path to the file to check.
+    copyright: list
+        List containing the copyright string. For example, ["ANSYS, Inc. and/or its affiliates."].
+    years: str
+        The expected year span. For example, "2023 - 2026" or "2026".
+
+    Returns
+    -------
+    bool
+        ``True`` if the file header appears to already have the correct copyright and years.
+        ``False`` if the file may need a header update.
+    """
+    try:
+        with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
+            head = f.read(1024)
+    except OSError:
+        return False
+
+    # Check both the copyright holder and year range are present in the header
+    return copyright[0] in head and years in head
+
+
 def non_recursive_file_check(
     changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace
 ) -> int:
@@ -326,6 +358,10 @@ def non_recursive_file_check(
     )
 
     for file in pre_commit_files:
+        # Fast check: skip files that already have the correct header
+        if _has_current_header(file, copyright, years):
+            continue
+
         # Get the reuse information of the file
         file_reuse_info = project.reuse_info_of(file)
 
