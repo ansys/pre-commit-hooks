@@ -36,13 +36,6 @@ import sys
 from tempfile import NamedTemporaryFile
 from typing import IO, Union
 
-import git
-from jinja2 import Environment, FileSystemLoader
-from reuse import extract
-from reuse.cli import common
-from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info, get_template
-from reuse.copyright import YearRange
-
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
 DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
@@ -245,6 +238,8 @@ def generate_license_file(
     license_file_name: Path
         Path to the license file in the repository to generate.
     """
+    from jinja2 import Environment, FileSystemLoader
+
     loader = FileSystemLoader(searchpath=template_parent_dir)
     env = Environment(loader=loader)  # nosec
     # Get the template for the specified file
@@ -329,7 +324,7 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
 
 
 def non_recursive_file_check(
-    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace
+    changed_headers: int, obj: "common.ClickObj", values: dict, args: argparse.Namespace
 ) -> int:
     """
     Check if the committed file is missing its header.
@@ -377,7 +372,7 @@ def non_recursive_file_check(
     return changed_headers
 
 
-def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) -> tuple:
+def set_variables(obj: "common.ClickObj", values: dict, args: argparse.Namespace) -> tuple:
     """Set variables to run `REUSE <https://reuse.software/>`_ on the project.
 
     Parameters
@@ -395,6 +390,8 @@ def set_variables(obj: common.ClickObj, values: dict, args: argparse.Namespace) 
     tuple
         Tuple containing the project, template, commented, license, files, copyright, and years.
     """
+    from reuse.cli.annotate import get_template
+
     project = obj.project
     template, commented = get_template(values["template"], project)
 
@@ -517,6 +514,9 @@ def add_header(
     tmp: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
+    from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info
+    from reuse.copyright import YearRange
+
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
 
@@ -593,6 +593,8 @@ def apply_hook_changes(before_hook: str, after_hook: str) -> None:
         # the file after add-license-header was run.
         for line in after_hook_lines:
             # Copy the new reuse lines into the file
+            from reuse import extract
+
             if extract.contains_reuse_info(line):
                 count += 1
                 found_reuse_info = True
@@ -774,6 +776,8 @@ def main():
     else:
         raise Exception("Please ensure the start year is a number.")
 
+    import git
+
     # Get root directory of the git repository.
     git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
     # Get the root of the git repository and fix the line separators
@@ -824,6 +828,8 @@ def main():
 
         # Update the year span in the LICENSE file
         license_return_code = update_license_file(repo_license_path, year_span)
+
+    from reuse.cli import common
 
     # Create click object for the project
     obj = common.ClickObj(git_root)
