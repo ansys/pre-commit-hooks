@@ -192,6 +192,9 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     """
     Link the default template and/or license from the assets folder to your git repo.
 
+    Only creates symlinks or generates files if they don't already exist or
+    point to the wrong target, avoiding unnecessary filesystem churn.
+
     Parameters
     ----------
     assets: dict
@@ -201,9 +204,6 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
     args: argparse.Namespace
         Namespace of arguments with their values.
     """
-    # Unlink default files & remove .reuse and LICENSES folders if empty
-    cleanup(assets, git_root)
-
     # Get the location of the hook in the file system
     hook_loc = Path(__file__).parent.resolve()
 
@@ -226,7 +226,8 @@ def link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None:
             repo_license_file = repo_asset_dir / value["default_file"]
             if not repo_asset_dir.is_dir():
                 repo_asset_dir.mkdir(parents=True)
-            generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
+            if not repo_license_file.is_file():
+                generate_license_file(hook_license_file.parent, dt.today().year, repo_license_file)
 
 
 def generate_license_file(
@@ -262,6 +263,9 @@ def mkdirs_and_link(
     """
     Make .reuse or LICENSES directory and create symbolic link to file.
 
+    Skips symlink creation if destination already points to the correct source,
+    avoiding unnecessary filesystem operations on every invocation.
+
     Parameters
     ----------
     asset_dir: str
@@ -275,9 +279,19 @@ def mkdirs_and_link(
     """
     src = Path(hook_asset_dir) / filename
     dest = Path(repo_asset_dir) / filename
+
+    # If symlink already points to the correct target, skip
+    if dest.is_symlink() and dest.resolve() == src.resolve():
+        return
+
     # If .reuse/templates or LICENSES directories do not exist, create them
     if not Path(asset_dir).is_dir():
         Path(asset_dir).mkdir(parents=True)
+
+    # Remove stale symlink or file before creating new one
+    if dest.exists() or dest.is_symlink():
+        dest.unlink()
+
     # Make symbolic links to files within the assets folder
     dest.symlink_to(src)
 
@@ -417,7 +431,7 @@ def update_header(
     # Update the year span in the header if necessary
     years_list = years.split(" - ")
     if len(years_list) == 1:
-        if int(years_list) != DEFAULT_START_YEAR:
+        if int(years_list[0]) != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
         else:
             years_list.append(years_list[0])
