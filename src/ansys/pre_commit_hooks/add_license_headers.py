@@ -282,58 +282,6 @@ def mkdirs_and_link(
     dest.symlink_to(src)
 
 
-def recursive_file_check(
-    changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace, count: int
-) -> int:
-    """Check if the committed file is missing its header.
-
-    Parameters
-    ----------
-    changed_headers: int
-        ``0`` if no headers were added or updated.
-        ``1`` if headers were added or updated.
-    obj: common.ClickObj
-        A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
-    values: dict
-        Dictionary containing the values of files, copyright,
-        template, license, changed_headers, year, and git_repo.
-    args: argparse.Namespace
-        Namespace of arguments with their values.
-    count: int
-        Integer of the location in the files array.
-
-    Returns
-    -------
-    int
-        ``0`` if all files contain headers and are up to date.
-        ``1`` if ``REUSE`` changed all noncompliant files.
-    """
-    project, template, commented, license, pre_commit_files, copyright, years = set_variables(
-        obj, values, args
-    )
-
-    if count < len(pre_commit_files):
-        # Get the file name at count from pre_commit_files
-        file = pre_commit_files[count]
-        # Get the reuse information of the file
-        file_reuse_info = project.reuse_info_of(file)
-
-        if (not file_reuse_info) or (Path(file).stat().st_size == 0):
-            changed_headers = 1
-            # Add the header to the file
-            add_header(copyright, license, years, file, template, commented, sys.stdout)
-            # Check if the next file is in missing_headers
-            return recursive_file_check(changed_headers, obj, values, args, count + 1)
-        elif file_reuse_info:
-            # Update the header
-            changed_headers = update_header(
-                changed_headers, file, copyright, license, years, template, commented
-            )
-            return recursive_file_check(changed_headers, obj, values, args, count + 1)
-
-    return changed_headers
-
-
 def non_recursive_file_check(
     changed_headers: int, obj: common.ClickObj, values: dict, args: argparse.Namespace
 ) -> int:
@@ -371,7 +319,7 @@ def non_recursive_file_check(
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             add_header(copyright, license, years, file, template, commented, sys.stdout)
-        elif file_reuse_info:
+        else:
             changed_headers = update_header(
                 changed_headers, file, copyright, license, years, template, commented
             )
@@ -463,16 +411,16 @@ def update_header(
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
     # from other hooks before add-license-headers was run to the file
-    if check_same_content(before_hook, file) == False:
+    if check_same_content(before_hook, file) is False:
         apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
     years_list = years.split(" - ")
     if len(years_list) == 1:
-        if years_list != DEFAULT_START_YEAR:
+        if int(years_list) != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
         else:
-            years_list.append(years_list)
+            years_list.append(years_list[0])
     changed_headers = update_year_range(
         changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
     )
@@ -480,7 +428,7 @@ def update_header(
     # Check if the file content before add-license-headers was run has been changed
     # Assuming the syntax was fixed in the above if statement, this check is
     # solely for the file's content
-    if check_same_content(before_hook, file) == False:
+    if check_same_content(before_hook, file) is False:
         changed_headers = 1
         print(f"Successfully changed header of {file}")
 
@@ -570,12 +518,7 @@ def check_same_content(before_hook: str, after_hook: str) -> bool:
         ``False`` if the files have different content.
     """
     # Check if the files have the same content
-    same_files = filecmp.cmp(before_hook, after_hook, shallow=False)
-    # If the files are different, return False. Otherwise, return True
-    if same_files == False:
-        return False
-    else:
-        return True
+    return filecmp.cmp(before_hook, after_hook, shallow=False)
 
 
 def apply_hook_changes(before_hook: str, after_hook: str) -> None:
@@ -639,8 +582,8 @@ def get_content(file: str) -> str:
     str
         Content of the file.
     """
-    read_file = Path(file).open(encoding="utf-8", newline="", mode="r")
-    content = read_file.readlines()
+    with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
+        content = read_file.readlines()
 
     return content
 
@@ -837,17 +780,15 @@ def main():
 
     # Add or update headers of required files.
     # Return 1 if files were added or updated, and return 0 if no files were altered.
-    if len(values["files"]) <= (sys.getrecursionlimit() - 2):
-        file_return_code = recursive_file_check(changed_headers, obj, values, args, 0)
-    else:
-        file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
+    # No recursion needed because simply iterating over a flat list
+    file_return_code = non_recursive_file_check(changed_headers, obj, values, args)
 
     # Unlink default files & remove .reuse and LICENSES folders if empty
     cleanup(assets, git_root)
 
     # Returns 1 if REUSE changes noncompliant files or the year was updated in LICENSE
     # Returns 0 if all files are compliant
-    return 1 if (license_return_code or file_return_code) == 1 else 0
+    return 1 if license_return_code or file_return_code else 0
 
 
 if __name__ == "__main__":
