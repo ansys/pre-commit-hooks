@@ -669,10 +669,10 @@ def check_license_year(license_file, copyright, start_year, current_year):
     with open(license_file, "r") as file:
         for line in file:
             if copyright in line:
-                if start_year != current_year:
+                if str(start_year) != str(current_year):
                     assert f"{start_year} - {current_year}" in line
                 else:
-                    assert current_year in line
+                    assert str(current_year) in line
                 return
 
 
