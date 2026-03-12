@@ -31,12 +31,6 @@ import pathlib
 import re
 from tempfile import NamedTemporaryFile
 
-import git
-from jinja2 import Environment, FileSystemLoader
-import requests
-import semver
-import toml
-
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
 
@@ -212,6 +206,8 @@ def check_pyproject_toml(
     """
     name = ""
     # Load pyproject.toml
+    import toml
+
     with open(repo_path / "pyproject.toml", "r") as project_file:
         config = toml.load(project_file)
         project = config.get("project")
@@ -230,6 +226,8 @@ def check_pyproject_toml(
         project_version = project.get("version", "DNE")
         if project_version != "DNE":
             try:
+                import semver
+
                 version = semver.Version.parse(project_version)
             except ValueError:
                 if not bool(re.match(r"^[0-9]+.[0-9]+.dev[0-9]+$", project_version)):
@@ -260,7 +258,9 @@ def check_pyproject_toml(
     return is_compliant, name
 
 
-def check_auth_maint(project_value: str, arg_value: str, err_string: str, is_compliant: bool):
+def check_auth_maint(
+    project_value: str, arg_value: str, err_string: str, is_compliant: bool
+) -> bool:
     """
     Check if the author and maintainer names and emails are the same.
 
@@ -347,6 +347,8 @@ def download_license_json(url: str, json_file: str) -> bool:
     # If the licenses.json file does not exist in the hook's folder
     if not pathlib.Path.exists(json_file):
         # Download licenses.json
+        import requests
+
         r = requests.get(url, timeout=60)
         status_code = r.status_code
         if status_code == 200:
@@ -544,6 +546,8 @@ def generate_file_from_jinja(
     str
         Content of the template that was generated.
     """
+    from jinja2 import Environment, FileSystemLoader
+
     # Load the templates from the hook path
     loader = FileSystemLoader(searchpath=pathlib.PurePath.joinpath(HOOK_PATH, "templates"))
     env = Environment(loader=loader)  # nosec
@@ -692,6 +696,8 @@ def main():
     # is_complaint is `True` when all files are compliant and
     # `False` when a file is missing or its content is incorrect
     is_compliant = True
+
+    import git
 
     # Get current git repository
     git_repo = git.Repo(pathlib.Path.cwd(), search_parent_directories=True)

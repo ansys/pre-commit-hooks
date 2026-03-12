@@ -1,36 +1,8 @@
 """Installation file for ansys-pre-commit-hooks."""
 
 import os
-import sys
 
 from setuptools import find_namespace_packages, setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-
-SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "ansys")
-
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-from ansys.pre_commit_hooks.tech_review import JSON_URL, LICENSES_JSON, download_license_json
-
-
-class CustomInstallCommand(install):
-    """Custom install command to download the license json file."""
-
-    def run(self):
-        """Download the license json file."""
-        install.run(self)
-        download_license_json(JSON_URL, LICENSES_JSON)
-
-
-class CustomDevelopCommand(develop):
-    """Custom develop command to download the license json file."""
-
-    def run(self):
-        """Download the license json file."""
-        develop.run(self)
-        download_license_json(JSON_URL, LICENSES_JSON)
-
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "src", "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
@@ -98,10 +70,6 @@ setup(
         "Changelog": "https://github.com/ansys/pre-commit-hooks/blob/main/doc/source/changelog.rst",
     },
     include_package_data=True,
-    cmdclass={
-        "develop": CustomDevelopCommand,
-        "install": CustomInstallCommand,
-    },
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
