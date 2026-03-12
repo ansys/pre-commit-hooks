@@ -262,6 +262,8 @@ def mkdirs_and_link(
     """
     Make .reuse or LICENSES directory and create symbolic link to file.
 
+    If symlink creation is not supported by the environment, the file is copied instead.
+
     Parameters
     ----------
     asset_dir: str
@@ -278,8 +280,13 @@ def mkdirs_and_link(
     # If .reuse/templates or LICENSES directories do not exist, create them
     if not Path(asset_dir).is_dir():
         Path(asset_dir).mkdir(parents=True)
-    # Make symbolic links to files within the assets folder
-    dest.symlink_to(src)
+    # Make symbolic links to files within the assets folder.
+    # If symlinks are not supported (e.g., on Windows without the required privileges),
+    # fall back to copying the file.
+    try:
+        dest.symlink_to(src)
+    except OSError:
+        shutil.copy2(src, dest)
 
 
 def recursive_file_check(

@@ -506,6 +506,45 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.add_license_headers
+def test_symlink_fallback_to_copy(tmp_path: pytest.TempPathFactory):
+    """Test that assets are copied when symlink creation is not supported."""
+    from unittest.mock import patch
+
+    # List of files to be git added
+    new_files = []
+
+    # Set up git repository in tmp_path with temporary file
+    os.chdir(tmp_path)
+
+    # Create a test file in tmp_path
+    tmp_file = create_test_file(tmp_path)
+
+    # Initialize tmp_path as a git repository
+    repo = init_repo(tmp_path)
+
+    # Copy LICENSE file to tmp_path repo
+    cp_LICENSE_file(tmp_path)
+
+    new_files.append(tmp_file)
+
+    # Simulate an environment where symlinks cannot be created
+    def raise_os_error(self, *args, **kwargs):
+        raise OSError("Symlinks not supported")
+
+    with patch.object(Path, "symlink_to", raise_os_error):
+        # Assert the hook fails because it added the header
+        assert add_argv_run(repo, new_files, new_files) == 1
+
+    check_ansys_header(tmp_file)
+
+    # Verify the asset was copied (not symlinked) to the .reuse/templates directory
+    template_dest = Path(tmp_path) / ".reuse" / "templates" / "ansys.jinja2"
+    assert not template_dest.exists(), "Copied asset should be cleaned up after the hook runs"
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
 def test_bad_chars(tmp_path: pytest.TempPathFactory):
     # Set template and license names
     template_name = "ansys.jinja2"
