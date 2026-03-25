@@ -23,7 +23,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.6.0
+    rev: v0.5.2
     hooks:
     - id: add-license-headers
 
@@ -37,7 +37,7 @@ so the ``.pre-commit-config.yaml`` file looks like this:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.6.0
+    rev: v0.5.2
     hooks:
     - id: add-license-headers
       args:
@@ -71,7 +71,7 @@ The template contains the following variables:
       - ``ansys``
       - Name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
     * - ``--custom_license``
-      - ``MIT``
+      - ``MIT`` or ``Apache-2.0``
       - SPDX-License-Identifier expression to include in the license header. To view
         the list of valid SPDX license expressions, see the
         `SPDX License List <https://github.com/spdx/license-list-data/tree/main/text>`_.
