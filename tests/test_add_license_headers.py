@@ -761,6 +761,133 @@ def get_line_endings(tmp_file):
             return "Mac"
 
 
+def check_apache_header(file_name):
+    """Check file contains all Apache-2.0 copyright and license header components."""
+    with open(file_name, "r", encoding="utf8") as file:
+        content = file.read()
+        assert "ANSYS, Inc. and/or its affiliates" in content
+        assert "Apache-2.0" in content
+        assert "Apache License, Version 2.0" in content
+        assert "http://www.apache.org/licenses/LICENSE-2.0" in content
+        # Confirm there is no MIT text in the header
+        assert "Permission is hereby granted" not in content
+
+
+@pytest.mark.add_license_headers
+def test_apache_header_added(tmp_path: pytest.TempPathFactory):
+    """Test that a file with no header gets an Apache-2.0 header when it's the custom license."""
+    # Set template and license names (use default ansys template; Apache-2.0 is in assets)
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, "--custom_license=Apache-2.0"]
+
+    # Assert the hook fails because it added the header
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+
+    check_apache_header(tmp_file)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_mit_header_replaced_with_apache(tmp_path: pytest.TempPathFactory):
+    """Test that a file with an MIT header is fully replaced with Apache-2.0 when requested."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # First, add an MIT header to the file
+    mit_args = [tmp_file]
+    add_argv_run(repo, tmp_file, mit_args)
+    repo.index.add([tmp_file])
+
+    # Verify the MIT header was added
+    with open(tmp_file, "r") as f:
+        content = f.read()
+    assert "MIT" in content
+    assert "Permission is hereby granted" in content
+
+    # Now re-run with Apache-2.0 — the MIT header should be fully replaced
+    apache_args = [tmp_file, "--custom_license=Apache-2.0"]
+    assert add_argv_run(repo, tmp_file, apache_args) == 1
+
+    check_apache_header(tmp_file)
+
+    # Ensure the old MIT license text is gone
+    with open(tmp_file, "r") as f:
+        new_content = f.read()
+    assert "Permission is hereby granted" not in new_content
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_mit_license_file_replaced_with_apache(tmp_path: pytest.TempPathFactory):
+    """Test that LICENSE file is regenerated as Apache-2.0 when it's the custom license."""
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file (this copies a MIT LICENSE file)
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    tmp_license = Path(tmp_path) / "LICENSE"
+
+    # Confirm the starting LICENSE file is MIT
+    with open(tmp_license, "r") as f:
+        starting_content = f.read()
+    assert "Permission is hereby granted" in starting_content
+
+    custom_args = [tmp_file, "--custom_license=Apache-2.0"]
+    add_argv_run(repo, tmp_file, custom_args)
+
+    # Confirm the LICENSE file is now Apache-2.0
+    with open(tmp_license, "r") as f:
+        new_content = f.read()
+
+    assert "Apache License" in new_content
+    assert "Version 2.0" in new_content
+    assert "http://www.apache.org/licenses/LICENSE-2.0" in new_content
+    # MIT text must be gone
+    assert "Permission is hereby granted" not in new_content
+
+    os.chdir(REPO_PATH)
+
+
 @pytest.mark.add_license_headers
 def test_line_endings(tmp_path: pytest.TempPathFactory):
     """Test line endings remain the same before and after running the hook."""
