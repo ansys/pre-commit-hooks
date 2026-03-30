@@ -128,8 +128,8 @@ def get_full_paths(file_list: list) -> list:
 # Mapping from license identifier to a string that uniquely identifies that license
 # in the body of the LICENSE file.
 _LICENSE_FINGERPRINTS = {
-    "MIT": "Permission is hereby granted, free of charge",
-    "Apache-2.0": "Apache License",
+    "MIT": "MIT License",
+    "Apache-2.0": "Apache License, Version 2.0",
 }
 
 
@@ -375,16 +375,16 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     return copyright[0] in head and years in head
 
 
-def _file_has_license(file_path: str, license: list) -> bool:
+def _file_has_license(file_path: str, license: str) -> bool:
     """Check if the file's header already contains the requested SPDX-License-Identifier.
 
     Parameters
     ----------
     file_path: str
         Path to the file to check.
-    license: list
-        List containing the license SPDX identifier string(s).
-        For example, ``["MIT"]`` or ``["Apache-2.0"]``.
+    license: str
+        License SPDX identifier string.
+        For example, ``"MIT"`` or ``"Apache-2.0"``.
 
     Returns
     -------
@@ -392,9 +392,6 @@ def _file_has_license(file_path: str, license: list) -> bool:
         ``True`` if the file header already contains the expected license identifier.
         ``False`` if the license identifier is missing or different.
     """
-    if not license:
-        # No specific license requested — nothing to validate against
-        return True
     try:
         with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
             head = f.read(1024)
@@ -482,9 +479,13 @@ def non_recursive_file_check(
     )
 
     for file in pre_commit_files:
+        # If license isn't specified, set it as True, otherwise check the content of the file
+        # for the existing license
+        existing_license_matches = True if not license else _file_has_license(file, license)
+
         # Fast check: skip files that already have the correct header (copyright,
         # year range, AND the expected license identifier).
-        if _has_current_header(file, copyright, years) and _file_has_license(file, license):
+        if _has_current_header(file, copyright, years) and existing_license_matches:
             continue
 
         # Get the reuse information of the file
@@ -498,7 +499,6 @@ def non_recursive_file_check(
             # Check whether the existing SPDX-License-Identifier differs from the
             # requested license. If so, strip the old header and write a fresh one
             # so that the old identifier is fully replaced rather than merged.
-            existing_license_matches = _file_has_license(file, license)
             if not existing_license_matches:
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
@@ -539,7 +539,7 @@ def set_variables(obj: "common.ClickObj", values: dict, args: argparse.Namespace
     project = obj.project
     template, commented = get_template(values["template"], project)
 
-    license = [] if args.ignore_license_check else [values["license"]]
+    license = "" if args.ignore_license_check else values["license"]
     files = values["files"]
     copyright = [values["copyright"]]
     years = (
@@ -645,7 +645,7 @@ def update_header(
 
 def add_header(
     copyright: str,
-    license: Union[str, list],
+    license: str,
     years: str,
     file: str,
     template: str,
