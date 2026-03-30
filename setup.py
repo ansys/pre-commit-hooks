@@ -40,7 +40,7 @@ setup(
     python_requires=">=3.10,<4",
     install_requires=[
         "GitPython==3.1.46",
-        "importlib-metadata==8.7.1",
+        "importlib-metadata==8.9.0",
         "Jinja2==3.1.6",
         "reuse==6.2.0",
         "requests==2.32.5",
@@ -58,7 +58,7 @@ setup(
         ],
         "tests": [
             "pytest==9.0.2",
-            "pytest-cov==7.0.0",
+            "pytest-cov==7.1.0",
         ],
     },
     project_urls={
