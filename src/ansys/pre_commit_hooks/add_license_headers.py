@@ -486,12 +486,10 @@ def non_recursive_file_check(
         # Fast check: skip files that already have the correct header (copyright,
         # year range, AND the expected license identifier).
         if _has_current_header(file, copyright, years) and existing_license_matches:
-            continue
+            continue        # Get the reuse information of the file
+        file_reuse_info = project.reuse_info_of(file)
 
-        # Get the reuse information of the file
-        file_reuse_info = project.reuse_info_of(
-            file
-        )  # If the file is empty or does not contain reuse information
+        # If the file is empty or does not contain reuse information
         if (not file_reuse_info) or (Path(file).stat().st_size == 0):
             changed_headers = 1
             add_header(copyright, license, years, file, template, commented, sys.stdout)
@@ -539,7 +537,7 @@ def set_variables(obj: "common.ClickObj", values: dict, args: argparse.Namespace
     project = obj.project
     template, commented = get_template(values["template"], project)
 
-    license = "" if args.ignore_license_check else values["license"]
+    license = [] if args.ignore_license_check else [values["license"]]
     files = values["files"]
     copyright = [values["copyright"]]
     years = (
