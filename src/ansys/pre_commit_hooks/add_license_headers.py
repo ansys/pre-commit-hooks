@@ -641,6 +641,167 @@ def update_header(
     return changed_headers
 
 
+def _get_max_line_length(git_root: Path) -> int:
+    """Return the configured max line length for the repository.
+
+    Searches for a ``line-length`` / ``max-line-length`` setting in this order:
+
+    1. ``[tool.black] line-length`` in ``pyproject.toml``
+    2. ``[tool.flake8] max-line-length`` in ``pyproject.toml``
+    3. ``[flake8] max-line-length`` in ``setup.cfg``
+    4. Falls back to ``79`` (PEP 8 default) if none is found.
+
+    Parameters
+    ----------
+    git_root: Path
+        Root directory of the git repository.
+
+    Returns
+    -------
+    int
+        The maximum allowed line length.
+    """
+    # pyproject.toml – black then flake8
+    pyproject = git_root / "pyproject.toml"
+    if pyproject.is_file():
+        try:
+            import toml
+
+            cfg = toml.load(pyproject)
+            black_len = cfg.get("tool", {}).get("black", {}).get("line-length")
+            if black_len is not None:
+                return int(black_len)
+            flake8_len = cfg.get("tool", {}).get("flake8", {}).get("max-line-length")
+            if flake8_len is not None:
+                return int(flake8_len)
+        except Exception:
+            pass
+
+    # setup.cfg – flake8
+    setup_cfg = git_root / "setup.cfg"
+    if setup_cfg.is_file():
+        try:
+            import configparser
+
+            parser = configparser.ConfigParser()
+            parser.read(setup_cfg)
+            if parser.has_option("flake8", "max-line-length"):
+                return int(parser.get("flake8", "max-line-length"))
+        except Exception:
+            pass
+
+    return 79
+
+
+def _wrap_long_header_lines(file_path: str, max_line_length: int) -> None:
+    """Wrap copyright comment lines in a file's header that exceed ``max_line_length``.
+
+    Only lines that contain REUSE copyright or SPDX identifier markers are
+    considered for wrapping — the license body text is left untouched.  Each
+    oversized line is split at the last word boundary that keeps the line
+    within ``max_line_length``.  Continuation lines reuse the same comment
+    prefix as the original line.
+
+    Parameters
+    ----------
+    file_path: str
+        Path to the file whose header lines should be wrapped.
+    max_line_length: int
+        Maximum allowed line length (inclusive).
+    """
+    from reuse import extract
+
+    with Path(file_path).open(encoding="utf-8", newline="", mode="r") as f:
+        lines = f.readlines()  # Comment prefixes that support safe single-line wrapping.
+    # Block-comment markers (/* */ *) are intentionally excluded — splitting a
+    # block-comment line would corrupt the comment structure unless we also
+    # insert matching open/close markers, which is out of scope here.
+    _SINGLE_LINE_COMMENT_PREFIXES = ("#", "//", "--", "%", ";", "!")
+
+    new_lines = []
+    for line in lines:
+        raw = line.rstrip("\n\r")
+        line_ending = line[len(raw) :]
+
+        # Only attempt wrapping on REUSE-info lines that are too long
+        if len(raw) <= max_line_length or not extract.contains_reuse_info(line):
+            new_lines.append(line)
+            continue
+
+        # Detect the comment prefix from the line itself (e.g. "# ", "// ").
+        # Only wrap single-line comment styles; block comments (/* * */) are
+        # left intact to avoid corrupting the block comment structure.
+        stripped = raw.lstrip()
+        indent = raw[: len(raw) - len(stripped)]
+        comment_prefix = ""
+        for char in _SINGLE_LINE_COMMENT_PREFIXES:
+            if stripped.startswith(char):
+                # The continuation prefix is the indent + comment marker + a space
+                comment_prefix = indent + char + " "
+                break
+
+        if not comment_prefix:
+            # Block comment or unrecognised style — leave the line as-is
+            new_lines.append(line)
+            continue
+
+        wrapped = _word_wrap(raw, comment_prefix, max_line_length)
+        new_lines.append(wrapped + line_ending)
+
+    with Path(file_path).open(encoding="utf-8", newline="", mode="w") as f:
+        f.writelines(new_lines)
+
+
+def _word_wrap(text: str, continuation_prefix: str, max_length: int) -> str:
+    """Wrap ``text`` to ``max_length`` using ``continuation_prefix`` for wrapped lines.
+
+    Parameters
+    ----------
+    text: str
+        The full text of a single (potentially long) line, without its line ending.
+    continuation_prefix: str
+        The string prepended to each continuation line (e.g. ``"# "``).
+    max_length: int
+        Maximum allowed line length (inclusive).
+
+    Returns
+    -------
+    str
+        The wrapped text as a single string with embedded newlines between segments.
+    """
+    if len(text) <= max_length:
+        return text
+
+    words = text.split(" ")
+    result_lines = []
+    current = ""
+
+    for word in words:
+        if not result_lines:
+            # Building the first segment: preserve the original text exactly as
+            # written (including any leading indent / comment character).
+            # We reconstruct by joining with a single space; if ``current`` is
+            # empty we start with the word as-is (no stripping).
+            candidate = f"{current} {word}" if current else word
+            line_to_measure = candidate
+        else:
+            # Continuation segments use ``continuation_prefix`` as the line
+            # leader; ``current`` already starts with that prefix.
+            candidate = f"{current} {word}"
+            line_to_measure = candidate
+
+        if len(line_to_measure) > max_length and current:
+            result_lines.append(current)
+            current = f"{continuation_prefix}{word}"
+        else:
+            current = line_to_measure
+
+    if current:
+        result_lines.append(current)
+
+    return "\n".join(result_lines)
+
+
 def add_header(
     copyright: str,
     license: str,
@@ -694,9 +855,7 @@ def add_header(
         style=f"{get_comment_style(file).SHORTHAND}",
         merge_copyrights=True,
         out=out,
-    )
-
-    # Add a space before and after the year range if there is not already one
+    )  # Add a space before and after the year range if there is not already one
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
     content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
@@ -704,6 +863,20 @@ def add_header(
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
         write_file.write(content)
+
+    # Wrap any header comment lines that exceed the repo's configured max line length
+    try:
+        import git as _git
+
+        _git_root = Path(
+            _git.Repo(Path(file).parent, search_parent_directories=True).git.rev_parse(
+                "--show-toplevel"
+            )
+        )
+        max_len = _get_max_line_length(_git_root)
+    except Exception:
+        max_len = 79
+    _wrap_long_header_lines(file, max_len)
 
 
 def check_same_content(before_hook: str, after_hook: str) -> bool:

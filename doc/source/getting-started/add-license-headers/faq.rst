@@ -66,7 +66,7 @@ Frequently asked questions
           hooks:
           - id: add-license-headers
             args:
-            - --custom_copyright="custom copyright phrase"
+            - --custom_copyright=custom copyright phrase
 
     This would change the copyright line to ``Copyright (C) 2025 custom copyright phrase.``
 
