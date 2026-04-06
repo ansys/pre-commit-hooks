@@ -486,7 +486,7 @@ def non_recursive_file_check(
         # Fast check: skip files that already have the correct header (copyright,
         # year range, AND the expected license identifier).
         if _has_current_header(file, copyright, years) and existing_license_matches:
-            continue        # Get the reuse information of the file
+            continue  # Get the reuse information of the file
         file_reuse_info = project.reuse_info_of(file)
 
         # If the file is empty or does not contain reuse information
