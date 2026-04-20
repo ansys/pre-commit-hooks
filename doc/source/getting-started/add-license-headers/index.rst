@@ -71,7 +71,7 @@ The template contains the following variables:
       - ``ansys``
       - Name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
     * - ``--custom_license``
-      - ``MIT``
+      - ``MIT`` or ``Apache-2.0``
       - SPDX-License-Identifier expression to include in the license header. To view
         the list of valid SPDX license expressions, see the
         `SPDX License List <https://github.com/spdx/license-list-data/tree/main/text>`_.
