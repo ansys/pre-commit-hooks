@@ -9,6 +9,22 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.7.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.1>`_ - April 22, 2026
+=========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix Windows developer mode and comment style bugs
+          - `#420 <https://github.com/ansys/pre-commit-hooks/pull/420>`_
+
+
 `0.7.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.0>`_ - April 22, 2026
 =========================================================================================
 
