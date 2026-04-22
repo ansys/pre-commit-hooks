@@ -9,6 +9,88 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.7.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.0>`_ - April 22, 2026
+=========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add Apache-2.0 license support
+          - `#406 <https://github.com/ansys/pre-commit-hooks/pull/406>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump ansys/actions from 10.2.7 to 10.2.9
+          - `#404 <https://github.com/ansys/pre-commit-hooks/pull/404>`_
+
+        * - Bump actions/download-artifact from 8.0.0 to 8.0.1
+          - `#405 <https://github.com/ansys/pre-commit-hooks/pull/405>`_
+
+        * - Bump pytest-cov from 7.0.0 to 7.1.0
+          - `#408 <https://github.com/ansys/pre-commit-hooks/pull/408>`_
+
+        * - Bump importlib-metadata from 8.7.1 to 8.9.0
+          - `#409 <https://github.com/ansys/pre-commit-hooks/pull/409>`_
+
+        * - Bump requests from 2.32.5 to 2.33.0
+          - `#412 <https://github.com/ansys/pre-commit-hooks/pull/412>`_
+
+        * - Bump ansys/actions from 10.2.9 to 10.2.12
+          - `#413 <https://github.com/ansys/pre-commit-hooks/pull/413>`_
+
+        * - Bump pypa/gh-action-pypi-publish from 1.13.0 to 1.14.0
+          - `#414 <https://github.com/ansys/pre-commit-hooks/pull/414>`_
+
+        * - Bump pytest from 9.0.2 to 9.0.3
+          - `#415 <https://github.com/ansys/pre-commit-hooks/pull/415>`_
+
+        * - Bump sphinx-copybutton from 0.5.1 to 0.5.2
+          - `#416 <https://github.com/ansys/pre-commit-hooks/pull/416>`_
+
+        * - Bump requests from 2.33.0 to 2.33.1
+          - `#417 <https://github.com/ansys/pre-commit-hooks/pull/417>`_
+
+        * - Bump importlib-metadata from 8.9.0 to 9.0.0
+          - `#419 <https://github.com/ansys/pre-commit-hooks/pull/419>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update \`\`CONTRIBUTORS.md\`\` with the latest contributors
+          - `#403 <https://github.com/ansys/pre-commit-hooks/pull/403>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Support Python 3.14
+          - `#407 <https://github.com/ansys/pre-commit-hooks/pull/407>`_
+
+        * - Pre-commit automatic update
+          - `#410 <https://github.com/ansys/pre-commit-hooks/pull/410>`_
+
+        * - Update license metadata in pyproject.toml
+          - `#418 <https://github.com/ansys/pre-commit-hooks/pull/418>`_
+
+
 `0.6.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.6.0>`_ - March 19, 2026
 =========================================================================================
 
