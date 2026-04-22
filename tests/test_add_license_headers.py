@@ -22,6 +22,7 @@
 
 import argparse
 from datetime import date as dt
+import io
 import os
 from pathlib import Path
 import shutil
@@ -494,6 +495,108 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     check_ansys_header(tmp_file)
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_creates_symlink(tmp_path):
+    """Test that mkdirs_and_link creates a symlink when permissions allow."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    asset_dir = str(dest_dir)
+
+    hook.mkdirs_and_link(asset_dir, str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    dest_file = dest_dir / "ansys.jinja2"
+    assert dest_file.exists()
+    assert dest_file.read_text() == "template content"
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_fallback_copy_on_oserror(tmp_path, monkeypatch):
+    """Test that mkdirs_and_link falls back to copying when symlink raises OSError."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    asset_dir = str(dest_dir)
+
+    # Simulate Windows symlink privilege error
+    monkeypatch.setattr(
+        Path,
+        "symlink_to",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            OSError(1314, "A required privilege is not held by the client")
+        ),
+    )
+
+    hook.mkdirs_and_link(asset_dir, str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    dest_file = dest_dir / "ansys.jinja2"
+    assert dest_file.exists()
+    assert not dest_file.is_symlink()
+    assert dest_file.read_text() == "template content"
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_skips_existing_symlink(tmp_path):
+    """Test that mkdirs_and_link skips creation when symlink points to the correct source."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    dest_dir.mkdir(parents=True)
+    dest_file = dest_dir / "ansys.jinja2"
+
+    try:
+        dest_file.symlink_to(src_file)
+    except OSError:
+        pytest.skip("Symlinks not supported on this platform/environment")
+
+    mtime_before = src_file.stat().st_mtime
+
+    hook.mkdirs_and_link(str(dest_dir), str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    # File should still exist and be unchanged
+    assert dest_file.is_symlink()
+    assert dest_file.read_text() == "template content"
+    assert src_file.stat().st_mtime == mtime_before
+
+
+@pytest.mark.add_license_headers
+def test_add_header_skips_unknown_comment_style(tmp_path, monkeypatch):
+    """Test add_header skips files when no comment style can be inferred."""
+    test_file = tmp_path / "unknown.ext"
+    test_file.write_text("content\n", encoding="utf-8")
+
+    called = {"add_header_to_file": False}
+
+    def _fake_add_header_to_file(**_kwargs):
+        called["add_header_to_file"] = True
+
+    monkeypatch.setattr("reuse.cli.annotate.get_comment_style", lambda _path: None)
+    monkeypatch.setattr("reuse.cli.annotate.add_header_to_file", _fake_add_header_to_file)
+
+    out = io.StringIO()
+    hook.add_header(
+        [DEFAULT_COPYRIGHT],
+        ["MIT"],
+        f"{dt.today().year}",
+        str(test_file),
+        "ansys.jinja2",
+        True,
+        out,
+    )
+
+    assert not called["add_header_to_file"]
+    assert "Skipping" in out.getvalue()
 
 
 @pytest.mark.add_license_headers
