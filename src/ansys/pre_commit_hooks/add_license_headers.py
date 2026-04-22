@@ -340,7 +340,13 @@ def mkdirs_and_link(
         dest.unlink()
 
     # Make symbolic links to files within the assets folder
-    dest.symlink_to(src)
+    # Fall back to copying if symlinks are not permitted (e.g. Windows without Developer Mode)
+    try:
+        dest.symlink_to(src)
+    except OSError:
+        import shutil
+
+        shutil.copy2(src, dest)
 
 
 def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
@@ -686,12 +692,17 @@ def add_header(
     )
 
     # Add or update the header in the file with the REUSE information.
+    comment_style = get_comment_style(file)
+    if comment_style is None:
+        print(f"Skipping {file}: no comment style found for this file type.", file=out)
+        return
+
     add_header_to_file(
         path=file,
         reuse_info=reuse_info,
         template=template,
         template_is_commented=commented,
-        style=f"{get_comment_style(file).SHORTHAND}",
+        style=f"{comment_style.SHORTHAND}",
         merge_copyrights=True,
         out=out,
     )
