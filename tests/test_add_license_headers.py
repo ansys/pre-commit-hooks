@@ -22,6 +22,7 @@
 
 import argparse
 from datetime import date as dt
+import io
 import os
 from pathlib import Path
 import shutil
@@ -567,6 +568,35 @@ def test_mkdirs_and_link_skips_existing_symlink(tmp_path):
     assert dest_file.is_symlink()
     assert dest_file.read_text() == "template content"
     assert src_file.stat().st_mtime == mtime_before
+
+
+@pytest.mark.add_license_headers
+def test_add_header_skips_unknown_comment_style(tmp_path, monkeypatch):
+    """Test add_header skips files when no comment style can be inferred."""
+    test_file = tmp_path / "unknown.ext"
+    test_file.write_text("content\n", encoding="utf-8")
+
+    called = {"add_header_to_file": False}
+
+    def _fake_add_header_to_file(**_kwargs):
+        called["add_header_to_file"] = True
+
+    monkeypatch.setattr("reuse.cli.annotate.get_comment_style", lambda _path: None)
+    monkeypatch.setattr("reuse.cli.annotate.add_header_to_file", _fake_add_header_to_file)
+
+    out = io.StringIO()
+    hook.add_header(
+        [DEFAULT_COPYRIGHT],
+        ["MIT"],
+        f"{dt.today().year}",
+        str(test_file),
+        "ansys.jinja2",
+        True,
+        out,
+    )
+
+    assert not called["add_header_to_file"]
+    assert "Skipping" in out.getvalue()
 
 
 @pytest.mark.add_license_headers
