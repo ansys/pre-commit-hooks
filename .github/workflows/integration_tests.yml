@@ -131,8 +131,16 @@ jobs:
         shell: bash
         run: |
           WHEEL=$(ls dist/*.whl | head -1)
-          echo "abs=$(realpath "$WHEEL")" >> "$GITHUB_OUTPUT"
-          echo "Found wheel: $WHEEL"
+          ABS=$(realpath "$WHEEL")
+          # On Windows runners, realpath (Git Bash/MSYS2) emits a POSIX path
+          # like /d/a/... that Windows-native Python/pip cannot resolve.
+          # cygpath -m converts it to a mixed-mode path (D:/a/...) that pip
+          # accepts on both Windows and Linux.
+          if command -v cygpath &>/dev/null; then
+            ABS=$(cygpath -m "$ABS")
+          fi
+          echo "abs=$ABS" >> "$GITHUB_OUTPUT"
+          echo "Found wheel: $ABS"
 
       - name: "Pre-install pre-commit hook environment"
         shell: bash
