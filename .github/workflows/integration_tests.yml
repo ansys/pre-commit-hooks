@@ -145,8 +145,9 @@ jobs:
       - name: "Pre-install pre-commit hook environment"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -173,8 +174,9 @@ jobs:
       - name: "Scenario 1: First run adds MIT header (hook should exit 1)"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -223,8 +225,9 @@ jobs:
       - name: "Scenario 3: Custom start year 2023 — copyright shows year range"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           CURRENT_YEAR=$(date +%Y)
           cat > .pre-commit-config.yaml << EOF
           repos:
@@ -262,8 +265,9 @@ jobs:
       - name: "Scenario 4: Custom copyright statement appears in header"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -302,8 +306,9 @@ jobs:
       - name: "Scenario 5: Custom ECL-1.0 license with custom template — first run adds header"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cp ../hooks-repo/tests/test_add_license_headers_files/LICENSES/ECL-1.0.txt LICENSES/ECL-1.0.txt || true
           cat > .pre-commit-config.yaml << EOF
           repos:
@@ -349,9 +354,10 @@ jobs:
       - name: "Scenario 6 setup: create file and apply MIT header first"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
           printf 'def switch_license():\n    pass\n' > src/scenario_06.py
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -370,8 +376,9 @@ jobs:
       - name: "Scenario 6: Switch header from MIT to Apache-2.0"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -418,8 +425,9 @@ jobs:
       - name: "Scenario 7: Copyright-only header — no SPDX-License-Identifier added"
         shell: bash
         working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > .pre-commit-config.yaml << EOF
           repos:
           - repo: local
@@ -489,8 +497,8 @@ jobs:
           mkdir target-repo
           cd target-repo
           git init
-          git config user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL }}"
-          git config user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config user.email "ci-integration-test@example.com"
+          git config user.name "CI Integration Test"
 
           # Copy the full set of compliant files from the test fixtures
           cp ../hooks-repo/tests/test_tech_review_files/AUTHORS .
@@ -527,8 +535,9 @@ jobs:
 
       - name: "Write .pre-commit-config.yaml for target repo"
         shell: bash
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
         run: |
-          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > target-repo/.pre-commit-config.yaml << EOF
           repos:
           - repo: local
