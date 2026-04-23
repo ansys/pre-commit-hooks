@@ -511,19 +511,24 @@ jobs:
           echo "# Contributors" > CONTRIBUTORS.md
 
           git add .
+          git commit -m "chore: initial commit for integration test"
 
       - name: "Find wheel path"
         id: wheel-path
         shell: bash
         run: |
           WHEEL=$(ls dist/*.whl | head -1)
-          echo "path=$WHEEL" >> "$GITHUB_OUTPUT"
-          echo "Found wheel: $WHEEL"
+          ABS=$(realpath "$WHEEL")
+          if command -v cygpath &>/dev/null; then
+            ABS=$(cygpath -m "$ABS")
+          fi
+          echo "abs=$ABS" >> "$GITHUB_OUTPUT"
+          echo "Found wheel: $ABS"
 
       - name: "Write .pre-commit-config.yaml for target repo"
         shell: bash
         run: |
-          WHEEL_ABS=$(realpath ${{ steps.wheel-path.outputs.path }})
+          WHEEL_ABS="${{ steps.wheel-path.outputs.abs }}"
           cat > target-repo/.pre-commit-config.yaml << EOF
           repos:
           - repo: local
