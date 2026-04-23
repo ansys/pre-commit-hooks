@@ -70,7 +70,7 @@ jobs:
   # install the hooks, but without requiring a published release.
   # ---------------------------------------------------------------------------
   integration-add-license-headers:
-    name: "Integration: add-license-headers (${{ matrix.os }})"
+    name: "Integration: add-license-headers (${{ matrix.os }}, Python ${{ matrix.python-version }})"
     needs: [build-wheel]
     runs-on: ${{ matrix.os }}
     permissions:
@@ -452,7 +452,7 @@ jobs:
           fi
 
   integration-tech-review:
-    name: "Integration: tech-review (${{ matrix.os }})"
+    name: "Integration: tech-review (${{ matrix.os }}, Python ${{ matrix.python-version }})"
     needs: [build-wheel]
     runs-on: ${{ matrix.os }}
     permissions:
