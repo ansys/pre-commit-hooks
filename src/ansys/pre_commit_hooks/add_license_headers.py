@@ -29,6 +29,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
+import io
 from pathlib import Path
 import re
 import shutil
@@ -507,7 +508,7 @@ def non_recursive_file_check(
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
-                add_header(copyright, license, years, file, template, commented, sys.stdout)
+                add_header(copyright, license, years, file, template, commented, io.StringIO())
                 if not check_same_content(before_hook, file):
                     changed_headers = 1
                     print(f"Successfully changed header of {file}")
@@ -673,7 +674,7 @@ def add_header(
         The template to use for the license header. For example, "ansys.jinja2".
     commented: bool
         Whether the template is commented or not.
-    tmp: Union[NamedTemporaryFile, IO[str]]
+    out: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
     from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info
