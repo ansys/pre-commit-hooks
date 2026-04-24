@@ -951,6 +951,46 @@ def test_mit_header_replaced_with_apache(tmp_path: pytest.TempPathFactory):
 
 
 @pytest.mark.add_license_headers
+def test_no_duplicate_prints_on_license_switch(
+    tmp_path: pytest.TempPathFactory, capsys: pytest.CaptureFixture
+):
+    """Test that switching from MIT to Apache-2.0 prints each changed file exactly once."""
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # First run: add the MIT header
+    add_argv_run(repo, tmp_file, [tmp_file])
+    repo.index.add([tmp_file])
+    capsys.readouterr()  # discard output from the MIT-header run
+
+    # Second run: switch to Apache-2.0 — triggers the license-switch branch
+    add_argv_run(repo, tmp_file, [tmp_file, "--custom_license=Apache-2.0"])
+
+    captured = capsys.readouterr()
+    file_lines = [
+        line for line in captured.out.splitlines() if "Successfully changed header" in line
+    ]
+    assert len(file_lines) == 1, (
+        f"Expected 'Successfully changed header' to appear exactly once, "
+        f"but got {len(file_lines)} time(s):\n{captured.out}"
+    )
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
 def test_mit_license_file_replaced_with_apache(tmp_path: pytest.TempPathFactory):
     """Test that LICENSE file is regenerated as Apache-2.0 when it's the custom license."""
     template_name = "ansys.jinja2"
