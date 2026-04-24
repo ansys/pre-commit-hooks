@@ -29,6 +29,7 @@ A license header consists of the Ansys copyright statement and licensing informa
 import argparse
 from datetime import date as dt
 import filecmp
+import io
 from pathlib import Path
 import re
 import shutil
@@ -507,7 +508,6 @@ def non_recursive_file_check(
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
-                with NamedTemporaryFile(mode="w", delete=True) as tmp:
                 add_header(copyright, license, years, file, template, commented, io.StringIO())
                 if not check_same_content(before_hook, file):
                     changed_headers = 1
