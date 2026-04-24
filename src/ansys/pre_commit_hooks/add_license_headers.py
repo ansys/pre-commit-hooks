@@ -674,7 +674,7 @@ def add_header(
         The template to use for the license header. For example, "ansys.jinja2".
     commented: bool
         Whether the template is commented or not.
-    tmp: Union[NamedTemporaryFile, IO[str]]
+    out: Union[NamedTemporaryFile, IO[str]]
         Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
     """
     from reuse.cli.annotate import add_header_to_file, get_comment_style, get_reuse_info
