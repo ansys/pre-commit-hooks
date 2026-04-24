@@ -508,7 +508,7 @@ def non_recursive_file_check(
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
                 with NamedTemporaryFile(mode="w", delete=True) as tmp:
-                    add_header(copyright, license, years, file, template, commented, tmp)
+                add_header(copyright, license, years, file, template, commented, io.StringIO())
                 if not check_same_content(before_hook, file):
                     changed_headers = 1
                     print(f"Successfully changed header of {file}")
