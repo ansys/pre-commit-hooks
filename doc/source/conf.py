@@ -104,6 +104,7 @@ source_suffix = {".rst": "restructuredtext"}
 master_doc = "index"
 
 # Ignore links
+linkcheck_exclude_documents = ["changelog"]
 linkcheck_ignore = [
     "https://opensource.org/licenses/MIT",
 ]
