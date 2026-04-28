@@ -104,7 +104,9 @@ source_suffix = {".rst": "restructuredtext"}
 master_doc = "index"
 
 # Ignore links
+linkcheck_exclude_documents = ["changelog"]
 linkcheck_ignore = [
+    r"https://github.com/ansys/pre-commit-hooks/.*",
     "https://opensource.org/licenses/MIT",
 ]
 
