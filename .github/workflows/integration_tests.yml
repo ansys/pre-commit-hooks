@@ -1,0 +1,558 @@
+name: Integration Tests
+
+# Run integration tests to validate that hooks work correctly when consumed
+# via pre-commit in an external repository — the same way downstream users use them.
+# This catches issues that unit tests inside this repo cannot catch (e.g., entry-point
+# packaging bugs, missing assets bundled in the wheel, etc.).
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  MAIN_PYTHON_VERSION: '3.14'
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # Build the wheel from the current commit so that the integration repo can
+  # install it as a local pre-commit "additional_dependencies" package.
+  # ---------------------------------------------------------------------------
+  build-wheel:
+    name: "Build wheel for integration tests"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      wheel-artifact: ${{ steps.set-artifact-name.outputs.name }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "Set up Python ${{ env.MAIN_PYTHON_VERSION }}"
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Build wheel"
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel --outdir dist/
+
+      - name: "Set artifact name"
+        id: set-artifact-name
+        run: echo "name=integration-test-wheel" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload wheel artifact"
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: integration-test-wheel
+          path: dist/*.whl
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Run the hooks from this repository against a minimal synthetic target repo.
+  # The target repo is configured with a .pre-commit-config.yaml that points
+  # at the local wheel built above — matching exactly how downstream consumers
+  # install the hooks, but without requiring a published release.
+  # ---------------------------------------------------------------------------
+  integration-add-license-headers:
+    name: "Integration: add-license-headers (${{ matrix.os }}, Python ${{ matrix.python-version }})"
+    needs: [build-wheel]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - name: "Checkout hooks repository (for wheel + test assets)"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: hooks-repo
+
+      - name: "Download wheel artifact"
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: integration-test-wheel
+          path: dist
+
+      - name: "Set up Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: "Install pre-commit"
+        run: python -m pip install pre-commit
+
+      - name: "Set up target repository with all test fixtures"
+        shell: bash
+        run: |
+          mkdir target-repo
+          cd target-repo
+          git init
+          git config user.email "ci-integration-test@example.com"
+          git config user.name "CI Integration Test"
+
+          # Base directory structure
+          mkdir -p src tests LICENSES .reuse/templates
+
+          # MIT license for default scenarios (hook also recreates this from its bundled assets)
+          cp ../hooks-repo/tests/test_add_license_headers_files/LICENSES/LICENSE LICENSES/MIT.txt
+
+          # ECL-1.0 license for the custom-license scenario
+          # Not bundled in the hook's assets — must be present in the repo before the hook runs
+          cp ../hooks-repo/tests/test_add_license_headers_files/LICENSES/ECL-1.0.txt LICENSES/ECL-1.0.txt
+
+          # Custom Jinja2 templates used by specific scenarios
+          cp ../hooks-repo/tests/test_add_license_headers_files/templates/test_template.jinja2 .reuse/templates/test_template.jinja2
+          cp ../hooks-repo/tests/test_add_license_headers_files/templates/copyright_only.jinja2 .reuse/templates/copyright_only.jinja2
+
+          git add .
+
+      - name: "Find wheel absolute path"
+        id: wheel-path
+        shell: bash
+        run: |
+          WHEEL=$(ls dist/*.whl | head -1)
+          ABS=$(realpath "$WHEEL")
+          # On Windows runners, realpath (Git Bash/MSYS2) emits a POSIX path
+          # like /d/a/... that Windows-native Python/pip cannot resolve.
+          # cygpath -m converts it to a mixed-mode path (D:/a/...) that pip
+          # accepts on both Windows and Linux.
+          if command -v cygpath &>/dev/null; then
+            ABS=$(cygpath -m "$ABS")
+          fi
+          echo "abs=$ABS" >> "$GITHUB_OUTPUT"
+          echo "Found wheel: $ABS"
+
+      - name: "Pre-install pre-commit hook environment"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          pre-commit install-hooks
+
+      # =======================================================================
+      # Scenario 1: File without a header → MIT header added
+      # Mirrors: test_main_fails, test_copy_assets
+      # =======================================================================
+      - name: "Scenario 1 setup: create file without a header"
+        shell: bash
+        run: printf 'def greet():\n    return "hello"\n' > target-repo/src/scenario_01.py
+
+      - name: "Scenario 1: First run adds MIT header (hook should exit 1)"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_01.py; then
+            echo "ERROR: Expected hook to exit 1 (file was modified) but it exited 0"
+            exit 1
+          fi
+          grep -q "SPDX-License-Identifier: MIT" src/scenario_01.py || {
+            echo "ERROR: MIT license identifier not found in header"
+            cat src/scenario_01.py
+            exit 1
+          }
+          grep -q "ANSYS, Inc. and/or its affiliates" src/scenario_01.py || {
+            echo "ERROR: Default Ansys copyright not found in header"
+            cat src/scenario_01.py
+            exit 1
+          }
+
+      # =======================================================================
+      # Scenario 2: File already has correct MIT header → hook is idempotent
+      # Mirrors: test_main_passes, test_header_doesnt_change
+      # =======================================================================
+      - name: "Scenario 2: File with MIT header — second run exits 0 (idempotent)"
+        shell: bash
+        working-directory: target-repo
+        run: pre-commit run add-license-headers --files src/scenario_01.py
+
+      # =======================================================================
+      # Scenario 3: Custom start year → copyright shows year range
+      # Mirrors: test_custom_start_year, test_date_update
+      # =======================================================================
+      - name: "Scenario 3 setup: create file without a header"
+        shell: bash
+        run: printf 'def compute():\n    return 42\n' > target-repo/src/scenario_03.py
+
+      - name: "Scenario 3: Custom start year 2023 — copyright shows year range"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          CURRENT_YEAR=$(date +%Y)
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              args:
+                - --start_year=2023
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_03.py; then
+            echo "ERROR: Expected hook to exit 1 (header added) but it exited 0"
+            exit 1
+          fi
+          grep -q "2023 - ${CURRENT_YEAR}" src/scenario_03.py || {
+            echo "ERROR: Expected copyright year range '2023 - ${CURRENT_YEAR}' not found in header"
+            cat src/scenario_03.py
+            exit 1
+          }
+
+      # =======================================================================
+      # Scenario 4: Custom copyright statement
+      # Mirrors: test_custom_args
+      # =======================================================================
+      - name: "Scenario 4 setup: create file without a header"
+        shell: bash
+        run: printf 'def process():\n    pass\n' > target-repo/src/scenario_04.py
+
+      - name: "Scenario 4: Custom copyright statement appears in header"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              args:
+                - --custom_copyright=Super cool copyright
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_04.py; then
+            echo "ERROR: Expected hook to exit 1 (header added) but it exited 0"
+            exit 1
+          fi
+          grep -q "Super cool copyright" src/scenario_04.py || {
+            echo "ERROR: Custom copyright text 'Super cool copyright' not found in header"
+            cat src/scenario_04.py
+            exit 1
+          }
+
+      # =======================================================================
+      # Scenario 5: Custom license (ECL-1.0) with custom template
+      # Mirrors: test_custom_args, test_update_changed_header
+      # ECL-1.0 is not bundled in the hook's assets, so it must be present in
+      # the repo's LICENSES/ directory before each run.
+      # =======================================================================
+      - name: "Scenario 5 setup: create file without a header"
+        shell: bash
+        run: printf 'def transform():\n    pass\n' > target-repo/src/scenario_05.py
+
+      - name: "Scenario 5: Custom ECL-1.0 license with custom template — first run adds header"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cp ../hooks-repo/tests/test_add_license_headers_files/LICENSES/ECL-1.0.txt LICENSES/ECL-1.0.txt || true
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              args:
+                - --custom_license=ECL-1.0
+                - --custom_template=test_template
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_05.py; then
+            echo "ERROR: Expected hook to exit 1 (header added) but it exited 0"
+            exit 1
+          fi
+          grep -q "ECL-1.0" src/scenario_05.py || {
+            echo "ERROR: ECL-1.0 license identifier not found in header"
+            cat src/scenario_05.py
+            exit 1
+          }
+          grep -q "The Educational Community License" src/scenario_05.py || {
+            echo "ERROR: ECL-1.0 template content not found in header"
+            cat src/scenario_05.py
+            exit 1
+          }
+
+      - name: "Scenario 5: Second run with ECL-1.0 is idempotent"
+        shell: bash
+        working-directory: target-repo
+        run: pre-commit run add-license-headers --files src/scenario_05.py
+
+      # =======================================================================
+      # Scenario 6: File with MIT header switching to Apache-2.0
+      # Apache-2.0 is bundled in the hook's assets, so the hook auto-creates
+      # LICENSES/Apache-2.0.txt — no manual download required.
+      # =======================================================================
+      - name: "Scenario 6 setup: create file and apply MIT header first"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          printf 'def switch_license():\n    pass\n' > src/scenario_06.py
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          pre-commit run add-license-headers --files src/scenario_06.py || true
+
+      - name: "Scenario 6: Switch header from MIT to Apache-2.0"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              args:
+                - --custom_license=Apache-2.0
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_06.py; then
+            echo "ERROR: Expected hook to exit 1 (header updated to Apache-2.0) but it exited 0"
+            exit 1
+          fi
+          grep -q "SPDX-License-Identifier: Apache-2.0" src/scenario_06.py || {
+            echo "ERROR: Apache-2.0 identifier not found after switch"
+            cat src/scenario_06.py
+            exit 1
+          }
+          if grep -q "SPDX-License-Identifier: MIT" src/scenario_06.py; then
+            echo "ERROR: MIT still present as SPDX-License-Identifier after switching to Apache-2.0"
+            cat src/scenario_06.py
+            exit 1
+          fi
+
+      - name: "Scenario 6: Second run with Apache-2.0 is idempotent"
+        shell: bash
+        working-directory: target-repo
+        run: pre-commit run add-license-headers --files src/scenario_06.py
+
+      # =======================================================================
+      # Scenario 7: Ignore license check with copyright-only template
+      # Mirrors: test_no_license_check
+      # =======================================================================
+      - name: "Scenario 7 setup: create file without a header"
+        shell: bash
+        run: printf 'def validate():\n    pass\n' > target-repo/src/scenario_07.py
+
+      - name: "Scenario 7: Copyright-only header — no SPDX-License-Identifier added"
+        shell: bash
+        working-directory: target-repo
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > .pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: add-license-headers
+              name: Add License Headers
+              entry: add-license-headers
+              language: python
+              files: '(src|tests)/.*\.(py)$'
+              require_serial: true
+              args:
+                - --ignore_license_check
+                - --custom_template=copyright_only
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+          if pre-commit run add-license-headers --files src/scenario_07.py; then
+            echo "ERROR: Expected hook to exit 1 (header added) but it exited 0"
+            exit 1
+          fi
+          grep -q "ANSYS, Inc. and/or its affiliates" src/scenario_07.py || {
+            echo "ERROR: Default copyright not found in file"
+            cat src/scenario_07.py
+            exit 1
+          }
+          if grep -q "SPDX-License-Identifier:" src/scenario_07.py; then
+            echo "ERROR: SPDX-License-Identifier found but should not be present with copyright-only template"
+            cat src/scenario_07.py
+            exit 1
+          fi
+
+  integration-tech-review:
+    name: "Integration: tech-review (${{ matrix.os }}, Python ${{ matrix.python-version }})"
+    needs: [build-wheel]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - name: "Checkout hooks repository (for wheel + test assets)"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: hooks-repo
+
+      - name: "Download wheel artifact"
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: integration-test-wheel
+          path: dist
+
+      - name: "Set up Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: "Install pre-commit"
+        run: python -m pip install pre-commit
+
+      - name: "Create compliant target repository"
+        shell: bash
+        run: |
+          mkdir target-repo
+          cd target-repo
+          git init
+          git config user.email "ci-integration-test@example.com"
+          git config user.name "CI Integration Test"
+
+          # Copy the full set of compliant files from the test fixtures
+          cp ../hooks-repo/tests/test_tech_review_files/AUTHORS .
+          cp ../hooks-repo/tests/test_tech_review_files/CODE_OF_CONDUCT.md .
+          cp ../hooks-repo/tests/test_tech_review_files/CONTRIBUTING.md .
+          cp "../hooks-repo/tests/test_tech_review_files/dependabot_pyproject.yml" .github/dependabot.yml || true
+          cp ../hooks-repo/tests/test_tech_review_files/LICENSE .
+          cp ../hooks-repo/tests/test_tech_review_files/pyproject.toml .
+          cp ../hooks-repo/tests/test_tech_review_files/README.rst .
+
+          # Create expected directories
+          mkdir -p .github src tests doc
+
+          # Copy dependabot to .github
+          cp ../hooks-repo/tests/test_tech_review_files/dependabot_pyproject.yml .github/dependabot.yml
+
+          # Create a CONTRIBUTORS.md
+          echo "# Contributors" > CONTRIBUTORS.md
+
+          git add .
+          git commit -m "chore: initial commit for integration test"
+
+      - name: "Find wheel path"
+        id: wheel-path
+        shell: bash
+        run: |
+          WHEEL=$(ls dist/*.whl | head -1)
+          ABS=$(realpath "$WHEEL")
+          if command -v cygpath &>/dev/null; then
+            ABS=$(cygpath -m "$ABS")
+          fi
+          echo "abs=$ABS" >> "$GITHUB_OUTPUT"
+          echo "Found wheel: $ABS"
+
+      - name: "Write .pre-commit-config.yaml for target repo"
+        shell: bash
+        env:
+          WHEEL_ABS: ${{ steps.wheel-path.outputs.abs }}
+        run: |
+          cat > target-repo/.pre-commit-config.yaml << EOF
+          repos:
+          - repo: local
+            hooks:
+            - id: tech-review
+              name: Ansys Technical Review
+              entry: tech-review
+              language: python
+              pass_filenames: false
+              additional_dependencies:
+                - "${WHEEL_ABS}"
+          EOF
+
+      - name: "Run tech-review hook against target repo"
+        shell: bash
+        working-directory: target-repo
+        run: |
+          pre-commit run tech-review --all-files
