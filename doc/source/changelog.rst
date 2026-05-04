@@ -9,6 +9,61 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.7.2 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.2>`_ - May 04, 2026
+=======================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix duplicate printed lines when updating license header
+          - `#422 <https://github.com/ansys/pre-commit-hooks/pull/422>`_
+
+        * - Anchor license year update to copyright line
+          - `#429 <https://github.com/ansys/pre-commit-hooks/pull/429>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Ignore linkcheck on repository links
+          - `#425 <https://github.com/ansys/pre-commit-hooks/pull/425>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump gitpython from 3.1.46 to 3.1.47
+          - `#423 <https://github.com/ansys/pre-commit-hooks/pull/423>`_
+
+        * - Bump gitpython from 3.1.47 to 3.1.49
+          - `#426 <https://github.com/ansys/pre-commit-hooks/pull/426>`_
+
+        * - Bump ansys/actions from 10.2.12 to 10.3.0
+          - `#427 <https://github.com/ansys/pre-commit-hooks/pull/427>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit automatic update
+          - `#424 <https://github.com/ansys/pre-commit-hooks/pull/424>`_
+
+
 `0.7.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.1>`_ - April 22, 2026
 =========================================================================================
 
