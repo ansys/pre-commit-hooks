@@ -202,22 +202,23 @@ def update_license_file(
         template_parent_dir = hook_loc / "assets" / "LICENSES"
         generate_license_file(template_parent_dir, year_span, repo_license_path, license)
     else:
-        # The year regex to match the year or year range in the LICENSE file
-        year_regex = r"(\d{4}) - (\d{4})|\d{4}"
-
         content = existing_content
-        # Get the first instance of the year range, either one year or a range of years
-        year_range_match = re.search(year_regex, content)
-        # Get the group from the year_range_match
-        year_range = year_range_match.group()
+        # Match the year (or year range) specifically in the Copyright line.
+        # Searching for the first year in the file is incorrect for licenses like
+        # Apache-2.0 whose boilerplate contains "January 2004" before the copyright
+        # notice, which would otherwise be overwritten with the current year.
+        copyright_year_regex = r"(Copyright(?:\s+\(c\))?\s+)((?:\d{4}\s+-\s+)?\d{4})"
+        year_range_match = re.search(copyright_year_regex, content)
 
-        # Replace the current year span with the updated year span
-        if year_range != year_span:
-            # Update the year span in the LICENSE file. "1" is the max number of replacements
-            content = re.sub(year_regex, year_span, content, 1)
+        if year_range_match:
+            year_range = year_range_match.group(2)
 
-            with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
-                file.write(content)
+            # Replace the current year span with the updated year span
+            if year_range != year_span:
+                content = re.sub(copyright_year_regex, rf"\g<1>{year_span}", content, 1)
+
+                with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
+                    file.write(content)
 
     # If the file changed, print a message that the LICENSE file was changed
     if not check_same_content(temp_file, repo_license_path):

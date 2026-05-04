@@ -1032,6 +1032,34 @@ def test_mit_license_file_replaced_with_apache(tmp_path: pytest.TempPathFactory)
 
 
 @pytest.mark.add_license_headers
+def test_apache_license_year_update_preserves_boilerplate(tmp_path):
+    """Test that updating the year in an Apache-2.0 LICENSE does not corrupt the boilerplate.
+
+    Regression test: the 'January 2004' text in the Apache boilerplate header must not
+    be replaced with the current year when the copyright year is updated.
+    """
+    hook_loc = Path(REPO_PATH) / "src" / "ansys" / "pre_commit_hooks"
+    template_dir = hook_loc / "assets" / "LICENSES"
+    license_file = tmp_path / "LICENSE"
+
+    # Generate an Apache-2.0 LICENSE file with a fixed start year
+    hook.generate_license_file(template_dir, "2023", license_file, "Apache-2.0")
+
+    initial_content = license_file.read_text(encoding="utf-8")
+    assert "January 2004" in initial_content
+    assert "Copyright 2023 ANSYS" in initial_content
+
+    # Simulate a year-span update (e.g., a new calendar year)
+    hook.update_license_file(license_file, "2023 - 2026", "Apache-2.0")
+
+    updated_content = license_file.read_text(encoding="utf-8")
+    assert "January 2004" in updated_content, (
+        "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
+    )
+    assert "Copyright 2023 - 2026 ANSYS" in updated_content
+
+
+@pytest.mark.add_license_headers
 def test_line_endings(tmp_path: pytest.TempPathFactory):
     """Test line endings remain the same before and after running the hook."""
     # List of files to be git added
