@@ -211,10 +211,12 @@ def update_license_file(
         year_range_match = re.search(copyright_year_regex, content)
 
         if year_range_match:
+            # Get the group from the year_range_match
             year_range = year_range_match.group(2)
 
             # Replace the current year span with the updated year span
             if year_range != year_span:
+                # Update the year span in the LICENSE file. "1" is the max number of replacements
                 content = re.sub(copyright_year_regex, rf"\g<1>{year_span}", content, 1)
 
                 with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
