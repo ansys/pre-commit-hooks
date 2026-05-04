@@ -2,10 +2,10 @@ version: 2
 updates:
   - package-ecosystem: "pip"
     cooldown:
-      default-days: 5
+      default-days: 7
       semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
+      semver-minor-days: 10
+      semver-patch-days: 7
     directory: "/"
     schedule:
       interval: "weekly"
