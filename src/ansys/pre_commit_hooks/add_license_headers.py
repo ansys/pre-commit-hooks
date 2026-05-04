@@ -221,6 +221,12 @@ def update_license_file(
 
                 with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
                     file.write(content)
+        else:
+            # No year found in the Copyright line (e.g. "Copyright [yyyy]" placeholder
+            # in a stock Apache-2.0 LICENSE). Regenerate the file from the template.
+            hook_loc = Path(__file__).parent.resolve()
+            template_parent_dir = hook_loc / "assets" / "LICENSES"
+            generate_license_file(template_parent_dir, year_span, repo_license_path, license)
 
     # If the file changed, print a message that the LICENSE file was changed
     if not check_same_content(temp_file, repo_license_path):
@@ -961,7 +967,7 @@ def main():
         "copyright": args.custom_copyright,
         "template": args.custom_template,
         "license": args.custom_license,
-        "start_year": args.start_year,
+        "start_year": int(args.start_year),
         "current_year": dt.today().year,
         "git_repo": git_repo,
     }
