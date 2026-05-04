@@ -1053,9 +1053,9 @@ def test_apache_license_year_update_preserves_boilerplate(tmp_path):
     hook.update_license_file(license_file, "2023 - 2026", "Apache-2.0")
 
     updated_content = license_file.read_text(encoding="utf-8")
-    assert "January 2004" in updated_content, (
-        "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
-    )
+    assert (
+        "January 2004" in updated_content
+    ), "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
     assert "Copyright 2023 - 2026 ANSYS" in updated_content
 
 
