@@ -247,24 +247,10 @@ def update_license_file(
             # Get the group from the year_range_match
             year_range = year_range_match.group(2)
 
-            # If the existing LICENSE already has a multi-year range (e.g. "2024 - 2026")
-            # and the new year_span is only a single year (e.g. "2026" — typically because
-            # --start_year was not provided and defaulted to the current year), preserve
-            # the existing start year so the initial year is never silently erased.
-            effective_year_span = year_span
-            if " - " not in year_span and " - " in year_range:
-                existing_start_year = year_range.split(" - ")[0].strip()
-                end_year = year_span
-                effective_year_span = (
-                    f"{existing_start_year} - {end_year}"
-                    if existing_start_year != end_year
-                    else end_year
-                )
-
             # Replace the current year span with the updated year span
-            if year_range != effective_year_span:
+            if year_range != year_span:
                 # Update the year span in the LICENSE file. "1" is the max number of replacements
-                content = re.sub(copyright_year_regex, rf"\g<1>{effective_year_span}", content, 1)
+                content = re.sub(copyright_year_regex, rf"\g<1>{year_span}", content, 1)
 
                 with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
                     file.write(content)

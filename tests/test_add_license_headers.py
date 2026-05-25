@@ -735,41 +735,6 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-@pytest.mark.add_license_headers
-def test_license_year_range_preserved_without_start_year(tmp_path: pytest.TempPathFactory):
-    """Regression test: running the hook without --start_year must not erase the initial year.
-
-    If the LICENSE file already contains a multi-year range such as
-    ``Copyright (c) 2024 - 2026 ANSYS, Inc.`` and the hook is run without
-    ``--start_year`` (so the default start year equals the current year), the
-    initial year must be preserved.  The hook should **not** collapse the range
-    to a single year.
-    """
-    hook_loc = Path(REPO_PATH) / "src" / "ansys" / "pre_commit_hooks"
-    template_dir = hook_loc / "assets" / "LICENSES"
-    license_file = tmp_path / "LICENSE"
-    current_year = str(dt.today().year)
-
-    # Use a start year that is guaranteed to differ from the current year so
-    # we can verify the range is preserved.
-    old_start_year = str(dt.today().year - 2)
-    initial_year_span = f"{old_start_year} - {current_year}"
-
-    # Generate a LICENSE file that already has a multi-year range
-    hook.generate_license_file(template_dir, initial_year_span, license_file, "MIT")
-    initial_content = license_file.read_text(encoding="utf-8")
-    assert initial_year_span in initial_content, "Precondition: initial year range must be present"
-
-    # Call update_license_file with a single-year span (simulating the default
-    # behaviour when --start_year is not provided)
-    hook.update_license_file(license_file, current_year, "MIT")
-
-    updated_content = license_file.read_text(encoding="utf-8")
-    assert initial_year_span in updated_content, (
-        f"The initial year {old_start_year!r} must be preserved; "
-        f"the range must not be collapsed to just {current_year!r}"
-    )
-
 
 @pytest.mark.add_license_headers
 def test_get_start_year_from_git_new_repo(tmp_path: pytest.TempPathFactory):
