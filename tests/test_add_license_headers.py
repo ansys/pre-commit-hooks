@@ -772,6 +772,78 @@ def test_license_year_range_preserved_without_start_year(tmp_path: pytest.TempPa
 
 
 @pytest.mark.add_license_headers
+def test_get_start_year_from_git_new_repo(tmp_path: pytest.TempPathFactory):
+    """Test that get_start_year_from_git returns the current year for a brand-new repo."""
+    os.chdir(tmp_path)
+    repo = init_repo(tmp_path)
+    year = hook.get_start_year_from_git(repo)
+    assert year == dt.today().year
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_get_start_year_from_git_detects_first_commit_year(tmp_path: pytest.TempPathFactory):
+    """Test that get_start_year_from_git returns the year of the *first* commit.
+
+    Creates a repo with a backdated initial commit so the result is deterministic
+    regardless of when the test suite is run.
+    """
+    from datetime import datetime
+
+    os.chdir(tmp_path)
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+
+    # Back-dated initial commit — gitpython requires timezone-aware datetimes
+    from datetime import timezone
+
+    old_date = datetime(2020, 6, 15, tzinfo=timezone.utc)
+    readme = tmp_path / "README.md"
+    readme.write_text("initial")
+    repo.index.add([str(readme)])
+    repo.index.commit("initial commit", author_date=old_date, commit_date=old_date)
+
+    # A more recent commit — must not affect the result
+    readme.write_text("updated")
+    repo.index.add([str(readme)])
+    repo.index.commit("recent commit")
+
+    year = hook.get_start_year_from_git(repo)
+    assert year == 2020
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_start_year_autodetected_from_git(tmp_path: pytest.TempPathFactory):
+    """End-to-end test: when --start_year is omitted the hook uses the first commit year.
+
+    A fresh repo is initialised so the first commit year equals the current year.
+    Running the hook without ``--start_year`` should therefore produce a copyright
+    line that contains only the current year (no range).
+    """
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    os.chdir(tmp_path)
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Run the hook with NO --start_year argument
+    assert add_argv_run(repo, tmp_file, [tmp_file]) == 1
+
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+
+    # New repo: first commit is in the current year, so the copyright should
+    # contain only the current year (no multi-year range).
+    assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in first_line
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
 def test_date_update(tmp_path: pytest.TempPathFactory):
     """Test the date is correctly updated in the license header."""
     # Set template and license names
