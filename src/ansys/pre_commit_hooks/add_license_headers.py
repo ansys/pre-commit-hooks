@@ -70,9 +70,7 @@ def get_start_year_from_git(git_repo) -> int:
     try:
         # --reverse makes the oldest commit appear first; %ad is the author date
         first_year_str = (
-            git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y")
-            .split("\n")[0]
-            .strip()
+            git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y").split("\n")[0].strip()
         )
         if first_year_str and first_year_str.isdigit():
             return int(first_year_str)
@@ -266,9 +264,7 @@ def update_license_file(
             # Replace the current year span with the updated year span
             if year_range != effective_year_span:
                 # Update the year span in the LICENSE file. "1" is the max number of replacements
-                content = re.sub(
-                    copyright_year_regex, rf"\g<1>{effective_year_span}", content, 1
-                )
+                content = re.sub(copyright_year_regex, rf"\g<1>{effective_year_span}", content, 1)
 
                 with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
                     file.write(content)
