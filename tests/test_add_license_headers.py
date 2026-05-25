@@ -735,7 +735,6 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
     os.chdir(REPO_PATH)
 
 
-
 @pytest.mark.add_license_headers
 def test_get_start_year_from_git_new_repo(tmp_path: pytest.TempPathFactory):
     """Test that get_start_year_from_git returns the current year for a brand-new repo."""
