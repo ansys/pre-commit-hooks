@@ -54,7 +54,7 @@ def get_start_year_from_git(git_repo) -> int:
 
     Uses ``git log --reverse`` to find the oldest commit and extracts its year.
     Falls back to :data:`DEFAULT_START_YEAR` (the current year) when the
-    repository has no commits or the git history cannot be read.
+    repository has no commits yet.
 
     Parameters
     ----------
@@ -65,17 +65,14 @@ def get_start_year_from_git(git_repo) -> int:
     -------
     int
         The four-digit year of the first commit, or the current year if the
-        history is unavailable.
+        repository has no commits.
     """
-    try:
-        # --reverse makes the oldest commit appear first; %ad is the author date
-        first_year_str = (
-            git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y").split("\n")[0].strip()
-        )
-        if first_year_str and first_year_str.isdigit():
-            return int(first_year_str)
-    except Exception:
-        pass
+    # --reverse makes the oldest commit appear first; %ad is the author date
+    first_year_str = (
+        git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y").split("\n")[0].strip()
+    )
+    if first_year_str and first_year_str.isdigit():
+        return int(first_year_str)
     return DEFAULT_START_YEAR
 
 
