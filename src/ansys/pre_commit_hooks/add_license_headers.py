@@ -44,9 +44,36 @@ DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 DEFAULT_START_YEAR = dt.today().year
-"""Default start year for license headers."""
+"""Fallback start year used when git history is unavailable."""
 YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
 """Year regex to match year or year range in files."""
+
+
+def get_start_year_from_git(git_repo) -> int:
+    """Return the year of the first (oldest) commit in the git repository.
+
+    Uses ``git log --reverse`` to find the oldest commit and extracts its year.
+    Falls back to :data:`DEFAULT_START_YEAR` (the current year) when the
+    repository has no commits yet.
+
+    Parameters
+    ----------
+    git_repo: git.Repo
+        The git repository object.
+
+    Returns
+    -------
+    int
+        The four-digit year of the first commit, or the current year if the
+        repository has no commits.
+    """
+    # --reverse makes the oldest commit appear first; %ad is the author date
+    first_year_str = (
+        git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y").split("\n")[0].strip()
+    )
+    if first_year_str and first_year_str.isdigit():
+        return int(first_year_str)
+    return DEFAULT_START_YEAR
 
 
 def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -90,8 +117,11 @@ def set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser.add_argument(
         "--start_year",
         type=str,
-        help="Start year for copyright line in headers.",
-        default=DEFAULT_START_YEAR,
+        help=(
+            "Start year for copyright line in headers. "
+            "When omitted the year of the first git commit is used automatically."
+        ),
+        default=None,
     )
     # Ignore license check by default is False when action='store_true'
     parser.add_argument("--ignore_license_check", action="store_true")
@@ -942,23 +972,33 @@ def main():
     # Set changed_headers to zero by default
     changed_headers = 0
 
-    # Check start_year is valid
-    if str(args.start_year).isdigit():
-        # Check the start year is not later than the current year
-        if int(args.start_year) > dt.today().year:
-            raise Exception("Please provide a start year less than or equal to the current year.")
-        # Check the start year isn't earlier than when computers were created :)
-        elif int(args.start_year) < 1942:
-            raise Exception("Please provide a start year greater than or equal to 1942.")
-    else:
-        raise Exception("Please ensure the start year is a number.")
-
     import git
 
     # Get root directory of the git repository.
     git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
     # Get the root of the git repository and fix the line separators
     git_root = Path(git_repo.git.rev_parse("--show-toplevel"))
+
+    # Determine the start year.
+    # When --start_year is explicitly provided, validate and use that value.
+    # Otherwise, auto-detect from the year of the first git commit so that the
+    # original copyright year is never accidentally erased.
+    if args.start_year is not None:
+        if str(args.start_year).isdigit():
+            # Check the start year is not later than the current year
+            if int(args.start_year) > dt.today().year:
+                raise Exception(
+                    "Please provide a start year less than or equal to the current year."
+                )
+            # Check the start year isn't earlier than when computers were created :)
+            elif int(args.start_year) < 1942:
+                raise Exception("Please provide a start year greater than or equal to 1942.")
+        else:
+            raise Exception("Please ensure the start year is a number.")
+        start_year = int(args.start_year)
+    else:
+        # Auto-detect: use the year of the repository's first commit
+        start_year = get_start_year_from_git(git_repo)
 
     # Create dictionary containing the committed files, custom copyright,
     # template, license, changed_headers, year, and git_repo
@@ -967,7 +1007,7 @@ def main():
         "copyright": args.custom_copyright,
         "template": args.custom_template,
         "license": args.custom_license,
-        "start_year": int(args.start_year),
+        "start_year": start_year,
         "current_year": dt.today().year,
         "git_repo": git_repo,
     }
