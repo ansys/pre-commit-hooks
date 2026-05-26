@@ -46,7 +46,6 @@ jobs:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           python-package-name: ${{ env.LIBRARY_NAME }}
-          hide-log: false
           dev-mode: ${{ github.ref != 'refs/heads/main' }}
 
   actions-security:
