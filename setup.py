@@ -43,7 +43,7 @@ setup(
         "importlib-metadata==9.0.0",
         "Jinja2==3.1.6",
         "reuse==6.2.0",
-        "requests==2.33.1",
+        "requests==2.34.2",
         "semver==3.0.4",
         "toml==0.10.2",
     ],
