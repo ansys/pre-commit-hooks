@@ -1,0 +1,35 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.link_assets`
+=====================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None
+
+   
+   Link the default template and/or license from the assets folder to your git repo.
+
+
+   :Parameters:
+
+       **assets: dict**
+           Dictionary containing the asset folder information.
+
+       **git_root: str**
+           Full path of the repository's root directory.
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
