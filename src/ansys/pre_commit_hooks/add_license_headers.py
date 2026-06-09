@@ -30,12 +30,15 @@ import argparse
 from datetime import date as dt
 import filecmp
 import io
+from logging import Logger
 from pathlib import Path
 import re
 import shutil
 import sys
 from tempfile import NamedTemporaryFile
 from typing import IO, Union
+
+logger = Logger(__name__)
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
@@ -86,11 +89,12 @@ def get_start_year_from_git(git_repo) -> int:
         # Attempt to retrieve the full history so the real first commit is visible.
         try:
             git_repo.git.fetch("--unshallow")
-        except Exception:
+        except Exception as e:
             # Unshallow can fail when there is no network, no remote is configured,
             # or the server does not support it. Continue with whatever history is
             # available locally.
-            pass
+            logger.debug(f"Failure during unshallow: {e}")
+            logger.debug("Continuing with limited history available in shallow clone.")
 
     # --reverse makes the oldest commit appear first; %ad is the author date
     first_year_str = (
