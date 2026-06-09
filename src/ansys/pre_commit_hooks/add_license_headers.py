@@ -53,6 +53,11 @@ def get_start_year_from_git(git_repo) -> int:
     """Return the year of the first (oldest) commit in the git repository.
 
     Uses ``git log --reverse`` to find the oldest commit and extracts its year.
+    When the repository is a shallow clone (e.g. ``fetch-depth: 1`` in CI/CD),
+    attempts ``git fetch --unshallow`` to retrieve the full history before
+    reading the first commit year. If unshallowing fails (no network access,
+    no remote configured, etc.) the function continues with the limited history
+    that is locally available.
     Falls back to :data:`DEFAULT_START_YEAR` (the current year) when the
     repository has no commits yet.
 
@@ -67,6 +72,26 @@ def get_start_year_from_git(git_repo) -> int:
         The four-digit year of the first commit, or the current year if the
         repository has no commits.
     """
+    # Detect shallow clones produced by CI/CD checkouts with fetch-depth: 1.
+    # In that case git log --reverse only sees the single fetched commit, not
+    # the true first commit in history.
+    try:
+        is_shallow = git_repo.git.rev_parse("--is-shallow-repository").strip() == "true"
+    except Exception:
+        # Older git versions (<2.15) do not support --is-shallow-repository;
+        # fall back to checking for the presence of the .git/shallow file.
+        is_shallow = (Path(git_repo.git_dir) / "shallow").is_file()
+
+    if is_shallow:
+        # Attempt to retrieve the full history so the real first commit is visible.
+        try:
+            git_repo.git.fetch("--unshallow")
+        except Exception:
+            # Unshallow can fail when there is no network, no remote is configured,
+            # or the server does not support it. Continue with whatever history is
+            # available locally.
+            pass
+
     # --reverse makes the oldest commit appear first; %ad is the author date
     first_year_str = (
         git_repo.git.log("--reverse", "--format=%ad", "--date=format:%Y").split("\n")[0].strip()
