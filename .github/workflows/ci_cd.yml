@@ -101,7 +101,7 @@ jobs:
           # This dependency is GPL 2 or later licensed, but is only used for parsing Debian control
           # files and is not distributed with the library, so we can safely ignore it in our
           # license checks
-          whitelist-license-check: "python-debian"  
+          whitelist-license-check: "python-debian"
 
   tests:
     name: "Tests"
