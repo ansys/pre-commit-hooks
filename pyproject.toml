@@ -4,7 +4,7 @@ requires = [
     "GitPython==3.1.50",
     "Jinja2==3.1.6",
     "reuse==6.2.0",
-    "requests==2.33.1",
+    "requests==2.34.2",
     "semver==3.0.4",
     "toml==0.10.2",
     "wheel",
@@ -24,7 +24,7 @@ dependencies = [
     "importlib-metadata==9.0.0",
     "Jinja2==3.1.6",
     "reuse==6.2.0",
-    "requests==2.33.1",
+    "requests==2.34.2",
     "semver==3.0.4",
     "toml==0.10.2",
 ]
@@ -47,7 +47,7 @@ classifiers = {file = """
 
 [project.optional-dependencies]
 doc = [
-    "ansys-sphinx-theme[autoapi]==1.7.2",
+    "ansys-sphinx-theme[autoapi]==1.8.1",
     "numpydoc==1.10.0",
     "sphinx==8.2.3",
     "sphinx-autodoc-typehints==3.1.0",
