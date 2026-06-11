@@ -1128,7 +1128,7 @@ def test_apache_license_year_update_preserves_boilerplate(tmp_path):
 
     initial_content = license_file.read_text(encoding="utf-8")
     assert "January 2004" in initial_content
-    assert "Copyright 2023 ANSYS" in initial_content
+    assert "Copyright 2023 Synopsys, Inc. and ANSYS, Inc." in initial_content
 
     # Simulate a year-span update (e.g., a new calendar year)
     hook.update_license_file(license_file, "2023 - 2026", "Apache-2.0")
@@ -1137,7 +1137,7 @@ def test_apache_license_year_update_preserves_boilerplate(tmp_path):
     assert (
         "January 2004" in updated_content
     ), "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
-    assert "Copyright 2023 - 2026 ANSYS" in updated_content
+    assert "Copyright 2023 - 2026 Synopsys, Inc. and ANSYS, Inc." in updated_content
 
 
 @pytest.mark.add_license_headers
