@@ -949,7 +949,7 @@ def check_apache_header(file_name):
     """Check file contains all Apache-2.0 copyright and license header components."""
     with open(file_name, "r", encoding="utf8") as file:
         content = file.read()
-        assert "ANSYS, Inc. and/or its affiliates" in content
+        assert "Synopsys, Inc. and ANSYS, Inc." in content
         assert "Apache-2.0" in content
         assert "Apache License, Version 2.0" in content
         assert "http://www.apache.org/licenses/LICENSE-2.0" in content
