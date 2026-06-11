@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,7 +37,7 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 START_YEAR = "2023"
-DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+DEFAULT_COPYRIGHT = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
 
 
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
@@ -129,7 +129,7 @@ def check_ansys_header(file_name):
         for line in file:
             count += 1
             if count == 1:
-                assert "ANSYS, Inc. and/or its affiliates" in line
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
             if count == 2:
                 assert "MIT" in line
             if count == 5:
@@ -189,7 +189,7 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
             count += 1
             # Assert the copyright line's time range is from 2023 to the current year
             if count == 1:
-                assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in line
+                assert f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc." in line
             if count > 1:
                 break
 
@@ -356,7 +356,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
             count += 1
             # Assert that only the copyright line is in the file
             if count == 1:
-                assert "ANSYS, Inc. and/or its affiliates" in line
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
             if count == 2:
                 assert "MIT" not in line
             if count == 5:
@@ -802,7 +802,10 @@ def test_start_year_autodetected_from_git(tmp_path: pytest.TempPathFactory):
 
     # New repo: first commit is in the current year, so the copyright should
     # contain only the current year (no multi-year range).
-    assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in first_line
+    assert (
+        f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+        in first_line
+    )
 
     os.chdir(REPO_PATH)
 

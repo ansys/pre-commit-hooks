@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -42,7 +42,7 @@ logger = Logger(__name__)
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
-DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+DEFAULT_COPYRIGHT = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
@@ -430,7 +430,8 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     file_path: str
         Path to the file to check.
     copyright: list
-        List containing the copyright string. For example, ["ANSYS, Inc. and/or its affiliates."].
+        List containing the copyright string. For example,
+        ["Synopsys, Inc. and ANSYS, Inc. All rights reserved."].
     years: str
         The expected year span. For example, "2023 - 2026" or "2026".
 
@@ -644,7 +645,8 @@ def update_header(
     file: str
         The file whose header is being updated.
     copyright: str
-        The copyright string of the header. For example, "ANSYS, Inc. and/or its affiliates."
+        The copyright string of the header. For example,
+        "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
     license: str
         The license of the header. For example, "MIT".
     years: str
@@ -731,7 +733,7 @@ def add_header(
     ----------
     copyright: str
         The copyright line for the license header. For example,
-        "ANSYS, Inc. and/or its affiliates."
+        "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
     license: str
         The license for the license header. For example, "MIT".
     years: str

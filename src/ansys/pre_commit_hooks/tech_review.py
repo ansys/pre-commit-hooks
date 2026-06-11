@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,10 +37,10 @@ HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 LICENSES_JSON = HOOK_PATH / "assets" / "licenses.json"
 """JSON file containing licenses information."""
 
-DEFAULT_AUTHOR_MAINT_NAME = "ANSYS, Inc."
+DEFAULT_AUTHOR_MAINT_NAME = "Synopsys, Inc. and ANSYS, Inc."
 """Default name of project authors and maintainers."""
 
-DEFAULT_AUTHOR_MAINT_EMAIL = "pyansys.core@ansys.com"
+DEFAULT_AUTHOR_MAINT_EMAIL = "pyansys-core@synopsys.com"
 """Default email of project authors and maintainers."""
 
 DEFAULT_START_YEAR = dt.today().year
