@@ -1172,3 +1172,55 @@ def test_line_endings(tmp_path: pytest.TempPathFactory):
     assert license_line_endings_before == get_line_endings(tmp_license)
 
     os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_copyright_holder_change_replaces_not_duplicates(tmp_path: pytest.TempPathFactory):
+    """Test that changing the copyright holder replaces the old line instead of adding a new one.
+
+    Regression test: when a file already has a valid header with the *old* copyright phrase
+    (e.g. 'ANSYS, Inc. and/or its affiliates.') and the hook is re-run with a new phrase
+    (e.g. 'Synopsys, Inc. and ANSYS, Inc. All rights reserved.'), the header must be
+    fully replaced — not duplicated — so only one copyright line exists in the file.
+    """
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    old_copyright = "ANSYS, Inc. and/or its affiliates."
+    new_copyright = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+
+    # First run: add header with the *old* copyright phrase
+    old_args = [tmp_file, f"--custom_copyright={old_copyright}"]
+    assert add_argv_run(repo, tmp_file, old_args) == 1
+    repo.index.add([tmp_file])
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_first_run = f.read()
+    assert old_copyright in content_after_first_run
+    assert new_copyright not in content_after_first_run
+
+    # Second run: re-run with the new copyright phrase (default)
+    new_args = [tmp_file, f"--custom_copyright={new_copyright}"]
+    assert add_argv_run(repo, tmp_file, new_args) == 1
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_second_run = f.read()
+
+    # The new phrase must be present
+    assert new_copyright in content_after_second_run
+    # The old phrase must be gone
+    assert old_copyright not in content_after_second_run
+    # Exactly one copyright line (no duplicates)
+    copyright_line_count = sum(
+        1 for line in content_after_second_run.splitlines() if "Copyright" in line
+    )
+    assert copyright_line_count == 1, (
+        f"Expected exactly 1 copyright line, found {copyright_line_count}:\n"
+        f"{content_after_second_run}"
+    )
+
+    os.chdir(REPO_PATH)
