@@ -9,6 +9,79 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.8.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.0>`_ - June 17, 2026
+========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Attempt shallow repository issue
+          - `#441 <https://github.com/ansys/pre-commit-hooks/pull/441>`_
+
+        * - Replace license header
+          - `#445 <https://github.com/ansys/pre-commit-hooks/pull/445>`_
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Auto-detect first-commit year; preserve start year in LICENSE
+          - `#436 <https://github.com/ansys/pre-commit-hooks/pull/436>`_
+
+        * - Whitelist python-debian
+          - `#442 <https://github.com/ansys/pre-commit-hooks/pull/442>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump gitpython from 3.1.49 to 3.1.50
+          - `#431 <https://github.com/ansys/pre-commit-hooks/pull/431>`_
+
+        * - Bump actions/labeler from 6.0.1 to 6.1.0
+          - `#432 <https://github.com/ansys/pre-commit-hooks/pull/432>`_
+
+        * - Bump ansys/actions from 10.3.0 to 10.3.1
+          - `#434 <https://github.com/ansys/pre-commit-hooks/pull/434>`_
+
+        * - Bump requests from 2.33.1 to 2.34.2
+          - `#438 <https://github.com/ansys/pre-commit-hooks/pull/438>`_
+
+        * - Bump ansys-sphinx-theme from 1.7.2 to 1.8.1
+          - `#439 <https://github.com/ansys/pre-commit-hooks/pull/439>`_
+
+        * - Bump ansys/actions from 10.3.1 to 10.3.2
+          - `#440 <https://github.com/ansys/pre-commit-hooks/pull/440>`_
+
+        * - Bump actions/checkout from 6.0.2 to 6.0.3
+          - `#443 <https://github.com/ansys/pre-commit-hooks/pull/443>`_
+
+        * - Bump ansys-sphinx-theme from 1.8.1 to 1.8.2
+          - `#444 <https://github.com/ansys/pre-commit-hooks/pull/444>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit automatic update
+          - `#430 <https://github.com/ansys/pre-commit-hooks/pull/430>`_, `#433 <https://github.com/ansys/pre-commit-hooks/pull/433>`_, `#437 <https://github.com/ansys/pre-commit-hooks/pull/437>`_, `#446 <https://github.com/ansys/pre-commit-hooks/pull/446>`_
+
+
 `0.7.2 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.2>`_ - May 04, 2026
 =======================================================================================
 
