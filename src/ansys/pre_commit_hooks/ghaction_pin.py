@@ -166,7 +166,7 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
     bool
         ``True`` if the file was modified, ``False`` otherwise.
     """
-    content = filepath.read_text(encoding="utf-8")
+    content = filepath.read_bytes().decode("utf-8")
     lines = content.splitlines(keepends=True)
     new_lines = []
     modified = False
@@ -218,7 +218,7 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
         new_lines.append(new_line)
 
     if modified:
-        filepath.write_text("".join(new_lines), encoding="utf-8")
+        filepath.write_bytes("".join(new_lines).encode("utf-8"))
 
     return modified
 
