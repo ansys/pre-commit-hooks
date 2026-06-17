@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -42,7 +42,7 @@ logger = Logger(__name__)
 
 DEFAULT_TEMPLATE = "ansys"
 """Default template to use for license headers."""
-DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+DEFAULT_COPYRIGHT = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
 """Default copyright line for license headers."""
 DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
@@ -50,6 +50,11 @@ DEFAULT_START_YEAR = dt.today().year
 """Fallback start year used when git history is unavailable."""
 YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
 """Year regex to match year or year range in files."""
+HEADER_PEEK_BYTES = 1024
+"""Number of bytes read from the top of a file to check for an existing license header.
+
+License headers always appear at the very start of a file and are at most a few hundred
+bytes, so reading only this many bytes avoids loading the full file for every checked file."""
 
 
 def get_start_year_from_git(git_repo) -> int:
@@ -430,7 +435,8 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     file_path: str
         Path to the file to check.
     copyright: list
-        List containing the copyright string. For example, ["ANSYS, Inc. and/or its affiliates."].
+        List containing the copyright string. For example,
+        ["Synopsys, Inc. and ANSYS, Inc. All rights reserved."].
     years: str
         The expected year span. For example, "2023 - 2026" or "2026".
 
@@ -442,7 +448,7 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     """
     try:
         with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
-            head = f.read(1024)
+            head = f.read(HEADER_PEEK_BYTES)
     except OSError:
         return False
 
@@ -469,7 +475,7 @@ def _file_has_license(file_path: str, license: str) -> bool:
     """
     try:
         with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
-            head = f.read(1024)
+            head = f.read(HEADER_PEEK_BYTES)
     except OSError:
         return False
 
@@ -570,9 +576,16 @@ def non_recursive_file_check(
             add_header(copyright, license, years, file, template, commented, sys.stdout)
         else:
             # Check whether the existing SPDX-License-Identifier differs from the
-            # requested license. If so, strip the old header and write a fresh one
-            # so that the old identifier is fully replaced rather than merged.
-            if not existing_license_matches:
+            # requested license, or whether the copyright holder phrase has changed.
+            # In either case, strip the old header and write a fresh one so that the
+            # old lines are fully replaced rather than merged by REUSE's annotate.
+            try:
+                with Path(file).open(encoding="utf-8", errors="ignore") as _f:
+                    _head = _f.read(HEADER_PEEK_BYTES)
+            except OSError:
+                _head = ""
+            copyright_holder_changed = copyright[0] not in _head
+            if not existing_license_matches or copyright_holder_changed:
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
@@ -644,7 +657,8 @@ def update_header(
     file: str
         The file whose header is being updated.
     copyright: str
-        The copyright string of the header. For example, "ANSYS, Inc. and/or its affiliates."
+        The copyright string of the header. For example,
+        "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
     license: str
         The license of the header. For example, "MIT".
     years: str
@@ -731,7 +745,7 @@ def add_header(
     ----------
     copyright: str
         The copyright line for the license header. For example,
-        "ANSYS, Inc. and/or its affiliates."
+        "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
     license: str
         The license for the license header. For example, "MIT".
     years: str

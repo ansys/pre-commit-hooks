@@ -53,7 +53,7 @@ Frequently asked questions
    * ``.*\.js`` excludes all JS files in all directories.
    * ``\..*`` excludes all hidden files.
 
-.. dropdown:: How do you change the copyright phrase from "ANSYS, Inc. and/or its affiliates."?
+.. dropdown:: How do you change the copyright phrase from "Synopsys, Inc. and ANSYS, Inc. All rights reserved."?
     :animate: fade-in-slide-down
 
     To change the copyright phrase in the copyright line, add the ``--custom_copyright`` argument
@@ -175,4 +175,4 @@ Frequently asked questions
     example, if ``start_year`` is 2023 and the current year is 2025, the copyright statement would
     be:
 
-    ``Copyright (C) 2023 - 2025 ANSYS, Inc. and/or its affiliates.``
+    ``Copyright (C) 2023 - 2025 Synopsys, Inc. and ANSYS, Inc. All rights reserved.``

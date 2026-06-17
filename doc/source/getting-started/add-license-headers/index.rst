@@ -50,7 +50,7 @@ template is used to generate the license headers for files.
 The template contains the following variables:
 
 - ``{{ copyright_line }}``: Contains the current year and the phrase
-  "ANSYS, Inc. and/or its affiliates." by default.
+  "Synopsys, Inc. and ANSYS, Inc. All rights reserved." by default.
 - ``{{ expression }}``: Contains the SPDX-License-Identifier expression, which is "MIT" by default.
 
 ``add-license-headers`` hook arguments
@@ -65,7 +65,7 @@ The template contains the following variables:
       - Default value
       - Description
     * - ``--custom_copyright``
-      - ``ANSYS, Inc. and/or its affiliates.``
+      - ``Synopsys, Inc. and ANSYS, Inc. All rights reserved.``
       - Copyright line to include in the license header.
     * - ``--custom_template``
       - ``ansys``

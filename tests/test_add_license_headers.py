@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,7 +37,7 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 START_YEAR = "2023"
-DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+DEFAULT_COPYRIGHT = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
 
 
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
@@ -129,7 +129,7 @@ def check_ansys_header(file_name):
         for line in file:
             count += 1
             if count == 1:
-                assert "ANSYS, Inc. and/or its affiliates" in line
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
             if count == 2:
                 assert "MIT" in line
             if count == 5:
@@ -189,7 +189,7 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
             count += 1
             # Assert the copyright line's time range is from 2023 to the current year
             if count == 1:
-                assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in line
+                assert f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc." in line
             if count > 1:
                 break
 
@@ -356,7 +356,7 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
             count += 1
             # Assert that only the copyright line is in the file
             if count == 1:
-                assert "ANSYS, Inc. and/or its affiliates" in line
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
             if count == 2:
                 assert "MIT" not in line
             if count == 5:
@@ -802,7 +802,10 @@ def test_start_year_autodetected_from_git(tmp_path: pytest.TempPathFactory):
 
     # New repo: first commit is in the current year, so the copyright should
     # contain only the current year (no multi-year range).
-    assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in first_line
+    assert (
+        f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+        in first_line
+    )
 
     os.chdir(REPO_PATH)
 
@@ -946,7 +949,7 @@ def check_apache_header(file_name):
     """Check file contains all Apache-2.0 copyright and license header components."""
     with open(file_name, "r", encoding="utf8") as file:
         content = file.read()
-        assert "ANSYS, Inc. and/or its affiliates" in content
+        assert "Synopsys, Inc. and ANSYS, Inc." in content
         assert "Apache-2.0" in content
         assert "Apache License, Version 2.0" in content
         assert "http://www.apache.org/licenses/LICENSE-2.0" in content
@@ -1125,7 +1128,7 @@ def test_apache_license_year_update_preserves_boilerplate(tmp_path):
 
     initial_content = license_file.read_text(encoding="utf-8")
     assert "January 2004" in initial_content
-    assert "Copyright 2023 ANSYS" in initial_content
+    assert "Copyright 2023 Synopsys, Inc. and ANSYS, Inc." in initial_content
 
     # Simulate a year-span update (e.g., a new calendar year)
     hook.update_license_file(license_file, "2023 - 2026", "Apache-2.0")
@@ -1134,7 +1137,7 @@ def test_apache_license_year_update_preserves_boilerplate(tmp_path):
     assert (
         "January 2004" in updated_content
     ), "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
-    assert "Copyright 2023 - 2026 ANSYS" in updated_content
+    assert "Copyright 2023 - 2026 Synopsys, Inc. and ANSYS, Inc." in updated_content
 
 
 @pytest.mark.add_license_headers
@@ -1167,5 +1170,57 @@ def test_line_endings(tmp_path: pytest.TempPathFactory):
     # Assert line endings haven't changed
     assert file_line_endings_before == get_line_endings(tmp_file)
     assert license_line_endings_before == get_line_endings(tmp_license)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_copyright_holder_change_replaces_not_duplicates(tmp_path: pytest.TempPathFactory):
+    """Test that changing the copyright holder replaces the old line instead of adding a new one.
+
+    Regression test: when a file already has a valid header with the *old* copyright phrase
+    (e.g. 'ANSYS, Inc. and/or its affiliates.') and the hook is re-run with a new phrase
+    (e.g. 'Synopsys, Inc. and ANSYS, Inc. All rights reserved.'), the header must be
+    fully replaced — not duplicated — so only one copyright line exists in the file.
+    """
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    old_copyright = "ANSYS, Inc. and/or its affiliates."
+    new_copyright = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+
+    # First run: add header with the *old* copyright phrase
+    old_args = [tmp_file, f"--custom_copyright={old_copyright}"]
+    assert add_argv_run(repo, tmp_file, old_args) == 1
+    repo.index.add([tmp_file])
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_first_run = f.read()
+    assert old_copyright in content_after_first_run
+    assert new_copyright not in content_after_first_run
+
+    # Second run: re-run with the new copyright phrase (default)
+    new_args = [tmp_file, f"--custom_copyright={new_copyright}"]
+    assert add_argv_run(repo, tmp_file, new_args) == 1
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_second_run = f.read()
+
+    # The new phrase must be present
+    assert new_copyright in content_after_second_run
+    # The old phrase must be gone
+    assert old_copyright not in content_after_second_run
+    # Exactly one copyright line (no duplicates)
+    copyright_line_count = sum(
+        1 for line in content_after_second_run.splitlines() if "Copyright" in line
+    )
+    assert copyright_line_count == 1, (
+        f"Expected exactly 1 copyright line, found {copyright_line_count}:\n"
+        f"{content_after_second_run}"
+    )
 
     os.chdir(REPO_PATH)

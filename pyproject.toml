@@ -17,8 +17,8 @@ dynamic = ["version", "classifiers", "description", "readme", "scripts"]
 requires-python = ">=3.10,<4"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
-maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+authors = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
+maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
 dependencies = [
     "GitPython==3.1.50",
     "importlib-metadata==9.0.0",

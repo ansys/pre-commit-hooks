@@ -48,18 +48,19 @@ repos:
   hooks:
     - id: check-github-workflows
 
-- repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.7.2
-  hooks:
-  - id: add-license-headers
-    args:
-    - --start_year=2023
-    exclude: |
-        (?x)^(
-            tests/test_add_license_headers_files/bad_chars.py |
-            tests/test_add_license_headers_files/index_error.scss
-        )$
-  - id: tech-review
-    args:
-    - --product=pre_commit_hooks
-    - --non_compliant_name
+# TODO: temporary skip until next release
+# - repo: https://github.com/ansys/pre-commit-hooks
+#   rev: v0.7.2
+#   hooks:
+#   - id: add-license-headers
+#     args:
+#     - --start_year=2023
+#     exclude: |
+#         (?x)^(
+#             tests/test_add_license_headers_files/bad_chars.py |
+#             tests/test_add_license_headers_files/index_error.scss
+#         )$
+#   - id: tech-review
+#     args:
+#     - --product=pre_commit_hooks
+#     - --non_compliant_name

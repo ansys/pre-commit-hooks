@@ -2,6 +2,8 @@ API
 ANSYS
 Ansys
 ansys
+Synopsys
+synopsys
 maint
 DNE
 [Jj]inja

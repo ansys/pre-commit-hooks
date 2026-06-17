@@ -71,10 +71,10 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
       - Default value
       - Description
     * - ``--author_maint_name``
-      - ``ANSYS, Inc.``
+      - ``Synopsys, Inc. and ANSYS, Inc.``
       - Name of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--author_maint_email``
-      - ``pyansys.core@ansys.com``
+      - ``pyansys-core@synopsys.com``
       - Email of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--license``
       - ``MIT``
