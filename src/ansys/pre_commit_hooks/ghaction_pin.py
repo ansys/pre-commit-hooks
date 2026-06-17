@@ -176,12 +176,12 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
         eol = line[len(bare) :]  # preserves original line ending (LF or CRLF)
         m = _USES_RE.match(bare)
         if m is None:
-            # Warn about uses: lines that have no @ref at all – they are
+            # Warn about uses: lines that have no @ref at all - they are
             # invalid GitHub Actions syntax and cannot be pinned automatically.
             if _USES_NO_REF_RE.match(bare):
                 action_bare = bare.strip().removeprefix("- ").removeprefix("uses:").strip()
                 print(
-                    f"WARNING: {filepath}: '{action_bare}' has no @ref – "
+                    f"WARNING: {filepath}: '{action_bare}' has no @ref - "
                     "add a version tag or SHA manually before pinning.",
                     file=sys.stderr,
                 )
@@ -194,7 +194,7 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
         subpath = m.group("subpath") or ""
         ref = m.group("ref")
 
-        # Already pinned to a full commit SHA → leave untouched.
+        # Already pinned to a full commit SHA - leave untouched.
         if _SHA40_RE.match(ref):
             new_lines.append(line)
             continue
@@ -202,7 +202,7 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
         sha = resolve_ref_to_sha(owner, repo, ref, session, cache)
         if sha is None:
             print(
-                f"WARNING: could not resolve {owner}/{repo}@{ref} – skipping",
+                f"WARNING: could not resolve {owner}/{repo}@{ref} - skipping",
                 file=sys.stderr,
             )
             new_lines.append(line)
@@ -213,7 +213,7 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
 
         if new_line != line:
             modified = True
-            print(f"  pinned {action}@{ref} → @{sha[:7]}…  ({filepath})")
+            print(f"  pinned {action}@{ref} -> @{sha[:7]}  ({filepath})")
 
         new_lines.append(new_line)
 
@@ -245,7 +245,7 @@ def collect_workflow_files(paths: list) -> list:
         elif path.is_file():
             candidates = [path]
         else:
-            print(f"WARNING: path does not exist – {p}", file=sys.stderr)
+            print(f"WARNING: path does not exist - {p}", file=sys.stderr)
             continue
         for c in candidates:
             resolved = c.resolve()
