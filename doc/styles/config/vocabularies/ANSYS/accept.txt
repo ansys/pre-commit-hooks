@@ -6,3 +6,5 @@ maint
 DNE
 [Jj]inja
 pytest
+Synopsys
+synopsys
