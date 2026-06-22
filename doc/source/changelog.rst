@@ -9,6 +9,480 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.8.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.0>`_ - June 17, 2026
+========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Attempt shallow repository issue
+          - `#441 <https://github.com/ansys/pre-commit-hooks/pull/441>`_
+
+        * - Replace license header
+          - `#445 <https://github.com/ansys/pre-commit-hooks/pull/445>`_
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Auto-detect first-commit year; preserve start year in LICENSE
+          - `#436 <https://github.com/ansys/pre-commit-hooks/pull/436>`_
+
+        * - Whitelist python-debian
+          - `#442 <https://github.com/ansys/pre-commit-hooks/pull/442>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump gitpython from 3.1.49 to 3.1.50
+          - `#431 <https://github.com/ansys/pre-commit-hooks/pull/431>`_
+
+        * - Bump actions/labeler from 6.0.1 to 6.1.0
+          - `#432 <https://github.com/ansys/pre-commit-hooks/pull/432>`_
+
+        * - Bump ansys/actions from 10.3.0 to 10.3.1
+          - `#434 <https://github.com/ansys/pre-commit-hooks/pull/434>`_
+
+        * - Bump requests from 2.33.1 to 2.34.2
+          - `#438 <https://github.com/ansys/pre-commit-hooks/pull/438>`_
+
+        * - Bump ansys-sphinx-theme from 1.7.2 to 1.8.1
+          - `#439 <https://github.com/ansys/pre-commit-hooks/pull/439>`_
+
+        * - Bump ansys/actions from 10.3.1 to 10.3.2
+          - `#440 <https://github.com/ansys/pre-commit-hooks/pull/440>`_
+
+        * - Bump actions/checkout from 6.0.2 to 6.0.3
+          - `#443 <https://github.com/ansys/pre-commit-hooks/pull/443>`_
+
+        * - Bump ansys-sphinx-theme from 1.8.1 to 1.8.2
+          - `#444 <https://github.com/ansys/pre-commit-hooks/pull/444>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit automatic update
+          - `#430 <https://github.com/ansys/pre-commit-hooks/pull/430>`_, `#433 <https://github.com/ansys/pre-commit-hooks/pull/433>`_, `#437 <https://github.com/ansys/pre-commit-hooks/pull/437>`_, `#446 <https://github.com/ansys/pre-commit-hooks/pull/446>`_
+
+
+`0.7.2 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.2>`_ - May 04, 2026
+=======================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix duplicate printed lines when updating license header
+          - `#422 <https://github.com/ansys/pre-commit-hooks/pull/422>`_
+
+        * - Anchor license year update to copyright line
+          - `#429 <https://github.com/ansys/pre-commit-hooks/pull/429>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Ignore linkcheck on repository links
+          - `#425 <https://github.com/ansys/pre-commit-hooks/pull/425>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump gitpython from 3.1.46 to 3.1.47
+          - `#423 <https://github.com/ansys/pre-commit-hooks/pull/423>`_
+
+        * - Bump gitpython from 3.1.47 to 3.1.49
+          - `#426 <https://github.com/ansys/pre-commit-hooks/pull/426>`_
+
+        * - Bump ansys/actions from 10.2.12 to 10.3.0
+          - `#427 <https://github.com/ansys/pre-commit-hooks/pull/427>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit automatic update
+          - `#424 <https://github.com/ansys/pre-commit-hooks/pull/424>`_
+
+
+`0.7.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.1>`_ - April 22, 2026
+=========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Fix Windows developer mode and comment style bugs
+          - `#420 <https://github.com/ansys/pre-commit-hooks/pull/420>`_
+
+
+`0.7.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.7.0>`_ - April 22, 2026
+=========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add Apache-2.0 license support
+          - `#406 <https://github.com/ansys/pre-commit-hooks/pull/406>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump ansys/actions from 10.2.7 to 10.2.9
+          - `#404 <https://github.com/ansys/pre-commit-hooks/pull/404>`_
+
+        * - Bump actions/download-artifact from 8.0.0 to 8.0.1
+          - `#405 <https://github.com/ansys/pre-commit-hooks/pull/405>`_
+
+        * - Bump pytest-cov from 7.0.0 to 7.1.0
+          - `#408 <https://github.com/ansys/pre-commit-hooks/pull/408>`_
+
+        * - Bump importlib-metadata from 8.7.1 to 8.9.0
+          - `#409 <https://github.com/ansys/pre-commit-hooks/pull/409>`_
+
+        * - Bump requests from 2.32.5 to 2.33.0
+          - `#412 <https://github.com/ansys/pre-commit-hooks/pull/412>`_
+
+        * - Bump ansys/actions from 10.2.9 to 10.2.12
+          - `#413 <https://github.com/ansys/pre-commit-hooks/pull/413>`_
+
+        * - Bump pypa/gh-action-pypi-publish from 1.13.0 to 1.14.0
+          - `#414 <https://github.com/ansys/pre-commit-hooks/pull/414>`_
+
+        * - Bump pytest from 9.0.2 to 9.0.3
+          - `#415 <https://github.com/ansys/pre-commit-hooks/pull/415>`_
+
+        * - Bump sphinx-copybutton from 0.5.1 to 0.5.2
+          - `#416 <https://github.com/ansys/pre-commit-hooks/pull/416>`_
+
+        * - Bump requests from 2.33.0 to 2.33.1
+          - `#417 <https://github.com/ansys/pre-commit-hooks/pull/417>`_
+
+        * - Bump importlib-metadata from 8.9.0 to 9.0.0
+          - `#419 <https://github.com/ansys/pre-commit-hooks/pull/419>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update \`\`CONTRIBUTORS.md\`\` with the latest contributors
+          - `#403 <https://github.com/ansys/pre-commit-hooks/pull/403>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Support Python 3.14
+          - `#407 <https://github.com/ansys/pre-commit-hooks/pull/407>`_
+
+        * - Pre-commit automatic update
+          - `#410 <https://github.com/ansys/pre-commit-hooks/pull/410>`_
+
+        * - Update license metadata in pyproject.toml
+          - `#418 <https://github.com/ansys/pre-commit-hooks/pull/418>`_
+
+
+`0.6.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.6.0>`_ - March 19, 2026
+=========================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add check-actions-security action
+          - `#352 <https://github.com/ansys/pre-commit-hooks/pull/352>`_
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Replace {project-name} with Ansys Pre-Commit Hooks
+          - `#368 <https://github.com/ansys/pre-commit-hooks/pull/368>`_
+
+        * - Remove recursive approach and fix few bugs
+          - `#396 <https://github.com/ansys/pre-commit-hooks/pull/396>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - bump sphinx from 8.2.1 to 8.2.3
+          - `#295 <https://github.com/ansys/pre-commit-hooks/pull/295>`_
+
+        * - bump pytest from 8.3.4 to 8.3.5
+          - `#296 <https://github.com/ansys/pre-commit-hooks/pull/296>`_
+
+        * - bump jinja2 from 3.1.5 to 3.1.6
+          - `#298 <https://github.com/ansys/pre-commit-hooks/pull/298>`_
+
+        * - bump ansys-sphinx-theme[autoapi] from 1.3.2 to 1.3.3
+          - `#303 <https://github.com/ansys/pre-commit-hooks/pull/303>`_
+
+        * - bump pytest-cov from 6.0.0 to 6.1.1
+          - `#305 <https://github.com/ansys/pre-commit-hooks/pull/305>`_
+
+        * - bump ansys-sphinx-theme[autoapi] from 1.3.3 to 1.4.2
+          - `#309 <https://github.com/ansys/pre-commit-hooks/pull/309>`_
+
+        * - bump importlib-metadata from 8.6.1 to 8.7.0
+          - `#310 <https://github.com/ansys/pre-commit-hooks/pull/310>`_
+
+        * - bump ansys-sphinx-theme[autoapi] from 1.4.2 to 1.4.4
+          - `#312 <https://github.com/ansys/pre-commit-hooks/pull/312>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.4.4 to 1.5.0
+          - `#313 <https://github.com/ansys/pre-commit-hooks/pull/313>`_
+
+        * - Bump ansys/actions from 9 to 10
+          - `#314 <https://github.com/ansys/pre-commit-hooks/pull/314>`_
+
+        * - Bump pytest from 8.3.5 to 8.4.0
+          - `#315 <https://github.com/ansys/pre-commit-hooks/pull/315>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.5.0 to 1.5.2
+          - `#316 <https://github.com/ansys/pre-commit-hooks/pull/316>`_, `#327 <https://github.com/ansys/pre-commit-hooks/pull/327>`_
+
+        * - Bump pytest-cov from 6.1.1 to 6.2.1
+          - `#318 <https://github.com/ansys/pre-commit-hooks/pull/318>`_, `#326 <https://github.com/ansys/pre-commit-hooks/pull/326>`_
+
+        * - Bump requests from 2.32.3 to 2.32.4
+          - `#319 <https://github.com/ansys/pre-commit-hooks/pull/319>`_, `#329 <https://github.com/ansys/pre-commit-hooks/pull/329>`_
+
+        * - Bump pytest from 8.4.0 to 8.4.1
+          - `#320 <https://github.com/ansys/pre-commit-hooks/pull/320>`_
+
+        * - Bump numpydoc from 1.8.0 to 1.9.0
+          - `#328 <https://github.com/ansys/pre-commit-hooks/pull/328>`_
+
+        * - Bump pytest from 8.3.5 to 8.4.1
+          - `#330 <https://github.com/ansys/pre-commit-hooks/pull/330>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.5.2 to 1.5.3
+          - `#331 <https://github.com/ansys/pre-commit-hooks/pull/331>`_
+
+        * - Bump gitpython from 3.1.44 to 3.1.45
+          - `#333 <https://github.com/ansys/pre-commit-hooks/pull/333>`_
+
+        * - Bump actions/download-artifact from 4.1.9 to 5.0.0
+          - `#338 <https://github.com/ansys/pre-commit-hooks/pull/338>`_
+
+        * - Bump actions/checkout from 4 to 5
+          - `#339 <https://github.com/ansys/pre-commit-hooks/pull/339>`_
+
+        * - Bump requests from 2.32.4 to 2.32.5
+          - `#341 <https://github.com/ansys/pre-commit-hooks/pull/341>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.5.3 to 1.6.0
+          - `#342 <https://github.com/ansys/pre-commit-hooks/pull/342>`_
+
+        * - Bump pypa/gh-action-pypi-publish from 1.12.4 to 1.13.0
+          - `#343 <https://github.com/ansys/pre-commit-hooks/pull/343>`_
+
+        * - Bump actions/labeler from 5 to 6
+          - `#344 <https://github.com/ansys/pre-commit-hooks/pull/344>`_
+
+        * - Bump pytest-cov from 6.2.1 to 6.3.0
+          - `#345 <https://github.com/ansys/pre-commit-hooks/pull/345>`_
+
+        * - Bump reuse from 5.0.2 to 5.1.1
+          - `#346 <https://github.com/ansys/pre-commit-hooks/pull/346>`_
+
+        * - Bump pytest from 8.4.1 to 8.4.2
+          - `#347 <https://github.com/ansys/pre-commit-hooks/pull/347>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.6.0 to 1.6.1
+          - `#348 <https://github.com/ansys/pre-commit-hooks/pull/348>`_
+
+        * - Bump pytest-cov from 6.3.0 to 7.0.0
+          - `#349 <https://github.com/ansys/pre-commit-hooks/pull/349>`_
+
+        * - Bump peter-evans/create-or-update-comment from 4.0.0 to 5.0.0
+          - `#353 <https://github.com/ansys/pre-commit-hooks/pull/353>`_
+
+        * - Bump actions-ecosystem/action-add-labels from 1.1.0 to 1.1.3
+          - `#354 <https://github.com/ansys/pre-commit-hooks/pull/354>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.6.1 to 1.6.3
+          - `#357 <https://github.com/ansys/pre-commit-hooks/pull/357>`_
+
+        * - Bump actions/download-artifact from 5.0.0 to 6.0.0
+          - `#359 <https://github.com/ansys/pre-commit-hooks/pull/359>`_
+
+        * - Bump ansys/actions from 10.1.4 to 10.1.5
+          - `#360 <https://github.com/ansys/pre-commit-hooks/pull/360>`_
+
+        * - Bump reuse from 5.1.1 to 6.2.0
+          - `#361 <https://github.com/ansys/pre-commit-hooks/pull/361>`_
+
+        * - Bump pytest from 8.4.2 to 9.0.0
+          - `#362 <https://github.com/ansys/pre-commit-hooks/pull/362>`_
+
+        * - Bump actions/checkout from 5.0.0 to 6.0.0
+          - `#365 <https://github.com/ansys/pre-commit-hooks/pull/365>`_
+
+        * - Bump ansys/actions from 10.1.5 to 10.2.2
+          - `#369 <https://github.com/ansys/pre-commit-hooks/pull/369>`_
+
+        * - Bump pytest from 9.0.0 to 9.0.2
+          - `#370 <https://github.com/ansys/pre-commit-hooks/pull/370>`_
+
+        * - Bump actions/checkout from 6.0.0 to 6.0.1
+          - `#371 <https://github.com/ansys/pre-commit-hooks/pull/371>`_
+
+        * - Bump numpydoc from 1.9.0 to 1.10.0
+          - `#372 <https://github.com/ansys/pre-commit-hooks/pull/372>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.6.3 to 1.6.4
+          - `#374 <https://github.com/ansys/pre-commit-hooks/pull/374>`_
+
+        * - Bump ansys/actions from 10.2.2 to 10.2.3
+          - `#375 <https://github.com/ansys/pre-commit-hooks/pull/375>`_
+
+        * - Bump actions/download-artifact from 6.0.0 to 7.0.0
+          - `#377 <https://github.com/ansys/pre-commit-hooks/pull/377>`_
+
+        * - Bump importlib-metadata from 8.7.0 to 8.7.1
+          - `#378 <https://github.com/ansys/pre-commit-hooks/pull/378>`_
+
+        * - Bump gitpython from 3.1.45 to 3.1.46
+          - `#379 <https://github.com/ansys/pre-commit-hooks/pull/379>`_
+
+        * - Bump actions/checkout from 6.0.1 to 6.0.2
+          - `#382 <https://github.com/ansys/pre-commit-hooks/pull/382>`_
+
+        * - Bump ansys/actions from 10.2.3 to 10.2.4
+          - `#383 <https://github.com/ansys/pre-commit-hooks/pull/383>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.6.4 to 1.7.0
+          - `#385 <https://github.com/ansys/pre-commit-hooks/pull/385>`_
+
+        * - Bump ansys/actions from 10.2.4 to 10.2.5
+          - `#386 <https://github.com/ansys/pre-commit-hooks/pull/386>`_
+
+        * - Bump actions/download-artifact from 7.0.0 to 8.0.0
+          - `#393 <https://github.com/ansys/pre-commit-hooks/pull/393>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.7.0 to 1.7.1
+          - `#394 <https://github.com/ansys/pre-commit-hooks/pull/394>`_
+
+        * - Bump ansys-sphinx-theme[autoapi] from 1.7.1 to 1.7.2
+          - `#397 <https://github.com/ansys/pre-commit-hooks/pull/397>`_
+
+        * - Bump ansys/actions from 10.2.5 to 10.2.7
+          - `#398 <https://github.com/ansys/pre-commit-hooks/pull/398>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - add favicon to documentation
+          - `#294 <https://github.com/ansys/pre-commit-hooks/pull/294>`_
+
+        * - Update CONTRIBUTORS.md with the latest contributors
+          - `#300 <https://github.com/ansys/pre-commit-hooks/pull/300>`_, `#301 <https://github.com/ansys/pre-commit-hooks/pull/301>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - pre-commit automatic update
+          - `#297 <https://github.com/ansys/pre-commit-hooks/pull/297>`_, `#299 <https://github.com/ansys/pre-commit-hooks/pull/299>`_, `#304 <https://github.com/ansys/pre-commit-hooks/pull/304>`_, `#307 <https://github.com/ansys/pre-commit-hooks/pull/307>`_
+
+        * - move to v9 ansys/actions
+          - `#308 <https://github.com/ansys/pre-commit-hooks/pull/308>`_
+
+        * - Add Python 3.13 to workflow
+          - `#311 <https://github.com/ansys/pre-commit-hooks/pull/311>`_
+
+        * - Pre-commit automatic update
+          - `#321 <https://github.com/ansys/pre-commit-hooks/pull/321>`_, `#332 <https://github.com/ansys/pre-commit-hooks/pull/332>`_, `#337 <https://github.com/ansys/pre-commit-hooks/pull/337>`_, `#340 <https://github.com/ansys/pre-commit-hooks/pull/340>`_, `#350 <https://github.com/ansys/pre-commit-hooks/pull/350>`_, `#355 <https://github.com/ansys/pre-commit-hooks/pull/355>`_, `#363 <https://github.com/ansys/pre-commit-hooks/pull/363>`_, `#364 <https://github.com/ansys/pre-commit-hooks/pull/364>`_, `#373 <https://github.com/ansys/pre-commit-hooks/pull/373>`_, `#376 <https://github.com/ansys/pre-commit-hooks/pull/376>`_, `#381 <https://github.com/ansys/pre-commit-hooks/pull/381>`_, `#387 <https://github.com/ansys/pre-commit-hooks/pull/387>`_, `#388 <https://github.com/ansys/pre-commit-hooks/pull/388>`_, `#395 <https://github.com/ansys/pre-commit-hooks/pull/395>`_, `#399 <https://github.com/ansys/pre-commit-hooks/pull/399>`_, `#402 <https://github.com/ansys/pre-commit-hooks/pull/402>`_
+
+        * - Add `ansys/actions/check-vulnerabilities` action and `security.md` file
+          - `#324 <https://github.com/ansys/pre-commit-hooks/pull/324>`_
+
+        * - Add `codeowners` file
+          - `#325 <https://github.com/ansys/pre-commit-hooks/pull/325>`_
+
+        * - Use trusted publishers approach for releases
+          - `#336 <https://github.com/ansys/pre-commit-hooks/pull/336>`_
+
+        * - Update missing or outdated files
+          - `#367 <https://github.com/ansys/pre-commit-hooks/pull/367>`_
+
+        * - Add dependabot cooldown settings
+          - `#384 <https://github.com/ansys/pre-commit-hooks/pull/384>`_
+
+
 `0.5.2 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.5.2>`_ - February 26, 2025
 ============================================================================================
 

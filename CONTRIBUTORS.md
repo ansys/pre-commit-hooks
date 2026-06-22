@@ -7,6 +7,7 @@
 ## Individual Contributors
 
 * [Camille](https://github.com/clatapie)
+* [Dipin](https://github.com/dipinknair)
 * [Jorge Martínez](https://github.com/jorgepiloto)
 * [Kathy Pippert](https://github.com/PipKat)
 * [Maxime Rey](https://github.com/MaxJPRey)

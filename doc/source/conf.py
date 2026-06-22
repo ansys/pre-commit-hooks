@@ -8,8 +8,8 @@ from ansys_sphinx_theme import ansys_favicon, get_version_match
 
 # Project information
 project = "ansys-pre-commit-hooks"
-copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
-author = "ANSYS, Inc."
+copyright = f"(c) {datetime.now().year} Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+author = "Synopsys, Inc. and ANSYS, Inc."
 cname = os.getenv("DOCUMENTATION_CNAME", "pre-commit-hooks.docs.ansys.com")
 
 # Read version from VERSION file in base root directory
@@ -104,7 +104,9 @@ source_suffix = {".rst": "restructuredtext"}
 master_doc = "index"
 
 # Ignore links
+linkcheck_exclude_documents = ["changelog"]
 linkcheck_ignore = [
+    r"https://github.com/ansys/pre-commit-hooks/.*",
     "https://opensource.org/licenses/MIT",
 ]
 

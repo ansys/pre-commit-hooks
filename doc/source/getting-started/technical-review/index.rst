@@ -29,7 +29,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
      .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: tech-review
             args:
@@ -45,7 +45,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
      .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: tech-review
             args:
@@ -71,10 +71,10 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
       - Default value
       - Description
     * - ``--author_maint_name``
-      - ``ANSYS, Inc.``
+      - ``Synopsys, Inc. and ANSYS, Inc.``
       - Name of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--author_maint_email``
-      - ``pyansys.core@ansys.com``
+      - ``pyansys-core@synopsys.com``
       - Email of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--license``
       - ``MIT``

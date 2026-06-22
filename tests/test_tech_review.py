@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -96,8 +96,8 @@ def run_main(custom_args):
 @pytest.mark.tech_review
 def test_pyproject_toml(tmp_path: pytest.TempPathFactory):
     """Test pyproject.toml retrieves all information."""
-    author_maint_name = "ANSYS, Inc."
-    author_maint_email = "pyansys.core@ansys.com"
+    author_maint_name = "Synopsys, Inc. and ANSYS, Inc."
+    author_maint_email = "pyansys-core@synopsys.com"
     is_compliant = True
     non_compliant_name = False
 
@@ -282,7 +282,7 @@ def test_bad_author_maint_name_email(tmp_path: pytest.TempPathFactory, capsys):
     setup_repo(tmp_path)
 
     # Remove name and email from author and maintainer in pyproject.toml
-    search = '{name = "ANSYS, Inc.", email = "pyansys.core@ansys.com"},'
+    search = '{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"},'
     replace = "{},"
     replace_line(tmp_path, "pyproject.toml", search, replace)
 

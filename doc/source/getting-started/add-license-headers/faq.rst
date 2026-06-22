@@ -10,7 +10,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: add-license-headers
             files: '(src|examples|tests|doc)/.*\.(py|rst)|\.(proto|cpp)'
@@ -35,7 +35,7 @@ Frequently asked questions
    .. code:: yaml
 
       - repo: https://github.com/ansys/pre-commit-hooks
-        rev: v0.5.2
+        rev: v0.8.0
         hooks:
         - id: add-license-headers
           exclude: |
@@ -53,7 +53,7 @@ Frequently asked questions
    * ``.*\.js`` excludes all JS files in all directories.
    * ``\..*`` excludes all hidden files.
 
-.. dropdown:: How do you change the copyright phrase from "ANSYS, Inc. and/or its affiliates."?
+.. dropdown:: How do you change the copyright phrase from "Synopsys, Inc. and ANSYS, Inc. All rights reserved."?
     :animate: fade-in-slide-down
 
     To change the copyright phrase in the copyright line, add the ``--custom_copyright`` argument
@@ -62,7 +62,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: add-license-headers
             args:
@@ -79,7 +79,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: add-license-headers
             args:
@@ -109,18 +109,36 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: add-license-headers
             args:
             - --custom_template=template_name
 
-.. dropdown:: How do you use a custom license?
+.. dropdown:: How do I change the license from MIT to Apache-2.0?
     :animate: fade-in-slide-down
+
+    The hook has templates for the ``MIT`` and ``Apache-2.0`` licenses. You can change
+    the license to ``Apache-2.0`` by adding the ``--custom_license`` argument to the hook
+    in your ``.pre-commit-config.yaml`` file:
+
+    .. code:: yaml
+
+        - repo: https://github.com/ansys/pre-commit-hooks
+          rev: v0.8.0
+          hooks:
+          - id: add-license-headers
+            args:
+            - --custom_license=Apache-2.0
+
+.. dropdown:: How do you use a custom license that isn't MIT or Apache-2.0?
+    :animate: fade-in-slide-down
+
+    The hook has templates for the ``MIT`` and ``Apache-2.0`` licenses by default.
 
     To use a custom license, create the ``LICENSES`` directory in the root of your
     repository and add the license to that directory. The custom license cannot be named
-    ``MIT.txt``. Otherwise, it would be removed after the hook is done running.
+    ``MIT.txt`` or ``Apache-2.0.txt``. Otherwise, it would be removed after the hook is done running.
 
     ::
 
@@ -139,7 +157,7 @@ Frequently asked questions
     .. code:: yaml
 
         - repo: https://github.com/ansys/pre-commit-hooks
-          rev: v0.5.2
+          rev: v0.8.0
           hooks:
           - id: add-license-headers
             args:
@@ -157,4 +175,4 @@ Frequently asked questions
     example, if ``start_year`` is 2023 and the current year is 2025, the copyright statement would
     be:
 
-    ``Copyright (C) 2023 - 2025 ANSYS, Inc. and/or its affiliates.``
+    ``Copyright (C) 2023 - 2025 Synopsys, Inc. and ANSYS, Inc. All rights reserved.``
