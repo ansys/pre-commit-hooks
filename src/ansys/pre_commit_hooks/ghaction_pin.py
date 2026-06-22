@@ -36,6 +36,13 @@ Output::
 
 No authentication is required.  The GitHub commits API works anonymously for
 all public repositories (60 requests/hour per IP; cached within each run).
+
+.. note::
+
+   This hook requires outbound HTTPS access to ``api.github.com``.
+   It will **not** work on `pre-commit.ci <https://pre-commit.ci>`_ because
+   that service blocks all external network traffic.  Run it locally or in a
+   CI environment that allows internet access (for example, GitHub Actions).
 """
 
 import argparse
@@ -138,7 +145,15 @@ def _resolve_via_commits_api(
     could not be resolved.
     """
     url = f"{_GITHUB_API}/repos/{owner}/{repo}/commits/{ref}"
-    resp = session.get(url, timeout=15)
+    try:
+        resp = session.get(url, timeout=15)
+    except requests.exceptions.RequestException as exc:
+        print(
+            f"WARNING: network error resolving {owner}/{repo}@{ref}: {exc}\n"
+            "  Hint: this hook requires internet access and will not work on pre-commit.ci.",
+            file=sys.stderr,
+        )
+        return None
     if resp.status_code == 200:
         return resp.json().get("sha")
     return None
@@ -172,8 +187,10 @@ def pin_file(filepath: pathlib.Path, session: requests.Session, cache: dict) -> 
     modified = False
 
     for line in lines:
-        bare = line.rstrip("\r\n")
-        eol = line[len(bare) :]  # preserves original line ending (LF or CRLF)
+        # Separate the line body from its line ending.
+        # Check for CRLF first so the \r is not left on the bare string.
+        eol = "\r\n" if line.endswith("\r\n") else "\n" if line.endswith("\n") else ""
+        bare = line[: len(line) - len(eol)]
         m = _USES_RE.match(bare)
         if m is None:
             # Warn about uses: lines that have no @ref at all - they are

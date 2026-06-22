@@ -27,9 +27,20 @@ Learn how to set up the available pre-commit hooks:
 
         :bdg-primary-line:`Set-up`
 
+    .. grid-item-card:: Pin GitHub Actions :octicon:`pin`
+        :padding: 2 2 2 2
+        :link: gh-pin/index
+        :link-type: doc
+
+        A hook that pins every ``uses:`` line in GitHub Actions workflow files
+        to a full commit SHA for supply-chain security.
+
+        :bdg-primary-line:`Set-up`
+
 .. toctree::
    :hidden:
    :maxdepth: 3
 
    add-license-headers/index
    technical-review/index
+   gh-pin/index
