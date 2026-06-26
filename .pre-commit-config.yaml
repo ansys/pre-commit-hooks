@@ -49,6 +49,13 @@ repos:
     - id: check-github-workflows
 
 - repo: https://github.com/ansys/pre-commit-hooks
+  rev: d05061666370b3dfb0d828ca4e286aca19349300
+  hooks:
+  - id: ghaction-pin
+    args:
+    - .github/workflows
+
+- repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.8.0
   hooks:
   - id: add-license-headers
