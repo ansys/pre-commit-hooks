@@ -1,0 +1,948 @@
+
+
+
+
+
+
+The ``add_license_headers.py`` module
+=====================================
+
+.. py:module:: src.ansys.pre_commit_hooks.add_license_headers
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: add_license_headers
+.. tab-set::
+
+
+
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~set_lint_args`
+            - Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
+
+
+          * - :py:obj:`~get_full_paths`
+            - Update file paths to be absolute paths with system separators.
+
+
+          * - :py:obj:`~update_license_file`
+            - Update the LICENSE file to match MIT.txt, adjusting the year span for each repository.
+
+
+          * - :py:obj:`~link_assets`
+            - Link the default template and/or license from the assets folder to your git repo.
+
+
+          * - :py:obj:`~generate_license_file`
+            - Generate the MIT.txt file from the assets/LICENSES/MIT.txt template.
+
+
+          * - :py:obj:`~mkdirs_and_link`
+            - Make .reuse or LICENSES directory and create symbolic link to file.
+
+
+          * - :py:obj:`~recursive_file_check`
+            - Check if the committed file is missing its header.
+
+
+          * - :py:obj:`~non_recursive_file_check`
+            - Check if the committed file is missing its header.
+
+
+          * - :py:obj:`~set_variables`
+            - Set variables to run `REUSE <https://reuse.software/>`_ on the project.
+
+
+          * - :py:obj:`~update_header`
+            - Update the license header of the file.
+
+
+          * - :py:obj:`~add_header`
+            - Add the license header to the file.
+
+
+          * - :py:obj:`~check_same_content`
+            - Check if file before the hook ran is the same as after the hook ran.
+
+
+          * - :py:obj:`~apply_hook_changes`
+            - Add earlier hook changes to updated file with header.
+
+
+          * - :py:obj:`~get_content`
+            - Read a file and return its content.
+
+
+          * - :py:obj:`~update_year_range`
+            - Update the year in the copyright statement of a file.
+
+
+          * - :py:obj:`~get_years_from_file`
+            - Get the start and end years from the year range in the file.
+
+
+          * - :py:obj:`~cleanup`
+            - Unlink the default asset files, and remove directories if empty.
+
+
+          * - :py:obj:`~main`
+            - Add and update file headers with `REUSE <https://reuse.software/>`_.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~DEFAULT_TEMPLATE`
+            - Default template to use for license headers.
+
+
+          * - :py:obj:`~DEFAULT_COPYRIGHT`
+            - Default copyright line for license headers.
+
+
+          * - :py:obj:`~DEFAULT_LICENSE`
+            - Default license for headers.
+
+
+          * - :py:obj:`~DEFAULT_START_YEAR`
+            - Default start year for license headers.
+
+
+          * - :py:obj:`~YEAR_REGEX`
+            - Year regex to match year or year range in files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
+
+A license header consists of the Ansys copyright statement and licensing information.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace
+
+   
+   Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **parser: argparse.ArgumentParser**
+           Parser without any lint arguments.
+
+
+
+   :Returns:
+
+       :obj:`argparse.Namespace`
+           Parser namespace containing lint arguments.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: get_full_paths(file_list: list) -> list
+
+   
+   Update file paths to be absolute paths with system separators.
+
+
+   :Parameters:
+
+       **file_list: list**
+           List containing committed files.
+
+
+
+   :Returns:
+
+       :class:`python:list`
+           List containing the full paths of committed files.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: update_license_file(repo_license_path: pathlib.Path, year_span: str) -> int
+
+   
+   Update the LICENSE file to match MIT.txt, adjusting the year span for each repository.
+
+
+   :Parameters:
+
+       **repo_license_path: Path**
+           Path to the LICENSE file in the repository.
+
+       **year_span: str**
+           The user start year to the current year. If they are the same, default to the current year.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if the year in the LICENSE file was not updated.
+           ``1`` if the year in the LICENSE file was updated.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None
+
+   
+   Link the default template and/or license from the assets folder to your git repo.
+
+
+   :Parameters:
+
+       **assets: dict**
+           Dictionary containing the asset folder information.
+
+       **git_root: str**
+           Full path of the repository's root directory.
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: generate_license_file(template_parent_dir: pathlib.Path, year_span: int, license_file_name: pathlib.Path) -> None
+
+   
+   Generate the MIT.txt file from the assets/LICENSES/MIT.txt template.
+
+
+   :Parameters:
+
+       **template_parent_dir: Path**
+           Path to the parent directory of the template file.
+
+       **year_span: int**
+           The user start year to the current year. If they are the same, default to the current year.
+           For example, "2024" or "2023 - 2025".
+
+       **license_file_name: Path**
+           Path to the license file in the repository to generate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: mkdirs_and_link(asset_dir: str, hook_asset_dir: str, repo_asset_dir: str, filename: str) -> None
+
+   
+   Make .reuse or LICENSES directory and create symbolic link to file.
+
+
+   :Parameters:
+
+       **asset_dir: str**
+           Path of the asset directory required for REUSE (.reuse/templates or LICENSES).
+
+       **hook_asset_dir: str**
+           Full path of the hook's asset directory.
+
+       **repo_asset_dir: str**
+           Full path of the git repository's asset directory.
+
+       **filename: str**
+           Name of the file to be linked from the hook_asset_dir to the repo_asset_dir.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: recursive_file_check(changed_headers: int, obj: reuse.cli.common.ClickObj, values: dict, args: argparse.Namespace, count: int) -> int
+
+   
+   Check if the committed file is missing its header.
+
+
+   :Parameters:
+
+       **changed_headers: int**
+           ``0`` if no headers were added or updated.
+           ``1`` if headers were added or updated.
+
+       **obj: common.ClickObj**
+           A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+
+       **values: dict**
+           Dictionary containing the values of files, copyright,
+           template, license, changed_headers, year, and git_repo.
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+       **count: int**
+           Integer of the location in the files array.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if all files contain headers and are up to date.
+           ``1`` if ``REUSE`` changed all noncompliant files.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: non_recursive_file_check(changed_headers: int, obj: reuse.cli.common.ClickObj, values: dict, args: argparse.Namespace) -> int
+
+   
+   Check if the committed file is missing its header.
+
+
+   :Parameters:
+
+       **changed_headers: int**
+           ``0`` if no headers were added or updated.
+           ``1`` if headers were added or updated.
+
+       **obj: common.ClickObj**
+           A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+
+       **values: dict**
+           Dictionary containing the values of files, copyright,
+           template, license, changed_headers, year, and git_repo.
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if all files contain headers and are up to date.
+           ``1`` if ``REUSE`` changed all noncompliant files.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: set_variables(obj: reuse.cli.common.ClickObj, values: dict, args: argparse.Namespace) -> tuple
+
+   
+   Set variables to run `REUSE <https://reuse.software/>`_ on the project.
+
+
+   :Parameters:
+
+       **obj: common.ClickObj**
+           A click object used in `REUSE <https://reuse.software/>`_ to annotate files.
+
+       **values: dict**
+           Dictionary containing the values of files, copyright,
+           template, license, changed_headers, year, and git_repo.
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+
+
+   :Returns:
+
+       :class:`python:tuple`
+           Tuple containing the project, template, commented, license, files, copyright, and years.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: update_header(changed_headers: int, file: str, copyright: str, license: str, years: str, template: str, commented: bool) -> int
+
+   
+   Update the license header of the file.
+
+
+   :Parameters:
+
+       **changed_headers: int**
+           ``0`` if no headers were added or updated.
+           ``1`` if headers were added or updated.
+
+       **file: str**
+           The file whose header is being updated.
+
+       **copyright: str**
+           The copyright string of the header. For example, "ANSYS, Inc. and/or its affiliates."
+
+       **license: str**
+           The license of the header. For example, "MIT".
+
+       **years: str**
+           The year span of the header. For example, "2024" or "2023 - 2025".
+
+       **template: str**
+           The template to use for the header. For example, "ansys" for "ansys.jinja2".
+
+       **commented: bool**
+           Whether the template is commented or not.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if all files contain headers and are up to date.
+           ``1`` if ``REUSE`` changed all noncompliant files.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: add_header(copyright: str, license: str, years: str, file: str, template: str, commented: bool, out: Union[tempfile.NamedTemporaryFile, IO[str]]) -> None
+
+   
+   Add the license header to the file.
+
+
+   :Parameters:
+
+       **copyright: str**
+           The copyright line for the license header. For example,
+           "ANSYS, Inc. and/or its affiliates."
+
+       **license: str**
+           The license for the license header. For example, "MIT".
+
+       **years: str**
+           The year span in the license header. For example, "2024" or "2023 - 2025".
+
+       **file: str**
+           The file path to add the license header to.
+
+       **template: str**
+           The template to use for the license header. For example, "ansys.jinja2".
+
+       **commented: bool**
+           Whether the template is commented or not.
+
+       **tmp: Union[NamedTemporaryFile, IO[str]]**
+           Temporary file to capture the stdout of the add_header_to_file() function or ``sys.stdout``.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_same_content(before_hook: str, after_hook: str) -> bool
+
+   
+   Check if file before the hook ran is the same as after the hook ran.
+
+
+   :Parameters:
+
+       **before_hook: str**
+           Path to file before add-license-headers was run.
+
+       **after_hook: str**
+           Path to file after add-license-headers was run.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the files have the same content.
+           ``False`` if the files have different content.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: apply_hook_changes(before_hook: str, after_hook: str) -> None
+
+   
+   Add earlier hook changes to updated file with header.
+
+
+   :Parameters:
+
+       **before_hook: str**
+           Path to file before add-license-headers was run.
+
+       **after_hook: str**
+           Path to file after add-license-headers was run.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: get_content(file: str) -> str
+
+   
+   Read a file and return its content.
+
+
+   :Parameters:
+
+       **file: str**
+           Path to the file to read.
+
+
+
+   :Returns:
+
+       :class:`python:str`
+           Content of the file.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: update_year_range(changed_headers: int, file: str, year_regex: str, user_start_year: str, current_year: str) -> int
+
+   
+   Update the year in the copyright statement of a file.
+
+
+   :Parameters:
+
+       **changed_headers: int**
+           ``0`` if no headers were added or updated.
+           ``1`` if headers were added or updated.
+
+       **file: str**
+           The file to update the year in the header.
+
+       **year_regex: str**
+           The regex to match the year or year range in the file.
+
+       **user_start_year: str**
+           The start year provided by the user.
+
+       **current_year: str**
+           The current year.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if the year is up to date.
+           ``1`` if the year was updated.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: get_years_from_file(content: str, year_regex: str) -> tuple
+
+   
+   Get the start and end years from the year range in the file.
+
+
+   :Parameters:
+
+       **content: str**
+           The content of the file.
+
+       **year_regex: str**
+           The regex to match the year or year range in the file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: cleanup(assets: dict, os_git_root: str) -> None
+
+   
+   Unlink the default asset files, and remove directories if empty.
+
+
+   :Parameters:
+
+       **assets: dict**
+           Dictionary containing assets information
+
+       **os_git_root: str**
+           Full path of the repository's root directory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: main()
+
+   
+   Add and update file headers with `REUSE <https://reuse.software/>`_.
+
+
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``0`` if all files contain headers and are up to date.
+           ``1`` if ``REUSE`` changed all noncompliant files.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_TEMPLATE
+   :value: 'ansys'
+
+
+   
+   Default template to use for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_COPYRIGHT
+   :value: 'ANSYS, Inc. and/or its affiliates.'
+
+
+   
+   Default copyright line for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_LICENSE
+   :value: 'MIT'
+
+
+   
+   Default license for headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_START_YEAR
+
+   
+   Default start year for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: YEAR_REGEX
+   :value: '(\\d{4}) - (\\d{4})|\\d{4}'
+
+
+   
+   Year regex to match year or year range in files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+

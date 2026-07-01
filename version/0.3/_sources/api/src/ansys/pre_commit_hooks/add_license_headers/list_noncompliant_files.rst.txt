@@ -1,0 +1,36 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.list_noncompliant_files`
+=================================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.list_noncompliant_files(args: argparse.Namespace, proj: reuse.project.Project) -> list
+
+   
+   Get a list of the files that are missing license headers.
+
+
+   :Parameters:
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+       **proj: project.Project**
+           Project to run `REUSE <https://reuse.software/>`_ on.
+
+   :Returns:
+
+       :class:`python:list`
+           List of the files that are missing license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
