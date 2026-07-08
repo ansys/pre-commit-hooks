@@ -28,7 +28,7 @@ jobs:
       contents: write  # Needed to combine changelog fragments into changelog file
       pull-requests: write  # Needed to commit to the release branch/tag
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@d946b24b9a765f4169bcc94afdb27bd1a0533741 # v10.3.2
+      - uses: ansys/actions/doc-deploy-changelog@a5b0351dc277d68c2dc1beca2d2674c7dfa4fc55 # v10.3.3
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           release-from-main: true
