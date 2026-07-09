@@ -92,6 +92,7 @@ testpaths = [
 ]
 markers = [
     "add_license_headers: marks tests for add-license-headers hook",
+    "ghaction_pin: marks tests for ghaction-pin hook",
     "tech_review: marks tests for tech-review hook",
 ]
 
