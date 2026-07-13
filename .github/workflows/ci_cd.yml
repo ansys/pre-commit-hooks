@@ -28,7 +28,7 @@ jobs:
       contents: write  # Needed to combine changelog fragments into changelog file
       pull-requests: write  # Needed to commit to the release branch/tag
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@d946b24b9a765f4169bcc94afdb27bd1a0533741 # v10.3.2
+      - uses: ansys/actions/doc-deploy-changelog@a5b0351dc277d68c2dc1beca2d2674c7dfa4fc55 # v10.3.3
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           release-from-main: true
@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/check-vulnerabilities@d946b24b9a765f4169bcc94afdb27bd1a0533741 # v10.3.2
+      - uses: ansys/actions/check-vulnerabilities@a5b0351dc277d68c2dc1beca2d2674c7dfa4fc55 # v10.3.3
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -94,7 +94,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
-      - uses: ansys/actions/build-wheelhouse@d946b24b9a765f4169bcc94afdb27bd1a0533741 # v10.3.2
+      - uses: ansys/actions/build-wheelhouse@a5b0351dc277d68c2dc1beca2d2674c7dfa4fc55 # v10.3.3
         with:
           library-name: ${{ env.LIBRARY_NAME }}
           operating-system: ${{ matrix.os }}
