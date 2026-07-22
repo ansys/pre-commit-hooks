@@ -1,0 +1,45 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.set_header_args`
+=========================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.set_header_args(parser: argparse.ArgumentParser, start_year: str, current_year: int, file_path: str, copyright: str, template: str) -> argparse.Namespace
+
+   
+   Set arguments for `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **parser: argparse.ArgumentParser**
+           Parser containing default license header arguments.
+
+       **year: int**
+           Current year retrieved by datetime.
+
+       **file_path: str**
+           Specific file path to create license headers.
+
+       **copyright: str**
+           Copyright line for license headers.
+
+       **template: str**
+           Name of the template for license headers (name.jinja2).
+
+   :Returns:
+
+       :obj:`argparse.Namespace`
+           Namespace of arguments with their values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
