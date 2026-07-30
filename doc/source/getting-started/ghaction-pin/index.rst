@@ -1,7 +1,7 @@
-``gh-pin`` setup
-================
+``ghaction-pin`` setup
+======================
 
-The ``gh-pin`` hook rewrites every ``uses:`` line in GitHub Actions workflow
+The ``ghaction-pin`` hook rewrites every ``uses:`` line in GitHub Actions workflow
 files to pin the action to a full 40-character commit SHA.  The original ref
 (tag or branch) is preserved as an inline comment for human readability.
 
@@ -23,10 +23,10 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
   - repo: https://github.com/ansys/pre-commit-hooks
     rev: v0.9.0
     hooks:
-    - id: gh-pin
+    - id: ghaction-pin
 
 The hook runs on any ``*.yml`` and ``*.yaml`` files that are staged for
-commit.  Pass individual workflow files or directories to restrict which
+commit. Pass individual workflow files or directories to restrict which
 files are processed.
 
 Known limitations
@@ -36,26 +36,26 @@ Internet access required
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The hook resolves each ref to a commit SHA by calling the GitHub commits API
-(``https://api.github.com``).  **It will not work on**
+(``https://api.github.com``). **It will not work on**
 `pre-commit.ci <https://pre-commit.ci>`_ because that service blocks all
 outbound network traffic.
 
-Run ``gh-pin`` locally or in a CI environment that allows internet access,
-such as GitHub Actions.  You can exclude it from ``pre-commit.ci`` by adding
+Run ``ghaction-pin`` locally or in a CI environment that allows internet access,
+such as GitHub Actions. You can exclude it from ``pre-commit.ci`` by adding
 the hook ID to the ``ci.skip`` list:
 
 .. code:: yaml
 
   ci:
     skip:
-    - gh-pin
+    - ghaction-pin
 
 Anonymous rate limit
 ~~~~~~~~~~~~~~~~~~~~
 
 The hook uses the unauthenticated GitHub API, which is limited to 60 requests
-per hour per IP address.  Each unique ``owner/repo@ref`` combination counts as
-one request; results are cached within a single run.  If you hit the rate
+per hour per IP address. Each unique ``owner/repo@ref`` combination counts as
+one request; results are cached within a single run. If you hit the rate
 limit, wait for the hour window to reset before running the hook again.
 
 Actions with no version ref

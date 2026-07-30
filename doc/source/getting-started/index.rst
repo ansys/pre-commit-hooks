@@ -29,7 +29,7 @@ Learn how to set up the available pre-commit hooks:
 
     .. grid-item-card:: Pin GitHub Actions :octicon:`pin`
         :padding: 2 2 2 2
-        :link: gh-pin/index
+        :link: ghaction-pin/index
         :link-type: doc
 
         A hook that pins every ``uses:`` line in GitHub Actions workflow files
@@ -43,4 +43,4 @@ Learn how to set up the available pre-commit hooks:
 
    add-license-headers/index
    technical-review/index
-   gh-pin/index
+   ghaction-pin/index
