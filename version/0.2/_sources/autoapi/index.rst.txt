@@ -1,0 +1,9 @@
+API reference
+=============
+
+This section provides descriptions of all API members for Ansys pre-commit hooks.
+
+.. toctree::
+   :titlesonly:
+
+   /autoapi/pre_commit_hooks/index
