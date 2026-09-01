@@ -1521,7 +1521,7 @@ def _style_status(status: str, text: str) -> str:
     return f"{color}{text}{reset}" if color else text
 
 
-def _print_report(review: dict[str, Any]) -> None:
+def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
     results = review["results"]
     tally = review["tally"]
     score = review["score"]
@@ -1538,7 +1538,7 @@ def _print_report(review: dict[str, Any]) -> None:
     print(summary)
 
     for item in results:
-        if item["status"] == "pass":
+        if item["status"] == "pass" and not show_passes:
             continue
         detail = item["detail"] or ""
         label = _style_status(item["status"], item["status"].upper())
@@ -1551,6 +1551,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the PyAnsys repository quality report.")
     parser.add_argument("--repo-root", default=".", help="Repository root to review.")
     parser.add_argument("--json", action="store_true", help="Emit a JSON report instead of a text summary.")
+    parser.add_argument("--all", action="store_true", help="Show all checks, including passing ones.")
     args = parser.parse_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
@@ -1564,7 +1565,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(review, indent=2))
         return 1 if review["tally"]["fail"] else 0
 
-    _print_report(review)
+    _print_report(review, show_passes=args.all)
     return 1 if review["tally"]["fail"] else 0
 
 
