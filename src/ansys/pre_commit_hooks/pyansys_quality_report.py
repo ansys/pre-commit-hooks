@@ -1509,6 +1509,18 @@ def _load_files(repo_root: Path) -> dict[str, str | None]:
     return files
 
 
+def _style_status(status: str, text: str) -> str:
+    colors = {
+        "pass": "\033[32m",
+        "warn": "\033[33m",
+        "fail": "\033[31m",
+        "na": "\033[36m",
+    }
+    reset = "\033[0m"
+    color = colors.get(status, "")
+    return f"{color}{text}{reset}" if color else text
+
+
 def _print_report(review: dict[str, Any]) -> None:
     results = review["results"]
     tally = review["tally"]
@@ -1517,13 +1529,20 @@ def _print_report(review: dict[str, Any]) -> None:
     print("PyAnsys quality report")
     print("=" * 24)
     print(f"Score: {score}%")
-    print(f"Summary: pass={tally['pass']} fail={tally['fail']} warn={tally['warn']} na={tally['na']}")
+    summary = (
+        f"Summary: pass={_style_status('pass', str(tally['pass']))} "
+        f"fail={_style_status('fail', str(tally['fail']))} "
+        f"warn={_style_status('warn', str(tally['warn']))} "
+        f"na={_style_status('na', str(tally['na']))}"
+    )
+    print(summary)
 
     for item in results:
         if item["status"] == "pass":
             continue
         detail = item["detail"] or ""
-        print(f"- [{item['status'].upper()}] {item['id']} - {item['label']}")
+        label = _style_status(item["status"], item["status"].upper())
+        print(f"- [{label}] {item['id']} - {item['label']}")
         if detail:
             print(f"  {detail}")
 

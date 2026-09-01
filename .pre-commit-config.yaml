@@ -63,3 +63,4 @@ repos:
     args:
     - --product=pre_commit_hooks
     - --non_compliant_name
+  - id: pyansys-quality-report
