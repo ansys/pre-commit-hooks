@@ -5,6 +5,12 @@
   language: python
   files: '(src|examples|tests)/.*\.(py)|\.(proto)'
   require_serial: true
+- id: "ghaction-pin"
+  name: "Pin GitHub Actions to commit SHAs"
+  description: "Rewrite GitHub Action uses: references from mutable tags to pinned commit SHAs"
+  entry: ghaction-pin
+  language: python
+  pass_filenames: false
 - id: "tech-review"
   name: "Ansys Technical Review"
   description: "Perform initial technical review on a repository"
