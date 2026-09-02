@@ -1,0 +1,32 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.cleanup`
+=================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.cleanup(assets: dict, os_git_root: str) -> None
+
+   
+   Unlink the default asset files, and remove directories if empty.
+
+
+   :Parameters:
+
+       **assets: dict**
+           Dictionary containing assets information
+
+       **os_git_root: str**
+           Full path of the repository's root directory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
