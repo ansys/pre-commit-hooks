@@ -68,14 +68,30 @@ version = "0.1.0"
 
 
 def test_hook_covers_all_repo_review_checks():
-    """The standalone hook must include the full repo-review rule set."""
+    """The package-level rule registry should expose the complete local check set."""
 
-    repo_root = Path(__file__).resolve().parents[3]
-    checks_dir = repo_root / "src" / "pyansys_review" / "checks"
+    import ansys.pre_commit_hooks.quality_rules as quality_rules
+
+    checks_dir = Path(quality_rules.__file__).resolve().parent
 
     def class_names(path: Path) -> set[str]:
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         return {node.name for node in tree.body if isinstance(node, ast.ClassDef)}
+
+    family_names = {
+        "ProjectMetadata",
+        "CICDFiles",
+        "CICD",
+        "Dependabot",
+        "Documentation",
+        "README",
+        "BuildSystem",
+        "Security",
+        "Labeler",
+        "Vale",
+        "MCP",
+        "PreCommit",
+    }
 
     expected = set()
     for path in checks_dir.glob("*.py"):
@@ -83,8 +99,8 @@ def test_hook_covers_all_repo_review_checks():
             continue
         expected |= class_names(path)
 
-    actual = class_names(Path(hook.__file__))
-    assert expected == actual - {"MemoryTraversable"}
+    actual = set(quality_rules.repo_review_checks())
+    assert expected - family_names == actual
 
 
 def test_quality_rules_are_grouped_package():

@@ -13,8 +13,12 @@ from __future__ import annotations
 import argparse
 from io import BytesIO, StringIO
 import json
+import os
 from pathlib import Path
+import re
 from typing import Any, Iterator
+
+from ansys.pre_commit_hooks import tech_review
 
 try:
     from importlib.resources.abc import Traversable
@@ -1663,11 +1667,41 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--all", action="store_true", help="Show all checks, including passing ones."
     )
-    args = parser.parse_args(argv)
+    parser.add_argument(
+        "--fix-missing",
+        action="store_true",
+        help="Generate missing repository scaffolding before running the quality report.",
+    )
+    args, unknown = parser.parse_known_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
     if not repo_root.exists():
         raise FileNotFoundError(f"Repo root not found: {repo_root}")
+
+    if args.fix_missing:
+        legacy_argv: list[str] = []
+        raw_argv = list(argv) if argv is not None else list(__import__("sys").argv[1:])
+
+        idx = 0
+        while idx < len(raw_argv):
+            token = raw_argv[idx]
+            if token in {"--repo-root", "--json", "--all", "--fix-missing"}:
+                idx += 1
+                if token == "--repo-root" and idx < len(raw_argv):
+                    idx += 1
+                continue
+            legacy_argv.append(token)
+            idx += 1
+
+        if unknown:
+            legacy_argv.extend(unknown)
+
+        current_dir = Path.cwd()
+        os.chdir(repo_root)
+        try:
+            return tech_review.main(legacy_argv)
+        finally:
+            os.chdir(current_dir)
 
     files = _load_files(repo_root)
     review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)))
