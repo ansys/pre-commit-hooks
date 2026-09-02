@@ -31,8 +31,8 @@ except ImportError:  # pragma: no cover
 
 from ansys.pre_commit_hooks.quality_rules import (
     _first_doc_line,
-    _interpret,
     is_mcp,
+    normalize_check_result,
     readme_path,
     repo_review_checks,
     repo_review_families,
@@ -542,10 +542,9 @@ def _bootstrap_legacy_files(
     return 0 if is_compliant else 1
 
 
-def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, Any]:
-    """Run the package-based repo review checks against an in-memory file set."""
-    root = MemoryTraversable(files)
-    fixture_values = {
+def _build_fixture_values(root: MemoryTraversable, is_mcp_flag: bool) -> dict[str, Any]:
+    """Create the shared repository context used by the quality-rule checks."""
+    return {
         "root": root,
         "package": root,
         "workflow_map": workflow_map(root),
@@ -553,35 +552,34 @@ def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, An
         "is_mcp": is_mcp_flag or is_mcp(root),
     }
 
-    checks = repo_review_checks()
-    families = repo_review_families()
-    results = []
 
-    for code, check_obj in checks.items():
-        try:
-            import inspect
+def _execute_check(check_obj: Any, *, code: str, fixture_values: dict[str, Any], families: dict[str, dict]) -> dict[str, Any]:
+    """Execute a single rule object and return its normalized report payload."""
+    try:
+        import inspect
 
-            signature = inspect.signature(check_obj.check)
-            kwargs = {
-                key: fixture_values[key] for key in signature.parameters if key in fixture_values
-            }
-            raw = check_obj.check(**kwargs)
-        except (AttributeError, TypeError, ValueError) as exc:  # pragma: no cover
-            raw = f"⚠️ Check error: {exc}"
+        signature = inspect.signature(check_obj.check)
+        kwargs = {
+            key: fixture_values[key] for key in signature.parameters if key in fixture_values
+        }
+        raw = check_obj.check(**kwargs)
+    except (AttributeError, TypeError, ValueError) as exc:  # pragma: no cover
+        raw = f"⚠️ Check error: {exc}"
 
-        status, detail = _interpret(raw, check_obj)
-        results.append(
-            {
-                "id": code,
-                "family": check_obj.family,
-                "family_name": families.get(check_obj.family, {}).get("name", check_obj.family),
-                "label": type(check_obj).__doc__ or code,
-                "description": _first_doc_line(check_obj),
-                "status": status,
-                "detail": detail,
-            }
-        )
+    status, detail = normalize_check_result(raw, check_obj)
+    return {
+        "id": code,
+        "family": check_obj.family,
+        "family_name": families.get(check_obj.family, {}).get("name", check_obj.family),
+        "label": type(check_obj).__doc__ or code,
+        "description": _first_doc_line(check_obj),
+        "status": status,
+        "detail": detail,
+    }
 
+
+def _tally_results(results: list[dict[str, Any]]) -> dict[str, int]:
+    """Summarize rule outcomes into pass/fail/warn/na counts."""
     tally = {"passed": 0, "failed": 0, "warned": 0, "not_applicable": 0}
     for result in results:
         if result["status"] == "pass":
@@ -592,7 +590,21 @@ def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, An
             tally["warned"] += 1
         else:
             tally["not_applicable"] += 1
+    return tally
 
+
+def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, Any]:
+    """Run the package-based repo review checks against an in-memory file set."""
+    root = MemoryTraversable(files)
+    fixture_values = _build_fixture_values(root, is_mcp_flag)
+    checks = repo_review_checks()
+    families = repo_review_families()
+    results = [
+        _execute_check(check_obj, code=code, fixture_values=fixture_values, families=families)
+        for code, check_obj in checks.items()
+    ]
+
+    tally = _tally_results(results)
     scored = tally["passed"] + tally["failed"]
     score = round(tally["passed"] / scored * 100) if scored else 0
     return {

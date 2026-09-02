@@ -43,8 +43,8 @@ __all__ = [
     "workflow_map",
     "readme_path",
     "is_mcp",
+    "normalize_check_result",
     "_first_doc_line",
-    "_interpret",
 ]
 
 
@@ -207,17 +207,30 @@ def _first_doc_line(obj: Any) -> str:
     return lines[0] if lines else ""
 
 
-def _interpret(raw: bool | str | None, check_obj: Any) -> tuple[str, str]:
-    """Interpret the raw check result into a status and detail message."""
+def normalize_check_result(raw: bool | str | None, check_obj: Any | None = None) -> tuple[str, str]:
+    """Normalize a raw rule result to the canonical status/detail contract.
+
+    The canonical contract is intentionally simple and shared across the whole
+    quality-rule package: ``pass``, ``warn``, ``fail``, and ``na`` are the only
+    valid statuses.
+    """
     if raw is True:
         return "pass", ""
     if raw is None:
         return "na", ""
-    if isinstance(raw, str) and raw.startswith("⚠️ "):
-        return "warn", raw.removeprefix("⚠️ ")
+    if isinstance(raw, str):
+        if raw.startswith("⚠️ "):
+            return "warn", raw.removeprefix("⚠️ ")
+        if raw:
+            return "warn", raw
+        return "fail", ""
     if raw is False:
+        if check_obj is None:
+            return "fail", ""
         doc = (check_obj.check.__doc__ or "").strip()
         lines = [line.strip() for line in doc.splitlines() if line.strip()]
         detail = lines[-1] if len(lines) > 1 else (lines[0] if lines else "")
         return "fail", detail
     return "fail", str(raw)
+
+

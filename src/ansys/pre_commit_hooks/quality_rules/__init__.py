@@ -51,12 +51,12 @@ from ansys.pre_commit_hooks.quality_rules.cicd_files import CI001, CI002, CI003,
 from ansys.pre_commit_hooks.quality_rules.common import (
     CANONICAL_WF,
     _first_doc_line,
-    _interpret,
     all_workflows_content,
     file_contains,
     file_content,
     file_exists,
     is_mcp,
+    normalize_check_result,
     readme_path,
     wf_content,
     wf_label,
@@ -158,10 +158,10 @@ __all__ = [
     "workflow_map",
     "readme_path",
     "is_mcp",
+    "normalize_check_result",
     "repo_review_families",
     "repo_review_checks",
     "_first_doc_line",
-    "_interpret",
     "ProjectMetadata",
     "PM001",
     "PM002",
@@ -268,42 +268,46 @@ __all__ = [
 ]
 
 
+QUALITY_RULE_FAMILIES = (
+    ProjectMetadata,
+    CICDFiles,
+    CICD,
+    Dependabot,
+    PreCommit,
+    Documentation,
+    README,
+    BuildSystem,
+    Security,
+    Labeler,
+    Vale,
+    MCP,
+)
+
+QUALITY_RULE_METADATA = {
+    "project_metadata": {"name": "Project Metadata", "order": 10},
+    "cicd_files": {"name": "CI/CD — Workflow File Names", "order": 20},
+    "cicd": {"name": "CI/CD — Content Checks", "order": 25},
+    "dependabot": {"name": "Dependabot", "order": 30},
+    "pre_commit": {"name": "Pre-commit", "order": 40},
+    "documentation": {"name": "Documentation", "order": 50},
+    "readme": {"name": "README", "order": 60},
+    "build_system": {"name": "Build System", "order": 70},
+    "security": {"name": "Security", "order": 80},
+    "labeler": {"name": "Labeler", "order": 90},
+    "vale": {"name": "Vale", "order": 100},
+    "mcp": {"name": "MCP Release Readiness", "order": 110},
+}
+
+
 def repo_review_families() -> dict[str, dict]:
-    """Return the metadata for each quality-report family."""
-    return {
-        "project_metadata": {"name": "Project Metadata", "order": 10},
-        "cicd_files": {"name": "CI/CD — Workflow File Names", "order": 20},
-        "cicd": {"name": "CI/CD — Content Checks", "order": 25},
-        "dependabot": {"name": "Dependabot", "order": 30},
-        "pre_commit": {"name": "Pre-commit", "order": 40},
-        "documentation": {"name": "Documentation", "order": 50},
-        "readme": {"name": "README", "order": 60},
-        "build_system": {"name": "Build System", "order": 70},
-        "security": {"name": "Security", "order": 80},
-        "labeler": {"name": "Labeler", "order": 90},
-        "vale": {"name": "Vale", "order": 100},
-        "mcp": {"name": "MCP Release Readiness", "order": 110},
-    }
+    """Return the family metadata used by the quality report."""
+    return dict(QUALITY_RULE_METADATA)
 
 
-def repo_review_checks() -> dict:
-    """Return the rule family classes used by the quality report."""
-    families = [
-        ProjectMetadata,
-        CICDFiles,
-        CICD,
-        Dependabot,
-        PreCommit,
-        Documentation,
-        README,
-        BuildSystem,
-        Security,
-        Labeler,
-        Vale,
-        MCP,
-    ]
-    result = {}
-    for family in families:
+def repo_review_checks() -> dict[str, object]:
+    """Return all discovered rule objects keyed by their rule class name."""
+    result: dict[str, object] = {}
+    for family in QUALITY_RULE_FAMILIES:
         for cls in family.__subclasses__():
             result[cls.__name__] = cls()
     return result

@@ -159,3 +159,13 @@ def test_quality_rules_are_grouped_package():
     assert hasattr(quality_rules, "PM001")
     assert hasattr(project_metadata, "PM001")
     assert callable(quality_rules.repo_review_checks)
+
+
+def test_normalize_check_result_standardizes_rule_status():
+    """Rule evaluation results should normalize to the canonical pass/warn/fail/na model."""
+    from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result
+
+    assert normalize_check_result(True) == ("pass", "")
+    assert normalize_check_result(None) == ("na", "")
+    assert normalize_check_result("⚠️ check warning") == ("warn", "check warning")
+    assert normalize_check_result(False) == ("fail", "")
