@@ -120,7 +120,9 @@ def test_fix_missing_mode_bootstraps_repo_files(tmp_path: pytest.TempPathFactory
     setup_repo(tmp_path)
     os.chdir(tmp_path)
 
-    exit_code = quality_hook.main(["--repo-root", str(tmp_path), "--fix-missing", "--product=techreview"])
+    exit_code = quality_hook.main(
+        ["--repo-root", str(tmp_path), "--fix-missing", "--product=techreview"]
+    )
 
     assert exit_code == 1
     assert pathlib.Path.exists(tmp_path / ".github")
