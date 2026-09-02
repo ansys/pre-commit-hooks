@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_exists, file_content
+from .common import file_contains, file_content, file_exists
 
 __all__ = [
     "ProjectMetadata",
