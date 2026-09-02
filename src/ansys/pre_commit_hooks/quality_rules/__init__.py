@@ -40,7 +40,7 @@ from .common import (
 from .dependabot import DB001, DB002, DB003, DB004, DB005, DB006, DB007, DB008, Dependabot
 from .documentation import DOC001, DOC002, DOC003, DOC004, DOC005, DOC006, DOC007, Documentation
 from .labeler import LB001, LB002, LB003, LB004, LB005, Labeler
-from .mcp import MCP001, MCP002, MCP003, MCP004, MCP005, MCP006, MCP007, MCP
+from .mcp import MCP, MCP001, MCP002, MCP003, MCP004, MCP005, MCP006, MCP007
 from .pre_commit import (
     PC001,
     PC002,
@@ -68,7 +68,7 @@ from .project_metadata import (
     PM011,
     ProjectMetadata,
 )
-from .readme import RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007, RM008, README
+from .readme import README, RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007, RM008
 from .security import SEC001, SEC002, SEC003, SEC004, SEC005, Security
 from .vale import VL001, VL002, VL003, VL004, VL005, Vale
 
