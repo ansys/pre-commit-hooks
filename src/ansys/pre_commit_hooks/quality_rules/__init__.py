@@ -1,12 +1,37 @@
 # Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Rule definitions for the PyAnsys repository quality report."""
 
 from __future__ import annotations
 
-from .build_system import BS001, BS002, BS003, BS004, BuildSystem
-from .cicd import (
+from ansys.pre_commit_hooks.quality_rules.build_system import (
+    BS001,
+    BS002,
+    BS003,
+    BS004,
+    BuildSystem,
+)
+from ansys.pre_commit_hooks.quality_rules.cicd import (
     CI004,
     CI005,
     CI006,
@@ -22,8 +47,8 @@ from .cicd import (
     CI016,
     CICD,
 )
-from .cicd_files import CI001, CI002, CI003, CICDFiles
-from .common import (
+from ansys.pre_commit_hooks.quality_rules.cicd_files import CI001, CI002, CI003, CICDFiles
+from ansys.pre_commit_hooks.quality_rules.common import (
     CANONICAL_WF,
     _first_doc_line,
     _interpret,
@@ -37,11 +62,39 @@ from .common import (
     wf_label,
     workflow_map,
 )
-from .dependabot import DB001, DB002, DB003, DB004, DB005, DB006, DB007, DB008, Dependabot
-from .documentation import DOC001, DOC002, DOC003, DOC004, DOC005, DOC006, DOC007, Documentation
-from .labeler import LB001, LB002, LB003, LB004, LB005, Labeler
-from .mcp import MCP, MCP001, MCP002, MCP003, MCP004, MCP005, MCP006, MCP007
-from .pre_commit import (
+from ansys.pre_commit_hooks.quality_rules.dependabot import (
+    DB001,
+    DB002,
+    DB003,
+    DB004,
+    DB005,
+    DB006,
+    DB007,
+    DB008,
+    Dependabot,
+)
+from ansys.pre_commit_hooks.quality_rules.documentation import (
+    DOC001,
+    DOC002,
+    DOC003,
+    DOC004,
+    DOC005,
+    DOC006,
+    DOC007,
+    Documentation,
+)
+from ansys.pre_commit_hooks.quality_rules.labeler import LB001, LB002, LB003, LB004, LB005, Labeler
+from ansys.pre_commit_hooks.quality_rules.mcp import (
+    MCP,
+    MCP001,
+    MCP002,
+    MCP003,
+    MCP004,
+    MCP005,
+    MCP006,
+    MCP007,
+)
+from ansys.pre_commit_hooks.quality_rules.pre_commit import (
     PC001,
     PC002,
     PC003,
@@ -54,7 +107,7 @@ from .pre_commit import (
     PC010,
     PreCommit,
 )
-from .project_metadata import (
+from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM001,
     PM002,
     PM003,
@@ -68,9 +121,27 @@ from .project_metadata import (
     PM011,
     ProjectMetadata,
 )
-from .readme import README, RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007, RM008
-from .security import SEC001, SEC002, SEC003, SEC004, SEC005, Security
-from .vale import VL001, VL002, VL003, VL004, VL005, Vale
+from ansys.pre_commit_hooks.quality_rules.readme import (
+    README,
+    RM000,
+    RM001,
+    RM002,
+    RM003,
+    RM004,
+    RM005,
+    RM006,
+    RM007,
+    RM008,
+)
+from ansys.pre_commit_hooks.quality_rules.security import (
+    SEC001,
+    SEC002,
+    SEC003,
+    SEC004,
+    SEC005,
+    Security,
+)
+from ansys.pre_commit_hooks.quality_rules.vale import VL001, VL002, VL003, VL004, VL005, Vale
 
 __all__ = [
     "file_exists",
