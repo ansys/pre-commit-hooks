@@ -136,6 +136,21 @@ def test_hook_covers_all_repo_review_checks():
     assert expected - family_names == actual
 
 
+def test_pm015_accepts_apache_license(tmp_path):
+    """Project metadata should accept Apache 2.0 as a valid license text."""
+    repo_path = tmp_path / "apache-license-project"
+    repo_path.mkdir()
+
+    (repo_path / "LICENSE").write_text(
+        "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\n",
+        encoding="utf-8",
+    )
+
+    import ansys.pre_commit_hooks.quality_rules.project_metadata as project_metadata
+
+    assert project_metadata.PM015.check(repo_path) is True
+
+
 def test_quality_rules_are_grouped_package():
     """Quality rules should be exposed from a package with one module per check family."""
     import ansys.pre_commit_hooks.quality_rules as quality_rules

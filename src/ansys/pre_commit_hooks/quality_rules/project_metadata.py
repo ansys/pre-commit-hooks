@@ -267,16 +267,20 @@ class PM014(ProjectMetadata):
 
 
 class PM015(ProjectMetadata):
-    """The LICENSE file includes the MIT License wording."""
+    """The LICENSE file includes recognized project license wording."""
 
     requires = {"PM006"}
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the LICENSE file contains the expected MIT License text."""
+        """Return whether the LICENSE file contains expected MIT or Apache 2.0 text."""
         if not file_exists(root, "LICENSE"):
             return None
         content = file_content(root, "LICENSE")
-        if "MIT License" in content:
+        if (
+            "MIT License" in content
+            or re.search(r"Apache License.*Version 2\.0", content, re.IGNORECASE | re.DOTALL)
+            or "Apache License" in content
+        ):
             return True
-        return '⚠️ LICENSE file content is missing "MIT License".'
+        return '⚠️ LICENSE file content is missing a recognized license statement (MIT or Apache 2.0).'
