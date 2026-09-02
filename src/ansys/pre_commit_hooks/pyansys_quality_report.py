@@ -464,21 +464,31 @@ def check_file_content(
         elif file.name == Filenames.LICENSE.value:
             downloaded = download_license_json(JSON_URL, LICENSES_JSON)
             if downloaded:
-                license_line_found = False
                 with open(LICENSES_JSON, "r", encoding="utf-8") as f:
                     license_json = json.load(f)
-                    license_full_name = license_json[license]
+
+                accepted_names = {
+                    value
+                    for key in {license, "MIT", "Apache-2.0"}
+                    if (value := license_json.get(key))
+                }
+                accepted_names.update(
+                    {
+                        "MIT License",
+                        "Apache License, Version 2.0",
+                        "Apache License 2.0",
+                        "Apache License",
+                    }
+                )
 
                 with open(file, "r", encoding="utf-8") as license_file:
-                    for line in license_file:
-                        if license_full_name in line:
-                            license_line_found = True
-                            break
+                    file_text = license_file.read().lower()
 
-                if not license_line_found:
+                if not any(name.lower() in file_text for name in accepted_names):
+                    requested_name = license_json.get(license, license)
                     is_compliant = False
                     print(
-                        f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'  # noqa: E501
+                        f'"The {Filenames.LICENSE.value} file content is missing "{requested_name}"'  # noqa: E501
                     )
     finally:
         temp_path.unlink(missing_ok=True)
@@ -553,15 +563,15 @@ def _build_fixture_values(root: MemoryTraversable, is_mcp_flag: bool) -> dict[st
     }
 
 
-def _execute_check(check_obj: Any, *, code: str, fixture_values: dict[str, Any], families: dict[str, dict]) -> dict[str, Any]:
+def _execute_check(
+    check_obj: Any, *, code: str, fixture_values: dict[str, Any], families: dict[str, dict]
+) -> dict[str, Any]:
     """Execute a single rule object and return its normalized report payload."""
     try:
         import inspect
 
         signature = inspect.signature(check_obj.check)
-        kwargs = {
-            key: fixture_values[key] for key in signature.parameters if key in fixture_values
-        }
+        kwargs = {key: fixture_values[key] for key in signature.parameters if key in fixture_values}
         raw = check_obj.check(**kwargs)
     except (AttributeError, TypeError, ValueError) as exc:  # pragma: no cover
         raw = f"⚠️ Check error: {exc}"

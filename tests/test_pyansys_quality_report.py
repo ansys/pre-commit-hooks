@@ -161,6 +161,24 @@ def test_quality_rules_are_grouped_package():
     assert callable(quality_rules.repo_review_checks)
 
 
+def test_legacy_license_check_accepts_apache_2_0_by_default(tmp_path):
+    """The legacy bootstrap should not reject a valid Apache 2.0 LICENSE no configured."""
+    license_path = tmp_path / "LICENSE"
+    license_path.write_text(
+        "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\n",
+        encoding="utf-8",
+    )
+
+    result = hook.check_file_content(
+        license_path,
+        "MIT License\n",
+        True,
+        hook.DEFAULT_LICENSE,
+    )
+
+    assert result is True
+
+
 def test_normalize_check_result_standardizes_rule_status():
     """Rule evaluation results should normalize to the canonical pass/warn/fail/na model."""
     from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result

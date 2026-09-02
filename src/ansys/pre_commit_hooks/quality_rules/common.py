@@ -232,5 +232,3 @@ def normalize_check_result(raw: bool | str | None, check_obj: Any | None = None)
         detail = lines[-1] if len(lines) > 1 else (lines[0] if lines else "")
         return "fail", detail
     return "fail", str(raw)
-
-
