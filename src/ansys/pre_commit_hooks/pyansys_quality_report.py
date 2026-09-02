@@ -258,7 +258,7 @@ def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the PyAnsys repository quality report."""
+    """Run the repository bootstrap and the PyAnsys quality report."""
     parser = argparse.ArgumentParser(description="Run the PyAnsys repository quality report.")
     parser.add_argument("--repo-root", default=".", help="Repository root to review.")
     parser.add_argument(
@@ -278,6 +278,7 @@ def main(argv: list[str] | None = None) -> int:
     if not repo_root.exists():
         raise FileNotFoundError(f"Repo root not found: {repo_root}")
 
+    legacy_exit = 0
     if args.fix_missing:
         legacy_argv: list[str] = []
         raw_argv = list(argv) if argv is not None else list(__import__("sys").argv[1:])
@@ -299,80 +300,24 @@ def main(argv: list[str] | None = None) -> int:
         current_dir = Path.cwd()
         os.chdir(repo_root)
         try:
-            return tech_review.main(legacy_argv)
+            legacy_exit = tech_review.main(legacy_argv)
         finally:
             os.chdir(current_dir)
+
+        if legacy_exit == 0:
+            print("\nLegacy tech-review bootstrap complete.")
+        else:
+            print(f"\nLegacy tech-review bootstrap reported exit code {legacy_exit}.")
 
     files = _load_files(repo_root)
     review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)))
 
     if args.json:
         print(json.dumps(review, indent=2))
-        return 1 if review["tally"]["fail"] else 0
+        return 1 if review["tally"]["fail"] or legacy_exit else 0
 
     _print_report(review, show_passes=args.all)
-    return 1 if review["tally"]["fail"] else 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-
-
-def main(argv: list[str] | None = None) -> int:
-    """Run the PyAnsys repository quality report."""
-    parser = argparse.ArgumentParser(description="Run the PyAnsys repository quality report.")
-    parser.add_argument("--repo-root", default=".", help="Repository root to review.")
-    parser.add_argument(
-        "--json", action="store_true", help="Emit a JSON report instead of a text summary."
-    )
-    parser.add_argument(
-        "--all", action="store_true", help="Show all checks, including passing ones."
-    )
-    parser.add_argument(
-        "--fix-missing",
-        action="store_true",
-        help="Generate missing repository scaffolding before running the quality report.",
-    )
-    args, unknown = parser.parse_known_args(argv)
-
-    repo_root = Path(args.repo_root).resolve()
-    if not repo_root.exists():
-        raise FileNotFoundError(f"Repo root not found: {repo_root}")
-
-    if args.fix_missing:
-        legacy_argv: list[str] = []
-        raw_argv = list(argv) if argv is not None else list(__import__("sys").argv[1:])
-
-        idx = 0
-        while idx < len(raw_argv):
-            token = raw_argv[idx]
-            if token in {"--repo-root", "--json", "--all", "--fix-missing"}:
-                idx += 1
-                if token == "--repo-root" and idx < len(raw_argv):
-                    idx += 1
-                continue
-            legacy_argv.append(token)
-            idx += 1
-
-        if unknown:
-            legacy_argv.extend(unknown)
-
-        current_dir = Path.cwd()
-        os.chdir(repo_root)
-        try:
-            return tech_review.main(legacy_argv)
-        finally:
-            os.chdir(current_dir)
-
-    files = _load_files(repo_root)
-    review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)))
-
-    if args.json:
-        print(json.dumps(review, indent=2))
-        return 1 if review["tally"]["fail"] else 0
-
-    _print_report(review, show_passes=args.all)
-    return 1 if review["tally"]["fail"] else 0
+    return 1 if review["tally"]["fail"] or legacy_exit else 0
 
 
 if __name__ == "__main__":

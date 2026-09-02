@@ -40,6 +40,39 @@ maintainers = [{name = "Example", email = "example@example.com"}]
     assert "Score" in output or "Summary" in output
 
 
+def test_fix_missing_runs_quality_report_after_bootstrap(tmp_path, capsys):
+    """--fix-missing should bootstrap the repo and then continue to the quality report."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    os.chdir(repo_path)
+    git.Repo.init(repo_path)
+    repo = git.Repo(repo_path)
+    repo.index.commit("initial")
+
+    (repo_path / ".github").mkdir()
+    (repo_path / "src").mkdir()
+    (repo_path / "tests").mkdir()
+    (repo_path / "doc").mkdir()
+    (repo_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Example", email = "example@example.com"}]
+maintainers = [{name = "Example", email = "example@example.com"}]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--fix-missing", "--product=techreview"])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "PyAnsys quality report" in output
+    assert "Score" in output or "Summary" in output
+
+
 def test_main_colors_status_labels(tmp_path, capsys):
     """The console report should colorize pass, warn, and fail states."""
     repo_path = tmp_path / "quality-demo"
