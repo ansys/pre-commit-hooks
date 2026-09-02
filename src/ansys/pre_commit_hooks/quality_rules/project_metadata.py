@@ -235,8 +235,17 @@ class PM014(ProjectMetadata):
         if not file_exists(root, "pyproject.toml"):
             return None
         content = file_content(root, "pyproject.toml")
-        name_ok = bool(re.search(r'authors\s*=\s*\[[\s\S]*?name\s*=\s*["\']Synopsys, Inc\. and ANSYS, Inc\.["\']', content))
-        email_ok = bool(re.search(r'authors\s*=\s*\[[\s\S]*?email\s*=\s*["\']pyansys-core@synopsys.com["\']', content))
+        name_ok = bool(
+            re.search(
+                r'authors\s*=\s*\[[\s\S]*?name\s*=\s*["\']Synopsys, Inc\. and ANSYS, Inc\.["\']',
+                content,
+            )
+        )
+        email_ok = bool(
+            re.search(
+                r'authors\s*=\s*\[[\s\S]*?email\s*=\s*["\']pyansys-core@synopsys.com["\']', content
+            )
+        )
         maintainer_name_ok = bool(
             re.search(
                 r'maintainers\s*=\s*\[[\s\S]*?name\s*=\s*["\']Synopsys, Inc\. and ANSYS, Inc\.["\']',
@@ -270,4 +279,4 @@ class PM015(ProjectMetadata):
         content = file_content(root, "LICENSE")
         if "MIT License" in content:
             return True
-        return "⚠️ LICENSE file content is missing \"MIT License\"."
+        return '⚠️ LICENSE file content is missing "MIT License".'
