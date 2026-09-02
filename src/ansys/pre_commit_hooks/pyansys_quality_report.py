@@ -220,6 +220,9 @@ def check_config_file(
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
         )
+        is_compliant, project_name = check_setup_py(
+            author_maint_name, author_maint_email, is_compliant
+        )
     elif has_pyproject and not has_setup:
         config_file = "pyproject"
         is_compliant, project_name = check_pyproject_toml(
@@ -252,6 +255,9 @@ def check_pyproject_toml(
 
         if not non_compliant_name:
             name = project.get("name", "DNE")
+            if (name == "DNE") or (
+                (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
+            ):
             if (name == "DNE") or (
                 (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
             ):
@@ -389,6 +395,9 @@ def check_file_exists(
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
+    year_str = (
+        start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
+    )
     ref_dict = {
         "AUTHORS": "the-authors-file",
         "CODE_OF_CONDUCT.md": "the-code-of-conduct-md-file",
@@ -442,10 +451,16 @@ def check_file_exists(
                 is_compliant = check_file_content(
                     repo_file_path, file_content, is_compliant, license
                 )
+                is_compliant = check_file_content(
+                    repo_file_path, file_content, is_compliant, license
+                )
 
     return is_compliant
 
 
+def check_file_content(
+    file: Path | str, generated_content: str, is_compliant: bool, license: str
+) -> bool:
 def check_file_content(
     file: Path | str, generated_content: str, is_compliant: bool, license: str
 ) -> bool:
@@ -476,6 +491,9 @@ def check_file_content(
 
             if not license_line_found:
                 is_compliant = False
+                print(
+                    f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
+                )
                 print(
                     f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
                 )
@@ -511,6 +529,9 @@ def _bootstrap_legacy_files(
     except Exception:
         start_year = DEFAULT_START_YEAR
 
+    is_compliant = check_dirs_exist(
+        root, is_compliant, [directory.value for directory in Directories]
+    )
     is_compliant = check_dirs_exist(
         root, is_compliant, [directory.value for directory in Directories]
     )
