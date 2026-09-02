@@ -553,15 +553,15 @@ def _build_fixture_values(root: MemoryTraversable, is_mcp_flag: bool) -> dict[st
     }
 
 
-def _execute_check(check_obj: Any, *, code: str, fixture_values: dict[str, Any], families: dict[str, dict]) -> dict[str, Any]:
+def _execute_check(
+    check_obj: Any, *, code: str, fixture_values: dict[str, Any], families: dict[str, dict]
+) -> dict[str, Any]:
     """Execute a single rule object and return its normalized report payload."""
     try:
         import inspect
 
         signature = inspect.signature(check_obj.check)
-        kwargs = {
-            key: fixture_values[key] for key in signature.parameters if key in fixture_values
-        }
+        kwargs = {key: fixture_values[key] for key in signature.parameters if key in fixture_values}
         raw = check_obj.check(**kwargs)
     except (AttributeError, TypeError, ValueError) as exc:  # pragma: no cover
         raw = f"⚠️ Check error: {exc}"
