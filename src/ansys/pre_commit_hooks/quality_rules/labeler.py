@@ -54,7 +54,7 @@ class LB002(Labeler):
 
 
 class LB003(Labeler):
-    """labels.yml has a bug label."""
+    """Labels.yml has a bug label."""
 
     requires = {"LB002"}
 
@@ -67,7 +67,7 @@ class LB003(Labeler):
 
 
 class LB004(Labeler):
-    """labels.yml has an enhancement label."""
+    """Labels.yml has an enhancement label."""
 
     requires = {"LB002"}
 
@@ -80,7 +80,7 @@ class LB004(Labeler):
 
 
 class LB005(Labeler):
-    """labels.yml has a documentation label."""
+    """Labels.yml has a documentation label."""
 
     requires = {"LB002"}
 

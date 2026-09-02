@@ -143,7 +143,7 @@ class PM009(ProjectMetadata):
 
 
 class PM010(ProjectMetadata):
-    """pyproject.toml references the README file."""
+    """Pyproject.toml references the README file."""
 
     requires = {"PM007"}
 
@@ -171,7 +171,7 @@ class PM010(ProjectMetadata):
 
 
 class PM011(ProjectMetadata):
-    """pyproject.toml references the LICENSE file."""
+    """Pyproject.toml references the LICENSE file."""
 
     requires = {"PM006"}
 

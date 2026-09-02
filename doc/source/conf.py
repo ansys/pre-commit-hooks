@@ -44,6 +44,9 @@ html_theme_options = {
     },
 }
 
+# Exclude legacy modules that still share public API names with the canonical hook.
+autoapi_ignore = ["**/tech_review.py"]
+
 # Sphinx extensions
 extensions = [
     "ansys_sphinx_theme.extension.autoapi",

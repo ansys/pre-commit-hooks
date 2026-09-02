@@ -60,7 +60,7 @@ class DB001(Dependabot):
 
 
 class DB002(Dependabot):
-    """dependabot.yml sets version 2."""
+    """Dependabot.yml sets version 2."""
 
     requires = {"DB001"}
 

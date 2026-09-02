@@ -59,7 +59,7 @@ class PC001(PreCommit):
 
 
 class PC002(PreCommit):
-    """ruff-pre-commit is configured."""
+    """Ruff-pre-commit is configured."""
 
     requires = {"PC001"}
 
@@ -72,7 +72,7 @@ class PC002(PreCommit):
 
 
 class PC003(PreCommit):
-    """zizmor is configured with the --pedantic flag."""
+    """Zizmor is configured with the --pedantic flag."""
 
     requires = {"PC001"}
 
@@ -91,7 +91,7 @@ class PC003(PreCommit):
 
 
 class PC004(PreCommit):
-    """blacken-docs is configured."""
+    """Blacken-docs is configured."""
 
     requires = {"PC001"}
 
@@ -104,7 +104,7 @@ class PC004(PreCommit):
 
 
 class PC005(PreCommit):
-    """codespell is configured."""
+    """Codespell is configured."""
 
     requires = {"PC001"}
 
@@ -117,7 +117,7 @@ class PC005(PreCommit):
 
 
 class PC006(PreCommit):
-    """ansys/pre-commit-hooks is configured."""
+    """Ansys/pre-commit-hooks is configured."""
 
     requires = {"PC001"}
 
@@ -130,7 +130,7 @@ class PC006(PreCommit):
 
 
 class PC007(PreCommit):
-    """google/yamlfmt is configured."""
+    """Google/yamlfmt is configured."""
 
     requires = {"PC001"}
 
@@ -143,7 +143,7 @@ class PC007(PreCommit):
 
 
 class PC008(PreCommit):
-    """pyright is configured."""
+    """Pyright is configured."""
 
     requires = {"PC001"}
 
@@ -156,7 +156,7 @@ class PC008(PreCommit):
 
 
 class PC009(PreCommit):
-    """autofix_prs: true is enabled."""
+    """Autofix_prs: true is enabled."""
 
     requires = {"PC001"}
 
@@ -171,7 +171,7 @@ class PC009(PreCommit):
 
 
 class PC010(PreCommit):
-    """autoupdate_schedule: weekly is configured."""
+    """Autoupdate_schedule: weekly is configured."""
 
     requires = {"PC001"}
 
