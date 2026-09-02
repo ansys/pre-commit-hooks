@@ -192,7 +192,9 @@ def check_dirs_exist(repo_path: Path | str, is_compliant: bool, directories: lis
         full_path = repo_path / directory
         if not full_path.exists():
             is_compliant = False
-            print(f'The "{directory}" directory does not exist. Creating the "{directory}" directory...')
+            print(
+                f'The "{directory}" directory does not exist. Creating the "{directory}" directory...'
+            )
             full_path.mkdir(parents=True, exist_ok=True)
 
     if not is_compliant:
@@ -215,7 +217,9 @@ def check_config_file(
 
     if (has_pyproject and has_setup) or (has_setup and not has_pyproject):
         config_file = "setuptools"
-        is_compliant, project_name = check_setup_py(author_maint_name, author_maint_email, is_compliant)
+        is_compliant, project_name = check_setup_py(
+            author_maint_name, author_maint_email, is_compliant
+        )
     elif has_pyproject and not has_setup:
         config_file = "pyproject"
         is_compliant, project_name = check_pyproject_toml(
@@ -248,7 +252,9 @@ def check_pyproject_toml(
 
         if not non_compliant_name:
             name = project.get("name", "DNE")
-            if (name == "DNE") or ((name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))):
+            if (name == "DNE") or (
+                (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
+            ):
                 is_compliant = False
                 print("Project name does not follow naming conventions")
 
@@ -380,7 +386,9 @@ def check_file_exists(
 ) -> bool:
     """Check files exist; if missing, generate them from the template."""
     repo_path = Path(repo_path)
-    year_str = start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
+    year_str = (
+        start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
+    )
     ref_dict = {
         "AUTHORS": "the-authors-file",
         "CODE_OF_CONDUCT.md": "the-code-of-conduct-md-file",
@@ -416,9 +424,7 @@ def check_file_exists(
                 if "dependabot" in file_name:
                     write_content(dne_message, repo_file_path, file_content)
                 else:
-                    tech_review_docs = (
-                        f"https://dev.docs.pyansys.com/packaging/structure.html#{ref_dict[file_name]}"
-                    )
+                    tech_review_docs = f"https://dev.docs.pyansys.com/packaging/structure.html#{ref_dict[file_name]}"
                     print(f"{file_name} does not exist. Please see {tech_review_docs}")
             else:
                 if "README" in file_name and product is None:
@@ -433,12 +439,16 @@ def check_file_exists(
                     write_content(dne_message, repo_file_path, file_content)
         else:
             if file_name in (Filenames.CONTRIBUTORS.value, Filenames.LICENSE.value):
-                is_compliant = check_file_content(repo_file_path, file_content, is_compliant, license)
+                is_compliant = check_file_content(
+                    repo_file_path, file_content, is_compliant, license
+                )
 
     return is_compliant
 
 
-def check_file_content(file: Path | str, generated_content: str, is_compliant: bool, license: str) -> bool:
+def check_file_content(
+    file: Path | str, generated_content: str, is_compliant: bool, license: str
+) -> bool:
     """Check the file content of the LICENSE and CONTRIBUTORS.md files."""
     file = Path(file)
     generated_file = NamedTemporaryFile(mode="w", delete=False)
@@ -466,7 +476,9 @@ def check_file_content(file: Path | str, generated_content: str, is_compliant: b
 
             if not license_line_found:
                 is_compliant = False
-                print(f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"')
+                print(
+                    f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
+                )
 
     return is_compliant
 
@@ -499,7 +511,9 @@ def _bootstrap_legacy_files(
     except Exception:
         start_year = DEFAULT_START_YEAR
 
-    is_compliant = check_dirs_exist(root, is_compliant, [directory.value for directory in Directories])
+    is_compliant = check_dirs_exist(
+        root, is_compliant, [directory.value for directory in Directories]
+    )
     is_compliant, project_name, config_file = check_config_file(
         root, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
