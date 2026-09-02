@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Iterator
-from datetime import date as dt
+import datetime
 from enum import Enum
 import filecmp
 from io import BytesIO, StringIO
@@ -81,7 +81,7 @@ DEFAULT_AUTHOR_MAINT_NAME = "Synopsys, Inc. and ANSYS, Inc."
 DEFAULT_AUTHOR_MAINT_EMAIL = "pyansys-core@synopsys.com"
 """Default email of project authors and maintainers."""
 
-DEFAULT_START_YEAR = dt.today().year
+DEFAULT_START_YEAR = datetime.datetime.now(tz=datetime.timezone.utc).date().year
 """Default start year of the repository."""
 
 DEFAULT_LICENSE = "MIT"
@@ -198,7 +198,7 @@ def check_dirs_exist(repo_path: Path | str, is_compliant: bool, directories: lis
             full_path.mkdir(parents=True, exist_ok=True)
 
     if not is_compliant:
-        print("")
+        print()
 
     return is_compliant
 
@@ -217,9 +217,6 @@ def check_config_file(
 
     if (has_pyproject and has_setup) or (has_setup and not has_pyproject):
         config_file = "setuptools"
-        is_compliant, project_name = check_setup_py(
-            author_maint_name, author_maint_email, is_compliant
-        )
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
         )
@@ -255,9 +252,6 @@ def check_pyproject_toml(
 
         if not non_compliant_name:
             name = project.get("name", "DNE")
-            if (name == "DNE") or (
-                (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
-            ):
             if (name == "DNE") or (
                 (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
             ):
@@ -395,9 +389,6 @@ def check_file_exists(
     year_str = (
         start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
     )
-    year_str = (
-        start_year if start_year == DEFAULT_START_YEAR else f"{start_year} - {DEFAULT_START_YEAR}"
-    )
     ref_dict = {
         "AUTHORS": "the-authors-file",
         "CODE_OF_CONDUCT.md": "the-code-of-conduct-md-file",
@@ -451,9 +442,6 @@ def check_file_exists(
                 is_compliant = check_file_content(
                     repo_file_path, file_content, is_compliant, license
                 )
-                is_compliant = check_file_content(
-                    repo_file_path, file_content, is_compliant, license
-                )
 
     return is_compliant
 
@@ -461,42 +449,39 @@ def check_file_exists(
 def check_file_content(
     file: Path | str, generated_content: str, is_compliant: bool, license: str
 ) -> bool:
-def check_file_content(
-    file: Path | str, generated_content: str, is_compliant: bool, license: str
-) -> bool:
     """Check the file content of the LICENSE and CONTRIBUTORS.md files."""
     file = Path(file)
-    generated_file = NamedTemporaryFile(mode="w", delete=False)
-    with open(generated_file.name, "w", encoding="utf-8") as f:
-        f.write(generated_content)
+    with NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as generated_file:
+        generated_file.write(generated_content)
+        temp_path = Path(generated_file.name)
 
-    same_files = filecmp.cmp(file, generated_file.name, shallow=False)
+    try:
+        same_files = filecmp.cmp(file, temp_path, shallow=False)
 
-    if file.name == Filenames.CONTRIBUTORS.value and same_files:
-        is_compliant = False
-        print("Please update your CONTRIBUTORS.md file.")
-    elif file.name == Filenames.LICENSE.value:
-        downloaded = download_license_json(JSON_URL, LICENSES_JSON)
-        if downloaded:
-            license_line_found = False
-            with open(LICENSES_JSON, "r", encoding="utf-8") as f:
-                license_json = json.load(f)
-                license_full_name = license_json[license]
+        if file.name == Filenames.CONTRIBUTORS.value and same_files:
+            is_compliant = False
+            print("Please update your CONTRIBUTORS.md file.")
+        elif file.name == Filenames.LICENSE.value:
+            downloaded = download_license_json(JSON_URL, LICENSES_JSON)
+            if downloaded:
+                license_line_found = False
+                with open(LICENSES_JSON, "r", encoding="utf-8") as f:
+                    license_json = json.load(f)
+                    license_full_name = license_json[license]
 
-            with open(file, "r", encoding="utf-8") as license_file:
-                for line in license_file:
-                    if license_full_name in line:
-                        license_line_found = True
-                        break
+                with open(file, "r", encoding="utf-8") as license_file:
+                    for line in license_file:
+                        if license_full_name in line:
+                            license_line_found = True
+                            break
 
-            if not license_line_found:
-                is_compliant = False
-                print(
-                    f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
-                )
-                print(
-                    f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'
-                )
+                if not license_line_found:
+                    is_compliant = False
+                    print(
+                        f'"The {Filenames.LICENSE.value} file content is missing "{license_full_name}"'  # noqa: E501
+                    )
+    finally:
+        temp_path.unlink(missing_ok=True)
 
     return is_compliant
 
@@ -526,7 +511,7 @@ def _bootstrap_legacy_files(
         g = git.Git(root)
         all_dates = g.log("--reverse", "--format=%ci")
         start_year = int(all_dates[0:4]) if all_dates else DEFAULT_START_YEAR
-    except Exception:
+    except (git.GitCommandError, TypeError, ValueError):
         start_year = DEFAULT_START_YEAR
 
     is_compliant = check_dirs_exist(
@@ -735,7 +720,7 @@ def main(argv: list[str] | None = None) -> int:
         help="The repository URL. For example, https://github.com/ansys/pymechanical",
     )
     parser.add_argument("--non_compliant_name", action="store_true")
-    args, unknown = parser.parse_known_args(argv)
+    args, _ = parser.parse_known_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
     if not repo_root.exists():
