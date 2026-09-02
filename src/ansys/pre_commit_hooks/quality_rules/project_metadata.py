@@ -283,4 +283,6 @@ class PM015(ProjectMetadata):
             or "Apache License" in content
         ):
             return True
-        return '⚠️ LICENSE file content is missing a recognized license statement (MIT or Apache 2.0).'
+        return (
+            "⚠️ LICENSE file content is missing a recognized license statement (MIT or Apache 2.0)."
+        )
