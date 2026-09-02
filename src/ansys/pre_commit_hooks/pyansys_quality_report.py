@@ -11,8 +11,8 @@ works in a standalone pre-commit environment without the separate
 from __future__ import annotations
 
 import argparse
-import json
 from io import BytesIO, StringIO
+import json
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -24,11 +24,11 @@ except ImportError:  # pragma: no cover
 from ansys.pre_commit_hooks.quality_rules import (
     _first_doc_line,
     _interpret,
+    is_mcp,
     readme_path,
     repo_review_checks,
     repo_review_families,
     workflow_map,
-    is_mcp,
 )
 
 _PATHS_TO_FETCH = [
@@ -175,7 +175,9 @@ def wf_content(root: Traversable, role: str, workflow_map: dict) -> tuple[bool, 
 def _merge_all_workflows(root: Traversable) -> str:
     try:
         entries = [
-            e for e in root.joinpath(".github/workflows").iterdir() if e.name.endswith((".yml", ".yaml"))
+            e
+            for e in root.joinpath(".github/workflows").iterdir()
+            if e.name.endswith((".yml", ".yaml"))
         ]
     except Exception:
         return ""
@@ -354,7 +356,9 @@ class PM010(ProjectMetadata):
             return None
         content = file_content(root, "pyproject.toml")
         if re.search(r"poetry\.core|poetry-core", content):
-            m = re.search(r"\[tool\.poetry\][\s\S]*?readme\s*=\s*[\"']([^\"']+)[\"']", content, re.M)
+            m = re.search(
+                r"\[tool\.poetry\][\s\S]*?readme\s*=\s*[\"']([^\"']+)[\"']", content, re.M
+            )
             if m:
                 return True
             return False
@@ -380,7 +384,7 @@ class PM011(ProjectMetadata):
             return bool(re.search(r"\[tool\.poetry\][\s\S]*?license\s*=", c, re.M))
         return bool(
             re.search(r"license-files\s*=", c)
-            or re.search(r'license\s*=\s*\{[^}]*file', c)
+            or re.search(r"license\s*=\s*\{[^}]*file", c)
             or re.search(r'license\s*=\s*["\']LICENSE["\']', c)
         )
 
@@ -435,7 +439,11 @@ class CI004(CICD):
         present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
         if not present:
             return None
-        missing = [lbl for role, lbl in present if "concurrency:" not in wf_content(root, role, workflow_map)[1]]
+        missing = [
+            lbl
+            for role, lbl in present
+            if "concurrency:" not in wf_content(root, role, workflow_map)[1]
+        ]
         if not missing:
             return True
         return f"⚠️ concurrency: block missing in: {', '.join(missing)}"
@@ -450,7 +458,11 @@ class CI005(CICD):
         present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
         if not present:
             return None
-        missing = [lbl for role, lbl in present if not re.search(r"^permissions:\s*\{\}", wf_content(root, role, workflow_map)[1], re.M)]
+        missing = [
+            lbl
+            for role, lbl in present
+            if not re.search(r"^permissions:\s*\{\}", wf_content(root, role, workflow_map)[1], re.M)
+        ]
         return True if not missing else f"Missing root permissions: {{}} in: {', '.join(missing)}"
 
 
@@ -463,7 +475,11 @@ class CI006(CICD):
         present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
         if not present:
             return None
-        missing = [lbl for role, lbl in present if "persist-credentials: false" not in wf_content(root, role, workflow_map)[1]]
+        missing = [
+            lbl
+            for role, lbl in present
+            if "persist-credentials: false" not in wf_content(root, role, workflow_map)[1]
+        ]
         if not missing:
             return True
         return f"⚠️ persist-credentials: false missing in: {', '.join(missing)}"
@@ -512,7 +528,9 @@ class CI010(CICD):
         content = all_workflows_content(root)
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/check-pr-title|check-pr-title", content, re.IGNORECASE))
+        return bool(
+            re.search(r"ansys/actions/check-pr-title|check-pr-title", content, re.IGNORECASE)
+        )
 
 
 class CI011(CICD):
@@ -523,7 +541,9 @@ class CI011(CICD):
         content = all_workflows_content(root)
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/[^\s]*changelog|changelog-fragment", content, re.IGNORECASE))
+        return bool(
+            re.search(r"ansys/actions/[^\s]*changelog|changelog-fragment", content, re.IGNORECASE)
+        )
 
 
 class CI012(CICD):
@@ -556,7 +576,9 @@ class CI014(CICD):
         content = all_workflows_content(root)
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/build-wheelhouse|build-wheelhouse", content, re.IGNORECASE))
+        return bool(
+            re.search(r"ansys/actions/build-wheelhouse|build-wheelhouse", content, re.IGNORECASE)
+        )
 
 
 class CI015(CICD):
@@ -567,7 +589,13 @@ class CI015(CICD):
         content = all_workflows_content(root)
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest", content, re.IGNORECASE))
+        return bool(
+            re.search(
+                r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest",
+                content,
+                re.IGNORECASE,
+            )
+        )
 
 
 class CI016(CICD):
@@ -578,7 +606,9 @@ class CI016(CICD):
         content = all_workflows_content(root)
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/release-github|update-changelog", content, re.IGNORECASE))
+        return bool(
+            re.search(r"ansys/actions/release-github|update-changelog", content, re.IGNORECASE)
+        )
 
 
 class Dependabot:
@@ -617,8 +647,12 @@ class DB003(Dependabot):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        has_pip = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?"))
-        has_uv = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?"))
+        has_pip = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+        )
+        has_uv = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+        )
         if has_pip:
             return True
         if has_uv:
@@ -635,7 +669,9 @@ class DB004(Dependabot):
     def check(root: Traversable) -> bool | None:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        return file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?github-actions[\"']?"))
+        return file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?github-actions[\"']?")
+        )
 
 
 class DB005(Dependabot):
@@ -677,11 +713,17 @@ class DB007(Dependabot):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        has_uv = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?"))
-        has_pip = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?"))
+        has_uv = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+        )
+        has_pip = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+        )
         if has_uv and not has_pip:
             return None
-        if file_contains(root, _PATH_DEPENDABOT, re.compile(r"versioning-strategy:\s*[\"']?lockfile-only[\"']?")):
+        if file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"versioning-strategy:\s*[\"']?lockfile-only[\"']?")
+        ):
             return True
         return "⚠️ versioning-strategy: lockfile-only not found for pip ecosystem."
 
@@ -697,7 +739,7 @@ class DB008(Dependabot):
             return None
         if file_contains(root, _PATH_DEPENDABOT, re.compile(r'patterns:\s*\n\s+- ["\']?\*["\']?')):
             return True
-        return '⚠️ pip groups wildcard pattern "- \"*\"" not found in dependabot.yml.'
+        return '⚠️ pip groups wildcard pattern "- "*"" not found in dependabot.yml.'
 
 
 class Documentation:
@@ -779,7 +821,9 @@ class DOC007(Documentation):
     def check(root: Traversable) -> bool | None:
         if not file_exists(root, "doc/source/index.rst"):
             return None
-        return file_contains(root, "doc/source/index.rst", re.compile(r"api.reference|api_reference", re.I))
+        return file_contains(
+            root, "doc/source/index.rst", re.compile(r"api.reference|api_reference", re.I)
+        )
 
 
 class README:
@@ -807,7 +851,14 @@ class RM001(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys",
+                re.I,
+            ),
+        ):
             return True
         return f"⚠️ PyAnsys badge image not found in {readme_path}."
 
@@ -821,7 +872,14 @@ class RM002(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py",
+                re.I,
+            ),
+        ):
             return True
         return f"⚠️ PyPI badge image not found in {readme_path}."
 
@@ -835,7 +893,11 @@ class RM003(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov", re.I),
+        ):
             return True
         return f"⚠️ Codecov badge image not found in {readme_path}."
 
@@ -849,7 +911,11 @@ class RM004(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"shields\.io[^)\"']*mit|img\.shields\.io[^)\"']*license", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"shields\.io[^)\"']*mit|img\.shields\.io[^)\"']*license", re.I),
+        ):
             return True
         return f"⚠️ MIT license badge image not found in {readme_path}."
 
@@ -863,7 +929,11 @@ class RM005(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.I),
+        ):
             return True
         return f"⚠️ GH-CI workflow badge.svg URL not found in {readme_path}."
 
@@ -952,7 +1022,9 @@ class BS002(BuildSystem):
         if key == "unknown":
             return False
         if key == "setuptools":
-            return f"⚠️ Uses {name} — consider migrating to Flit, Hatch, or Poetry for simpler config."
+            return (
+                f"⚠️ Uses {name} — consider migrating to Flit, Hatch, or Poetry for simpler config."
+            )
         return True
 
 
@@ -1176,7 +1248,13 @@ class MCP001(MCP):
     def check(root: Traversable, is_mcp: bool) -> bool | None:
         if not is_mcp:
             return None
-        required = ["LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md", ".github/CODEOWNERS"]
+        required = [
+            "LICENSE",
+            "SECURITY.md",
+            "CONTRIBUTING.md",
+            "CHANGELOG.md",
+            ".github/CODEOWNERS",
+        ]
         missing = [p for p in required if not file_exists(root, p)]
         return True if not missing else f"Missing: {', '.join(missing)}"
 
@@ -1394,7 +1472,9 @@ class PC010(PreCommit):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, ".pre-commit-config.yaml"):
             return None
-        if file_contains(root, ".pre-commit-config.yaml", re.compile(r"autoupdate_schedule:\s*weekly")):
+        if file_contains(
+            root, ".pre-commit-config.yaml", re.compile(r"autoupdate_schedule:\s*weekly")
+        ):
             return True
         return "⚠️ autoupdate_schedule: weekly not found."
 
@@ -1418,8 +1498,18 @@ def repo_review_families() -> dict[str, dict]:
 
 def repo_review_checks() -> dict:
     families = [
-        ProjectMetadata, CICDFiles, CICD, Dependabot, PreCommit, Documentation, README, BuildSystem,
-        Security, Labeler, Vale, MCP,
+        ProjectMetadata,
+        CICDFiles,
+        CICD,
+        Dependabot,
+        PreCommit,
+        Documentation,
+        README,
+        BuildSystem,
+        Security,
+        Labeler,
+        Vale,
+        MCP,
     ]
     result = {}
     for family in families:
@@ -1468,7 +1558,9 @@ def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, An
             import inspect
 
             signature = inspect.signature(check_obj.check)
-            kwargs = {key: fixture_values[key] for key in signature.parameters if key in fixture_values}
+            kwargs = {
+                key: fixture_values[key] for key in signature.parameters if key in fixture_values
+            }
             raw = check_obj.check(**kwargs)
         except Exception as exc:  # pragma: no cover
             raw = f"⚠️ Check error: {exc}"
@@ -1497,7 +1589,11 @@ def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, An
         "tally": tally,
         "score": score,
         "workflow_map": fixture_values["workflow_map"],
-        "project_metadata": {"build_system": {"name": "Unknown", "key": "unknown"}, "license": None, "python_requires": None},
+        "project_metadata": {
+            "build_system": {"name": "Unknown", "key": "unknown"},
+            "license": None,
+            "python_requires": None,
+        },
     }
 
 
@@ -1513,7 +1609,9 @@ def _load_files(repo_root: Path) -> dict[str, str | None]:
     workflows = repo_root / ".github" / "workflows"
     if workflows.is_dir():
         for workflow in workflows.glob("*.y*ml"):
-            files[workflow.relative_to(repo_root).as_posix()] = workflow.read_text(encoding="utf-8", errors="replace")
+            files[workflow.relative_to(repo_root).as_posix()] = workflow.read_text(
+                encoding="utf-8", errors="replace"
+            )
 
     return files
 
@@ -1559,8 +1657,12 @@ def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the PyAnsys repository quality report.")
     parser.add_argument("--repo-root", default=".", help="Repository root to review.")
-    parser.add_argument("--json", action="store_true", help="Emit a JSON report instead of a text summary.")
-    parser.add_argument("--all", action="store_true", help="Show all checks, including passing ones.")
+    parser.add_argument(
+        "--json", action="store_true", help="Emit a JSON report instead of a text summary."
+    )
+    parser.add_argument(
+        "--all", action="store_true", help="Show all checks, including passing ones."
+    )
     args = parser.parse_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
