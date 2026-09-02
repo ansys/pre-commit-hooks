@@ -1,5 +1,24 @@
 # Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Dependabot checks."""
 
@@ -26,36 +45,41 @@ _PATH_DEPENDABOT = ".github/dependabot.yml"
 
 
 class Dependabot:
+    """Dependabot rule family."""
+
     family = "dependabot"
 
 
 class DB001(Dependabot):
-    ".github/dependabot.yml exists"
+    """The .github/dependabot.yml file exists."""
 
     @staticmethod
     def check(root) -> bool:
+        """Return whether the Dependabot config file exists."""
         return file_exists(root, _PATH_DEPENDABOT)
 
 
 class DB002(Dependabot):
-    "dependabot.yml sets version: 2"
+    """dependabot.yml sets version 2."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None:
+        """Return whether the Dependabot config uses the expected schema version."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         return file_contains(root, _PATH_DEPENDABOT, re.compile(r"^version:\s*2\s*$", re.M))
 
 
 class DB003(Dependabot):
-    "pip or uv ecosystem configured"
+    """Pip or uv ecosystem is configured."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None | str:
+        """Return whether a supported dependency ecosystem is configured."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         has_pip = file_contains(
@@ -72,12 +96,13 @@ class DB003(Dependabot):
 
 
 class DB004(Dependabot):
-    "github-actions ecosystem configured"
+    """The GitHub Actions ecosystem is configured."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None:
+        """Return whether the GitHub Actions ecosystem is configured."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         return file_contains(
@@ -86,12 +111,13 @@ class DB004(Dependabot):
 
 
 class DB005(Dependabot):
-    "Weekly update interval set"
+    """A weekly update interval is set."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None | str:
+        """Return whether the weekly update interval is configured for enough ecosystems."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         content = file_content(root, _PATH_DEPENDABOT)
@@ -102,12 +128,13 @@ class DB005(Dependabot):
 
 
 class DB006(Dependabot):
-    "Cooldown default-days: 7 configured"
+    """Cooldown default-days: 7 is configured."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None | str:
+        """Return whether the Dependabot cooldown policy is set to seven days."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         if file_contains(root, _PATH_DEPENDABOT, re.compile(r"default-days:\s*7")):
@@ -116,12 +143,13 @@ class DB006(Dependabot):
 
 
 class DB007(Dependabot):
-    "pip uses versioning-strategy: lockfile-only"
+    """Pip uses the lockfile-only versioning strategy."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None | str:
+        """Return whether pip uses the lockfile-only versioning strategy."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         has_uv = file_contains(
@@ -140,12 +168,13 @@ class DB007(Dependabot):
 
 
 class DB008(Dependabot):
-    "pip groups all dependencies together"
+    """Pip groups all dependencies together."""
 
     requires = {"DB001"}
 
     @staticmethod
     def check(root) -> bool | None | str:
+        """Return whether the pip group wildcard pattern is defined."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
         if file_contains(root, _PATH_DEPENDABOT, re.compile(r'patterns:\s*\n\s+- ["\']?\*["\']?')):

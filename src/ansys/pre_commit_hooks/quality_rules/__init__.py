@@ -190,6 +190,7 @@ __all__ = [
 
 
 def repo_review_families() -> dict[str, dict]:
+    """Return the metadata for each quality-report family."""
     return {
         "project_metadata": {"name": "Project Metadata", "order": 10},
         "cicd_files": {"name": "CI/CD — Workflow File Names", "order": 20},
@@ -207,6 +208,7 @@ def repo_review_families() -> dict[str, dict]:
 
 
 def repo_review_checks() -> dict:
+    """Return the rule family classes used by the quality report."""
     families = [
         ProjectMetadata,
         CICDFiles,
