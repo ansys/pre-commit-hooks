@@ -85,3 +85,13 @@ def test_hook_covers_all_repo_review_checks():
 
     actual = class_names(Path(hook.__file__))
     assert expected == actual - {"MemoryTraversable"}
+
+
+def test_quality_rules_are_grouped_package():
+    """Quality rules should be exposed from a package with one module per check family."""
+    import ansys.pre_commit_hooks.quality_rules as quality_rules
+    import ansys.pre_commit_hooks.quality_rules.project_metadata as project_metadata
+
+    assert hasattr(quality_rules, "PM001")
+    assert hasattr(project_metadata, "PM001")
+    assert callable(quality_rules.repo_review_checks)

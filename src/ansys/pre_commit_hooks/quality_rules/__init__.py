@@ -5,14 +5,32 @@
 
 from __future__ import annotations
 
-import re
-from typing import Any, Iterator
-
-try:
-    from importlib.resources.abc import Traversable
-except ImportError:  # pragma: no cover
-    from importlib.abc import Traversable
-
+from .build_system import BS001, BS002, BS003, BS004, BuildSystem
+from .cicd import CI004, CI005, CI006, CI007, CI008, CI009, CI010, CI011, CI012, CI013, CI014, CI015, CI016, CICD
+from .cicd_files import CI001, CI002, CI003, CICDFiles
+from .common import (
+    CANONICAL_WF,
+    _first_doc_line,
+    _interpret,
+    all_workflows_content,
+    file_contains,
+    file_content,
+    file_exists,
+    is_mcp,
+    readme_path,
+    wf_content,
+    wf_label,
+    workflow_map,
+)
+from .dependabot import DB001, DB002, DB003, DB004, DB005, DB006, DB007, DB008, Dependabot
+from .documentation import DOC001, DOC002, DOC003, DOC004, DOC005, DOC006, DOC007, Documentation
+from .labeler import LB001, LB002, LB003, LB004, LB005, Labeler
+from .mcp import MCP001, MCP002, MCP003, MCP004, MCP005, MCP006, MCP007, MCP
+from .pre_commit import PC001, PC002, PC003, PC004, PC005, PC006, PC007, PC008, PC009, PC010, PreCommit
+from .project_metadata import PM001, PM002, PM003, PM004, PM005, PM006, PM007, PM008, PM009, PM010, PM011, ProjectMetadata
+from .readme import RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007, RM008, README
+from .security import SEC001, SEC002, SEC003, SEC004, SEC005, Security
+from .vale import VL001, VL002, VL003, VL004, VL005, Vale
 
 __all__ = [
     "file_exists",
@@ -30,476 +48,144 @@ __all__ = [
     "_first_doc_line",
     "_interpret",
     "ProjectMetadata",
+    "PM001",
+    "PM002",
+    "PM003",
+    "PM004",
+    "PM005",
+    "PM006",
+    "PM007",
+    "PM008",
+    "PM009",
+    "PM010",
+    "PM011",
     "CICDFiles",
+    "CI001",
+    "CI002",
+    "CI003",
     "CICD",
+    "CI004",
+    "CI005",
+    "CI006",
+    "CI007",
+    "CI008",
+    "CI009",
+    "CI010",
+    "CI011",
+    "CI012",
+    "CI013",
+    "CI014",
+    "CI015",
+    "CI016",
     "Dependabot",
+    "DB001",
+    "DB002",
+    "DB003",
+    "DB004",
+    "DB005",
+    "DB006",
+    "DB007",
+    "DB008",
     "Documentation",
+    "DOC001",
+    "DOC002",
+    "DOC003",
+    "DOC004",
+    "DOC005",
+    "DOC006",
+    "DOC007",
     "README",
+    "RM000",
+    "RM001",
+    "RM002",
+    "RM003",
+    "RM004",
+    "RM005",
+    "RM006",
+    "RM007",
+    "RM008",
     "BuildSystem",
+    "BS001",
+    "BS002",
+    "BS003",
+    "BS004",
     "Security",
+    "SEC001",
+    "SEC002",
+    "SEC003",
+    "SEC004",
+    "SEC005",
     "Labeler",
+    "LB001",
+    "LB002",
+    "LB003",
+    "LB004",
+    "LB005",
     "Vale",
+    "VL001",
+    "VL002",
+    "VL003",
+    "VL004",
+    "VL005",
     "MCP",
+    "MCP001",
+    "MCP002",
+    "MCP003",
+    "MCP004",
+    "MCP005",
+    "MCP006",
+    "MCP007",
     "PreCommit",
+    "PC001",
+    "PC002",
+    "PC003",
+    "PC004",
+    "PC005",
+    "PC006",
+    "PC007",
+    "PC008",
+    "PC009",
+    "PC010",
 ]
 
 
-def file_exists(root: Traversable, path: str) -> bool:
-    try:
-        return root.joinpath(path).is_file()
-    except Exception:
-        return False
+def repo_review_families() -> dict[str, dict]:
+    return {
+        "project_metadata": {"name": "Project Metadata", "order": 10},
+        "cicd_files": {"name": "CI/CD — Workflow File Names", "order": 20},
+        "cicd": {"name": "CI/CD — Content Checks", "order": 25},
+        "dependabot": {"name": "Dependabot", "order": 30},
+        "pre_commit": {"name": "Pre-commit", "order": 40},
+        "documentation": {"name": "Documentation", "order": 50},
+        "readme": {"name": "README", "order": 60},
+        "build_system": {"name": "Build System", "order": 70},
+        "security": {"name": "Security", "order": 80},
+        "labeler": {"name": "Labeler", "order": 90},
+        "vale": {"name": "Vale", "order": 100},
+        "mcp": {"name": "MCP Release Readiness", "order": 110},
+    }
 
 
-def file_content(root: Traversable, path: str) -> str:
-    try:
-        f = root.joinpath(path)
-        if f.is_file():
-            return f.read_text(encoding="utf-8")
-    except Exception:
-        pass
-    return ""
-
-
-def file_contains(root: Traversable, path: str, pattern: str | re.Pattern) -> bool:
-    content = file_content(root, path)
-    if not content:
-        return False
-    if isinstance(pattern, str):
-        return pattern in content
-    return bool(pattern.search(content))
-
-
-CANONICAL_WF = {
-    "main": ".github/workflows/ci_cd_main.yml",
-    "pr": ".github/workflows/ci_cd_pr.yml",
-    "release": ".github/workflows/ci_cd_release.yml",
-}
-
-
-def all_workflows_content(root: Traversable) -> str:
-    return _merge_all_workflows(root)
-
-
-def wf_content(root: Traversable, role: str, workflow_map: dict) -> tuple[bool, str]:
-    canonical = CANONICAL_WF[role]
-    if file_exists(root, canonical):
-        return True, file_content(root, canonical)
-
-    entry = workflow_map.get(role)
-    if entry and not entry.get("is_fallback"):
-        path = entry.get("path", "")
-        return False, file_content(root, path) if path else ""
-    return False, _merge_all_workflows(root)
-
-
-def _merge_all_workflows(root: Traversable) -> str:
-    try:
-        entries = [
-            e for e in root.joinpath(".github/workflows").iterdir() if e.name.endswith((".yml", ".yaml"))
-        ]
-    except Exception:
-        return ""
-    parts = []
-    for entry in entries:
-        try:
-            c = entry.read_text(encoding="utf-8")
-            if c:
-                parts.append(c)
-        except Exception:
-            pass
-    return "\n\n".join(parts)
-
-
-def wf_label(role: str, workflow_map: dict) -> str:
-    entry = workflow_map.get(role)
-    if not entry:
-        return CANONICAL_WF.get(role, role)
-    if entry.get("is_fallback"):
-        sources = entry.get("sources", [])
-        return f"{len(sources)} workflow file(s) ({', '.join(sources)})"
-    return entry.get("name", role)
-
-
-def workflow_map(root: Traversable) -> dict[str, dict]:
-    wf_dir = root.joinpath(".github/workflows")
-    try:
-        entries = [e for e in wf_dir.iterdir() if e.name.endswith((".yml", ".yaml"))]
-    except Exception:
-        entries = []
-
-    result: dict[str, dict] = {}
-    for entry in entries:
-        role = _classify_workflow(entry.name)
-        if role != "unknown" and role not in result:
-            result[role] = {
-                "name": entry.name,
-                "path": f".github/workflows/{entry.name}",
-                "is_fallback": False,
-                "sources": [entry.name],
-            }
-
-    for role in ("main", "pr", "release"):
-        if role not in result and entries:
-            result[role] = {
-                "name": f"{len(entries)} workflow(s)",
-                "path": None,
-                "is_fallback": True,
-                "sources": [e.name for e in entries],
-            }
-
+def repo_review_checks() -> dict:
+    families = [
+        ProjectMetadata,
+        CICDFiles,
+        CICD,
+        Dependabot,
+        PreCommit,
+        Documentation,
+        README,
+        BuildSystem,
+        Security,
+        Labeler,
+        Vale,
+        MCP,
+    ]
+    result = {}
+    for family in families:
+        for cls in family.__subclasses__():
+            result[cls.__name__] = cls()
     return result
-
-
-def _classify_workflow(name: str) -> str:
-    n = name.lower()
-    if re.search(r"release|publish|deploy", n):
-        return "release"
-    if re.search(r"\bpr\b|pull.?request|pull_request", n):
-        return "pr"
-    if re.search(r"main|push|branch|nightly|schedule|ci_cd_main|ci.main", n):
-        return "main"
-    if re.search(r"\bci\b|build|test", n):
-        return "pr"
-    return "unknown"
-
-
-def readme_path(root: Traversable) -> str | None:
-    if file_exists(root, "README.rst"):
-        return "README.rst"
-    if file_exists(root, "README.md"):
-        return "README.md"
-    return None
-
-
-def is_mcp(root: Traversable) -> bool:
-    try:
-        pyproject_text = root.joinpath("pyproject.toml").read_text()
-        return bool(re.search(r"\b(fastmcp|mcp)\b", pyproject_text, re.IGNORECASE))
-    except Exception:
-        pass
-    try:
-        return file_exists(root, "src/server.py") or file_exists(root, "server.py")
-    except Exception:
-        return False
-
-
-class ProjectMetadata:
-    family = "project_metadata"
-
-
-class PM001(ProjectMetadata):
-    "AUTHORS exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "AUTHORS")
-
-
-class PM002(ProjectMetadata):
-    "CHANGELOG.md exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "CHANGELOG.md")
-
-
-class PM003(ProjectMetadata):
-    "CODE_OF_CONDUCT.md exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "CODE_OF_CONDUCT.md")
-
-
-class PM004(ProjectMetadata):
-    "CONTRIBUTING.md exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "CONTRIBUTING.md")
-
-
-class PM005(ProjectMetadata):
-    "CONTRIBUTORS.md exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "CONTRIBUTORS.md")
-
-
-class PM006(ProjectMetadata):
-    "LICENSE exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "LICENSE")
-
-
-class PM007(ProjectMetadata):
-    "README exists (.rst preferred)"
-
-    @staticmethod
-    def check(root: Traversable, readme_path: str | None) -> bool | str:
-        if readme_path is None:
-            return False
-        if readme_path == "README.md":
-            return "⚠️ README.md found — README.rst is the preferred format."
-        return True
-
-
-class PM008(ProjectMetadata):
-    "SECURITY.md exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, "SECURITY.md")
-
-
-class PM009(ProjectMetadata):
-    ".github/CODEOWNERS exists"
-
-    @staticmethod
-    def check(root: Traversable) -> bool:
-        return file_exists(root, ".github/CODEOWNERS")
-
-
-class PM010(ProjectMetadata):
-    "pyproject.toml references README file"
-
-    requires = {"PM007"}
-
-    @staticmethod
-    def check(root: Traversable, readme_path: str | None) -> bool | None | str:
-        if not file_exists(root, "pyproject.toml"):
-            return None
-        content = file_content(root, "pyproject.toml")
-        if re.search(r"poetry\.core|poetry-core", content):
-            m = re.search(r"\[tool\.poetry\][\s\S]*?readme\s*=\s*[\"']([^\"']+)[\"']", content, re.M)
-            if m:
-                return True
-            return False
-        rm = readme_path or "README.rst"
-        if rm in content:
-            return True
-        if "README" in content:
-            return "⚠️ readme key found but exact README filename not confirmed."
-        return False
-
-
-class PM011(ProjectMetadata):
-    "pyproject.toml references LICENSE file"
-
-    requires = {"PM006"}
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        if not file_exists(root, "pyproject.toml"):
-            return None
-        c = file_content(root, "pyproject.toml")
-        if re.search(r"poetry\.core|poetry-core", c):
-            return bool(re.search(r"\[tool\.poetry\][\s\S]*?license\s*=", c, re.M))
-        return bool(
-            re.search(r"license-files\s*=", c)
-            or re.search(r'license\s*=\s*\{[^}]*file', c)
-            or re.search(r'license\s*=\s*["\']LICENSE["\']', c)
-        )
-
-
-class CICDFiles:
-    family = "cicd_files"
-
-
-class CI001(CICDFiles):
-    "ci_cd_main.yml exists"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | str:
-        if file_exists(root, CANONICAL_WF["main"]):
-            return True
-        lbl = wf_label("main", workflow_map)
-        return f"⚠️ Canonical ci_cd_main.yml not found — detected: {lbl}"
-
-
-class CI002(CICDFiles):
-    "ci_cd_pr.yml exists"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | str:
-        if file_exists(root, CANONICAL_WF["pr"]):
-            return True
-        lbl = wf_label("pr", workflow_map)
-        return f"⚠️ Canonical ci_cd_pr.yml not found — detected: {lbl}"
-
-
-class CI003(CICDFiles):
-    "ci_cd_release.yml exists"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | str:
-        if file_exists(root, CANONICAL_WF["release"]):
-            return True
-        lbl = wf_label("release", workflow_map)
-        return f"⚠️ Canonical ci_cd_release.yml not found — detected: {lbl}"
-
-
-class CICD:
-    family = "cicd"
-
-
-class CI004(CICD):
-    "Workflows use concurrency blocks"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | None | str:
-        roles = [("pr", "ci_cd_pr.yml"), ("main", "ci_cd_main.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
-        if not present:
-            return None
-        missing = [lbl for role, lbl in present if "concurrency:" not in wf_content(root, role, workflow_map)[1]]
-        if not missing:
-            return True
-        return f"⚠️ concurrency: block missing in: {', '.join(missing)}"
-
-
-class CI005(CICD):
-    "Workflows set root `permissions: {}`"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | None | str:
-        roles = [("pr", "ci_cd_pr.yml"), ("release", "ci_cd_release.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
-        if not present:
-            return None
-        missing = [lbl for role, lbl in present if not re.search(r"^permissions:\s*\{\}", wf_content(root, role, workflow_map)[1], re.M)]
-        return True if not missing else f"Missing root permissions: {{}} in: {', '.join(missing)}"
-
-
-class CI006(CICD):
-    "checkout uses persist-credentials: false"
-
-    @staticmethod
-    def check(root: Traversable, workflow_map: dict) -> bool | None | str:
-        roles = [("pr", "ci_cd_pr.yml"), ("release", "ci_cd_release.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
-        if not present:
-            return None
-        missing = [lbl for role, lbl in present if "persist-credentials: false" not in wf_content(root, role, workflow_map)[1]]
-        if not missing:
-            return True
-        return f"⚠️ persist-credentials: false missing in: {', '.join(missing)}"
-
-
-class CI007(CICD):
-    "Labeler job present across workflows"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/[^\s]*label|\blabeler\b", content, re.IGNORECASE))
-
-
-class CI008(CICD):
-    "ansys/actions/check-vulnerabilities used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return "ansys/actions/check-vulnerabilities" in content
-
-
-class CI009(CICD):
-    "ansys/actions/code-style used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None | str:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        if "ansys/actions/code-style" in content:
-            return True
-        return "⚠️ ansys/actions/code-style not found in any workflow file."
-
-
-class CI010(CICD):
-    "check-pr-title step present across workflows"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/check-pr-title|check-pr-title", content, re.IGNORECASE))
-
-
-class CI011(CICD):
-    "changelog-fragment step present across workflows"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/[^\s]*changelog|changelog-fragment", content, re.IGNORECASE))
-
-
-class CI012(CICD):
-    "ansys/actions/check-doc-style used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/check-doc-style|doc-style", content, re.IGNORECASE))
-
-
-class CI013(CICD):
-    "ansys/actions/doc-build used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/doc-build|\bdoc-build\b", content, re.IGNORECASE))
-
-
-class CI014(CICD):
-    "ansys/actions/build-wheelhouse used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/build-wheelhouse|build-wheelhouse", content, re.IGNORECASE))
-
-
-class CI015(CICD):
-    "ansys/actions/tests-pytest (or pytest) used"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest", content, re.IGNORECASE))
-
-
-class CI016(CICD):
-    "update-changelog step present across workflows"
-
-    @staticmethod
-    def check(root: Traversable) -> bool | None:
-        content = all_workflows_content(root)
-        if not content:
-            return None
-        return bool(re.search(r"ansys/actions/release-github|update-changelog", content, re.IGNORECASE))
 
 
 class Dependabot:
@@ -538,8 +224,12 @@ class DB003(Dependabot):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        has_pip = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?"))
-        has_uv = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?"))
+        has_pip = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+        )
+        has_uv = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+        )
         if has_pip:
             return True
         if has_uv:
@@ -556,7 +246,9 @@ class DB004(Dependabot):
     def check(root: Traversable) -> bool | None:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        return file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?github-actions[\"']?"))
+        return file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?github-actions[\"']?")
+        )
 
 
 class DB005(Dependabot):
@@ -598,11 +290,17 @@ class DB007(Dependabot):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        has_uv = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?"))
-        has_pip = file_contains(root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?"))
+        has_uv = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+        )
+        has_pip = file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+        )
         if has_uv and not has_pip:
             return None
-        if file_contains(root, _PATH_DEPENDABOT, re.compile(r"versioning-strategy:\s*[\"']?lockfile-only[\"']?")):
+        if file_contains(
+            root, _PATH_DEPENDABOT, re.compile(r"versioning-strategy:\s*[\"']?lockfile-only[\"']?")
+        ):
             return True
         return "⚠️ versioning-strategy: lockfile-only not found for pip ecosystem."
 
@@ -618,7 +316,7 @@ class DB008(Dependabot):
             return None
         if file_contains(root, _PATH_DEPENDABOT, re.compile(r'patterns:\s*\n\s+- ["\']?\*["\']?')):
             return True
-        return '⚠️ pip groups wildcard pattern "- \"*\"" not found in dependabot.yml.'
+        return '⚠️ pip groups wildcard pattern "- "*"" not found in dependabot.yml.'
 
 
 class Documentation:
@@ -700,7 +398,9 @@ class DOC007(Documentation):
     def check(root: Traversable) -> bool | None:
         if not file_exists(root, "doc/source/index.rst"):
             return None
-        return file_contains(root, "doc/source/index.rst", re.compile(r"api.reference|api_reference", re.I))
+        return file_contains(
+            root, "doc/source/index.rst", re.compile(r"api.reference|api_reference", re.I)
+        )
 
 
 class README:
@@ -728,7 +428,14 @@ class RM001(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys",
+                re.I,
+            ),
+        ):
             return True
         return f"⚠️ PyAnsys badge image not found in {readme_path}."
 
@@ -742,7 +449,14 @@ class RM002(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py",
+                re.I,
+            ),
+        ):
             return True
         return f"⚠️ PyPI badge image not found in {readme_path}."
 
@@ -756,7 +470,11 @@ class RM003(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov", re.I),
+        ):
             return True
         return f"⚠️ Codecov badge image not found in {readme_path}."
 
@@ -770,7 +488,11 @@ class RM004(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"shields\.io[^)\"']*mit|img\.shields\.io[^)\"']*license", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"shields\.io[^)\"']*mit|img\.shields\.io[^)\"']*license", re.I),
+        ):
             return True
         return f"⚠️ MIT license badge image not found in {readme_path}."
 
@@ -784,7 +506,11 @@ class RM005(README):
     def check(root: Traversable, readme_path: str | None) -> bool | None | str:
         if not readme_path:
             return None
-        if file_contains(root, readme_path, re.compile(r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.I)):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.I),
+        ):
             return True
         return f"⚠️ GH-CI workflow badge.svg URL not found in {readme_path}."
 
@@ -873,7 +599,9 @@ class BS002(BuildSystem):
         if key == "unknown":
             return False
         if key == "setuptools":
-            return f"⚠️ Uses {name} — consider migrating to Flit, Hatch, or Poetry for simpler config."
+            return (
+                f"⚠️ Uses {name} — consider migrating to Flit, Hatch, or Poetry for simpler config."
+            )
         return True
 
 
@@ -1097,7 +825,13 @@ class MCP001(MCP):
     def check(root: Traversable, is_mcp: bool) -> bool | None:
         if not is_mcp:
             return None
-        required = ["LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md", ".github/CODEOWNERS"]
+        required = [
+            "LICENSE",
+            "SECURITY.md",
+            "CONTRIBUTING.md",
+            "CHANGELOG.md",
+            ".github/CODEOWNERS",
+        ]
         missing = [p for p in required if not file_exists(root, p)]
         return True if not missing else f"Missing: {', '.join(missing)}"
 
@@ -1315,7 +1049,9 @@ class PC010(PreCommit):
     def check(root: Traversable) -> bool | None | str:
         if not file_exists(root, ".pre-commit-config.yaml"):
             return None
-        if file_contains(root, ".pre-commit-config.yaml", re.compile(r"autoupdate_schedule:\s*weekly")):
+        if file_contains(
+            root, ".pre-commit-config.yaml", re.compile(r"autoupdate_schedule:\s*weekly")
+        ):
             return True
         return "⚠️ autoupdate_schedule: weekly not found."
 
