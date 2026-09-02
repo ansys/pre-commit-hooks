@@ -5,12 +5,6 @@
   language: python
   files: '(src|examples|tests)/.*\.(py)|\.(proto)'
   require_serial: true
-- id: "tech-review"
-  name: "Ansys Technical Review"
-  description: "Perform initial technical review on a repository"
-  entry: tech-review
-  language: python
-  pass_filenames: false
 - id: "pyansys-quality-report"
   name: "PyAnsys Quality Report"
   description: "Generate a PyAnsys repository quality summary"

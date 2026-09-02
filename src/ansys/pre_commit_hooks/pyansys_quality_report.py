@@ -279,6 +279,7 @@ def main(argv: list[str] | None = None) -> int:
         raise FileNotFoundError(f"Repo root not found: {repo_root}")
 
     legacy_exit = 0
+    legacy_exit = 0
     if args.fix_missing:
         legacy_argv: list[str] = []
         raw_argv = list(argv) if argv is not None else list(__import__("sys").argv[1:])
