@@ -52,7 +52,7 @@ def file_exists(root: Traversable, path: str) -> bool:
     """Return whether a file exists under the repository root."""
     try:
         return root.joinpath(path).is_file()
-    except Exception:
+    except (AttributeError, TypeError, ValueError):
         return False
 
 
@@ -62,8 +62,8 @@ def file_content(root: Traversable, path: str) -> str:
         f = root.joinpath(path)
         if f.is_file():
             return f.read_text(encoding="utf-8")
-    except Exception:
-        pass
+    except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
+        return ""
     return ""
 
 
@@ -110,7 +110,7 @@ def _merge_all_workflows(root: Traversable) -> str:
             for e in root.joinpath(".github/workflows").iterdir()
             if e.name.endswith((".yml", ".yaml"))
         ]
-    except Exception:
+    except (AttributeError, FileNotFoundError, OSError, TypeError):
         return ""
     parts = []
     for entry in entries:
@@ -118,8 +118,8 @@ def _merge_all_workflows(root: Traversable) -> str:
             c = entry.read_text(encoding="utf-8")
             if c:
                 parts.append(c)
-        except Exception:
-            pass
+        except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
+            continue
     return "\n\n".join(parts)
 
 
@@ -139,7 +139,7 @@ def workflow_map(root: Traversable) -> dict[str, dict]:
     wf_dir = root.joinpath(".github/workflows")
     try:
         entries = [e for e in wf_dir.iterdir() if e.name.endswith((".yml", ".yaml"))]
-    except Exception:
+    except (AttributeError, FileNotFoundError, OSError, TypeError):
         entries = []
 
     result: dict[str, dict] = {}
@@ -192,11 +192,11 @@ def is_mcp(root: Traversable) -> bool:
     try:
         pyproject_text = root.joinpath("pyproject.toml").read_text()
         return bool(re.search(r"\b(fastmcp|mcp)\b", pyproject_text, re.IGNORECASE))
-    except Exception:
+    except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
         pass
     try:
         return file_exists(root, "src/server.py") or file_exists(root, "server.py")
-    except Exception:
+    except (AttributeError, OSError, TypeError, ValueError):
         return False
 
 
