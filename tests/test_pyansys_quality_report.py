@@ -11,7 +11,7 @@ import git
 
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
 from ansys.pre_commit_hooks.quality_rules.common import workflow_map
-from ansys.pre_commit_hooks.quality_rules.project_metadata import PM013
+from ansys.pre_commit_hooks.quality_rules.project_metadata import PM013, PM016, PM017
 
 
 def test_workflow_map_classifies_ci_cd_roles(tmp_path):
@@ -175,12 +175,52 @@ def test_pm015_accepts_apache_license(tmp_path):
     assert project_metadata.PM015.check(repo_path) is True
 
 
+def test_pm016_warns_on_empty_codeowners(tmp_path):
+    """CODEOWNERS should require at least one actual owner entry."""
+    repo_path = tmp_path / "codeowners-project"
+    repo_path.mkdir()
+    (repo_path / ".github").mkdir()
+    (repo_path / ".github" / "CODEOWNERS").write_text("# comment only\n", encoding="utf-8")
+
+    assert PM016.check(repo_path) == "⚠️ .github/CODEOWNERS exists but has no owner entries."
+
+
+def test_pm016_accepts_valid_codeowners(tmp_path):
+    """CODEOWNERS with an actual @owner entry should pass."""
+    repo_path = tmp_path / "codeowners-project"
+    repo_path.mkdir()
+    (repo_path / ".github").mkdir()
+    (repo_path / ".github" / "CODEOWNERS").write_text("* @ansys/maintainers\n", encoding="utf-8")
+
+    assert PM016.check(repo_path) is True
+
+
+def test_pm017_requires_python_bounds_in_pyproject(tmp_path):
+    """Project metadata should require explicit lower and upper bounds for Python support."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[project]\nrequires-python = ">=3.10,<4"\n', encoding="utf-8")
+
+    assert PM017.check(tmp_path) is True
+
+
+def test_pm017_rejects_missing_upper_bound(tmp_path):
+    """Lower-only Python support declarations should fail the metadata standard."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[project]\nrequires-python = ">=3.10"\n', encoding="utf-8")
+
+    result = PM017.check(tmp_path)
+    assert isinstance(result, str)
+    assert "supported PyAnsys version range" in result
+
+
 def test_quality_rules_are_grouped_package():
     """Quality rules should be exposed from a package with one module per check family."""
     import ansys.pre_commit_hooks.quality_rules as quality_rules
     import ansys.pre_commit_hooks.quality_rules.project_metadata as project_metadata
 
     assert hasattr(quality_rules, "PM001")
+    assert hasattr(quality_rules, "PM016")
+    assert hasattr(quality_rules, "PM017")
     assert hasattr(project_metadata, "PM001")
     assert callable(quality_rules.repo_review_checks)
 

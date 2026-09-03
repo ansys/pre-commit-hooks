@@ -139,6 +139,8 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM013,
     PM014,
     PM015,
+    PM016,
+    PM017,
     ProjectMetadata,
 )
 from ansys.pre_commit_hooks.quality_rules.readme import (
@@ -194,6 +196,8 @@ __all__ = [
     "PM013",
     "PM014",
     "PM015",
+    "PM016",
+    "PM017",
     "CICDFiles",
     "CI001",
     "CI002",

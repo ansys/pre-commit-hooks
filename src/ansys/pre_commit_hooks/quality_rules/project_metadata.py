@@ -77,6 +77,8 @@ __all__ = [
     "PM013",
     "PM014",
     "PM015",
+    "PM016",
+    "PM017",
 ]
 
 _PYPROJECT = "pyproject.toml"
@@ -388,3 +390,54 @@ class PM015(ProjectMetadata):
             "⚠️ LICENSE file content is missing a recognized "
             "license statement (MIT or Apache 2.0)."
         )
+
+
+class PM016(ProjectMetadata):
+    """The .github/CODEOWNERS file contains at least one valid owner entry."""
+
+    requires = {"PM009"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether the CODEOWNERS file contains at least one valid ownership entry."""
+        if not file_exists(root, ".github/CODEOWNERS"):
+            return None
+
+        content = file_content(root, ".github/CODEOWNERS")
+
+        if re.search(r"^\s*[^#\n]+\s+@\S+", content, re.MULTILINE):
+            return True
+
+        return "⚠️ .github/CODEOWNERS exists but has no owner entries."
+
+
+def _validate_python_version_spec(spec: str) -> bool | str:
+    """Validate that a Python version spec defines supported lower and upper bounds."""
+    if not re.search(r">=\d+\.\d+", spec) or not re.search(r"[<,]=?\d+", spec):
+        return (
+            f"⚠️ requires-python '{spec}' does not declare a supported PyAnsys version range. "
+            "Use >=3.10,<4 or a more recent support window."
+        )
+
+    return True
+
+
+class PM017(ProjectMetadata):
+    """Project declares supported Python versions with explicit bounds."""
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether Python support is declared with both lower and upper bounds."""
+        if file_exists(root, _PYPROJECT):
+            content = file_content(root, _PYPROJECT)
+            match = re.search(r'requires-python\s*=\s*["\']([^"\']+)["\']', content)
+            if match:
+                return _validate_python_version_spec(match.group(1))
+
+        if file_exists(root, "setup.py"):
+            content = file_content(root, "setup.py")
+            match = re.search(r'python_requires\s*=\s*["\']([^"\']+)["\']', content)
+            if match:
+                return _validate_python_version_spec(match.group(1))
+
+        return None
