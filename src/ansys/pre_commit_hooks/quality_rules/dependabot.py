@@ -20,7 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Dependabot checks."""
+"""Dependabot checks.
+
+This rule set validates the repository Dependabot configuration and expected
+update automation settings.
+
+The checks cover:
+
+* Dependabot config presence
+* schema version validation
+* ecosystem configuration
+* update schedule and grouping policy
+* security-relevant dependency settings
+"""
 
 from __future__ import annotations
 

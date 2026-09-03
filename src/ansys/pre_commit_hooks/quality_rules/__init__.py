@@ -20,7 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Rule definitions for the PyAnsys repository quality report."""
+"""Rule definitions for the PyAnsys repository quality report.
+
+This package contains the repository quality checks used to review PyAnsys
+projects for consistent metadata, automation, documentation, and security
+standards.
+
+The checks are grouped into rule families such as:
+
+* build system validation
+* CI/CD workflow validation
+* Dependabot configuration
+* documentation requirements
+* project metadata
+* README quality
+* security checks
+* Vale linting configuration
+"""
 
 from __future__ import annotations
 

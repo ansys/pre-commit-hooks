@@ -20,7 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""MCP release readiness checks."""
+"""MCP release readiness checks.
+
+This rule set validates the minimum governance and release-readiness checks
+required for MCP projects.
+
+The checks cover:
+
+* required governance files
+* canonical workflow presence
+* test and documentation jobs in the PR workflow
+* README and docs metadata alignment
+* TODO/FIXME policy in the docs index
+* security checks and release safeguards
+"""
 
 from __future__ import annotations
 

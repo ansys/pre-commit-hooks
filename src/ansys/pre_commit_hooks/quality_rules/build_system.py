@@ -20,7 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Build system checks."""
+"""Build system checks.
+
+This rule set validates repository build metadata and ensures the project uses
+an acceptable Python packaging backend.
+
+The checks cover:
+
+* build-system table presence
+* setuptools, Poetry, Hatchling, Flit, or PDM detection
+* backend preference validation against the repository standard
+"""
 
 from __future__ import annotations
 

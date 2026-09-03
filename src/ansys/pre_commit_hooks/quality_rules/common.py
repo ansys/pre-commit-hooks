@@ -20,7 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Shared helpers used by the repository quality checks."""
+"""Shared helpers used by the repository quality checks.
+
+This module provides the common file, workflow, and README utilities used by
+all rule families.
+
+The helpers cover:
+
+* file existence and content checks
+* workflow discovery and classification
+* canonical workflow lookup
+* README path detection
+* result normalization for quality reports
+"""
 
 from __future__ import annotations
 

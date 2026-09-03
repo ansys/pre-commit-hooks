@@ -22,21 +22,17 @@
 
 """Pre-commit configuration checks.
 
-This rule set validates the presence of a standard PyAnsys pre-commit
-configuration and verifies that the following tools and hooks are configured:
+This rule set validates the repository pre-commit configuration and required
+repository automation hooks.
 
-* ruff-pre-commit
-* zizmor (--pedantic)
-* blacken-docs
-* codespell
-* ansys/pre-commit-hooks
-* yamlfmt
-* pyright
+The checks cover:
 
-The checks also verify repository maintenance settings such as:
-
-* autofix_prs: true
-* autoupdate_schedule: weekly
+* .pre-commit-config.yaml presence
+* ruff-pre-commit configuration
+* zizmor configuration and pedantic mode
+* formatting and spelling hooks
+* ansys/pre-commit-hooks integration
+* repository maintenance settings such as autofix and weekly updates
 """
 
 from __future__ import annotations

@@ -20,7 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""CI/CD content checks."""
+"""CI/CD content checks.
+
+This rule set validates the expected GitHub Actions workflow policy for
+repository automation.
+
+The checks cover:
+
+* concurrency blocks in the PR and main workflows
+* root permissions configuration
+* workflow triggers and required jobs
+* SHA-pinned action references
+* required security and release controls
+"""
 
 from __future__ import annotations
 

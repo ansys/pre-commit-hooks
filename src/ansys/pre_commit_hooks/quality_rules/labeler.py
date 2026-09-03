@@ -19,7 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Labeler checks."""
+"""Labeler checks.
+
+This rule set validates the repository label configuration used for issue and
+pull request triage.
+
+The checks cover:
+
+* labeler configuration presence
+* labels.yml presence
+* bug label definition
+* enhancement label definition
+* documentation label definition
+"""
 
 from __future__ import annotations
 

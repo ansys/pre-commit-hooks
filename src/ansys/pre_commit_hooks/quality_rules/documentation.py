@@ -20,7 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Documentation checks."""
+"""Documentation checks.
+
+This rule set validates the repository documentation structure and Sphinx
+configuration.
+
+The checks cover:
+
+* doc/source directory presence
+* Sphinx config file presence
+* numpydoc configuration
+* expected documentation conventions and structure
+"""
 
 from __future__ import annotations
 

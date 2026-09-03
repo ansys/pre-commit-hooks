@@ -20,15 +20,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Security checks."""
+"""Security checks.
+
+This rule set validates repository security configurations and
+secure-development best practices.
+
+The checks cover:
+
+* Zizmor configuration
+    - .github/zizmor.yml exists
+    - secrets-outside-env rule enabled
+
+* Secret scanning
+    - gitleaks pre-commit hook configured
+
+* GitHub Actions security
+    - Actions are pinned to full commit SHAs
+
+* Security policy
+    - SECURITY.md discourages public disclosure of vulnerabilities
+"""
 
 from __future__ import annotations
 
 import re
 
-from ansys.pre_commit_hooks.quality_rules.common import file_contains, file_exists, wf_content
+from ansys.pre_commit_hooks.quality_rules.common import (
+    file_contains,
+    file_exists,
+    wf_content,
+)
 
-__all__ = ["Security", "SEC001", "SEC002", "SEC003", "SEC004", "SEC005"]
+__all__ = [
+    "Security",
+    "SEC001",
+    "SEC002",
+    "SEC003",
+    "SEC004",
+    "SEC005",
+]
+
+_ZIZMOR_CONFIG = ".github/zizmor.yml"
+_PRE_COMMIT_CONFIG = ".pre-commit-config.yaml"
+_SECURITY_POLICY = "SECURITY.md"
 
 
 class Security:
@@ -42,10 +76,11 @@ class SEC001(Security):
 
     @staticmethod
     def check(root) -> bool | str:
-        """Return whether the Zizmor config is present."""
-        if file_exists(root, ".github/zizmor.yml"):
+        """Return whether the Zizmor configuration is present."""
+        if file_exists(root, _ZIZMOR_CONFIG):
             return True
-        return "⚠️ .github/zizmor.yml not found — optional but recommended."
+
+        return "⚠️ .github/zizmor.yml not found " "— optional but recommended."
 
 
 class SEC002(Security):
@@ -55,10 +90,15 @@ class SEC002(Security):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the Zizmor config enables the secrets-outside-env rule."""
-        if not file_exists(root, ".github/zizmor.yml"):
+        """Return whether the Zizmor configuration enables the secrets-outside-env rule."""
+        if not file_exists(root, _ZIZMOR_CONFIG):
             return None
-        return file_contains(root, ".github/zizmor.yml", "secrets-outside-env")
+
+        return file_contains(
+            root,
+            _ZIZMOR_CONFIG,
+            "secrets-outside-env",
+        )
 
 
 class SEC003(Security):
@@ -66,10 +106,15 @@ class SEC003(Security):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the pre-commit config includes gitleaks."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        """Return whether the pre-commit configuration includes gitleaks."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "gitleaks")
+
+        return file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "gitleaks",
+        )
 
 
 class SEC004(Security):
@@ -77,13 +122,24 @@ class SEC004(Security):
 
     @staticmethod
     def check(root, workflow_map: dict) -> bool | None | str:
-        """Return whether the PR workflow pins GitHub Actions to full SHAs."""
-        _, content = wf_content(root, "pr", workflow_map)
+        """Return whether the PR workflow pins GitHub Actions to full commit SHAs."""
+        _, content = wf_content(
+            root,
+            "pr",
+            workflow_map,
+        )
+
         if not content:
             return None
-        if re.search(r"uses:\s*\S+@[0-9a-f]{40}", content, re.I):
+
+        if re.search(
+            r"uses:\s*\S+@[0-9a-f]{40}",
+            content,
+            re.IGNORECASE,
+        ):
             return True
-        return "⚠️ No SHA-pinned actions detected in PR workflow. Use full commit SHAs."
+
+        return "⚠️ No SHA-pinned actions detected in PR workflow. " "Use full commit SHAs."
 
 
 class SEC005(Security):
@@ -94,8 +150,17 @@ class SEC005(Security):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the security policy discourages public issue reporting."""
-        if not file_exists(root, "SECURITY.md"):
+        if not file_exists(root, _SECURITY_POLICY):
             return None
-        if file_contains(root, "SECURITY.md", re.compile(r"do not|don't|please don", re.I)):
+
+        if file_contains(
+            root,
+            _SECURITY_POLICY,
+            re.compile(
+                r"do not|don't|please don",
+                re.IGNORECASE,
+            ),
+        ):
             return True
-        return "⚠️ SECURITY.md may not clearly discourage public issue reporting."
+
+        return "⚠️ SECURITY.md may not clearly discourage " "public issue reporting."

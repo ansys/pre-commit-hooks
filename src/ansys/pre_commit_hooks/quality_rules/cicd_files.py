@@ -19,7 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""CI/CD workflow file naming checks."""
+"""CI/CD workflow file naming checks.
+
+This rule set validates the presence of the canonical workflow files used by
+repository automation.
+
+The checks cover:
+
+* ci_cd_main.yml presence
+* ci_cd_pr.yml presence
+* ci_cd_release.yml presence
+* workflow-role naming consistency
+"""
 
 from __future__ import annotations
 

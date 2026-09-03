@@ -20,7 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Vale checks."""
+"""Vale checks.
+
+This rule set validates the documentation quality workflow used by the
+repository.
+
+The checks cover:
+
+* Vale configuration presence
+* Google style package configuration
+* ANSYS vocabulary inclusion
+* ANSYS accept.txt and reject.txt vocabulary files
+"""
 
 from __future__ import annotations
 
