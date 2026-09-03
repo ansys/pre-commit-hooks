@@ -42,13 +42,21 @@ _BACKENDS = {
 
 
 def _detect_backend(content: str) -> tuple[str, str]:
-    m = re.search(r'build-backend\s*=\s*["\']([^"\']+)["\']', content)
-    backend = m.group(1) if m else ""
+    """Detect the configured build backend from pyproject.toml."""
+    match = re.search(
+        r'build-backend\s*=\s*["\']([^"\']+)["\']',
+        content,
+    )
+
+    backend = match.group(1) if match else ""
+
     for pattern, name in _BACKENDS.items():
         if pattern in backend:
             return name, pattern.split(".")[0].replace("_core", "")
+
     if "[build-system]" in content:
         return "Other", "other"
+
     return "Unknown", "unknown"
 
 
@@ -66,6 +74,7 @@ class BS001(BuildSystem):
         """Return whether a build-system table is present in pyproject.toml."""
         if not file_exists(root, "pyproject.toml"):
             return None
+
         return file_contains(root, "pyproject.toml", "[build-system]")
 
 
@@ -79,13 +88,18 @@ class BS002(BuildSystem):
         """Return whether the project uses a supported modern build backend."""
         if not file_exists(root, "pyproject.toml"):
             return None
+
         name, key = _detect_backend(file_content(root, "pyproject.toml"))
+
         if key == "unknown":
             return False
+
         if key == "setuptools":
             return (
-                f"⚠️ Uses {name} — consider migrating to Flit, Hatch, or Poetry for simpler config."
+                f"⚠️ Uses {name} — consider migrating to Flit, Hatch, "
+                "or Poetry for simpler config."
             )
+
         return True
 
 
@@ -95,12 +109,24 @@ class BS003(BuildSystem):
     @staticmethod
     def check(root) -> bool | str:
         """Return whether the project uses only pyproject.toml for packaging metadata."""
-        has_py = file_exists(root, "setup.py")
-        has_cfg = file_exists(root, "setup.cfg")
-        if not has_py and not has_cfg:
+        has_setup_py = file_exists(root, "setup.py")
+        has_setup_cfg = file_exists(root, "setup.cfg")
+
+        if not has_setup_py and not has_setup_cfg:
             return True
-        found = [f for f, present in [("setup.py", has_py), ("setup.cfg", has_cfg)] if present]
-        return f"⚠️ Legacy file(s) found: {', '.join(found)}. Remove in favour of pyproject.toml."
+
+        found = [
+            filename
+            for filename, exists in (
+                ("setup.py", has_setup_py),
+                ("setup.cfg", has_setup_cfg),
+            )
+            if exists
+        ]
+
+        return (
+            f"⚠️ Legacy file(s) found: {', '.join(found)}. " "Remove in favour of pyproject.toml."
+        )
 
 
 class BS004(BuildSystem):
@@ -113,10 +139,18 @@ class BS004(BuildSystem):
         """Return whether the build backend requirement includes a version pin."""
         if not file_exists(root, "pyproject.toml"):
             return None
+
         content = file_content(root, "pyproject.toml")
-        m = re.search(r"requires\s*=\s*\[([^\]]+)\]", content)
-        if not m:
+
+        match = re.search(
+            r"requires\s*=\s*\[([^\]]+)\]",
+            content,
+        )
+
+        if not match:
             return False
-        if re.search(r"[><=!~]", m.group(1)):
+
+        if re.search(r"[><=!~]", match.group(1)):
             return True
-        return "⚠️ Build backend in requires has no version pin (e.g. >=x.y)."
+
+        return "⚠️ Build backend in requires has no version pin " "(e.g. >=x.y)."
