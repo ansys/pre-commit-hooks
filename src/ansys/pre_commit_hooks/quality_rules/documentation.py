@@ -28,7 +28,16 @@ import re
 
 from .common import file_contains, file_exists
 
-__all__ = ["Documentation", "DOC001", "DOC002", "DOC003", "DOC004", "DOC005", "DOC006", "DOC007"]
+__all__ = [
+    "Documentation",
+    "DOC001",
+    "DOC002",
+    "DOC003",
+    "DOC004",
+    "DOC005",
+    "DOC006",
+    "DOC007",
+]
 
 
 class Documentation:
@@ -53,7 +62,7 @@ class DOC002(Documentation):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the Sphinx conf.py file exists."""
+        """Return whether the Sphinx configuration file exists."""
         return file_exists(root, "doc/source/conf.py")
 
 
@@ -64,9 +73,10 @@ class DOC003(Documentation):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether numpydoc is enabled in the Sphinx config."""
+        """Return whether numpydoc is enabled in the Sphinx configuration."""
         if not file_exists(root, "doc/source/conf.py"):
             return None
+
         return file_contains(root, "doc/source/conf.py", "numpydoc")
 
 
@@ -77,9 +87,10 @@ class DOC004(Documentation):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether sphinx_design is enabled in the Sphinx config."""
+        """Return whether sphinx_design is enabled in the Sphinx configuration."""
         if not file_exists(root, "doc/source/conf.py"):
             return None
+
         return file_contains(root, "doc/source/conf.py", "sphinx_design")
 
 
@@ -90,9 +101,10 @@ class DOC005(Documentation):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether intersphinx is enabled in the Sphinx config."""
+        """Return whether intersphinx is enabled in the Sphinx configuration."""
         if not file_exists(root, "doc/source/conf.py"):
             return None
+
         return file_contains(root, "doc/source/conf.py", "intersphinx")
 
 
@@ -103,10 +115,15 @@ class DOC006(Documentation):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the docs index includes a getting-started section."""
+        """Return whether the documentation index includes a getting-started section."""
         if not file_exists(root, "doc/source/index.rst"):
             return None
-        return file_contains(root, "doc/source/index.rst", re.compile(r"getting.started", re.I))
+
+        return file_contains(
+            root,
+            "doc/source/index.rst",
+            re.compile(r"getting.started", re.IGNORECASE),
+        )
 
 
 class DOC007(Documentation):
@@ -116,9 +133,15 @@ class DOC007(Documentation):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the docs index includes an API reference section."""
+        """Return whether the documentation index includes an API reference section."""
         if not file_exists(root, "doc/source/index.rst"):
             return None
+
         return file_contains(
-            root, "doc/source/index.rst", re.compile(r"api.reference|api_reference", re.I)
+            root,
+            "doc/source/index.rst",
+            re.compile(
+                r"api.reference|api_reference",
+                re.IGNORECASE,
+            ),
         )
