@@ -69,7 +69,12 @@ class DB002(Dependabot):
         """Return whether the Dependabot config uses the expected schema version."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        return file_contains(root, _PATH_DEPENDABOT, re.compile(r"^version:\s*2\s*$", re.M))
+
+        return file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r"^version:\s*2\s*$", re.MULTILINE),
+        )
 
 
 class DB003(Dependabot):
@@ -82,16 +87,25 @@ class DB003(Dependabot):
         """Return whether a supported dependency ecosystem is configured."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
+
         has_pip = file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
         )
+
         has_uv = file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
         )
+
         if has_pip:
             return True
+
         if has_uv:
-            return "⚠️ uv ecosystem configured (pip preferred for PyAnsys standard)."
+            return "⚠️ uv ecosystem configured " "(pip preferred for PyAnsys standard)."
+
         return False
 
 
@@ -105,8 +119,11 @@ class DB004(Dependabot):
         """Return whether the GitHub Actions ecosystem is configured."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
+
         return file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?github-actions[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?github-actions["\']?'),
         )
 
 
@@ -120,11 +137,20 @@ class DB005(Dependabot):
         """Return whether the weekly update interval is configured for enough ecosystems."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
+
         content = file_content(root, _PATH_DEPENDABOT)
-        count = len(re.findall(r"interval:\s*[\"']?weekly[\"']?", content))
+
+        count = len(
+            re.findall(
+                r'interval:\s*["\']?weekly["\']?',
+                content,
+            )
+        )
+
         if count >= 2:
             return True
-        return f"⚠️ Only {count} ecosystem(s) use weekly interval (expected ≥2)."
+
+        return f"⚠️ Only {count} ecosystem(s) use weekly interval " "(expected ≥2)."
 
 
 class DB006(Dependabot):
@@ -137,8 +163,14 @@ class DB006(Dependabot):
         """Return whether the Dependabot cooldown policy is set to seven days."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        if file_contains(root, _PATH_DEPENDABOT, re.compile(r"default-days:\s*7")):
+
+        if file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r"default-days:\s*7"),
+        ):
             return True
+
         return "⚠️ Cooldown default-days: 7 not found in dependabot.yml."
 
 
@@ -152,19 +184,30 @@ class DB007(Dependabot):
         """Return whether pip uses the lockfile-only versioning strategy."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
+
         has_uv = file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?uv[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
         )
+
         has_pip = file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"package-ecosystem:\s*[\"']?pip[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
         )
+
         if has_uv and not has_pip:
             return None
+
         if file_contains(
-            root, _PATH_DEPENDABOT, re.compile(r"versioning-strategy:\s*[\"']?lockfile-only[\"']?")
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'versioning-strategy:\s*["\']?lockfile-only["\']?'),
         ):
             return True
-        return "⚠️ versioning-strategy: lockfile-only not found for pip ecosystem."
+
+        return "⚠️ versioning-strategy: lockfile-only " "not found for pip ecosystem."
 
 
 class DB008(Dependabot):
@@ -177,6 +220,12 @@ class DB008(Dependabot):
         """Return whether the pip group wildcard pattern is defined."""
         if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        if file_contains(root, _PATH_DEPENDABOT, re.compile(r'patterns:\s*\n\s+- ["\']?\*["\']?')):
+
+        if file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'patterns:\s*\n\s*-\s*["\']?\*["\']?'),
+        ):
             return True
-        return '⚠️ pip groups wildcard pattern "- "*"" not found in dependabot.yml.'
+
+        return "⚠️ pip groups wildcard pattern " '"- \\"*\\"" not found in dependabot.yml.'
