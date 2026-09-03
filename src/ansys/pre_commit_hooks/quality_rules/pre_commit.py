@@ -20,7 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Pre-commit configuration checks."""
+"""Pre-commit configuration checks.
+
+This rule set validates the presence of a standard PyAnsys pre-commit
+configuration and verifies that the following tools and hooks are configured:
+
+* ruff-pre-commit
+* zizmor (--pedantic)
+* blacken-docs
+* codespell
+* ansys/pre-commit-hooks
+* yamlfmt
+* pyright
+
+The checks also verify repository maintenance settings such as:
+
+* autofix_prs: true
+* autoupdate_schedule: weekly
+"""
 
 from __future__ import annotations
 
@@ -42,6 +59,8 @@ __all__ = [
     "PC010",
 ]
 
+_PRE_COMMIT_CONFIG = ".pre-commit-config.yaml"
+
 
 class PreCommit:
     """Pre-commit rule family."""
@@ -54,8 +73,8 @@ class PC001(PreCommit):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the pre-commit config exists."""
-        return file_exists(root, ".pre-commit-config.yaml")
+        """Return whether the pre-commit configuration exists."""
+        return file_exists(root, _PRE_COMMIT_CONFIG)
 
 
 class PC002(PreCommit):
@@ -65,10 +84,11 @@ class PC002(PreCommit):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether ruff-pre-commit is present in the config."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        """Return whether ruff-pre-commit is configured."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "ruff-pre-commit")
+
+        return file_contains(root, _PRE_COMMIT_CONFIG, "ruff-pre-commit")
 
 
 class PC003(PreCommit):
@@ -79,14 +99,27 @@ class PC003(PreCommit):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether zizmor is configured with the pedantic option."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        has_zizmor = file_contains(root, ".pre-commit-config.yaml", "zizmor")
-        has_pedantic = file_contains(root, ".pre-commit-config.yaml", "--pedantic")
+
+        has_zizmor = file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "zizmor",
+        )
+
+        has_pedantic = file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "--pedantic",
+        )
+
         if not has_zizmor:
             return False
+
         if not has_pedantic:
             return "⚠️ zizmor found but --pedantic flag not set."
+
         return True
 
 
@@ -98,9 +131,10 @@ class PC004(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether blacken-docs is configured."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "blacken-docs")
+
+        return file_contains(root, _PRE_COMMIT_CONFIG, "blacken-docs")
 
 
 class PC005(PreCommit):
@@ -111,9 +145,10 @@ class PC005(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether codespell is configured."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "codespell")
+
+        return file_contains(root, _PRE_COMMIT_CONFIG, "codespell")
 
 
 class PC006(PreCommit):
@@ -123,10 +158,15 @@ class PC006(PreCommit):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the repository uses the shared Ansys pre-commit hook."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        """Return whether the shared Ansys pre-commit hooks are configured."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "ansys/pre-commit-hooks")
+
+        return file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "ansys/pre-commit-hooks",
+        )
 
 
 class PC007(PreCommit):
@@ -137,9 +177,10 @@ class PC007(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether yamlfmt is configured."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "yamlfmt")
+
+        return file_contains(root, _PRE_COMMIT_CONFIG, "yamlfmt")
 
 
 class PC008(PreCommit):
@@ -150,9 +191,10 @@ class PC008(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether pyright is configured."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        return file_contains(root, ".pre-commit-config.yaml", "pyright")
+
+        return file_contains(root, _PRE_COMMIT_CONFIG, "pyright")
 
 
 class PC009(PreCommit):
@@ -162,11 +204,17 @@ class PC009(PreCommit):
 
     @staticmethod
     def check(root) -> bool | None | str:
-        """Return whether pull requests are configured to autogenerate fixes."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        """Return whether automatic pull-request fixes are enabled."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
-        if file_contains(root, ".pre-commit-config.yaml", "autofix_prs: true"):
+
+        if file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "autofix_prs: true",
+        ):
             return True
+
         return "⚠️ autofix_prs: true not set in ci: block."
 
 
@@ -178,10 +226,16 @@ class PC010(PreCommit):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the pre-commit autoupdate schedule is weekly."""
-        if not file_exists(root, ".pre-commit-config.yaml"):
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
+
         if file_contains(
-            root, ".pre-commit-config.yaml", re.compile(r"autoupdate_schedule:\s*weekly")
+            root,
+            _PRE_COMMIT_CONFIG,
+            re.compile(
+                r"autoupdate_schedule:\s*weekly",
+            ),
         ):
             return True
+
         return "⚠️ autoupdate_schedule: weekly not found."

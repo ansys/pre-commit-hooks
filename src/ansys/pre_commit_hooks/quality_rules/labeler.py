@@ -19,14 +19,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Labeler checks."""
 
 from __future__ import annotations
 
 from .common import file_contains, file_exists
 
-__all__ = ["Labeler", "LB001", "LB002", "LB003", "LB004", "LB005"]
+__all__ = [
+    "Labeler",
+    "LB001",
+    "LB002",
+    "LB003",
+    "LB004",
+    "LB005",
+]
 
 
 class Labeler:
@@ -40,7 +46,7 @@ class LB001(Labeler):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the labeler config exists."""
+        """Return whether the labeler configuration exists."""
         return file_exists(root, ".github/labeler.yml")
 
 
@@ -49,7 +55,7 @@ class LB002(Labeler):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the labels config exists."""
+        """Return whether the labels configuration exists."""
         return file_exists(root, ".github/labels.yml")
 
 
@@ -63,6 +69,7 @@ class LB003(Labeler):
         """Return whether the bug label is present."""
         if not file_exists(root, ".github/labels.yml"):
             return None
+
         return file_contains(root, ".github/labels.yml", "bug")
 
 
@@ -76,6 +83,7 @@ class LB004(Labeler):
         """Return whether the enhancement label is present."""
         if not file_exists(root, ".github/labels.yml"):
             return None
+
         return file_contains(root, ".github/labels.yml", "enhancement")
 
 
@@ -89,4 +97,5 @@ class LB005(Labeler):
         """Return whether the documentation label is present."""
         if not file_exists(root, ".github/labels.yml"):
             return None
+
         return file_contains(root, ".github/labels.yml", "documentation")
