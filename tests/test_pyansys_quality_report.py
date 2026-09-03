@@ -10,7 +10,22 @@ from pathlib import Path
 import git
 
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
+from ansys.pre_commit_hooks.quality_rules.common import workflow_map
 from ansys.pre_commit_hooks.quality_rules.project_metadata import PM013
+
+
+def test_workflow_map_classifies_ci_cd_roles(tmp_path):
+    """Workflow filenames like ci_cd_pr.yml should map to their canonical roles."""
+    workflows = tmp_path / ".github" / "workflows"
+    workflows.mkdir(parents=True)
+    (workflows / "ci_cd_main.yml").write_text("name: main\n", encoding="utf-8")
+    (workflows / "ci_cd_pr.yml").write_text("name: pr\n", encoding="utf-8")
+    (workflows / "ci_cd_release.yml").write_text("name: release\n", encoding="utf-8")
+
+    result = workflow_map(tmp_path)
+
+    assert set(result) >= {"main", "pr", "release"}
+    assert result["pr"]["name"] == "ci_cd_pr.yml"
 
 
 def test_pm013_accepts_supported_version_formats(tmp_path):

@@ -48,6 +48,13 @@ __all__ = [
 ]
 
 
+CANONICAL_WF: dict[str, str] = {
+    "main": ".github/workflows/ci_cd_main.yml",
+    "pr": ".github/workflows/ci_cd_pr.yml",
+    "release": ".github/workflows/ci_cd_release.yml",
+}
+
+
 def file_exists(root: Traversable, path: str) -> bool:
     """Return whether a file exists under the repository root."""
     try:
@@ -59,29 +66,32 @@ def file_exists(root: Traversable, path: str) -> bool:
 def file_content(root: Traversable, path: str) -> str:
     """Return the text content of a file under the repository root."""
     try:
-        f = root.joinpath(path)
-        if f.is_file():
-            return f.read_text(encoding="utf-8")
+        file_path = root.joinpath(path)
+
+        if file_path.is_file():
+            return file_path.read_text(encoding="utf-8")
+
     except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
         return ""
+
     return ""
 
 
-def file_contains(root: Traversable, path: str, pattern: str | re.Pattern) -> bool:
+def file_contains(
+    root: Traversable,
+    path: str,
+    pattern: str | re.Pattern,
+) -> bool:
     """Return whether a file contains the given string or regex pattern."""
     content = file_content(root, path)
+
     if not content:
         return False
+
     if isinstance(pattern, str):
         return pattern in content
+
     return bool(pattern.search(content))
-
-
-CANONICAL_WF = {
-    "main": ".github/workflows/ci_cd_main.yml",
-    "pr": ".github/workflows/ci_cd_pr.yml",
-    "release": ".github/workflows/ci_cd_release.yml",
-}
 
 
 def all_workflows_content(root: Traversable) -> str:
@@ -89,16 +99,23 @@ def all_workflows_content(root: Traversable) -> str:
     return _merge_all_workflows(root)
 
 
-def wf_content(root: Traversable, role: str, workflow_map: dict) -> tuple[bool, str]:
+def wf_content(
+    root: Traversable,
+    role: str,
+    workflow_map: dict,
+) -> tuple[bool, str]:
     """Return the content for the workflow matching the given role."""
     canonical = CANONICAL_WF[role]
+
     if file_exists(root, canonical):
         return True, file_content(root, canonical)
 
     entry = workflow_map.get(role)
+
     if entry and not entry.get("is_fallback"):
         path = entry.get("path", "")
         return False, file_content(root, path) if path else ""
+
     return False, _merge_all_workflows(root)
 
 
@@ -106,45 +123,58 @@ def _merge_all_workflows(root: Traversable) -> str:
     """Merge the contents of all workflow files into a single string."""
     try:
         entries = [
-            e
-            for e in root.joinpath(".github/workflows").iterdir()
-            if e.name.endswith((".yml", ".yaml"))
+            entry
+            for entry in root.joinpath(".github/workflows").iterdir()
+            if entry.name.endswith((".yml", ".yaml"))
         ]
     except (AttributeError, FileNotFoundError, OSError, TypeError):
         return ""
-    parts = []
+
+    parts: list[str] = []
+
     for entry in entries:
         try:
-            c = entry.read_text(encoding="utf-8")
-            if c:
-                parts.append(c)
+            content = entry.read_text(encoding="utf-8")
+
+            if content:
+                parts.append(content)
+
         except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
             continue
+
     return "\n\n".join(parts)
 
 
 def wf_label(role: str, workflow_map: dict) -> str:
     """Return a human-readable label for a workflow role."""
     entry = workflow_map.get(role)
+
     if not entry:
         return CANONICAL_WF.get(role, role)
+
     if entry.get("is_fallback"):
         sources = entry.get("sources", [])
         return f"{len(sources)} workflow file(s) ({', '.join(sources)})"
+
     return entry.get("name", role)
 
 
 def workflow_map(root: Traversable) -> dict[str, dict]:
     """Classify workflow files into canonical roles for repository checks."""
-    wf_dir = root.joinpath(".github/workflows")
+    workflow_dir = root.joinpath(".github/workflows")
+
     try:
-        entries = [e for e in wf_dir.iterdir() if e.name.endswith((".yml", ".yaml"))]
+        entries = [
+            entry for entry in workflow_dir.iterdir() if entry.name.endswith((".yml", ".yaml"))
+        ]
     except (AttributeError, FileNotFoundError, OSError, TypeError):
         entries = []
 
     result: dict[str, dict] = {}
+
     for entry in entries:
         role = _classify_workflow(entry.name)
+
         if role != "unknown" and role not in result:
             result[role] = {
                 "name": entry.name,
@@ -159,22 +189,31 @@ def workflow_map(root: Traversable) -> dict[str, dict]:
                 "name": f"{len(entries)} workflow(s)",
                 "path": None,
                 "is_fallback": True,
-                "sources": [e.name for e in entries],
+                "sources": [entry.name for entry in entries],
             }
 
     return result
 
 
 def _classify_workflow(name: str) -> str:
-    n = name.lower()
-    if re.search(r"release|publish|deploy", n):
+    """Classify a workflow filename into a canonical workflow role."""
+    workflow_name = name.lower()
+
+    if re.search(r"release|publish|deploy", workflow_name):
         return "release"
-    if re.search(r"\bpr\b|pull.?request|pull_request", n):
+
+    if re.search(r"(^|[_-])pr(?:[_-]|[.]|$)|pull.?request|pull_request", workflow_name):
         return "pr"
-    if re.search(r"main|push|branch|nightly|schedule|ci_cd_main|ci.main", n):
+
+    if re.search(
+        r"main|push|branch|nightly|schedule|ci_cd_main|ci.main",
+        workflow_name,
+    ):
         return "main"
-    if re.search(r"\bci\b|build|test", n):
+
+    if re.search(r"\bci\b|build|test", workflow_name):
         return "pr"
+
     return "unknown"
 
 
@@ -182,8 +221,10 @@ def readme_path(root: Traversable) -> str | None:
     """Return the preferred README filename if present."""
     if file_exists(root, "README.rst"):
         return "README.rst"
+
     if file_exists(root, "README.md"):
         return "README.md"
+
     return None
 
 
@@ -191,9 +232,18 @@ def is_mcp(root: Traversable) -> bool:
     """Return whether the repository appears to be an MCP project."""
     try:
         pyproject_text = root.joinpath("pyproject.toml").read_text()
-        return bool(re.search(r"\b(fastmcp|mcp)\b", pyproject_text, re.IGNORECASE))
+
+        return bool(
+            re.search(
+                r"\b(fastmcp|mcp)\b",
+                pyproject_text,
+                re.IGNORECASE,
+            )
+        )
+
     except (AttributeError, OSError, TypeError, UnicodeError, ValueError):
         pass
+
     try:
         return file_exists(root, "src/server.py") or file_exists(root, "server.py")
     except (AttributeError, OSError, TypeError, ValueError):
@@ -202,12 +252,15 @@ def is_mcp(root: Traversable) -> bool:
 
 def _first_doc_line(obj: Any) -> str:
     """Return the first line of the check method's docstring, if present."""
-    doc = (obj.check.__doc__ or "").strip()
-    lines = [line.strip() for line in doc.splitlines() if line.strip()]
+    lines = [line.strip() for line in (obj.check.__doc__ or "").splitlines() if line.strip()]
+
     return lines[0] if lines else ""
 
 
-def normalize_check_result(raw: bool | str | None, check_obj: Any | None = None) -> tuple[str, str]:
+def normalize_check_result(
+    raw: bool | str | None,
+    check_obj: Any | None = None,
+) -> tuple[str, str]:
     """Normalize a raw rule result to the canonical status/detail contract.
 
     The canonical contract is intentionally simple and shared across the whole
@@ -216,19 +269,28 @@ def normalize_check_result(raw: bool | str | None, check_obj: Any | None = None)
     """
     if raw is True:
         return "pass", ""
+
     if raw is None:
         return "na", ""
+
     if isinstance(raw, str):
         if raw.startswith("⚠️ "):
             return "warn", raw.removeprefix("⚠️ ")
+
         if raw:
             return "warn", raw
+
         return "fail", ""
+
     if raw is False:
         if check_obj is None:
             return "fail", ""
+
         doc = (check_obj.check.__doc__ or "").strip()
         lines = [line.strip() for line in doc.splitlines() if line.strip()]
+
         detail = lines[-1] if len(lines) > 1 else (lines[0] if lines else "")
+
         return "fail", detail
+
     return "fail", str(raw)

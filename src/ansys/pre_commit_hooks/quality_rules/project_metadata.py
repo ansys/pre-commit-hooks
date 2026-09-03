@@ -223,7 +223,7 @@ class PM013(ProjectMetadata):
         version = match.group(1)
 
         semver_pattern = r"\d+\.\d+\.\d+(?:-(?:a|b|beta|rc|dev)\.?\d+)?"
-        pep440_dev_pattern = r"\d+\.\d+\.\d+\.dev\d+"
+        pep440_dev_pattern = r"\d+\.\d+(?:\.\d+)?\.dev\d+"
 
         if re.fullmatch(semver_pattern, version) or re.fullmatch(pep440_dev_pattern, version):
             return True
