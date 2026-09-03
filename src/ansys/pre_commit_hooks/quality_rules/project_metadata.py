@@ -20,7 +20,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Project metadata checks."""
+"""Project metadata checks.
+
+This rule set validates repository metadata against PyAnsys standards.
+
+The checks cover:
+
+* Governance and repository files
+    - AUTHORS
+    - CHANGELOG.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - CONTRIBUTORS.md
+    - LICENSE
+    - SECURITY.md
+    - .github/CODEOWNERS
+
+* README requirements
+    - README exists
+    - README.rst preferred over README.md
+    - pyproject.toml references the README
+
+* Packaging metadata
+    - LICENSE metadata is declared
+    - Project name follows ansys-*-* convention
+    - Project version follows accepted versioning schemes
+    - Author and maintainer metadata is configured
+
+* Licensing
+    - LICENSE file contains recognized MIT or Apache 2.0 wording
+"""
 
 from __future__ import annotations
 
@@ -49,6 +78,12 @@ __all__ = [
     "PM014",
     "PM015",
 ]
+
+_PYPROJECT = "pyproject.toml"
+_LICENSE = "LICENSE"
+
+_DEFAULT_AUTHOR = "Synopsys, Inc. and ANSYS, Inc."
+_DEFAULT_EMAIL = "pyansys-core@synopsys.com"
 
 
 class ProjectMetadata:
@@ -80,7 +115,7 @@ class PM003(ProjectMetadata):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the code of conduct file is present."""
+        """Return whether the code-of-conduct file is present."""
         return file_exists(root, "CODE_OF_CONDUCT.md")
 
 
@@ -108,7 +143,7 @@ class PM006(ProjectMetadata):
     @staticmethod
     def check(root) -> bool:
         """Return whether the license file is present."""
-        return file_exists(root, "LICENSE")
+        return file_exists(root, _LICENSE)
 
 
 class PM007(ProjectMetadata):
@@ -119,8 +154,10 @@ class PM007(ProjectMetadata):
         """Return whether the README is present and in the preferred format."""
         if readme_path is None:
             return False
+
         if readme_path == "README.md":
             return "⚠️ README.md found — README.rst is the preferred format."
+
         return True
 
 
@@ -138,7 +175,7 @@ class PM009(ProjectMetadata):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the code owners file is present."""
+        """Return whether the CODEOWNERS file is present."""
         return file_exists(root, ".github/CODEOWNERS")
 
 
@@ -150,23 +187,31 @@ class PM010(ProjectMetadata):
     @staticmethod
     def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether pyproject.toml references the expected README file."""
-        if not file_exists(root, "pyproject.toml"):
+        if not file_exists(root, _PYPROJECT):
             return None
-        content = file_content(root, "pyproject.toml")
+
+        content = file_content(root, _PYPROJECT)
+
         if re.search(r"poetry\.core|poetry-core", content):
-            m = re.search(
-                r"\[tool\.poetry\][\s\S]*?readme\s*=\s*[\"']([^\"']+)[\"']",
+            match = re.search(
+                r"\[^\"']+[\"']",
                 content,
-                re.M,
+                re.MULTILINE,
             )
-            if m:
+
+            if match:
                 return True
+
             return False
-        rm = readme_path or "README.rst"
-        if rm in content:
+
+        readme = readme_path or "README.rst"
+
+        if readme in content:
             return True
+
         if "README" in content:
-            return "⚠️ readme key found but exact README filename not confirmed."
+            return "⚠️ readme key found but exact README filename " "not confirmed."
+
         return False
 
 
@@ -178,15 +223,27 @@ class PM011(ProjectMetadata):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether pyproject.toml references the license file."""
-        if not file_exists(root, "pyproject.toml"):
+        if not file_exists(root, _PYPROJECT):
             return None
-        c = file_content(root, "pyproject.toml")
-        if re.search(r"poetry\.core|poetry-core", c):
-            return bool(re.search(r"\[tool\.poetry\][\s\S]*?license\s*=", c, re.M))
+
+        content = file_content(root, _PYPROJECT)
+
+        if re.search(r"poetry\.core|poetry-core", content):
+            return bool(
+                re.search(
+                    r"\[tool\.poetry\][\s\S]*?license\s*=",
+                    content,
+                    re.MULTILINE,
+                )
+            )
+
         return bool(
-            re.search(r"license-files\s*=", c)
-            or re.search(r"license\s*=\s*\{[^}]*file", c)
-            or re.search(r'license\s*=\s*["\']LICENSE["\']', c)
+            re.search(r"license-files\s*=", content)
+            or re.search(r"license\s*=\s*\{[^}]*file", content)
+            or re.search(
+                r'license\s*=\s*["\']LICENSE["\']',
+                content,
+            )
         )
 
 
@@ -196,81 +253,110 @@ class PM012(ProjectMetadata):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the project name matches the PyAnsys naming convention."""
-        if not file_exists(root, "pyproject.toml"):
+        if not file_exists(root, _PYPROJECT):
             return None
-        content = file_content(root, "pyproject.toml")
-        match = re.search(r'^name\s*=\s*["\']([^"\']+)["\']', content, re.M)
+
+        content = file_content(root, _PYPROJECT)
+
+        match = re.search(
+            r'^name\s*=\s*["\']([^"\']+)["\']',
+            content,
+            re.MULTILINE,
+        )
+
         if not match:
             return "⚠️ project name not found in pyproject.toml."
+
         name = match.group(1)
+
         if re.fullmatch(r"ansys-[a-z0-9-]+-[a-z0-9-]+", name):
             return True
+
         return f"⚠️ project name '{name}' does not match ansys-*-*."
 
 
 class PM013(ProjectMetadata):
-    """Project version follows semantic versioning or accepted Python dev versions."""
+    """Project version follows semantic versioning or accepted dev versions."""
 
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the project version uses a valid release or dev version."""
-        if not file_exists(root, "pyproject.toml"):
+        if not file_exists(root, _PYPROJECT):
             return None
-        content = file_content(root, "pyproject.toml")
-        match = re.search(r'^version\s*=\s*["\']([^"\']+)["\']', content, re.M)
+
+        content = file_content(root, _PYPROJECT)
+
+        match = re.search(
+            r'^version\s*=\s*["\']([^"\']+)["\']',
+            content,
+            re.MULTILINE,
+        )
+
         if not match:
             return "⚠️ project version not found in pyproject.toml."
+
         version = match.group(1)
 
-        semver_pattern = r"\d+\.\d+\.\d+(?:-(?:a|b|beta|rc|dev)\.?\d+)?"
+        semver_pattern = r"\d+\.\d+\.\d+" r"(?:-(?:a|b|beta|rc|dev)\.?\d+)?"
+
         pep440_dev_pattern = r"\d+\.\d+(?:\.\d+)?\.dev\d+"
 
         if re.fullmatch(semver_pattern, version) or re.fullmatch(pep440_dev_pattern, version):
             return True
 
         return (
-            f"⚠️ project version '{version}' does not follow semantic versioning "
-            "or the accepted Python dev-version form."
+            f"⚠️ project version '{version}' does not follow "
+            "semantic versioning or the accepted Python "
+            "dev-version form."
         )
 
 
 class PM014(ProjectMetadata):
-    """Project author and maintainer metadata matches the PyAnsys defaults."""
+    """Project author and maintainer metadata matches PyAnsys defaults."""
 
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether author and maintainer metadata are configured as expected."""
-        if not file_exists(root, "pyproject.toml"):
+        if not file_exists(root, _PYPROJECT):
             return None
-        content = file_content(root, "pyproject.toml")
+
+        content = file_content(root, _PYPROJECT)
+
         name_ok = bool(
             re.search(
-                r'authors\s*=\s*\[[\s\S]*?name\s*=\s*["\']Synopsys, Inc\. and ANSYS, Inc\.["\']',
+                rf'authors\s*=\s*\[[\s\S]*?name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
                 content,
             )
         )
+
         email_ok = bool(
             re.search(
-                r'authors\s*=\s*\[[\s\S]*?email\s*=\s*["\']pyansys-core@synopsys.com["\']', content
+                rf'authors\s*=\s*\[[\s\S]*?email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
+                content,
             )
         )
+
         maintainer_name_ok = bool(
             re.search(
-                r'maintainers\s*=\s*\[[\s\S]*?name\s*=\s*["\']Synopsys, Inc\. and ANSYS, Inc\.["\']',  # noqa: E501
+                rf'maintainers\s*=\s*\[[\s\S]*?name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
                 content,
             )
         )
+
         maintainer_email_ok = bool(
             re.search(
-                r'maintainers\s*=\s*\[[\s\S]*?email\s*=\s*["\']pyansys-core@synopsys.com["\']',
+                rf'maintainers\s*=\s*\[[\s\S]*?email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
                 content,
             )
         )
+
         if name_ok and email_ok and maintainer_name_ok and maintainer_email_ok:
             return True
+
         return (
             "⚠️ author/maintainer metadata does not match "
-            "Synopsys, Inc. and ANSYS, Inc. / pyansys-core@synopsys.com."
+            "Synopsys, Inc. and ANSYS, Inc. / "
+            "pyansys-core@synopsys.com."
         )
 
 
@@ -282,15 +368,23 @@ class PM015(ProjectMetadata):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the LICENSE file contains expected MIT or Apache 2.0 text."""
-        if not file_exists(root, "LICENSE"):
+        if not file_exists(root, _LICENSE):
             return None
-        content = file_content(root, "LICENSE")
+
+        content = file_content(root, _LICENSE)
+
         if (
             "MIT License" in content
-            or re.search(r"Apache License.*Version 2\.0", content, re.IGNORECASE | re.DOTALL)
+            or re.search(
+                r"Apache License.*Version 2\.0",
+                content,
+                re.IGNORECASE | re.DOTALL,
+            )
             or "Apache License" in content
         ):
             return True
+
         return (
-            "⚠️ LICENSE file content is missing a recognized license statement (MIT or Apache 2.0)."
+            "⚠️ LICENSE file content is missing a recognized "
+            "license statement (MIT or Apache 2.0)."
         )
