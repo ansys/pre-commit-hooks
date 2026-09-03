@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """CI/CD workflow file naming checks."""
 
 from __future__ import annotations
@@ -34,6 +33,22 @@ class CICDFiles:
 
     family = "cicd_files"
 
+    @staticmethod
+    def _check_workflow(
+        root,
+        workflow_map: dict,
+        workflow_type: str,
+        expected_file: str,
+    ) -> bool | str:
+        """Validate that the expected workflow file exists."""
+        if file_exists(root, CANONICAL_WF[workflow_type]):
+            return True
+
+        return (
+            f"⚠️ Canonical {expected_file} not found "
+            f"— detected: {wf_label(workflow_type, workflow_map)}"
+        )
+
 
 class CI001(CICDFiles):
     """The ci_cd_main.yml workflow file exists."""
@@ -41,10 +56,12 @@ class CI001(CICDFiles):
     @staticmethod
     def check(root, workflow_map: dict) -> bool | str:
         """Return whether the canonical main workflow file is present."""
-        if file_exists(root, CANONICAL_WF["main"]):
-            return True
-        lbl = wf_label("main", workflow_map)
-        return f"⚠️ Canonical ci_cd_main.yml not found — detected: {lbl}"
+        return CICDFiles._check_workflow(
+            root,
+            workflow_map,
+            "main",
+            "ci_cd_main.yml",
+        )
 
 
 class CI002(CICDFiles):
@@ -53,10 +70,12 @@ class CI002(CICDFiles):
     @staticmethod
     def check(root, workflow_map: dict) -> bool | str:
         """Return whether the canonical PR workflow file is present."""
-        if file_exists(root, CANONICAL_WF["pr"]):
-            return True
-        lbl = wf_label("pr", workflow_map)
-        return f"⚠️ Canonical ci_cd_pr.yml not found — detected: {lbl}"
+        return CICDFiles._check_workflow(
+            root,
+            workflow_map,
+            "pr",
+            "ci_cd_pr.yml",
+        )
 
 
 class CI003(CICDFiles):
@@ -65,7 +84,9 @@ class CI003(CICDFiles):
     @staticmethod
     def check(root, workflow_map: dict) -> bool | str:
         """Return whether the canonical release workflow file is present."""
-        if file_exists(root, CANONICAL_WF["release"]):
-            return True
-        lbl = wf_label("release", workflow_map)
-        return f"⚠️ Canonical ci_cd_release.yml not found — detected: {lbl}"
+        return CICDFiles._check_workflow(
+            root,
+            workflow_map,
+            "release",
+            "ci_cd_release.yml",
+        )
