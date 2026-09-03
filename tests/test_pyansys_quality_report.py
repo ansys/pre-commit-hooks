@@ -10,6 +10,15 @@ from pathlib import Path
 import git
 
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
+from ansys.pre_commit_hooks.quality_rules.project_metadata import PM013
+
+
+def test_pm013_accepts_supported_version_formats(tmp_path):
+    """Development versions in Python packaging should be accepted alongside SemVer."""
+    for version in ["1.2.3", "1.2.3-rc.1", "1.2.3.dev0", "1.2.3.dev1"]:
+        pyproject = tmp_path / "pyproject.toml"
+        pyproject.write_text(f'[project]\nversion = "{version}"\n', encoding="utf-8")
+        assert PM013.check(tmp_path) is True
 
 
 def test_main_reports_quality_summary(tmp_path, capsys):

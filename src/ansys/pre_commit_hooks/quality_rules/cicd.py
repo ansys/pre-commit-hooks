@@ -59,17 +59,19 @@ class CI004(CICD):
     def check(root, workflow_map: dict) -> bool | None | str:
         """Return whether the PR and main workflows define concurrency blocks."""
         roles = [("pr", "ci_cd_pr.yml"), ("main", "ci_cd_main.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
+
+        present = [
+            (role, label, content)
+            for role, label in roles
+            if (content := wf_content(root, role, workflow_map)[1])
+        ]
+
         if not present:
             return None
-        missing = [
-            lbl
-            for role, lbl in present
-            if "concurrency:" not in wf_content(root, role, workflow_map)[1]
-        ]
-        if not missing:
-            return True
-        return f"⚠️ concurrency: block missing in: {', '.join(missing)}"
+
+        missing = [label for _, label, content in present if "concurrency:" not in content]
+
+        return True if not missing else f"⚠️ concurrency: block missing in: {', '.join(missing)}"
 
 
 class CI005(CICD):
@@ -79,14 +81,22 @@ class CI005(CICD):
     def check(root, workflow_map: dict) -> bool | None | str:
         """Return whether the PR and release workflows have explicit root permissions."""
         roles = [("pr", "ci_cd_pr.yml"), ("release", "ci_cd_release.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
+
+        present = [
+            (role, label, content)
+            for role, label in roles
+            if (content := wf_content(root, role, workflow_map)[1])
+        ]
+
         if not present:
             return None
+
         missing = [
-            lbl
-            for role, lbl in present
-            if not re.search(r"^permissions:\s*\{\}", wf_content(root, role, workflow_map)[1], re.M)
+            label
+            for _, label, content in present
+            if not re.search(r"^permissions:\s*\{\}", content, re.MULTILINE)
         ]
+
         return True if not missing else f"Missing root permissions: {{}} in: {', '.join(missing)}"
 
 
@@ -97,17 +107,25 @@ class CI006(CICD):
     def check(root, workflow_map: dict) -> bool | None | str:
         """Return whether workflows disable persisting credentials during checkout."""
         roles = [("pr", "ci_cd_pr.yml"), ("release", "ci_cd_release.yml")]
-        present = [(role, lbl) for role, lbl in roles if wf_content(root, role, workflow_map)[1]]
+
+        present = [
+            (role, label, content)
+            for role, label in roles
+            if (content := wf_content(root, role, workflow_map)[1])
+        ]
+
         if not present:
             return None
+
         missing = [
-            lbl
-            for role, lbl in present
-            if "persist-credentials: false" not in wf_content(root, role, workflow_map)[1]
+            label for _, label, content in present if "persist-credentials: false" not in content
         ]
-        if not missing:
-            return True
-        return f"⚠️ persist-credentials: false missing in: {', '.join(missing)}"
+
+        return (
+            True
+            if not missing
+            else f"⚠️ persist-credentials: false missing in: {', '.join(missing)}"
+        )
 
 
 class CI007(CICD):
@@ -117,9 +135,17 @@ class CI007(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include a labeler action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/[^\s]*label|\blabeler\b", content, re.IGNORECASE))
+
+        return bool(
+            re.search(
+                r"ansys/actions/[^\s]*label|\blabeler\b",
+                content,
+                re.IGNORECASE,
+            )
+        )
 
 
 class CI008(CICD):
@@ -129,8 +155,10 @@ class CI008(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include the vulnerability check action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return "ansys/actions/check-vulnerabilities" in content
 
 
@@ -141,10 +169,13 @@ class CI009(CICD):
     def check(root) -> bool | None | str:
         """Return whether the workflows include the code-style action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         if "ansys/actions/code-style" in content:
             return True
+
         return "⚠️ ansys/actions/code-style not found in any workflow file."
 
 
@@ -155,10 +186,16 @@ class CI010(CICD):
     def check(root) -> bool | None:
         """Return whether workflows enforce the PR title check."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return bool(
-            re.search(r"ansys/actions/check-pr-title|check-pr-title", content, re.IGNORECASE)
+            re.search(
+                r"ansys/actions/check-pr-title|check-pr-title",
+                content,
+                re.IGNORECASE,
+            )
         )
 
 
@@ -169,10 +206,16 @@ class CI011(CICD):
     def check(root) -> bool | None:
         """Return whether workflows include changelog-fragment validation."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return bool(
-            re.search(r"ansys/actions/[^\s]*changelog|changelog-fragment", content, re.IGNORECASE)
+            re.search(
+                r"ansys/actions/[^\s]*changelog|changelog-fragment",
+                content,
+                re.IGNORECASE,
+            )
         )
 
 
@@ -183,9 +226,17 @@ class CI012(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include the doc-style action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/check-doc-style|doc-style", content, re.IGNORECASE))
+
+        return bool(
+            re.search(
+                r"ansys/actions/check-doc-style|doc-style",
+                content,
+                re.IGNORECASE,
+            )
+        )
 
 
 class CI013(CICD):
@@ -195,9 +246,17 @@ class CI013(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include the doc-build action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
-        return bool(re.search(r"ansys/actions/doc-build|\bdoc-build\b", content, re.IGNORECASE))
+
+        return bool(
+            re.search(
+                r"ansys/actions/doc-build|\bdoc-build\b",
+                content,
+                re.IGNORECASE,
+            )
+        )
 
 
 class CI014(CICD):
@@ -207,10 +266,16 @@ class CI014(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include the build-wheelhouse action."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return bool(
-            re.search(r"ansys/actions/build-wheelhouse|build-wheelhouse", content, re.IGNORECASE)
+            re.search(
+                r"ansys/actions/build-wheelhouse|build-wheelhouse",
+                content,
+                re.IGNORECASE,
+            )
         )
 
 
@@ -221,11 +286,13 @@ class CI015(CICD):
     def check(root) -> bool | None:
         """Return whether the workflows include pytest-based tests."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return bool(
             re.search(
-                r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest",
+                r"ansys/actions/tests-pytest|" r"ansys/actions/tests|" r"\btests\b|" r"pytest",
                 content,
                 re.IGNORECASE,
             )
@@ -239,8 +306,14 @@ class CI016(CICD):
     def check(root) -> bool | None:
         """Return whether workflows include changelog updates during release."""
         content = all_workflows_content(root)
+
         if not content:
             return None
+
         return bool(
-            re.search(r"ansys/actions/release-github|update-changelog", content, re.IGNORECASE)
+            re.search(
+                r"ansys/actions/release-github|update-changelog",
+                content,
+                re.IGNORECASE,
+            )
         )

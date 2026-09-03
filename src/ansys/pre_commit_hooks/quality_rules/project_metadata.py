@@ -209,11 +209,11 @@ class PM012(ProjectMetadata):
 
 
 class PM013(ProjectMetadata):
-    """Project version follows semantic versioning."""
+    """Project version follows semantic versioning or accepted Python dev versions."""
 
     @staticmethod
     def check(root) -> bool | None | str:
-        """Return whether the project version uses semantic versioning."""
+        """Return whether the project version uses a valid release or dev version."""
         if not file_exists(root, "pyproject.toml"):
             return None
         content = file_content(root, "pyproject.toml")
@@ -221,9 +221,17 @@ class PM013(ProjectMetadata):
         if not match:
             return "⚠️ project version not found in pyproject.toml."
         version = match.group(1)
-        if re.fullmatch(r"\d+\.\d+\.\d+(?:[.-]?(?:a|b|rc|dev)\d+)?", version):
+
+        semver_pattern = r"\d+\.\d+\.\d+(?:-(?:a|b|beta|rc|dev)\.?\d+)?"
+        pep440_dev_pattern = r"\d+\.\d+\.\d+\.dev\d+"
+
+        if re.fullmatch(semver_pattern, version) or re.fullmatch(pep440_dev_pattern, version):
             return True
-        return f"⚠️ project version '{version}' does not follow semantic versioning."
+
+        return (
+            f"⚠️ project version '{version}' does not follow semantic versioning "
+            "or the accepted Python dev-version form."
+        )
 
 
 class PM014(ProjectMetadata):
