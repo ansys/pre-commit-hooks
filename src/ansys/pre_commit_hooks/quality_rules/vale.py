@@ -20,24 +20,42 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Vale checks.
+"""Vale configuration checks.
 
-This rule set validates the documentation quality workflow used by the
-repository.
+This rule set validates that Vale is configured according to PyAnsys
+documentation standards.
 
 The checks cover:
 
-* Vale configuration presence
-* Google style package configuration
-* ANSYS vocabulary inclusion
-* ANSYS accept.txt and reject.txt vocabulary files
+* Vale configuration
+    - doc/.vale.ini exists
+    - Google style package is configured
+    - ANSYS vocabulary is configured
+
+* Vocabulary files
+    - ANSYS accept.txt exists
+    - ANSYS reject.txt exists (recommended)
 """
 
 from __future__ import annotations
 
-from ansys.pre_commit_hooks.quality_rules.common import file_contains, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import (
+    file_contains,
+    file_exists,
+)
 
-__all__ = ["Vale", "VL001", "VL002", "VL003", "VL004", "VL005"]
+__all__ = [
+    "Vale",
+    "VL001",
+    "VL002",
+    "VL003",
+    "VL004",
+    "VL005",
+]
+
+_VALE_CONFIG = "doc/.vale.ini"
+_ACCEPT_VOCAB = "doc/styles/config/vocabularies/ANSYS/accept.txt"
+_REJECT_VOCAB = "doc/styles/config/vocabularies/ANSYS/reject.txt"
 
 
 class Vale:
@@ -51,8 +69,8 @@ class VL001(Vale):
 
     @staticmethod
     def check(root) -> bool:
-        """Return whether the Vale config exists."""
-        return file_exists(root, "doc/.vale.ini")
+        """Return whether the Vale configuration exists."""
+        return file_exists(root, _VALE_CONFIG)
 
 
 class VL002(Vale):
@@ -62,10 +80,11 @@ class VL002(Vale):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the Vale config targets the Google style package."""
-        if not file_exists(root, "doc/.vale.ini"):
+        """Return whether the Vale configuration uses the Google style package."""
+        if not file_exists(root, _VALE_CONFIG):
             return None
-        return file_contains(root, "doc/.vale.ini", "Google")
+
+        return file_contains(root, _VALE_CONFIG, "Google")
 
 
 class VL003(Vale):
@@ -75,10 +94,11 @@ class VL003(Vale):
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the Vale config references the ANSYS vocabulary."""
-        if not file_exists(root, "doc/.vale.ini"):
+        """Return whether the Vale configuration references the ANSYS vocabulary."""
+        if not file_exists(root, _VALE_CONFIG):
             return None
-        return file_contains(root, "doc/.vale.ini", "ANSYS")
+
+        return file_contains(root, _VALE_CONFIG, "ANSYS")
 
 
 class VL004(Vale):
@@ -89,7 +109,7 @@ class VL004(Vale):
     @staticmethod
     def check(root) -> bool:
         """Return whether the accepted vocabulary file exists."""
-        return file_exists(root, "doc/styles/config/vocabularies/ANSYS/accept.txt")
+        return file_exists(root, _ACCEPT_VOCAB)
 
 
 class VL005(Vale):
@@ -98,6 +118,9 @@ class VL005(Vale):
     requires = {"VL001"}
 
     @staticmethod
-    def check(root) -> bool:
-        """Return whether the rejected vocabulary file exists."""
-        return file_exists(root, "doc/styles/config/vocabularies/ANSYS/reject.txt")
+    def check(root) -> bool | str:
+        """Return whether the recommended rejected vocabulary file exists."""
+        if file_exists(root, _REJECT_VOCAB):
+            return True
+
+        return "⚠️ ANSYS reject.txt vocabulary not found. " "The file is optional but recommended."
