@@ -61,12 +61,37 @@ _PATHS_TO_FETCH = [
     "pyproject.toml",
     "setup.py",
     "setup.cfg",
+    "tox.ini",
+    "noxfile.py",
+    "noxfile.toml",
+    "pixi.toml",
+    "justfile",
+    "Makefile",
     "doc/.vale.ini",
     "doc/source/index.rst",
     "doc/source/conf.py",
     "doc/styles/config/vocabularies/ANSYS/accept.txt",
     "doc/styles/config/vocabularies/ANSYS/reject.txt",
 ]
+
+_TASK_RUNNER_FILES = (
+    "tox.ini",
+    "noxfile.py",
+    "noxfile.toml",
+    "pixi.toml",
+    "justfile",
+    "Makefile",
+)
+
+_REPO_DIRECTORIES = (
+    "tests",
+    "test",
+    "docs",
+    "doc",
+    "src",
+    "examples",
+    ".github",
+)
 
 
 HOOK_PATH = Path(__file__).parent.resolve()
@@ -644,6 +669,21 @@ def _load_files(repo_root: Path) -> dict[str, str | None]:
             files[relative_path] = candidate.read_text(encoding="utf-8", errors="replace")
         else:
             files[relative_path] = None
+
+    for directory in _REPO_DIRECTORIES:
+        candidate = repo_root / directory
+        if candidate.is_dir():
+            files[f"{directory.rstrip('/')}/"] = None
+            for file in candidate.rglob("*"):
+                if file.is_file():
+                    files[file.relative_to(repo_root).as_posix()] = file.read_text(
+                        encoding="utf-8", errors="replace"
+                    )
+
+    for filename in _TASK_RUNNER_FILES:
+        candidate = repo_root / filename
+        if candidate.is_file():
+            files[filename] = candidate.read_text(encoding="utf-8", errors="replace")
 
     workflows = repo_root / ".github" / "workflows"
     if workflows.is_dir():

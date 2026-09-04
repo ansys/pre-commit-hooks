@@ -200,6 +200,23 @@ def test_pm016_accepts_valid_codeowners(tmp_path):
     assert PM016.check(repo_path) is True
 
 
+def test_load_files_keeps_repo_directories_and_task_runner_files_for_virtual_review(tmp_path):
+    """Virtual repo reviews should recognize real directories and task-runner files."""
+    repo_path = tmp_path / "virtual-review-repo"
+    repo_path.mkdir()
+    (repo_path / "tests").mkdir()
+    (repo_path / "tests" / "test_example.py").write_text(
+        "def test_ok():\n    assert True\n", encoding="utf-8"
+    )
+    (repo_path / "tox.ini").write_text("[tox]\nenvlist = py\n", encoding="utf-8")
+
+    files = hook._load_files(repo_path)
+    root = hook.MemoryTraversable(files)
+
+    assert PM022.check(root) is True
+    assert PM024.check(root) is True
+
+
 def test_pm021_requires_docs_directory(tmp_path):
     """Projects should have a docs or doc directory for documentation."""
     assert PM021.check(tmp_path) is False
