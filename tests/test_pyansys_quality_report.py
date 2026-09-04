@@ -65,11 +65,11 @@ readme = "README.rst"
     assert project_metadata.PM010.check(repo_path, "README.rst") is True
 
 
-def test_main_reports_quality_summary(tmp_path, capsys):
+def test_main_reports_quality_summary(tmp_path, capsys, monkeypatch):
     """The quality report hook should run and print a summary for the repo."""
     repo_path = tmp_path / "quality-demo"
     repo_path.mkdir()
-    os.chdir(repo_path)
+    monkeypatch.chdir(repo_path)
     git.Repo.init(repo_path)
 
     (repo_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
@@ -93,11 +93,11 @@ maintainers = [{name = "Example", email = "example@example.com"}]
     assert "Score" in output or "Summary" in output
 
 
-def test_fix_missing_runs_quality_report_after_bootstrap(tmp_path, capsys):
+def test_fix_missing_runs_quality_report_after_bootstrap(tmp_path, capsys, monkeypatch):
     """--fix-missing should bootstrap the repo and then continue to the quality report."""
     repo_path = tmp_path / "quality-demo"
     repo_path.mkdir()
-    os.chdir(repo_path)
+    monkeypatch.chdir(repo_path)
     git.Repo.init(repo_path)
     repo = git.Repo(repo_path)
     repo.index.commit("initial")
@@ -126,11 +126,11 @@ maintainers = [{name = "Example", email = "example@example.com"}]
     assert "Score" in output or "Summary" in output
 
 
-def test_main_colors_status_labels(tmp_path, capsys):
+def test_main_colors_status_labels(tmp_path, capsys, monkeypatch):
     """The console report should colorize pass, warn, and fail states."""
     repo_path = tmp_path / "quality-demo"
     repo_path.mkdir()
-    os.chdir(repo_path)
+    monkeypatch.chdir(repo_path)
     git.Repo.init(repo_path)
 
     (repo_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")

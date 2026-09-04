@@ -44,7 +44,8 @@ html_theme_options = {
     },
 }
 
-# Exclude legacy modules that still share public API names with the canonical hook.
+# Keep the legacy compatibility module out of the canonical API docs.
+# It remains intentionally excluded while the newer quality-report entry point is preferred.
 autoapi_ignore = ["**/tech_review.py"]
 
 # Sphinx extensions

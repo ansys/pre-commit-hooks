@@ -30,6 +30,14 @@ import json
 import pathlib
 import re
 from tempfile import NamedTemporaryFile
+import warnings
+
+warnings.warn(
+    "ansys.pre_commit_hooks.tech_review is deprecated and kept only for backward compatibility; "
+    "use ansys.pre_commit_hooks.pyansys_quality_report instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
