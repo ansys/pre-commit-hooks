@@ -61,7 +61,6 @@ from ansys.pre_commit_hooks.quality_rules.common import (
 )
 
 __all__ = [
-    "ProjectMetadata",
     "PM001",
     "PM002",
     "PM003",
@@ -79,6 +78,10 @@ __all__ = [
     "PM015",
     "PM016",
     "PM017",
+    "PM021",
+    "PM022",
+    "PM024",
+    "ProjectMetadata",
 ]
 
 _PYPROJECT = "pyproject.toml"
@@ -86,6 +89,22 @@ _LICENSE = "LICENSE"
 
 _DEFAULT_AUTHOR = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL = "pyansys-core@synopsys.com"
+
+
+def _has_any_file(root, *paths: str) -> bool:
+    """Return whether any of the provided file paths exist under the repo root."""
+    return any(file_exists(root, path) for path in paths)
+
+
+def _has_any_directory(root, *paths: str) -> bool:
+    """Return whether any of the provided directory paths exist under the repo root."""
+    for path in paths:
+        try:
+            if root.joinpath(path).is_dir():
+                return True
+        except (AttributeError, TypeError, ValueError):
+            continue
+    return False
 
 
 class ProjectMetadata:
@@ -441,3 +460,38 @@ class PM017(ProjectMetadata):
                 return _validate_python_version_spec(match.group(1))
 
         return None
+
+
+class PM021(ProjectMetadata):
+    """The project includes a docs directory."""
+
+    @staticmethod
+    def check(root) -> bool:
+        """Return whether a documentation directory is present."""
+        return _has_any_directory(root, "docs", "doc")
+
+
+class PM022(ProjectMetadata):
+    """The project includes a tests directory."""
+
+    @staticmethod
+    def check(root) -> bool:
+        """Return whether a test directory is present."""
+        return _has_any_directory(root, "tests", "test")
+
+
+class PM024(ProjectMetadata):
+    """The project supports a task runner such as nox, tox, or pixi."""
+
+    @staticmethod
+    def check(root) -> bool:
+        """Return whether an easy task runner is configured for the project."""
+        return _has_any_file(
+            root,
+            "tox.ini",
+            "noxfile.py",
+            "noxfile.toml",
+            "pixi.toml",
+            "justfile",
+            "Makefile",
+        )

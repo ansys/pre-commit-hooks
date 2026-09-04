@@ -9,9 +9,18 @@ from pathlib import Path
 
 import git
 
+from ansys.pre_commit_hooks import quality_rules
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
+from ansys.pre_commit_hooks.quality_rules import project_metadata
 from ansys.pre_commit_hooks.quality_rules.common import workflow_map
-from ansys.pre_commit_hooks.quality_rules.project_metadata import PM013, PM016, PM017
+from ansys.pre_commit_hooks.quality_rules.project_metadata import (
+    PM013,
+    PM016,
+    PM017,
+    PM021,
+    PM022,
+    PM024,
+)
 
 
 def test_workflow_map_classifies_ci_cd_roles(tmp_path):
@@ -127,8 +136,6 @@ version = "0.1.0"
 def test_hook_covers_all_repo_review_checks():
     """The package-level rule registry should expose the complete local check set."""
 
-    import ansys.pre_commit_hooks.quality_rules as quality_rules
-
     checks_dir = Path(quality_rules.__file__).resolve().parent
 
     def class_names(path: Path) -> set[str]:
@@ -170,8 +177,6 @@ def test_pm015_accepts_apache_license(tmp_path):
         encoding="utf-8",
     )
 
-    import ansys.pre_commit_hooks.quality_rules.project_metadata as project_metadata
-
     assert project_metadata.PM015.check(repo_path) is True
 
 
@@ -195,6 +200,30 @@ def test_pm016_accepts_valid_codeowners(tmp_path):
     assert PM016.check(repo_path) is True
 
 
+def test_pm021_requires_docs_directory(tmp_path):
+    """Projects should have a docs or doc directory for documentation."""
+    assert PM021.check(tmp_path) is False
+
+    (tmp_path / "doc").mkdir()
+    assert PM021.check(tmp_path) is True
+
+
+def test_pm022_requires_tests_directory(tmp_path):
+    """Projects should have a tests directory."""
+    assert PM022.check(tmp_path) is False
+
+    (tmp_path / "tests").mkdir()
+    assert PM022.check(tmp_path) is True
+
+
+def test_pm024_requires_task_runner_configuration(tmp_path):
+    """Projects should expose a task runner configuration file for common workflows."""
+    assert PM024.check(tmp_path) is False
+
+    (tmp_path / "tox.ini").write_text("[tox]\nenvlist = py\n", encoding="utf-8")
+    assert PM024.check(tmp_path) is True
+
+
 def test_pm017_requires_python_bounds_in_pyproject(tmp_path):
     """Project metadata should require explicit lower and upper bounds for Python support."""
     pyproject = tmp_path / "pyproject.toml"
@@ -215,9 +244,6 @@ def test_pm017_rejects_missing_upper_bound(tmp_path):
 
 def test_quality_rules_are_grouped_package():
     """Quality rules should be exposed from a package with one module per check family."""
-    import ansys.pre_commit_hooks.quality_rules as quality_rules
-    import ansys.pre_commit_hooks.quality_rules.project_metadata as project_metadata
-
     assert hasattr(quality_rules, "PM001")
     assert hasattr(quality_rules, "PM016")
     assert hasattr(quality_rules, "PM017")
