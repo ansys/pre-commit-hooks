@@ -552,9 +552,6 @@ def _bootstrap_legacy_files(
     is_compliant = check_dirs_exist(
         root, is_compliant, [directory.value for directory in Directories]
     )
-    is_compliant = check_dirs_exist(
-        root, is_compliant, [directory.value for directory in Directories]
-    )
     is_compliant, project_name, config_file = check_config_file(
         root, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
@@ -852,7 +849,7 @@ def main(argv: list[str] | None = None) -> int:
         help="The repository URL. For example, https://github.com/ansys/pymechanical",
     )
     parser.add_argument("--non_compliant_name", action="store_true")
-    args, _ = parser.parse_known_args(argv)
+    args = parser.parse_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
     if not repo_root.exists():

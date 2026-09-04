@@ -45,6 +45,26 @@ def test_pm013_accepts_supported_version_formats(tmp_path):
         assert PM013.check(tmp_path) is True
 
 
+def test_pm010_accepts_poetry_readme_reference(tmp_path):
+    """Poetry projects should validate the README path the same way as other build systems."""
+    repo_path = tmp_path / "poetry-project"
+    repo_path.mkdir()
+
+    (repo_path / "README.rst").write_text("Poetry\n======\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[tool.poetry]
+name = "ansys-demo-library"
+version = "0.1.0"
+description = "Demo"
+readme = "README.rst"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert project_metadata.PM010.check(repo_path, "README.rst") is True
+
+
 def test_main_reports_quality_summary(tmp_path, capsys):
     """The quality report hook should run and print a summary for the repo."""
     repo_path = tmp_path / "quality-demo"
@@ -178,6 +198,27 @@ def test_pm015_accepts_apache_license(tmp_path):
     )
 
     assert project_metadata.PM015.check(repo_path) is True
+
+
+def test_pm014_rejects_wrong_author_block_when_maintainer_block_is_valid(tmp_path):
+    """Author validation must stay limited to the authors array and not bleed into maintainers."""
+    repo_path = tmp_path / "author-bounds-project"
+    repo_path.mkdir()
+
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+authors = [{ name = "Wrong Author", email = "wrong@example.com" }]
+maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert project_metadata.PM014.check(repo_path) == (
+        "⚠️ author/maintainer metadata does not match "
+        "Synopsys, Inc. and ANSYS, Inc. / "
+        "pyansys-core@synopsys.com."
+    )
 
 
 def test_pm016_warns_on_empty_codeowners(tmp_path):

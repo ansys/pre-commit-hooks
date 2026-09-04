@@ -214,14 +214,12 @@ class PM010(ProjectMetadata):
         content = file_content(root, _PYPROJECT)
 
         if re.search(r"poetry\.core|poetry-core", content):
-            match = re.search(
-                r"\[^\"']+[\"']",
-                content,
-                re.MULTILINE,
-            )
-
-            if match:
+            readme = readme_path or "README.rst"
+            if readme in content:
                 return True
+
+            if "README" in content:
+                return "⚠️ readme key found but exact README filename not confirmed."
 
             return False
 
@@ -343,31 +341,37 @@ class PM014(ProjectMetadata):
 
         content = file_content(root, _PYPROJECT)
 
+        authors_match = re.search(r"authors\s*=\s*\[([\s\S]*?)\]", content)
+        maintainers_match = re.search(r"maintainers\s*=\s*\[([\s\S]*?)\]", content)
+
+        author_block = authors_match.group(1) if authors_match else ""
+        maintainer_block = maintainers_match.group(1) if maintainers_match else ""
+
         name_ok = bool(
             re.search(
-                rf'authors\s*=\s*\[[\s\S]*?name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
-                content,
+                rf'name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
+                author_block,
             )
         )
 
         email_ok = bool(
             re.search(
-                rf'authors\s*=\s*\[[\s\S]*?email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
-                content,
+                rf'email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
+                author_block,
             )
         )
 
         maintainer_name_ok = bool(
             re.search(
-                rf'maintainers\s*=\s*\[[\s\S]*?name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
-                content,
+                rf'name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']',
+                maintainer_block,
             )
         )
 
         maintainer_email_ok = bool(
             re.search(
-                rf'maintainers\s*=\s*\[[\s\S]*?email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
-                content,
+                rf'email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']',
+                maintainer_block,
             )
         )
 
