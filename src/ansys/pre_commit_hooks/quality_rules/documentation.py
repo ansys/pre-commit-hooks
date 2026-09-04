@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import checked_contains, file_exists
 
 __all__ = [
     "Documentation",
@@ -85,10 +85,7 @@ class DOC003(Documentation):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether numpydoc is enabled in the Sphinx configuration."""
-        if not file_exists(root, "doc/source/conf.py"):
-            return None
-
-        return file_contains(root, "doc/source/conf.py", "numpydoc")
+        return checked_contains(root, "doc/source/conf.py", "numpydoc")
 
 
 class DOC004(Documentation):
@@ -99,10 +96,7 @@ class DOC004(Documentation):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether sphinx_design is enabled in the Sphinx configuration."""
-        if not file_exists(root, "doc/source/conf.py"):
-            return None
-
-        return file_contains(root, "doc/source/conf.py", "sphinx_design")
+        return checked_contains(root, "doc/source/conf.py", "sphinx_design")
 
 
 class DOC005(Documentation):
@@ -113,10 +107,7 @@ class DOC005(Documentation):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether intersphinx is enabled in the Sphinx configuration."""
-        if not file_exists(root, "doc/source/conf.py"):
-            return None
-
-        return file_contains(root, "doc/source/conf.py", "intersphinx")
+        return checked_contains(root, "doc/source/conf.py", "intersphinx")
 
 
 class DOC006(Documentation):
@@ -127,10 +118,7 @@ class DOC006(Documentation):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the documentation index includes a getting-started section."""
-        if not file_exists(root, "doc/source/index.rst"):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             "doc/source/index.rst",
             re.compile(r"getting.started", re.IGNORECASE),
@@ -145,10 +133,7 @@ class DOC007(Documentation):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the documentation index includes an API reference section."""
-        if not file_exists(root, "doc/source/index.rst"):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             "doc/source/index.rst",
             re.compile(

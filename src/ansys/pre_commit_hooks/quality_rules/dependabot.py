@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_content, file_exists
+from .common import checked_contains, file_contains, file_content, file_exists
 
 __all__ = [
     "Dependabot",
@@ -79,10 +79,7 @@ class DB002(Dependabot):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the Dependabot config uses the expected schema version."""
-        if not file_exists(root, _PATH_DEPENDABOT):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             _PATH_DEPENDABOT,
             re.compile(r"^version:\s*2\s*$", re.MULTILINE),
@@ -129,10 +126,7 @@ class DB004(Dependabot):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the GitHub Actions ecosystem is configured."""
-        if not file_exists(root, _PATH_DEPENDABOT):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             _PATH_DEPENDABOT,
             re.compile(r'package-ecosystem:\s*["\']?github-actions["\']?'),
@@ -173,14 +167,15 @@ class DB006(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the Dependabot cooldown policy is set to seven days."""
-        if not file_exists(root, _PATH_DEPENDABOT):
-            return None
-
-        if file_contains(
+        result = checked_contains(
             root,
             _PATH_DEPENDABOT,
             re.compile(r"default-days:\s*7"),
-        ):
+        )
+
+        if result is None:
+            return None
+        if result:
             return True
 
         return "⚠️ Cooldown default-days: 7 not found in dependabot.yml."
@@ -212,11 +207,15 @@ class DB007(Dependabot):
         if has_uv and not has_pip:
             return None
 
-        if file_contains(
+        result = checked_contains(
             root,
             _PATH_DEPENDABOT,
             re.compile(r'versioning-strategy:\s*["\']?lockfile-only["\']?'),
-        ):
+        )
+
+        if result is None:
+            return None
+        if result:
             return True
 
         return "⚠️ versioning-strategy: lockfile-only " "not found for pip ecosystem."
@@ -230,14 +229,12 @@ class DB008(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the pip group wildcard pattern is defined."""
-        if not file_exists(root, _PATH_DEPENDABOT):
-            return None
+        pattern = re.compile(r'patterns:\s*\n\s*-\s*["\']?\*["\']?')
+        result = checked_contains(root, _PATH_DEPENDABOT, pattern)
 
-        if file_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'patterns:\s*\n\s*-\s*["\']?\*["\']?'),
-        ):
+        if result is None:
+            return None
+        if result:
             return True
 
-        return "⚠️ pip groups wildcard pattern " '"- \\"*\\"" not found in dependabot.yml.'
+        return '⚠️ pip groups wildcard pattern "- "*"" not found in dependabot.yml.'

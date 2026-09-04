@@ -35,7 +35,7 @@ The checks cover:
 
 from __future__ import annotations
 
-from .common import file_contains, file_exists
+from .common import checked_contains, file_exists
 
 __all__ = [
     "Labeler",
@@ -79,10 +79,7 @@ class LB003(Labeler):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the bug label is present."""
-        if not file_exists(root, ".github/labels.yml"):
-            return None
-
-        return file_contains(root, ".github/labels.yml", "bug")
+        return checked_contains(root, ".github/labels.yml", "bug")
 
 
 class LB004(Labeler):
@@ -93,10 +90,7 @@ class LB004(Labeler):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the enhancement label is present."""
-        if not file_exists(root, ".github/labels.yml"):
-            return None
-
-        return file_contains(root, ".github/labels.yml", "enhancement")
+        return checked_contains(root, ".github/labels.yml", "enhancement")
 
 
 class LB005(Labeler):
@@ -107,7 +101,4 @@ class LB005(Labeler):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the documentation label is present."""
-        if not file_exists(root, ".github/labels.yml"):
-            return None
-
-        return file_contains(root, ".github/labels.yml", "documentation")
+        return checked_contains(root, ".github/labels.yml", "documentation")

@@ -48,6 +48,7 @@ __all__ = [
     "file_exists",
     "file_content",
     "file_contains",
+    "checked_contains",
     "CANONICAL_WF",
     "all_workflows_content",
     "wf_content",
@@ -306,3 +307,15 @@ def normalize_check_result(
         return "fail", detail
 
     return "fail", str(raw)
+
+
+def checked_contains(
+    root: Traversable,
+    path: str,
+    pattern: str | re.Pattern,
+) -> bool | None:
+    """Return None if the file is missing; otherwise, return the file_contains result."""
+    if not file_exists(root, path):
+        return None
+
+    return file_contains(root, path, pattern)

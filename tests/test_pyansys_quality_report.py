@@ -11,7 +11,7 @@ import git
 
 from ansys.pre_commit_hooks import quality_rules
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
-from ansys.pre_commit_hooks.quality_rules import project_metadata
+from ansys.pre_commit_hooks.quality_rules import project_metadata, security
 from ansys.pre_commit_hooks.quality_rules.common import workflow_map
 from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM013,
@@ -185,6 +185,32 @@ def test_hook_covers_all_repo_review_checks():
 
     actual = set(quality_rules.repo_review_checks())
     assert expected - family_names == actual
+
+
+def test_sec004_requires_all_uses_lines_to_be_pinned(tmp_path):
+    """Mixed pinned and unpinned GitHub Actions should fail instead of passing on a single SHA."""
+    repo_path = tmp_path / "security-project"
+    repo_path.mkdir()
+    (repo_path / ".github").mkdir()
+    (repo_path / ".github" / "workflows").mkdir()
+    (repo_path / ".github" / "workflows" / "pr.yml").write_text(
+        """
+name: PR
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+      - uses: actions/cache@v4
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert security.SEC004.check(repo_path, {"pr": {"path": ".github/workflows/pr.yml"}}) == (
+        "⚠️ Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
+        "Use full commit SHAs for all actions."
+    )
 
 
 def test_pm015_accepts_apache_license(tmp_path):

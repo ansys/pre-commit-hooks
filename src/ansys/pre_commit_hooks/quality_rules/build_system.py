@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_content, file_exists
+from .common import checked_contains, file_content, file_exists
 
 __all__ = ["BuildSystem", "BS001", "BS002", "BS003", "BS004"]
 
@@ -82,10 +82,7 @@ class BS001(BuildSystem):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether a build-system table is present in pyproject.toml."""
-        if not file_exists(root, "pyproject.toml"):
-            return None
-
-        return file_contains(root, "pyproject.toml", "[build-system]")
+        return checked_contains(root, "pyproject.toml", "[build-system]")
 
 
 class BS002(BuildSystem):

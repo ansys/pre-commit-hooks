@@ -40,7 +40,7 @@ The checks cover:
 from __future__ import annotations
 
 from ansys.pre_commit_hooks.quality_rules.common import (
-    file_contains,
+    checked_contains,
     file_exists,
 )
 
@@ -81,10 +81,7 @@ class VL002(Vale):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the Vale configuration uses the Google style package."""
-        if not file_exists(root, _VALE_CONFIG):
-            return None
-
-        return file_contains(root, _VALE_CONFIG, "Google")
+        return checked_contains(root, _VALE_CONFIG, "Google")
 
 
 class VL003(Vale):
@@ -95,10 +92,7 @@ class VL003(Vale):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the Vale configuration references the ANSYS vocabulary."""
-        if not file_exists(root, _VALE_CONFIG):
-            return None
-
-        return file_contains(root, _VALE_CONFIG, "ANSYS")
+        return checked_contains(root, _VALE_CONFIG, "ANSYS")
 
 
 class VL004(Vale):

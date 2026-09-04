@@ -46,6 +46,7 @@ from __future__ import annotations
 import re
 
 from ansys.pre_commit_hooks.quality_rules.common import (
+    checked_contains,
     file_contains,
     file_exists,
     wf_content,
@@ -91,10 +92,7 @@ class SEC002(Security):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the Zizmor configuration enables the secrets-outside-env rule."""
-        if not file_exists(root, _ZIZMOR_CONFIG):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             _ZIZMOR_CONFIG,
             "secrets-outside-env",
@@ -107,10 +105,7 @@ class SEC003(Security):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the pre-commit configuration includes gitleaks."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             _PRE_COMMIT_CONFIG,
             "gitleaks",
@@ -132,14 +127,25 @@ class SEC004(Security):
         if not content:
             return None
 
-        if re.search(
-            r"uses:\s*\S+@[0-9a-f]{40}",
-            content,
-            re.IGNORECASE,
-        ):
+        uses_lines = re.findall(r"^\s*-?\s*uses:\s*([^\n#]+)", content, re.MULTILINE)
+        if not uses_lines:
+            return None
+
+        pinned = 0
+        for uses in uses_lines:
+            value = uses.strip()
+            if re.fullmatch(
+                r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@(?:[0-9a-fA-F]{40}|[A-Fa-f0-9]{40})", value
+            ):
+                pinned += 1
+
+        if pinned == len(uses_lines):
             return True
 
-        return "⚠️ No SHA-pinned actions detected in PR workflow. " "Use full commit SHAs."
+        return (
+            "⚠️ Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
+            "Use full commit SHAs for all actions."
+        )
 
 
 class SEC005(Security):

@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_exists
+from .common import checked_contains, file_contains, file_exists
 
 __all__ = [
     "PreCommit",
@@ -81,10 +81,7 @@ class PC002(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether ruff-pre-commit is configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(root, _PRE_COMMIT_CONFIG, "ruff-pre-commit")
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "ruff-pre-commit")
 
 
 class PC003(PreCommit):
@@ -127,10 +124,7 @@ class PC004(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether blacken-docs is configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(root, _PRE_COMMIT_CONFIG, "blacken-docs")
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "blacken-docs")
 
 
 class PC005(PreCommit):
@@ -141,10 +135,7 @@ class PC005(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether codespell is configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(root, _PRE_COMMIT_CONFIG, "codespell")
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "codespell")
 
 
 class PC006(PreCommit):
@@ -155,10 +146,7 @@ class PC006(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the shared Ansys pre-commit hooks are configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(
+        return checked_contains(
             root,
             _PRE_COMMIT_CONFIG,
             "ansys/pre-commit-hooks",
@@ -173,10 +161,7 @@ class PC007(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether yamlfmt is configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(root, _PRE_COMMIT_CONFIG, "yamlfmt")
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "yamlfmt")
 
 
 class PC008(PreCommit):
@@ -187,10 +172,7 @@ class PC008(PreCommit):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether pyright is configured."""
-        if not file_exists(root, _PRE_COMMIT_CONFIG):
-            return None
-
-        return file_contains(root, _PRE_COMMIT_CONFIG, "pyright")
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "pyright")
 
 
 class PC009(PreCommit):
