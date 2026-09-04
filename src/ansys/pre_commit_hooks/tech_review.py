@@ -30,6 +30,14 @@ import json
 import pathlib
 import re
 from tempfile import NamedTemporaryFile
+import warnings
+
+warnings.warn(
+    "ansys.pre_commit_hooks.tech_review is deprecated and kept only for backward compatibility; "
+    "use ansys.pre_commit_hooks.pyansys_quality_report instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
@@ -649,7 +657,7 @@ def check_file_content(file: str, generated_content: str, is_compliant: bool, li
     return is_compliant
 
 
-def main():
+def main(argv: list[str] | None = None):
     """Check files for technical review."""
     parser = argparse.ArgumentParser()
     # Get the name of the authors and maintainers of the project
@@ -685,7 +693,7 @@ def main():
     parser.add_argument("--non_compliant_name", action="store_true")
 
     # Parse arguments
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     author_maint_name = args.author_maint_name
     author_maint_email = args.author_maint_email
     non_compliant_name = args.non_compliant_name

@@ -44,6 +44,10 @@ html_theme_options = {
     },
 }
 
+# Keep the legacy compatibility module out of the canonical API docs.
+# It remains intentionally excluded while the newer quality-report entry point is preferred.
+autoapi_ignore = ["**/tech_review.py"]
+
 # Sphinx extensions
 extensions = [
     "ansys_sphinx_theme.extension.autoapi",
