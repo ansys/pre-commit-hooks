@@ -11,3 +11,10 @@
   entry: pyansys-quality-report
   language: python
   pass_filenames: false
+
+- id: "tech-review"
+  name: "PyAnsys Quality Report (deprecated alias)"
+  description: "Deprecated compatibility alias for pyansys-quality-report"
+  entry: pyansys-quality-report
+  language: python
+  pass_filenames: false
