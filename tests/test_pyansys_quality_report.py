@@ -217,6 +217,67 @@ def test_load_files_keeps_repo_directories_and_task_runner_files_for_virtual_rev
     assert PM024.check(root) is True
 
 
+def test_pyansys_quality_report_ignore_option_skips_selected_checks(tmp_path, capsys):
+    """--ignore should remove selected checks from the quality report output."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    os.chdir(repo_path)
+    git.Repo.init(repo_path)
+
+    (repo_path / "tests").mkdir()
+    (repo_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
+    (repo_path / "README.rst").write_text("Demo\n=====\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Example", email = "example@example.com"}]
+maintainers = [{name = "Example", email = "example@example.com"}]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--ignore", "PM022,PM024"])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "PM022" not in output
+    assert "PM024" not in output
+
+
+def test_pyansys_quality_report_reads_ignore_from_pyproject_toml(tmp_path, capsys):
+    """Ignoring checks in pyproject.toml should suppress those checks in the report."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    os.chdir(repo_path)
+    git.Repo.init(repo_path)
+
+    (repo_path / "tests").mkdir()
+    (repo_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
+    (repo_path / "README.rst").write_text("Demo\n=====\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Example", email = "example@example.com"}]
+maintainers = [{name = "Example", email = "example@example.com"}]
+
+[tool.ansys-pre-commit-hooks]
+ignore = ["PM022", "PM024"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path)])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "PM022" not in output
+    assert "PM024" not in output
+
+
 def test_pm021_requires_docs_directory(tmp_path):
     """Projects should have a docs or doc directory for documentation."""
     assert PM021.check(tmp_path) is False

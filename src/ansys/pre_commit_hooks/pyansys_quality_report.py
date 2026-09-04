@@ -628,15 +628,79 @@ def _tally_results(results: list[dict[str, Any]]) -> dict[str, int]:
     return tally
 
 
-def _run_checks(files: dict[str, str | None], is_mcp_flag: bool) -> dict[str, Any]:
+def _normalize_ignore_codes(
+    values: list[str] | tuple[str, ...] | set[str] | str | None,
+) -> set[str]:
+    """Normalize ignore values from CLI or TOML into a canonical uppercase code set."""
+    items: list[str]
+    if values is None:
+        items = []
+    elif isinstance(values, str):
+        items = [values]
+    else:
+        items = list(values)
+
+    normalized: set[str] = set()
+    for value in items:
+        for part in str(value).split(","):
+            code = part.strip().strip("[](){} ")
+            if code:
+                normalized.add(code.upper())
+    return normalized
+
+
+def _read_pyproject_ignore(repo_root: Path) -> set[str]:
+    """Load ignore codes from pyproject.toml configuration if present."""
+    config_file = repo_root / "pyproject.toml"
+    if not config_file.exists():
+        return set()
+
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # pragma: no cover
+        import tomli as tomllib
+
+    try:
+        pyproject = tomllib.loads(config_file.read_text(encoding="utf-8"))
+    except (OSError, TypeError, ValueError):
+        return set()
+
+    tool_section = pyproject.get("tool", {})
+    options: list[str] = []
+
+    for section_name in ("ansys-pre-commit-hooks", "ansys_pre_commit_hooks"):
+        if isinstance(tool_section.get(section_name), dict):
+            options.extend(tool_section[section_name].get("ignore", []))
+
+    ansys_section = tool_section.get("ansys")
+    if isinstance(ansys_section, dict):
+        for section_name in (
+            "pre_commit_hooks",
+            "pre-commit-hooks",
+            "quality_report",
+            "quality-report",
+        ):
+            if isinstance(ansys_section.get(section_name), dict):
+                options.extend(ansys_section[section_name].get("ignore", []))
+
+    return _normalize_ignore_codes(options)
+
+
+def _run_checks(
+    files: dict[str, str | None],
+    is_mcp_flag: bool,
+    ignored_codes: set[str] | None = None,
+) -> dict[str, Any]:
     """Run the package-based repo review checks against an in-memory file set."""
     root = MemoryTraversable(files)
     fixture_values = _build_fixture_values(root, is_mcp_flag)
     checks = repo_review_checks()
     families = repo_review_families()
+    ignored = _normalize_ignore_codes(ignored_codes or set())
     results = [
         _execute_check(check_obj, code=code, fixture_values=fixture_values, families=families)
         for code, check_obj in checks.items()
+        if code not in ignored
     ]
 
     tally = _tally_results(results)
@@ -749,6 +813,12 @@ def main(argv: list[str] | None = None) -> int:
         "--all", action="store_true", help="Show all checks, including passing ones."
     )
     parser.add_argument(
+        "--ignore",
+        action="append",
+        default=[],
+        help="Comma-separated list of quality-check codes to ignore, such as PM022,PM024.",
+    )
+    parser.add_argument(
         "--fix-missing",
         action="store_true",
         help="Generate missing repository scaffolding before running the quality report.",
@@ -811,7 +881,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\nLegacy tech-review bootstrap reported exit code {legacy_exit}.")
 
     files = _load_files(repo_root)
-    review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)))
+    ignored = _normalize_ignore_codes(args.ignore)
+    ignored |= _read_pyproject_ignore(repo_root)
+    review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)), ignored_codes=ignored)
 
     if args.json:
         print(json.dumps(review, indent=2))
