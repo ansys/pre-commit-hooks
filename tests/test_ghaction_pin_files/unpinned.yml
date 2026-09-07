@@ -1,0 +1,12 @@
+name: CI
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ansys/actions/code-style@v10.3.2
+      - uses: ansys/actions/doc-build@v10
+      - name: Run step with local action
+        uses: ./.github/actions/my-action

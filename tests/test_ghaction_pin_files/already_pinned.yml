@@ -1,0 +1,9 @@
+name: CI
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee # v4
+      - uses: ansys/actions/code-style@aaaaaaaabbbbbbbbccccccccddddddddeeeeeeee # v10.3.2
