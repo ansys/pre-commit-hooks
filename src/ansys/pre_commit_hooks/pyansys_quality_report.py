@@ -775,11 +775,36 @@ def _style_status(status: str, text: str) -> str:
     return f"{color}{text}{reset}" if color else text
 
 
-def _metadata_report(selected_codes: set[str] | None = None) -> list[dict[str, str]]:
+def _normalize_selection_codes(
+    selected_codes: set[str] | None = None,
+    selected_families: set[str] | None = None,
+) -> set[str]:
+    """Return the final set of rule codes after expanding any family selectors."""
+    normalized = set()
+    if selected_codes:
+        normalized |= {code.upper() for code in selected_codes}
+
+    if selected_families:
+        checks = repo_review_checks()
+        expanded = {
+            code.upper()
+            for code, check_obj in checks.items()
+            if getattr(check_obj.__class__, "family", "").lower() in selected_families
+        }
+        normalized |= expanded
+
+    return normalized
+
+
+def _metadata_report(
+    selected_codes: set[str] | None = None,
+    selected_families: set[str] | None = None,
+) -> list[dict[str, str]]:
     """Return the available rule metadata keyed by code and family."""
     checks = repo_review_checks()
-    if selected_codes:
-        checks = {code: check for code, check in checks.items() if code.upper() in selected_codes}
+    selected = _normalize_selection_codes(selected_codes, selected_families)
+    if selected:
+        checks = {code: check for code, check in checks.items() if code.upper() in selected}
 
     items: list[dict[str, str]] = []
     for code, check_obj in sorted(checks.items()):
@@ -845,6 +870,13 @@ def main(argv: list[str] | None = None) -> int:
         "May be passed multiple times or as a comma-separated list.",
     )
     parser.add_argument(
+        "--family",
+        action="append",
+        default=[],
+        help="Limit the run to a rule family, such as documentation or security. "
+        "May be passed multiple times or as a comma-separated list.",
+    )
+    parser.add_argument(
         "--all", action="store_true", help="Show all checks, including passing ones."
     )
     parser.add_argument(
@@ -890,8 +922,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     selected_codes = _normalize_ignore_codes(args.check)
+    selected_families = {
+        family.strip().lower() for family in ",".join(args.family).split(",") if family.strip()
+    }
     if args.metadata:
-        print(json.dumps(_metadata_report(selected_codes), indent=2))
+        print(json.dumps(_metadata_report(selected_codes, selected_families), indent=2))
         return 0
 
     repo_root = Path(args.repo_root).resolve()
@@ -927,7 +962,7 @@ def main(argv: list[str] | None = None) -> int:
         files,
         is_mcp_flag=is_mcp(MemoryTraversable(files)),
         ignored_codes=ignored,
-        selected_codes=selected_codes,
+        selected_codes=_normalize_selection_codes(selected_codes, selected_families),
     )
 
     if args.json:

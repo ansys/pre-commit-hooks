@@ -72,6 +72,30 @@ maintainers = [{name = "Example", email = "example@example.com"}]
     assert "PM001" not in output
 
 
+def test_main_can_limit_checks_to_selected_family(tmp_path, capsys):
+    """The CLI should allow a repository family to be selected instead of individual rule IDs."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "README.rst").write_text("Demo\n=====\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Example", email = "example@example.com"}]
+maintainers = [{name = "Example", email = "example@example.com"}]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--family", "documentation", "--all"])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "DOC001" in output
+    assert "PM001" not in output
+
+
 def test_pm013_accepts_supported_version_formats(tmp_path):
     """Development versions in Python packaging should be accepted alongside SemVer."""
     for version in ["1.2.3", "1.2.3-rc.1", "1.2.3.dev0", "1.2.3.dev1"]:
