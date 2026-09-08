@@ -37,6 +37,41 @@ def test_workflow_map_classifies_ci_cd_roles(tmp_path):
     assert result["pr"]["name"] == "ci_cd_pr.yml"
 
 
+def test_main_lists_quality_check_metadata(capsys):
+    """The CLI should list the available quality checks through a metadata flag."""
+    exit_code = hook.main(["--metadata"])
+    output = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert '"id": "PM001"' in output
+    assert '"id": "PC001"' in output
+    assert '"family": "project_metadata"' in output
+
+
+def test_main_can_limit_checks_to_selected_codes(tmp_path, capsys):
+    """The CLI should allow a subset of checks to be evaluated using a selection flag."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "README.rst").write_text("Demo\n=====\n", encoding="utf-8")
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Example", email = "example@example.com"}]
+maintainers = [{name = "Example", email = "example@example.com"}]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--check", "PM010,PM014"])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "PM010" in output or "PM014" in output
+    assert "PM001" not in output
+
+
 def test_pm013_accepts_supported_version_formats(tmp_path):
     """Development versions in Python packaging should be accepted alongside SemVer."""
     for version in ["1.2.3", "1.2.3-rc.1", "1.2.3.dev0", "1.2.3.dev1"]:

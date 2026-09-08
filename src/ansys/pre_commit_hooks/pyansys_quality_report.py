@@ -687,17 +687,20 @@ def _run_checks(
     files: dict[str, str | None],
     is_mcp_flag: bool,
     ignored_codes: set[str] | None = None,
+    selected_codes: set[str] | None = None,
 ) -> dict[str, Any]:
     """Run the package-based repo review checks against an in-memory file set."""
     root = MemoryTraversable(files)
     fixture_values = _build_fixture_values(root, is_mcp_flag)
     checks = repo_review_checks()
+    if selected_codes:
+        checks = {code: check for code, check in checks.items() if code.upper() in selected_codes}
     families = repo_review_families()
     ignored = _normalize_ignore_codes(ignored_codes or set())
     results = [
         _execute_check(check_obj, code=code, fixture_values=fixture_values, families=families)
         for code, check_obj in checks.items()
-        if code not in ignored
+        if code.upper() not in ignored
     ]
 
     tally = _tally_results(results)
@@ -772,6 +775,29 @@ def _style_status(status: str, text: str) -> str:
     return f"{color}{text}{reset}" if color else text
 
 
+def _metadata_report(selected_codes: set[str] | None = None) -> list[dict[str, str]]:
+    """Return the available rule metadata keyed by code and family."""
+    checks = repo_review_checks()
+    if selected_codes:
+        checks = {code: check for code, check in checks.items() if code.upper() in selected_codes}
+
+    items: list[dict[str, str]] = []
+    for code, check_obj in sorted(checks.items()):
+        klass = check_obj.__class__
+        items.append(
+            {
+                "id": code,
+                "family": getattr(klass, "family", "unknown"),
+                "name": _first_doc_line(check_obj),
+                "description": (
+                    (klass.__doc__ or "").strip().splitlines()[0] if klass.__doc__ else ""
+                ),
+            }
+        )
+
+    return items
+
+
 def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
     """Print the repo quality summary to stdout."""
     results = review["results"]
@@ -805,6 +831,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", default=".", help="Repository root to review.")
     parser.add_argument(
         "--json", action="store_true", help="Emit a JSON report instead of a text summary."
+    )
+    parser.add_argument(
+        "--metadata",
+        action="store_true",
+        help="Print metadata for all available repository quality checks.",
+    )
+    parser.add_argument(
+        "--check",
+        action="append",
+        default=[],
+        help="Limit the run to specific quality-check codes, such as PM010 or PM014. "
+        "May be passed multiple times or as a comma-separated list.",
     )
     parser.add_argument(
         "--all", action="store_true", help="Show all checks, including passing ones."
@@ -851,6 +889,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--non_compliant_name", action="store_true")
     args = parser.parse_args(argv)
 
+    selected_codes = _normalize_ignore_codes(args.check)
+    if args.metadata:
+        print(json.dumps(_metadata_report(selected_codes), indent=2))
+        return 0
+
     repo_root = Path(args.repo_root).resolve()
     if not repo_root.exists():
         raise FileNotFoundError(f"Repo root not found: {repo_root}")
@@ -880,7 +923,12 @@ def main(argv: list[str] | None = None) -> int:
     files = _load_files(repo_root)
     ignored = _normalize_ignore_codes(args.ignore)
     ignored |= _read_pyproject_ignore(repo_root)
-    review = _run_checks(files, is_mcp_flag=is_mcp(MemoryTraversable(files)), ignored_codes=ignored)
+    review = _run_checks(
+        files,
+        is_mcp_flag=is_mcp(MemoryTraversable(files)),
+        ignored_codes=ignored,
+        selected_codes=selected_codes,
+    )
 
     if args.json:
         print(json.dumps(review, indent=2))
