@@ -73,7 +73,8 @@ setup(
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
-            "tech-review=ansys.pre_commit_hooks.tech_review:main",
+            "pyansys-quality-report=ansys.pre_commit_hooks.pyansys_quality_report:main",
+            "tech-review=ansys.pre_commit_hooks.pyansys_quality_report:main",
         ],
     },
 )
