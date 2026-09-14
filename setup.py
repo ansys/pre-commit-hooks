@@ -73,6 +73,7 @@ setup(
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
+            "ghaction-pin=ansys.pre_commit_hooks.ghaction_pin:main",
             "tech-review=ansys.pre_commit_hooks.tech_review:main",
         ],
     },
