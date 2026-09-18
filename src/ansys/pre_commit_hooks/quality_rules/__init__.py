@@ -48,6 +48,9 @@ from ansys.pre_commit_hooks.quality_rules.build_system import (
     BuildSystem,
 )
 from ansys.pre_commit_hooks.quality_rules.cicd import (
+    CI001,
+    CI002,
+    CI003,
     CI004,
     CI005,
     CI006,
@@ -61,9 +64,11 @@ from ansys.pre_commit_hooks.quality_rules.cicd import (
     CI014,
     CI015,
     CI016,
+    CI017,
+    CI018,
+    CI019,
     CICD,
 )
-from ansys.pre_commit_hooks.quality_rules.cicd_files import CI001, CI002, CI003, CICDFiles
 from ansys.pre_commit_hooks.quality_rules.common import (
     CANONICAL_WF,
     _first_doc_line,
@@ -191,7 +196,6 @@ __all__ = [
     "CI001",
     "CI002",
     "CI003",
-    "CICDFiles",
     "CI004",
     "CI005",
     "CI006",
@@ -205,6 +209,9 @@ __all__ = [
     "CI014",
     "CI015",
     "CI016",
+    "CI017",
+    "CI018",
+    "CI019",
     "CICD",
     "DB001",
     "DB002",
@@ -296,7 +303,6 @@ __all__ = [
 
 QUALITY_RULE_FAMILIES = (
     ProjectMetadata,
-    CICDFiles,
     CICD,
     Dependabot,
     PreCommit,
@@ -311,8 +317,7 @@ QUALITY_RULE_FAMILIES = (
 
 QUALITY_RULE_METADATA = {
     "project_metadata": {"name": "Project Metadata", "order": 10},
-    "cicd_files": {"name": "CI/CD — Workflow File Names", "order": 20},
-    "cicd": {"name": "CI/CD — Content Checks", "order": 25},
+    "cicd": {"name": "CI/CD", "order": 20},
     "dependabot": {"name": "Dependabot", "order": 30},
     "pre_commit": {"name": "Pre-commit", "order": 40},
     "documentation": {"name": "Documentation", "order": 50},
@@ -332,8 +337,21 @@ def repo_review_families() -> dict[str, dict]:
 
 def repo_review_checks() -> dict[str, object]:
     """Return all discovered rule objects keyed by their rule class name."""
+
+    def _leaf_subclasses(base_cls):
+        children = base_cls.__subclasses__()
+        if not children:
+            return [base_cls]
+
+        leaves = []
+        for child in children:
+            leaves.extend(_leaf_subclasses(child))
+        return leaves
+
     result: dict[str, object] = {}
     for family in QUALITY_RULE_FAMILIES:
-        for cls in family.__subclasses__():
+        for cls in _leaf_subclasses(family):
+            if cls is family:
+                continue
             result[cls.__name__] = cls()
     return result

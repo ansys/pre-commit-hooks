@@ -19,85 +19,94 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""CI/CD workflow file naming checks.
+"""CI/CD workflow action checks.
 
-This rule set validates the presence of the canonical workflow files used by
-repository automation.
+This rule set validates the required reusable GitHub Actions used by the
+repository automation policy, instead of checking canonical workflow filenames.
 
-The checks cover:
-
-* ci_cd_main.yml presence
-* ci_cd_pr.yml presence
-* ci_cd_release.yml presence
-* workflow-role naming consistency
+The checks cover the expected automation actions for branch, pull-request, and
+release workflows.
 """
 
 from __future__ import annotations
 
-from .common import CANONICAL_WF, file_exists, wf_label
+import re
+
+from .common import all_workflows_content
 
 __all__ = ["CICDFiles", "CI001", "CI002", "CI003"]
 
 
 class CICDFiles:
-    """CI/CD workflow file naming rule family."""
+    """CI/CD workflow action rule family."""
 
     family = "cicd_files"
 
     @staticmethod
-    def _check_workflow(
-        root,
-        workflow_map: dict,
-        workflow_type: str,
-        expected_file: str,
-    ) -> bool | str:
-        """Validate that the expected workflow file exists."""
-        if file_exists(root, CANONICAL_WF[workflow_type]):
+    def _check_actions(root, patterns: list[str], description: str) -> bool | str:
+        """Validate that all required actions are present in repo workflows."""
+        content = all_workflows_content(root)
+
+        if not content:
+            return False
+
+        missing = [
+            pattern for pattern in patterns if not re.search(pattern, content, re.IGNORECASE)
+        ]
+
+        if not missing:
             return True
 
-        return (
-            f"⚠️ Canonical {expected_file} not found "
-            f"— detected: {wf_label(workflow_type, workflow_map)}"
-        )
+        return f"⚠️ Required {description} not found in workflow content: {', '.join(missing)}"
 
 
 class CI001(CICDFiles):
-    """The ci_cd_main.yml workflow file exists."""
+    """The repository includes the required PR and CI automation actions."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | str:
-        """Return whether the canonical main workflow file is present."""
-        return CICDFiles._check_workflow(
+    def check(root, workflow_map: dict | None = None) -> bool | str:
+        """Return whether the repo includes core CI actions used for PR automation."""
+        return CICDFiles._check_actions(
             root,
-            workflow_map,
-            "main",
-            "ci_cd_main.yml",
+            [
+                r"ansys/actions/check-pr-title|check-pr-title",
+                r"ansys/actions/code-style|code-style",
+                r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest",
+                r"ansys/actions/check-vulnerabilities",
+                r"ansys/actions/[^\s]*label|\blabeler\b",
+            ],
+            "PR/CI actions",
         )
 
 
 class CI002(CICDFiles):
-    """The ci_cd_pr.yml workflow file exists."""
+    """The repository includes the required documentation/build actions."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | str:
-        """Return whether the canonical PR workflow file is present."""
-        return CICDFiles._check_workflow(
+    def check(root, workflow_map: dict | None = None) -> bool | str:
+        """Return whether the repo includes documentation and build automation."""
+        return CICDFiles._check_actions(
             root,
-            workflow_map,
-            "pr",
-            "ci_cd_pr.yml",
+            [
+                r"ansys/actions/check-doc-style|doc-style",
+                r"ansys/actions/doc-build|\bdoc-build\b",
+                r"ansys/actions/build-wheelhouse|build-wheelhouse",
+            ],
+            "documentation/build actions",
         )
 
 
 class CI003(CICDFiles):
-    """The ci_cd_release.yml workflow file exists."""
+    """The repository includes the required release automation actions."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | str:
-        """Return whether the canonical release workflow file is present."""
-        return CICDFiles._check_workflow(
+    def check(root, workflow_map: dict | None = None) -> bool | str:
+        """Return whether the repo includes release automation actions."""
+        return CICDFiles._check_actions(
             root,
-            workflow_map,
-            "release",
-            "ci_cd_release.yml",
+            [
+                r"ansys/actions/[^\s]*changelog|changelog-fragment",
+                r"ansys/actions/release-github|update-changelog",
+            ],
+            "release actions",
         )

@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 import git
+import pytest
 
 from ansys.pre_commit_hooks import quality_rules
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
@@ -35,6 +36,73 @@ def test_workflow_map_classifies_ci_cd_roles(tmp_path):
 
     assert set(result) >= {"main", "pr", "release"}
     assert result["pr"]["name"] == "ci_cd_pr.yml"
+
+
+@pytest.mark.parametrize(
+    ("rule", "workflow_name", "workflow_body"),
+    [
+        ("CI005", "pr.yml", "- uses: ansys/actions/label"),
+        ("CI006", "pr.yml", "- uses: ansys/actions/check-vulnerabilities"),
+        ("CI007", "pr.yml", "- uses: ansys/actions/code-style"),
+        ("CI008", "pr.yml", "- uses: ansys/actions/check-pr-title"),
+        ("CI009", "release.yml", "- uses: ansys/actions/changelog-fragment"),
+        ("CI010", "main.yml", "- uses: ansys/actions/check-doc-style"),
+        ("CI011", "main.yml", "- uses: ansys/actions/doc-build"),
+        ("CI012", "main.yml", "- uses: ansys/actions/build-wheelhouse"),
+        ("CI013", "main.yml", "- uses: ansys/actions/tests-pytest"),
+        ("CI014", "release.yml", "- uses: ansys/actions/release-github"),
+        ("CI015", "main.yml", "- uses: ansys/actions/check-actions-security"),
+        ("CI016", "main.yml", "- uses: ansys/actions/build-library"),
+        ("CI017", "main.yml", "- uses: ansys/actions/doc-deploy-dev"),
+        ("CI018", "release.yml", "- uses: ansys/actions/doc-deploy-stable"),
+        ("CI019", "release.yml", "- uses: ansys/actions/doc-deploy-changelog"),
+    ],
+)
+def test_ci_action_rules_require_expected_actions(tmp_path, rule, workflow_name, workflow_body):
+    """Action-based CI checks should pass when their required action is present."""
+    workflows = tmp_path / ".github" / "workflows"
+    workflows.mkdir(parents=True)
+    (workflows / workflow_name).write_text(workflow_body, encoding="utf-8")
+
+    assert getattr(quality_rules, rule).check(tmp_path) is True
+
+
+def test_ci_rules_live_in_main_ci_family():
+    """All CI checks should be grouped under the main CI rule family."""
+    families = quality_rules.repo_review_families()
+
+    assert "cicd_files" not in families
+    assert families["cicd"]["name"] == "CI/CD"
+
+
+def test_ci001_ci004_accept_noncanonical_workflow_name(tmp_path):
+    """Role checks should work with generic workflow names like cicd.yml."""
+    workflows = tmp_path / ".github" / "workflows"
+    workflows.mkdir(parents=True)
+    (workflows / "cicd.yml").write_text(
+        """
+name: CI/CD
+on: [pull_request]
+permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    workflows_by_role = workflow_map(tmp_path)
+    assert quality_rules.CI001.check(tmp_path) is True
+    assert quality_rules.CI002.check(tmp_path, workflows_by_role) is True
+    assert quality_rules.CI003.check(tmp_path, workflows_by_role) is True
+    assert quality_rules.CI004.check(tmp_path, workflows_by_role) is True
 
 
 def test_main_lists_quality_check_metadata(capsys):
