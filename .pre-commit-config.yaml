@@ -63,3 +63,9 @@ repos:
     args:
     - --product=pre_commit_hooks
     - --non_compliant_name
+
+# - repo: https://github.com/ansys/pre-commit-hooks
+#   rev: 52f99ca
+#   hooks:
+#     - id: pyansys-quality-report
+#       args: [--repo-root, ., --all, --fix-missing]

@@ -31,11 +31,26 @@ import git
 import pytest
 
 from ansys.pre_commit_hooks.add_license_headers import check_same_content
+import ansys.pre_commit_hooks.pyansys_quality_report as quality_hook
+from ansys.pre_commit_hooks.quality_rules.build_system import _detect_backend
 import ansys.pre_commit_hooks.tech_review as hook
 
 git_repo = git.Repo(os.getcwd(), search_parent_directories=True)
 REPO_PATH = pathlib.Path(git_repo.git.rev_parse("--show-toplevel"))
 TEST_TECH_REVIEW_FILES = REPO_PATH / "tests" / "test_tech_review_files"
+
+
+def test_detect_backend():
+    """The build backend detector should identify common pyproject backends."""
+    assert _detect_backend(
+        '[build-system]\nrequires = ["setuptools>=68"]\nbuild-backend = "setuptools.build_meta"\n'
+    ) == ("Setuptools", "setuptools")
+    assert _detect_backend(
+        '[build-system]\nrequires = ["flit_core >=3.8"]\nbuild-backend = "flit_core.buildapi"\n'
+    ) == ("Flit", "flit")
+    assert _detect_backend(
+        '[build-system]\nrequires = ["poetry-core>=1.0"]\nbuild-backend = "poetry.core.masonry.api"\n'  # noqa: E501
+    ) == ("Poetry", "poetry")
 
 
 def setup_repo(tmp_path):
@@ -108,6 +123,25 @@ def test_pyproject_toml(tmp_path: pytest.TempPathFactory):
         tmp_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
     )
     assert is_compliant
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.tech_review
+def test_fix_missing_mode_bootstraps_repo_files(tmp_path: pytest.TempPathFactory):
+    """The quality report should support the old fix-missing bootstrap mode."""
+    tmp_path = tmp_path / "pytechreview"
+    setup_repo(tmp_path)
+    os.chdir(tmp_path)
+
+    exit_code = quality_hook.main(
+        ["--repo-root", str(tmp_path), "--fix-missing", "--product=techreview"]
+    )
+
+    assert exit_code == 1
+    assert pathlib.Path.exists(tmp_path / ".github")
+    assert pathlib.Path.exists(tmp_path / "CODE_OF_CONDUCT.md")
+    assert pathlib.Path.exists(tmp_path / ".github" / "dependabot.yml")
 
     os.chdir(REPO_PATH)
 
