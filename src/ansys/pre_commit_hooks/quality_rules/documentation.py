@@ -157,12 +157,12 @@ class DOC008(Documentation):
     """
 
     requires = {"DOC001", "DOC002"}
-    pass_detail = ""
+    pass_detail: str | None = None
 
     @classmethod
     def check(cls, root) -> bool | None:
         """Return whether examples are configured for the detected gallery extension."""
-        cls.pass_detail = ""
+        cls.pass_detail = None
         conf = file_content(root, "doc/source/conf.py")
 
         if not conf:
