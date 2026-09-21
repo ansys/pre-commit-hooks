@@ -495,6 +495,36 @@ version = "0.1.0"
     assert "\033[31m" in output
 
 
+def test_main_shows_passing_checks_by_default(tmp_path, capsys):
+    """The text report should include passing checks without requiring --all."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "doc" / "source").mkdir(parents=True)
+    (repo_path / "doc" / "source" / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--family", "documentation"])
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "DOC001" in output
+
+
+def test_main_fails_only_hides_passing_checks(tmp_path, capsys):
+    """The --fails-only flag should suppress passing checks in text output."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "doc" / "source").mkdir(parents=True)
+    (repo_path / "doc" / "source" / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+
+    exit_code = hook.main(
+        ["--repo-root", str(repo_path), "--family", "documentation", "--fails-only"]
+    )
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "DOC001" not in output
+
+
 def test_hook_covers_all_repo_review_checks():
     """The package-level rule registry should expose the complete local check set."""
 

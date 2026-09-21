@@ -877,7 +877,15 @@ def main(argv: list[str] | None = None) -> int:
         "May be passed multiple times or as a comma-separated list.",
     )
     parser.add_argument(
-        "--all", action="store_true", help="Show all checks, including passing ones."
+        "--all",
+        action="store_true",
+        default=True,
+        help="Show all checks, including passing ones (default behavior).",
+    )
+    parser.add_argument(
+        "--fails-only",
+        action="store_true",
+        help="Show only failing and warning checks.",
     )
     parser.add_argument(
         "--ignore",
@@ -969,7 +977,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(review, indent=2))
         return 1 if review["tally"]["fail"] or legacy_exit else 0
 
-    _print_report(review, show_passes=args.all)
+    _print_report(review, show_passes=not args.fails_only)
     return 1 if review["tally"]["fail"] or legacy_exit else 0
 
 
