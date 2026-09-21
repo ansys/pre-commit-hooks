@@ -41,7 +41,6 @@ import re
 from .common import checked_contains, file_contains, file_content, file_exists
 
 __all__ = [
-    "Dependabot",
     "DB001",
     "DB002",
     "DB003",
@@ -50,6 +49,8 @@ __all__ = [
     "DB006",
     "DB007",
     "DB008",
+    "DB009",
+    "Dependabot",
 ]
 
 
@@ -228,13 +229,71 @@ class DB008(Dependabot):
 
     @staticmethod
     def check(root) -> bool | None | str:
-        """Return whether the pip group wildcard pattern is defined."""
-        pattern = re.compile(r'patterns:\s*\n\s*-\s*["\']?\*["\']?')
-        result = checked_contains(root, _PATH_DEPENDABOT, pattern)
-
-        if result is None:
+        """Return whether the pip ecosystem groups dependency updates with a wildcard."""
+        if not file_exists(root, _PATH_DEPENDABOT):
             return None
-        if result:
+
+        content = file_content(root, _PATH_DEPENDABOT)
+        if not content:
+            return None
+
+        section_match = re.search(
+            r'-\s*package-ecosystem:\s*["\']?pip["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',
+            content,
+            re.DOTALL,
+        )
+        if not section_match:
+            return None
+
+        section = section_match.group(1)
+        has_groups = bool(re.search(r"\bgroups\s*:", section))
+        has_wildcard_pattern = bool(re.search(r'-\s*["\']?\*["\']?', section))
+
+        if has_groups and has_wildcard_pattern:
             return True
 
-        return '⚠️ pip groups wildcard pattern "- "*"" not found in dependabot.yml.'
+        return (
+            "⚠️ Pip updates are not grouped in the pip dependabot block. "
+            "Add groups with wildcard pattern '*' under package-ecosystem: pip."
+        )
+
+
+class DB009(Dependabot):
+    """GitHub Actions updates are grouped to reduce PR noise."""
+
+    requires = {"DB001", "DB004"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether GitHub Actions updates are grouped for Ansys actions or all actions."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        content = file_content(root, _PATH_DEPENDABOT)
+        if not content:
+            return None
+
+        section_match = re.search(
+            r'-\s*package-ecosystem:\s*["\']?github-actions["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',  # noqa: E501
+            content,
+            re.DOTALL,
+        )
+        if not section_match:
+            return None
+
+        section = section_match.group(1)
+        has_groups = bool(re.search(r"\bgroups\s*:", section))
+        has_action_group_pattern = bool(
+            re.search(
+                r'-\s*["\']?(\*|ansys/actions/\*)["\']?',
+                section,
+            )
+        )
+
+        if has_groups and has_action_group_pattern:
+            return True
+
+        return (
+            "⚠️ GitHub Actions updates are not grouped in .github/dependabot.yml. "
+            "Add groups with patterns '*' or 'ansys/actions/*' to reduce PR volume."
+        )

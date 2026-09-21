@@ -220,7 +220,7 @@ sphinx_gallery_conf = {
 
 
 def test_doc008_requires_examples_section_for_nbsphinx(tmp_path):
-    """DOC008 should require an examples section in the docs index when nbsphinx is enabled."""
+    """DOC008 should require a non-empty examples directory when nbsphinx is enabled."""
     docs = tmp_path / "doc" / "source"
     docs.mkdir(parents=True)
     (docs / "conf.py").write_text(
@@ -278,8 +278,105 @@ Home
     (examples_dir / "demo.py").write_text("print('demo')\n", encoding="utf-8")
 
     assert quality_rules.DOC008.check(tmp_path) is True
-    assert "doc/source/index.rst" in quality_rules.DOC008.pass_detail
+    assert "doc/source/conf.py" in quality_rules.DOC008.pass_detail
     assert "examples" in quality_rules.DOC008.pass_detail
+
+
+def test_db009_warns_when_github_actions_updates_are_not_grouped(tmp_path):
+    """DB009 should warn when github-actions updates are configured without groups."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        """
+version: 2
+updates:
+    - package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.DB009.check(tmp_path)
+    assert isinstance(result, str)
+    assert result.startswith("⚠️ ")
+
+
+def test_db009_passes_when_ansys_actions_updates_are_grouped(tmp_path):
+    """DB009 should pass when github-actions updates are grouped for Ansys actions."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        """
+version: 2
+updates:
+    - package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+        groups:
+            ansys-actions:
+                patterns:
+                    - "ansys/actions/*"
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.DB009.check(tmp_path) is True
+
+
+def test_db008_warns_when_only_actions_are_grouped(tmp_path):
+    """DB008 should warn when pip lacks grouping even if github-actions has grouped wildcard."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        """
+version: 2
+updates:
+    - package-ecosystem: "pip"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+
+    - package-ecosystem: "github-actions"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+        groups:
+            actions:
+                patterns:
+                    - "*"
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.DB008.check(tmp_path)
+    assert isinstance(result, str)
+    assert result.startswith("⚠️ ")
+
+
+def test_db008_passes_when_pip_updates_are_grouped(tmp_path):
+    """DB008 should pass when pip updates are grouped with wildcard pattern."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        """
+version: 2
+updates:
+    - package-ecosystem: "pip"
+        directory: "/"
+        schedule:
+            interval: "weekly"
+        groups:
+            python-deps:
+                patterns:
+                    - "*"
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.DB008.check(tmp_path) is True
 
 
 def test_pm013_accepts_supported_version_formats(tmp_path):
