@@ -281,6 +281,10 @@ def normalize_check_result(
     valid statuses.
     """
     if raw is True:
+        if check_obj is not None:
+            detail = getattr(check_obj, "pass_detail", "")
+            if detail:
+                return "pass", detail
         return "pass", ""
 
     if raw is None:

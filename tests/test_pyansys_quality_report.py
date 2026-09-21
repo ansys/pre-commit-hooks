@@ -253,6 +253,35 @@ Home
     assert quality_rules.DOC008.check(tmp_path) is True
 
 
+def test_doc008_logs_where_examples_are_configured_on_pass(tmp_path):
+    """DOC008 should record where examples were configured when the check passes."""
+    docs = tmp_path / "doc" / "source"
+    docs.mkdir(parents=True)
+    (docs / "conf.py").write_text(
+        "extensions = ['sphinx.ext.autodoc', 'nbsphinx']\n",
+        encoding="utf-8",
+    )
+    (docs / "index.rst").write_text(
+        """
+Home
+====
+
+.. toctree::
+   :maxdepth: 2
+
+   examples/index
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+    examples_dir = tmp_path / "examples"
+    examples_dir.mkdir()
+    (examples_dir / "demo.py").write_text("print('demo')\n", encoding="utf-8")
+
+    assert quality_rules.DOC008.check(tmp_path) is True
+    assert "doc/source/index.rst" in quality_rules.DOC008.pass_detail
+    assert "examples" in quality_rules.DOC008.pass_detail
+
+
 def test_pm013_accepts_supported_version_formats(tmp_path):
     """Development versions in Python packaging should be accepted alongside SemVer."""
     for version in ["1.2.3", "1.2.3-rc.1", "1.2.3.dev0", "1.2.3.dev1"]:

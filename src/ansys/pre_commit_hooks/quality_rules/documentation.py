@@ -151,14 +151,17 @@ class DOC007(Documentation):
 class DOC008(Documentation):
     """Gallery examples are configured when gallery extensions are enabled.
 
-    If ``sphinx-gallery`` or ``nbsphinx`` is enabled, examples must be configured.
+    Configure examples in ``doc/source/conf.py`` via ``sphinx_gallery_conf['examples_dirs']``
+    or in ``doc/source/index.rst`` (for ``nbsphinx``) with a non-empty examples directory.
     """
 
     requires = {"DOC001", "DOC002"}
+    pass_detail = ""
 
-    @staticmethod
-    def check(root) -> bool | None:
+    @classmethod
+    def check(cls, root) -> bool | None:
         """Return whether examples are configured for the detected gallery extension."""
+        cls.pass_detail = ""
         conf = file_content(root, "doc/source/conf.py")
 
         if not conf:
@@ -180,13 +183,19 @@ class DOC008(Documentation):
             if not (re.search(r"\bexamples_dirs\b", conf) and re.search(r"\bgallery_dirs\b", conf)):
                 return False
 
-            examples_dirs = DOC008._extract_examples_dirs(conf)
+            examples_dirs = cls._extract_examples_dirs(conf)
             if not examples_dirs:
                 return False
 
-            return all(
-                DOC008._configured_examples_dir_has_files(root, path) for path in examples_dirs
+            configured_ok = all(
+                cls._configured_examples_dir_has_files(root, path) for path in examples_dirs
             )
+            if configured_ok:
+                cls.pass_detail = (
+                    "Examples configured in doc/source/conf.py via examples_dirs="
+                    f"{examples_dirs}."
+                )
+            return configured_ok
 
         index_has_examples = checked_contains(
             root,
@@ -197,7 +206,10 @@ class DOC008(Documentation):
             return False
 
         for candidate in ("examples", "doc/examples", "doc/source/examples"):
-            if DOC008._dir_has_files(root, candidate):
+            if cls._dir_has_files(root, candidate):
+                cls.pass_detail = (
+                    "Examples configured through doc/source/index.rst and found in " f"{candidate}."
+                )
                 return True
 
         return False
