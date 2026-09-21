@@ -102,6 +102,7 @@ from ansys.pre_commit_hooks.quality_rules.documentation import (
     DOC005,
     DOC006,
     DOC007,
+    DOC008,
     Documentation,
 )
 from ansys.pre_commit_hooks.quality_rules.labeler import LB001, LB002, LB003, LB004, LB005, Labeler
@@ -229,6 +230,7 @@ __all__ = [
     "DOC005",
     "DOC006",
     "DOC007",
+    "DOC008",
     "Documentation",
     "LB001",
     "LB002",

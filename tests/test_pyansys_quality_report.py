@@ -164,6 +164,95 @@ maintainers = [{name = "Example", email = "example@example.com"}]
     assert "PM001" not in output
 
 
+def test_doc008_is_not_applicable_without_gallery_extensions(tmp_path):
+    """DOC008 should be N/A when neither sphinx-gallery nor nbsphinx is enabled."""
+    docs = tmp_path / "doc" / "source"
+    docs.mkdir(parents=True)
+    (docs / "conf.py").write_text("extensions = ['sphinx.ext.autodoc']\n", encoding="utf-8")
+    (docs / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+
+    assert quality_rules.DOC008.check(tmp_path) is None
+
+
+def test_doc008_requires_examples_dirs_and_gallery_dirs_for_sphinx_gallery(tmp_path):
+    """DOC008 should require examples_dirs and gallery_dirs when sphinx-gallery is enabled."""
+    docs = tmp_path / "doc" / "source"
+    docs.mkdir(parents=True)
+
+    (docs / "conf.py").write_text(
+        """
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx_gallery.gen_gallery',
+]
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',
+    'gallery_dirs': 'examples',
+}
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+    (docs / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+    (tmp_path / "doc" / "examples").mkdir(parents=True)
+    (tmp_path / "doc" / "examples" / "demo.py").write_text("print('demo')\n", encoding="utf-8")
+
+    assert quality_rules.DOC008.check(tmp_path) is True
+
+    (tmp_path / "doc" / "examples" / "demo.py").unlink()
+    assert quality_rules.DOC008.check(tmp_path) is False
+
+    (tmp_path / "doc" / "examples" / "demo.py").write_text("print('demo')\n", encoding="utf-8")
+
+    (docs / "conf.py").write_text(
+        """
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx_gallery.gen_gallery',
+]
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',
+}
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.DOC008.check(tmp_path) is False
+
+
+def test_doc008_requires_examples_section_for_nbsphinx(tmp_path):
+    """DOC008 should require an examples section in the docs index when nbsphinx is enabled."""
+    docs = tmp_path / "doc" / "source"
+    docs.mkdir(parents=True)
+    (docs / "conf.py").write_text(
+        "extensions = ['sphinx.ext.autodoc', 'nbsphinx']\n",
+        encoding="utf-8",
+    )
+    (docs / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+
+    assert quality_rules.DOC008.check(tmp_path) is False
+
+    (docs / "index.rst").write_text(
+        """
+Home
+====
+
+.. toctree::
+   :maxdepth: 2
+
+   examples/index
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.DOC008.check(tmp_path) is False
+
+    examples_dir = docs / "examples"
+    examples_dir.mkdir()
+    (examples_dir / "index.rst").write_text("Examples\n========\n", encoding="utf-8")
+
+    assert quality_rules.DOC008.check(tmp_path) is True
+
+
 def test_pm013_accepts_supported_version_formats(tmp_path):
     """Development versions in Python packaging should be accepted alongside SemVer."""
     for version in ["1.2.3", "1.2.3-rc.1", "1.2.3.dev0", "1.2.3.dev1"]:

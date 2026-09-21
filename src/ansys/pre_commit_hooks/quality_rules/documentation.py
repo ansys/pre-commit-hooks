@@ -37,10 +37,13 @@ from __future__ import annotations
 
 import re
 
-from ansys.pre_commit_hooks.quality_rules.common import checked_contains, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import (
+    checked_contains,
+    file_content,
+    file_exists,
+)
 
 __all__ = [
-    "Documentation",
     "DOC001",
     "DOC002",
     "DOC003",
@@ -48,6 +51,8 @@ __all__ = [
     "DOC005",
     "DOC006",
     "DOC007",
+    "DOC008",
+    "Documentation",
 ]
 
 
@@ -141,3 +146,114 @@ class DOC007(Documentation):
                 re.IGNORECASE,
             ),
         )
+
+
+class DOC008(Documentation):
+    """Gallery examples are configured when gallery extensions are enabled.
+
+    If ``sphinx-gallery`` or ``nbsphinx`` is enabled, examples must be configured.
+    """
+
+    requires = {"DOC001", "DOC002"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether examples are configured for the detected gallery extension."""
+        conf = file_content(root, "doc/source/conf.py")
+
+        if not conf:
+            return None
+
+        has_sphinx_gallery = bool(
+            re.search(
+                r"sphinx_gallery(?:\.gen_gallery)?",
+                conf,
+                re.IGNORECASE,
+            )
+        )
+        has_nbsphinx = bool(re.search(r"\bnbsphinx\b", conf, re.IGNORECASE))
+
+        if not has_sphinx_gallery and not has_nbsphinx:
+            return None
+
+        if has_sphinx_gallery:
+            if not (re.search(r"\bexamples_dirs\b", conf) and re.search(r"\bgallery_dirs\b", conf)):
+                return False
+
+            examples_dirs = DOC008._extract_examples_dirs(conf)
+            if not examples_dirs:
+                return False
+
+            return all(
+                DOC008._configured_examples_dir_has_files(root, path) for path in examples_dirs
+            )
+
+        index_has_examples = checked_contains(
+            root,
+            "doc/source/index.rst",
+            re.compile(r"\bexamples\b", re.IGNORECASE),
+        )
+        if not index_has_examples:
+            return False
+
+        for candidate in ("examples", "doc/examples", "doc/source/examples"):
+            if DOC008._dir_has_files(root, candidate):
+                return True
+
+        return False
+
+    @staticmethod
+    def _extract_examples_dirs(conf: str) -> list[str]:
+        """Return path strings configured under the ``examples_dirs`` key."""
+        match = re.search(
+            r"['\"]?examples_dirs['\"]?\s*[:=]\s*(\[[^\]]*\]|\"[^\"]+\"|'[^']+')",
+            conf,
+            re.DOTALL,
+        )
+        if not match:
+            return []
+
+        raw_value = match.group(1)
+        return [path for _, path in re.findall(r"(['\"])(.+?)\1", raw_value)]
+
+    @staticmethod
+    def _dir_has_files(root, path: str) -> bool:
+        """Return whether the given directory exists and has at least one file."""
+        try:
+            directory = root.joinpath(path)
+            if not directory.is_dir():
+                return False
+
+            for entry in directory.iterdir():
+                if entry.is_file():
+                    return True
+                if entry.is_dir() and DOC008._dir_tree_has_files(entry):
+                    return True
+
+            return False
+        except (AttributeError, OSError, TypeError, ValueError):
+            return False
+
+    @staticmethod
+    def _dir_tree_has_files(directory) -> bool:
+        """Return whether a directory tree contains at least one file."""
+        try:
+            for entry in directory.iterdir():
+                if entry.is_file():
+                    return True
+                if entry.is_dir() and DOC008._dir_tree_has_files(entry):
+                    return True
+        except (AttributeError, OSError, TypeError, ValueError):
+            return False
+
+        return False
+
+    @staticmethod
+    def _configured_examples_dir_has_files(root, configured_path: str) -> bool:
+        """Return whether a configured examples path exists and is non-empty.
+
+        Paths in ``examples_dirs`` are typically relative to ``doc/source/conf.py``.
+        For compatibility, this also checks repository-root-relative paths.
+        """
+        candidates = [f"doc/source/{configured_path}", configured_path]
+        return any(DOC008._dir_has_files(root, candidate) for candidate in candidates)
