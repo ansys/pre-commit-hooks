@@ -151,8 +151,9 @@ class DOC007(Documentation):
 class DOC008(Documentation):
     """Gallery examples are configured when gallery extensions are enabled.
 
-    Configure examples in ``doc/source/conf.py`` via ``sphinx_gallery_conf['examples_dirs']``
-    or in ``doc/source/index.rst`` (for ``nbsphinx``) with a non-empty examples directory.
+    Configure examples in ``doc/source/conf.py`` via ``sphinx_gallery_conf['examples_dirs']``.
+    For ``nbsphinx``, ensure the extension is enabled in ``doc/source/conf.py`` and an
+    examples directory exists with at least one file.
     """
 
     requires = {"DOC001", "DOC002"}
@@ -197,18 +198,10 @@ class DOC008(Documentation):
                 )
             return configured_ok
 
-        index_has_examples = checked_contains(
-            root,
-            "doc/source/index.rst",
-            re.compile(r"\bexamples\b", re.IGNORECASE),
-        )
-        if not index_has_examples:
-            return False
-
         for candidate in ("examples", "doc/examples", "doc/source/examples"):
             if cls._dir_has_files(root, candidate):
                 cls.pass_detail = (
-                    "Examples configured through doc/source/index.rst and found in " f"{candidate}."
+                    "nbsphinx enabled in doc/source/conf.py and examples found in " f"{candidate}."
                 )
                 return True
 
