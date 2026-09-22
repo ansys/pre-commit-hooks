@@ -81,6 +81,9 @@ __all__ = [
     "PM021",
     "PM022",
     "PM024",
+    "PM025",
+    "PM026",
+    "PM027",
     "ProjectMetadata",
 ]
 
@@ -498,4 +501,86 @@ class PM024(ProjectMetadata):
             "pixi.toml",
             "justfile",
             "Makefile",
+        )
+
+
+class PM025(ProjectMetadata):
+    """Project contact and support links are provided in pyproject metadata."""
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether key support URLs are declared under project.urls."""
+        if not file_exists(root, _PYPROJECT):
+            return None
+
+        content = file_content(root, _PYPROJECT)
+        missing = []
+
+        if not re.search(r"^Issues\s*=\s*[\"']https?://", content, re.MULTILINE):
+            missing.append("Issues")
+
+        if not re.search(r"^Discussions\s*=\s*[\"']https?://", content, re.MULTILINE):
+            missing.append("Discussions")
+
+        if not re.search(r"^Documentation\s*=\s*[\"']https?://", content, re.MULTILINE):
+            missing.append("Documentation")
+
+        if not missing:
+            return True
+
+        return "⚠️ missing support/contact project URLs in pyproject.toml: " + ", ".join(missing)
+
+
+class PM026(ProjectMetadata):
+    """The AUTHORS file contains compliant contributor ownership information."""
+
+    requires = {"PM001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether AUTHORS includes at least one ownership entry and the corporate owner."""
+        if not file_exists(root, "AUTHORS"):
+            return None
+
+        content = file_content(root, "AUTHORS")
+        lines = [
+            line.strip()
+            for line in content.splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
+
+        if not lines:
+            return "⚠️ AUTHORS exists but has no contributor ownership entries."
+
+        if not any(_DEFAULT_AUTHOR in line for line in lines):
+            return "⚠️ AUTHORS is missing the expected corporate owner entry."
+
+        return True
+
+
+class PM027(ProjectMetadata):
+    """The CONTRIBUTORS.md file includes lead and main contributors sections."""
+
+    requires = {"PM005"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether CONTRIBUTORS.md includes lead and contributor details."""
+        if not file_exists(root, "CONTRIBUTORS.md"):
+            return None
+
+        content = file_content(root, "CONTRIBUTORS.md")
+
+        has_lead_heading = bool(re.search(r"^##\s+Project\s+Lead\b", content, re.MULTILINE))
+        has_individual_heading = bool(
+            re.search(r"^##\s+Individual\s+Contributors\b", content, re.MULTILINE)
+        )
+        has_bullets = bool(re.search(r"^\*\s+\[[^\]]+\]\([^\)]+\)", content, re.MULTILINE))
+
+        if has_lead_heading and has_individual_heading and has_bullets:
+            return True
+
+        return (
+            "⚠️ CONTRIBUTORS.md should include 'Project Lead' and 'Individual Contributors' "
+            "sections with at least one contributor entry."
         )

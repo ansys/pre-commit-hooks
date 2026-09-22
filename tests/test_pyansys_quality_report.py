@@ -21,6 +21,9 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM021,
     PM022,
     PM024,
+    PM025,
+    PM026,
+    PM027,
 )
 
 
@@ -739,6 +742,56 @@ def test_pm024_requires_task_runner_configuration(tmp_path):
 
     (tmp_path / "tox.ini").write_text("[tox]\nenvlist = py\n", encoding="utf-8")
     assert PM024.check(tmp_path) is True
+
+
+def test_pm025_requires_contact_support_urls_in_pyproject(tmp_path):
+    """Project metadata should include support URLs in the project.urls section."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+name = "ansys-demo-library"
+
+[project.urls]
+Source = "https://github.com/ansys/demo"
+Issues = "https://github.com/ansys/demo/issues"
+Discussions = "https://github.com/ansys/demo/discussions"
+Documentation = "https://demo.docs.pyansys.com"
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert PM025.check(tmp_path) is True
+
+
+def test_pm026_requires_corporate_entry_in_authors_file(tmp_path):
+    """AUTHORS should include at least one ownership entry and the corporate owner line."""
+    (tmp_path / "AUTHORS").write_text(
+        "# contributors\nSynopsys, Inc. and ANSYS, Inc.\n",
+        encoding="utf-8",
+    )
+
+    assert PM026.check(tmp_path) is True
+
+
+def test_pm027_requires_contributors_sections(tmp_path):
+    """CONTRIBUTORS should include project lead and individual contributor sections."""
+    (tmp_path / "CONTRIBUTORS.md").write_text(
+        """
+# Contributors
+
+## Project Lead
+
+* [Lead](https://github.com/lead)
+
+## Individual Contributors
+
+* [Contributor](https://github.com/contrib)
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    assert PM027.check(tmp_path) is True
 
 
 def test_pm017_requires_python_bounds_in_pyproject(tmp_path):
