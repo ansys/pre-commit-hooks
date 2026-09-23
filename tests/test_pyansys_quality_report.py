@@ -26,6 +26,10 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM027,
     PM028,
     PM029,
+    PM030,
+    PM031,
+    PM032,
+    PM033,
 )
 
 
@@ -794,6 +798,59 @@ def test_pm027_requires_contributors_sections(tmp_path):
     )
 
     assert PM027.check(tmp_path) is True
+
+
+def test_pm030_accepts_authors_template_markers(tmp_path):
+    """AUTHORS should pass when it matches the dedicated AUTHORS template file."""
+    template_path = project_metadata._TEMPLATE_DIR / "AUTHORS"
+    (tmp_path / "AUTHORS").write_text(template_path.read_text(encoding="utf-8"), encoding="utf-8")
+
+    assert PM030.check(tmp_path) is True
+
+
+def test_pm031_warns_when_code_of_conduct_template_sections_missing(tmp_path):
+    """CODE_OF_CONDUCT should warn when it does not match the template file."""
+    (tmp_path / "CODE_OF_CONDUCT.md").write_text("# Code of Conduct\n", encoding="utf-8")
+
+    result = PM031.check(tmp_path)
+    assert isinstance(result, str)
+    assert (
+        result
+        == "WARN: CODE_OF_CONDUCT.md content does not match metadata template CODE_OF_CONDUCT.md."
+    )
+
+
+def test_pm032_accepts_contributing_template_markers(tmp_path):
+    """CONTRIBUTING should pass when it matches the dedicated CONTRIBUTING template file."""
+    template_path = project_metadata._TEMPLATE_DIR / "CONTRIBUTING.md"
+    (tmp_path / "CONTRIBUTING.md").write_text(
+        template_path.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    assert PM032.check(tmp_path) is True
+
+
+def test_pm033_warns_on_invalid_contributors_template_structure(tmp_path):
+    """CONTRIBUTORS should warn when it does not match the template file."""
+    (tmp_path / "CONTRIBUTORS.md").write_text(
+        """
+# Contributors
+
+## Project Lead
+
+## Individual Contributors
+
+* Person Name
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    result = PM033.check(tmp_path)
+    assert isinstance(result, str)
+    assert (
+        result == "WARN: CONTRIBUTORS.md content does not match metadata template CONTRIBUTORS.md."
+    )
 
 
 def test_pm017_requires_python_bounds_in_pyproject(tmp_path):

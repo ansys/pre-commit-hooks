@@ -53,6 +53,7 @@ The checks cover:
 
 from __future__ import annotations
 
+from pathlib import Path
 import re
 
 from ansys.pre_commit_hooks.quality_rules.common import (
@@ -86,11 +87,16 @@ __all__ = [
     "PM027",
     "PM028",
     "PM029",
+    "PM030",
+    "PM031",
+    "PM032",
+    "PM033",
     "ProjectMetadata",
 ]
 
 _PYPROJECT = "pyproject.toml"
 _LICENSE = "LICENSE"
+_TEMPLATE_DIR = Path(__file__).resolve().parent / "metadata_templates"
 
 _DEFAULT_AUTHOR = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL = "pyansys-core@synopsys.com"
@@ -658,3 +664,98 @@ class PM029(ProjectMetadata):
             )
 
         return "FAIL: Unsupported expected license for LICENSE content check"
+
+
+def _normalize_text_for_template_compare(text: str) -> str:
+    """Normalize text for stable template comparisons across line endings."""
+    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
+
+
+def _file_matches_template(root, repo_file: str, template_file: str) -> bool | None:
+    """Return whether a repository file matches the corresponding metadata template file."""
+    if not file_exists(root, repo_file):
+        return None
+
+    template_path = _TEMPLATE_DIR / template_file
+    if not template_path.exists():
+        return None
+
+    actual = file_content(root, repo_file)
+    expected = template_path.read_text(encoding="utf-8")
+    return _normalize_text_for_template_compare(actual) == _normalize_text_for_template_compare(
+        expected
+    )
+
+
+class PM030(ProjectMetadata):
+    """The AUTHORS file follows the expected PyAnsys template structure."""
+
+    requires = {"PM001", "PM026"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether AUTHORS matches the expected metadata template file."""
+        matches = _file_matches_template(root, "AUTHORS", "AUTHORS")
+        if matches is None:
+            return None
+
+        if matches:
+            return True
+
+        return "WARN: AUTHORS content does not match metadata template AUTHORS."
+
+
+class PM031(ProjectMetadata):
+    """The CODE_OF_CONDUCT.md file follows the expected template content."""
+
+    requires = {"PM003"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether CODE_OF_CONDUCT.md matches the expected metadata template file."""
+        matches = _file_matches_template(root, "CODE_OF_CONDUCT.md", "CODE_OF_CONDUCT.md")
+        if matches is None:
+            return None
+
+        if matches:
+            return True
+
+        return (
+            "WARN: CODE_OF_CONDUCT.md content does not match metadata template CODE_OF_CONDUCT.md."
+        )
+
+
+class PM032(ProjectMetadata):
+    """The CONTRIBUTING.md file follows the expected template content."""
+
+    requires = {"PM004"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether CONTRIBUTING.md matches the expected metadata template file."""
+        matches = _file_matches_template(root, "CONTRIBUTING.md", "CONTRIBUTING.md")
+        if matches is None:
+            return None
+
+        if matches:
+            return True
+
+        return "WARN: CONTRIBUTING.md content does not match metadata template CONTRIBUTING.md."
+
+
+class PM033(ProjectMetadata):
+    """The CONTRIBUTORS.md file follows the expected template content."""
+
+    requires = {"PM005", "PM027"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether CONTRIBUTORS.md matches the expected metadata template file."""
+        matches = _file_matches_template(root, "CONTRIBUTORS.md", "CONTRIBUTORS.md")
+        if matches is None:
+            return None
+
+        if matches:
+            return True
+
+        return "WARN: CONTRIBUTORS.md content does not match metadata template CONTRIBUTORS.md."
