@@ -130,7 +130,7 @@ class MCP005(MCP):
         if not file_contains(root, "pyproject.toml", filename):
             return f"pyproject.toml does not reference {filename} as readme."
         if readme_path == "README.md":
-            return "⚠️ README.md found — PyAnsys preferred format is README.rst."
+            return "WARN: README.md found — PyAnsys preferred format is README.rst."
         return True
 
 

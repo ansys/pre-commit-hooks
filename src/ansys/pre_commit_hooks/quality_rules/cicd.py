@@ -125,7 +125,7 @@ class CI002(CICD):
 
         missing = [label for _, label, content in present if "concurrency:" not in content]
 
-        return True if not missing else f"⚠️ concurrency: block missing in: {', '.join(missing)}"
+        return True if not missing else f"WARN: concurrency: block missing in: {', '.join(missing)}"
 
 
 class CI003(CICD):
@@ -174,7 +174,7 @@ class CI004(CICD):
         return (
             True
             if not missing
-            else f"⚠️ persist-credentials: false missing in: {', '.join(missing)}"
+            else f"WARN: persist-credentials: false missing in: {', '.join(missing)}"
         )
 
 
@@ -209,7 +209,7 @@ class CI007(CICD):
         if _contains_any(content, r"ansys/actions/code-style"):
             return True
 
-        return "⚠️ ansys/actions/code-style not found in any workflow file."
+        return "WARN: ansys/actions/code-style not found in any workflow file."
 
 
 class CI008(CICD):

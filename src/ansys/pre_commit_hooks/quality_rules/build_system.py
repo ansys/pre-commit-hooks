@@ -103,7 +103,7 @@ class BS002(BuildSystem):
 
         if key == "setuptools":
             return (
-                f"⚠️ Uses {name} — consider migrating to Flit, Hatch, "
+                f"WARN: Uses {name} — consider migrating to Flit, Hatch, "
                 "or Poetry for simpler config."
             )
 
@@ -132,7 +132,8 @@ class BS003(BuildSystem):
         ]
 
         return (
-            f"⚠️ Legacy file(s) found: {', '.join(found)}. " "Remove in favour of pyproject.toml."
+            f"WARN: Legacy file(s) found: {', '.join(found)}. "
+            "Remove in favour of pyproject.toml."
         )
 
 
@@ -160,4 +161,4 @@ class BS004(BuildSystem):
         if re.search(r"[><=!~]", match.group(1)):
             return True
 
-        return "⚠️ Build backend in requires has no version pin " "(e.g. >=x.y)."
+        return "WARN: Build backend in requires has no version pin " "(e.g. >=x.y)."

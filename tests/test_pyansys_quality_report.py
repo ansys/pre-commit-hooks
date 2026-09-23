@@ -24,6 +24,8 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM025,
     PM026,
     PM027,
+    PM028,
+    PM029,
 )
 
 
@@ -303,7 +305,7 @@ updates:
 
     result = quality_rules.DB009.check(tmp_path)
     assert isinstance(result, str)
-    assert result.startswith("⚠️ ")
+    assert result.startswith("WARN: ")
 
 
 def test_db009_passes_when_ansys_actions_updates_are_grouped(tmp_path):
@@ -356,7 +358,7 @@ updates:
 
     result = quality_rules.DB008.check(tmp_path)
     assert isinstance(result, str)
-    assert result.startswith("⚠️ ")
+    assert result.startswith("WARN: ")
 
 
 def test_db008_passes_when_pip_updates_are_grouped(tmp_path):
@@ -583,7 +585,7 @@ jobs:
     )
 
     assert security.SEC004.check(repo_path, {"pr": {"path": ".github/workflows/pr.yml"}}) == (
-        "⚠️ Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
+        "WARN: Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
         "Use full commit SHAs for all actions."
     )
 
@@ -616,7 +618,7 @@ maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@
     )
 
     assert project_metadata.PM014.check(repo_path) == (
-        "⚠️ author/maintainer metadata does not match "
+        "WARN: author/maintainer metadata does not match "
         "Synopsys, Inc. and ANSYS, Inc. / "
         "pyansys-core@synopsys.com."
     )
@@ -629,7 +631,7 @@ def test_pm016_warns_on_empty_codeowners(tmp_path):
     (repo_path / ".github").mkdir()
     (repo_path / ".github" / "CODEOWNERS").write_text("# comment only\n", encoding="utf-8")
 
-    assert PM016.check(repo_path) == "⚠️ .github/CODEOWNERS exists but has no owner entries."
+    assert PM016.check(repo_path) == "WARN: .github/CODEOWNERS exists but has no owner entries."
 
 
 def test_pm016_accepts_valid_codeowners(tmp_path):
@@ -821,8 +823,26 @@ def test_quality_rules_are_grouped_package():
     assert callable(quality_rules.repo_review_checks)
 
 
-def test_legacy_license_check_accepts_apache_2_0_by_default(tmp_path):
-    """The legacy bootstrap should not reject a valid Apache 2.0 LICENSE no configured."""
+def test_legacy_license_check_accepts_apache_default(tmp_path):
+    """The legacy bootstrap should accept Apache content with the default Apache license."""
+    license_path = tmp_path / "LICENSE"
+    license_path.write_text(
+        "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\n",
+        encoding="utf-8",
+    )
+
+    result = hook.check_file_content(
+        license_path,
+        "Apache License\nVersion 2.0\n",
+        True,
+        hook.DEFAULT_LICENSE,
+    )
+
+    assert result is True
+
+
+def test_legacy_license_check_accepts_apache_alias(tmp_path):
+    """The legacy bootstrap should accept '--license Apache' as Apache-2.0."""
     license_path = tmp_path / "LICENSE"
     license_path.write_text(
         "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\n",
@@ -833,10 +853,92 @@ def test_legacy_license_check_accepts_apache_2_0_by_default(tmp_path):
         license_path,
         "MIT License\n",
         True,
-        hook.DEFAULT_LICENSE,
+        "Apache",
     )
 
     assert result is True
+
+
+def test_main_accepts_common_apache_typo(tmp_path):
+    """The CLI should normalize common Apache typos for legacy bootstrap usage."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+authors = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+maintainers = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+    (repo_path / "LICENSE").write_text(
+        "Apache License\nVersion 2.0, January 2004\n",
+        encoding="utf-8",
+    )
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--fix-missing", "--license", "Apace"])
+    assert exit_code in (0, 1)
+
+
+def test_pyproject_license_must_match_selected_license(tmp_path):
+    """Pyproject license metadata should match the selected --license value."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "pyproject.toml").write_text(
+        """
+[project]
+name = "ansys-demo-library"
+version = "0.1.0"
+license = "MIT"
+authors = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+maintainers = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+""".strip() + "\n",
+        encoding="utf-8",
+    )
+
+    is_ok, _ = hook.check_pyproject_toml(
+        repo_path,
+        hook.DEFAULT_AUTHOR_MAINT_NAME,
+        hook.DEFAULT_AUTHOR_MAINT_EMAIL,
+        True,
+        "Apache",
+    )
+
+    assert is_ok is False
+
+
+def test_main_rejects_mit_license_argument(tmp_path):
+    """The CLI should reject MIT because Apache-2.0 is the only supported license."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+
+    with pytest.raises(SystemExit) as exc:
+        hook.main(["--repo-root", str(repo_path), "--license", "MIT"])
+
+    assert exc.value.code == 2
+
+
+def test_pm028_fails_when_pyproject_license_mismatches_selected_license(tmp_path):
+    """PM028 should fail when pyproject license does not match --license."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "ansys-demo-library"\nlicense = "MIT"\n',
+        encoding="utf-8",
+    )
+
+    result = PM028.check(tmp_path, expected_license="Apache-2.0")
+    assert isinstance(result, str)
+    assert result.startswith("FAIL: ")
+    assert "does not match --license=Apache-2.0" in result
+
+
+def test_pm029_fails_when_license_file_mismatches_selected_license(tmp_path):
+    """PM029 should fail when LICENSE content does not match --license."""
+    (tmp_path / "LICENSE").write_text("MIT License\n", encoding="utf-8")
+
+    result = PM029.check(tmp_path, expected_license="Apache-2.0")
+    assert result == 'FAIL: "The LICENSE file content is missing "Apache License 2.0"'
 
 
 def test_normalize_check_result_standardizes_rule_status():
@@ -845,5 +947,5 @@ def test_normalize_check_result_standardizes_rule_status():
 
     assert normalize_check_result(True) == ("pass", "")
     assert normalize_check_result(None) == ("na", "")
-    assert normalize_check_result("⚠️ check warning") == ("warn", "check warning")
+    assert normalize_check_result("WARN: check warning") == ("warn", "check warning")
     assert normalize_check_result(False) == ("fail", "")

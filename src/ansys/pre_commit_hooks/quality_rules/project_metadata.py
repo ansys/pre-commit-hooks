@@ -48,7 +48,7 @@ The checks cover:
     - Author and maintainer metadata is configured
 
 * Licensing
-    - LICENSE file contains recognized MIT or Apache 2.0 wording
+    - LICENSE file contains recognized Apache 2.0 wording
 """
 
 from __future__ import annotations
@@ -84,6 +84,8 @@ __all__ = [
     "PM025",
     "PM026",
     "PM027",
+    "PM028",
+    "PM029",
     "ProjectMetadata",
 ]
 
@@ -92,6 +94,20 @@ _LICENSE = "LICENSE"
 
 _DEFAULT_AUTHOR = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL = "pyansys-core@synopsys.com"
+
+
+def _normalize_license_identifier(license_name: str) -> str:
+    """Normalize common license aliases for metadata checks."""
+    normalized = license_name.strip()
+    key = normalized.lower().replace("_", "-").replace(" ", "")
+    aliases = {
+        "apache": "Apache-2.0",
+        "apache2": "Apache-2.0",
+        "apache-2": "Apache-2.0",
+        "apache2.0": "Apache-2.0",
+        "apache-2.0": "Apache-2.0",
+    }
+    return aliases.get(key, normalized)
 
 
 def _has_any_file(root, *paths: str) -> bool:
@@ -180,7 +196,7 @@ class PM007(ProjectMetadata):
             return False
 
         if readme_path == "README.md":
-            return "⚠️ README.md found — README.rst is the preferred format."
+            return "WARN: README.md found — README.rst is the preferred format."
 
         return True
 
@@ -222,7 +238,7 @@ class PM010(ProjectMetadata):
                 return True
 
             if "README" in content:
-                return "⚠️ readme key found but exact README filename not confirmed."
+                return "WARN: readme key found but exact README filename not confirmed."
 
             return False
 
@@ -232,7 +248,7 @@ class PM010(ProjectMetadata):
             return True
 
         if "README" in content:
-            return "⚠️ readme key found but exact README filename " "not confirmed."
+            return "WARN: readme key found but exact README filename " "not confirmed."
 
         return False
 
@@ -287,14 +303,14 @@ class PM012(ProjectMetadata):
         )
 
         if not match:
-            return "⚠️ project name not found in pyproject.toml."
+            return "WARN: project name not found in pyproject.toml."
 
         name = match.group(1)
 
         if re.fullmatch(r"ansys-[a-z0-9-]+-[a-z0-9-]+", name):
             return True
 
-        return f"⚠️ project name '{name}' does not match ansys-*-*."
+        return f"WARN: project name '{name}' does not match ansys-*-*."
 
 
 class PM013(ProjectMetadata):
@@ -315,7 +331,7 @@ class PM013(ProjectMetadata):
         )
 
         if not match:
-            return "⚠️ project version not found in pyproject.toml."
+            return "WARN: project version not found in pyproject.toml."
 
         version = match.group(1)
 
@@ -327,7 +343,7 @@ class PM013(ProjectMetadata):
             return True
 
         return (
-            f"⚠️ project version '{version}' does not follow "
+            f"WARN: project version '{version}' does not follow "
             "semantic versioning or the accepted Python "
             "dev-version form."
         )
@@ -382,28 +398,27 @@ class PM014(ProjectMetadata):
             return True
 
         return (
-            "⚠️ author/maintainer metadata does not match "
+            "WARN: author/maintainer metadata does not match "
             "Synopsys, Inc. and ANSYS, Inc. / "
             "pyansys-core@synopsys.com."
         )
 
 
 class PM015(ProjectMetadata):
-    """The LICENSE file includes recognized project license wording."""
+    """The LICENSE file includes recognized Apache 2.0 project license wording."""
 
     requires = {"PM006"}
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether the LICENSE file contains expected MIT or Apache 2.0 text."""
+        """Return whether the LICENSE file contains expected Apache 2.0 text."""
         if not file_exists(root, _LICENSE):
             return None
 
         content = file_content(root, _LICENSE)
 
         if (
-            "MIT License" in content
-            or re.search(
+            re.search(
                 r"Apache License.*Version 2\.0",
                 content,
                 re.IGNORECASE | re.DOTALL,
@@ -412,10 +427,7 @@ class PM015(ProjectMetadata):
         ):
             return True
 
-        return (
-            "⚠️ LICENSE file content is missing a recognized "
-            "license statement (MIT or Apache 2.0)."
-        )
+        return "WARN: LICENSE file content is missing a recognized Apache 2.0 statement."
 
 
 class PM016(ProjectMetadata):
@@ -434,14 +446,14 @@ class PM016(ProjectMetadata):
         if re.search(r"^\s*[^#\n]+\s+@\S+", content, re.MULTILINE):
             return True
 
-        return "⚠️ .github/CODEOWNERS exists but has no owner entries."
+        return "WARN: .github/CODEOWNERS exists but has no owner entries."
 
 
 def _validate_python_version_spec(spec: str) -> bool | str:
     """Validate that a Python version spec defines supported lower and upper bounds."""
     if not re.search(r">=\d+\.\d+", spec) or not re.search(r"[<,]=?\d+", spec):
         return (
-            f"⚠️ requires-python '{spec}' does not declare a supported PyAnsys version range. "
+            f"WARN: requires-python '{spec}' does not declare a supported PyAnsys version range. "
             "Use >=3.10,<4 or a more recent support window."
         )
 
@@ -528,7 +540,7 @@ class PM025(ProjectMetadata):
         if not missing:
             return True
 
-        return "⚠️ missing support/contact project URLs in pyproject.toml: " + ", ".join(missing)
+        return "WARN: missing support/contact project URLs in pyproject.toml: " + ", ".join(missing)
 
 
 class PM026(ProjectMetadata):
@@ -550,10 +562,10 @@ class PM026(ProjectMetadata):
         ]
 
         if not lines:
-            return "⚠️ AUTHORS exists but has no contributor ownership entries."
+            return "WARN: AUTHORS exists but has no contributor ownership entries."
 
         if not any(_DEFAULT_AUTHOR in line for line in lines):
-            return "⚠️ AUTHORS is missing the expected corporate owner entry."
+            return "WARN: AUTHORS is missing the expected corporate owner entry."
 
         return True
 
@@ -581,6 +593,68 @@ class PM027(ProjectMetadata):
             return True
 
         return (
-            "⚠️ CONTRIBUTORS.md should include 'Project Lead' and 'Individual Contributors' "
+            "WARN: CONTRIBUTORS.md should include 'Project Lead' and 'Individual Contributors' "
             "sections with at least one contributor entry."
         )
+
+
+class PM028(ProjectMetadata):
+    """Pyproject license matches the selected --license value."""
+
+    @staticmethod
+    def check(root, expected_license: str | None = None) -> bool | None | str:
+        """Return whether pyproject license metadata matches the selected expected license."""
+        if expected_license is None:
+            return None
+
+        if not file_exists(root, _PYPROJECT):
+            return None
+
+        content = file_content(root, _PYPROJECT)
+        expected = _normalize_license_identifier(expected_license)
+
+        str_match = re.search(r'^license\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE)
+        if str_match:
+            actual = _normalize_license_identifier(str_match.group(1))
+            if actual == expected:
+                return True
+            return f"FAIL: Project license in pyproject.toml ('{str_match.group(1)}') does not match --license={expected}"  # noqa: E501
+
+        if expected == "Apache-2.0" and re.search(
+            r"license\s*=\s*\{[^\}]*Apache", content, re.IGNORECASE
+        ):
+            return True
+
+        return "FAIL: Project license does not exist in pyproject.toml or does not match --license"
+
+
+class PM029(ProjectMetadata):
+    """LICENSE file content matches the selected --license value."""
+
+    requires = {"PM006"}
+
+    @staticmethod
+    def check(root, expected_license: str | None = None) -> bool | None | str:
+        """Return whether LICENSE content matches the selected expected license."""
+        if expected_license is None:
+            return None
+
+        if not file_exists(root, _LICENSE):
+            return None
+
+        content = file_content(root, _LICENSE)
+        expected = _normalize_license_identifier(expected_license)
+
+        if expected == "Apache-2.0":
+            apache_ok = (
+                "Apache License, Version 2.0" in content
+                or "Apache License 2.0" in content
+                or re.search(r"Apache License.*Version 2\.0", content, re.IGNORECASE | re.DOTALL)
+            )
+            return (
+                True
+                if apache_ok
+                else 'FAIL: "The LICENSE file content is missing "Apache License 2.0"'
+            )
+
+        return "FAIL: Unsupported expected license for LICENSE content check"

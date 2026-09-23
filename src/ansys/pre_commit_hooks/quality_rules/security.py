@@ -81,7 +81,7 @@ class SEC001(Security):
         if file_exists(root, _ZIZMOR_CONFIG):
             return True
 
-        return "⚠️ .github/zizmor.yml not found " "— optional but recommended."
+        return "WARN: .github/zizmor.yml not found " "— optional but recommended."
 
 
 class SEC002(Security):
@@ -143,7 +143,7 @@ class SEC004(Security):
             return True
 
         return (
-            "⚠️ Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
+            "WARN: Some GitHub Actions in the PR workflow are not pinned to full commit SHAs. "
             "Use full commit SHAs for all actions."
         )
 
@@ -169,4 +169,4 @@ class SEC005(Security):
         ):
             return True
 
-        return "⚠️ SECURITY.md may not clearly discourage " "public issue reporting."
+        return "WARN: SECURITY.md may not clearly discourage " "public issue reporting."

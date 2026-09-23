@@ -35,7 +35,7 @@ The checks cover:
     - PyAnsys badge
     - PyPI badge
     - Codecov badge
-    - MIT License badge
+    - Apache 2.0 license badge
     - GitHub Actions CI badge
 
 * Content sections
@@ -80,7 +80,7 @@ class RM000(README):
             return True
 
         if readme_path == "README.md":
-            return "⚠️ README.md found — PyAnsys preferred format is README.rst."
+            return "WARN: README.md found — PyAnsys preferred format is README.rst."
 
         return False
 
@@ -108,7 +108,7 @@ class RM001(README):
         ):
             return True
 
-        return f"⚠️ PyAnsys badge image not found in {readme_path}."
+        return f"WARN: PyAnsys badge image not found in {readme_path}."
 
 
 class RM002(README):
@@ -134,7 +134,7 @@ class RM002(README):
         ):
             return True
 
-        return f"⚠️ PyPI badge image not found in {readme_path}."
+        return f"WARN: PyPI badge image not found in {readme_path}."
 
 
 class RM003(README):
@@ -158,17 +158,17 @@ class RM003(README):
         ):
             return True
 
-        return f"⚠️ Codecov badge image not found in {readme_path}."
+        return f"WARN: Codecov badge image not found in {readme_path}."
 
 
 class RM004(README):
-    """README has an MIT license badge."""
+    """README has an Apache 2.0 license badge."""
 
     requires = {"RM000"}
 
     @staticmethod
     def check(root, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains an MIT license badge."""
+        """Return whether the README contains an Apache 2.0 license badge."""
         if not readme_path:
             return None
 
@@ -176,13 +176,15 @@ class RM004(README):
             root,
             readme_path,
             re.compile(
-                r"shields\.io[^)\"']*mit|" r"img\.shields\.io[^)\"']*license",
+                r"shields\.io[^)\"']*apache|"
+                r"apache[^)\"']*license|"
+                r"img\.shields\.io[^)\"']*license",
                 re.IGNORECASE,
             ),
         ):
             return True
 
-        return f"⚠️ MIT license badge image not found in {readme_path}."
+        return f"WARN: Apache 2.0 license badge image not found in {readme_path}."
 
 
 class RM005(README):
@@ -206,7 +208,7 @@ class RM005(README):
         ):
             return True
 
-        return f"⚠️ GH-CI workflow badge.svg URL not found in {readme_path}."
+        return f"WARN: GH-CI workflow badge.svg URL not found in {readme_path}."
 
 
 class RM006(README):

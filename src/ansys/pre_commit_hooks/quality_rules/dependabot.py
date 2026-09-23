@@ -114,7 +114,7 @@ class DB003(Dependabot):
             return True
 
         if has_uv:
-            return "⚠️ uv ecosystem configured " "(pip preferred for PyAnsys standard)."
+            return "WARN: uv ecosystem configured " "(pip preferred for PyAnsys standard)."
 
         return False
 
@@ -157,7 +157,7 @@ class DB005(Dependabot):
         if count >= 2:
             return True
 
-        return f"⚠️ Only {count} ecosystem(s) use weekly interval " "(expected ≥2)."
+        return f"WARN: Only {count} ecosystem(s) use weekly interval " "(expected ≥2)."
 
 
 class DB006(Dependabot):
@@ -179,7 +179,7 @@ class DB006(Dependabot):
         if result:
             return True
 
-        return "⚠️ Cooldown default-days: 7 not found in dependabot.yml."
+        return "WARN: Cooldown default-days: 7 not found in dependabot.yml."
 
 
 class DB007(Dependabot):
@@ -219,7 +219,7 @@ class DB007(Dependabot):
         if result:
             return True
 
-        return "⚠️ versioning-strategy: lockfile-only " "not found for pip ecosystem."
+        return "WARN: versioning-strategy: lockfile-only " "not found for pip ecosystem."
 
 
 class DB008(Dependabot):
@@ -253,7 +253,7 @@ class DB008(Dependabot):
             return True
 
         return (
-            "⚠️ Pip updates are not grouped in the pip dependabot block. "
+            "WARN: Pip updates are not grouped in the pip dependabot block. "
             "Add groups with wildcard pattern '*' under package-ecosystem: pip."
         )
 
@@ -294,6 +294,6 @@ class DB009(Dependabot):
             return True
 
         return (
-            "⚠️ GitHub Actions updates are not grouped in .github/dependabot.yml. "
+            "WARN: GitHub Actions updates are not grouped in .github/dependabot.yml. "
             "Add groups with patterns '*' or 'ansys/actions/*' to reduce PR volume."
         )

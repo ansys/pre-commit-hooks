@@ -117,4 +117,6 @@ class VL005(Vale):
         if file_exists(root, _REJECT_VOCAB):
             return True
 
-        return "⚠️ ANSYS reject.txt vocabulary not found. " "The file is optional but recommended."
+        return (
+            "WARN: ANSYS reject.txt vocabulary not found. " "The file is optional but recommended."
+        )

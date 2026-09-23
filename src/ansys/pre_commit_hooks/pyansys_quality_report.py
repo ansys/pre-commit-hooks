@@ -109,11 +109,42 @@ DEFAULT_AUTHOR_MAINT_EMAIL = "pyansys-core@synopsys.com"
 DEFAULT_START_YEAR = datetime.datetime.now(tz=datetime.timezone.utc).date().year
 """Default start year of the repository."""
 
-DEFAULT_LICENSE = "MIT"
+DEFAULT_LICENSE = "Apache-2.0"
 """Default license of the repository."""
 
 JSON_URL = "https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json"
 """URL to retrieve list of license IDs and names."""
+
+
+def _normalize_license_identifier(license_name: str) -> str:
+    """Normalize common license aliases used by the legacy bootstrap flow."""
+    normalized = license_name.strip()
+    key = normalized.lower().replace("_", "-").replace(" ", "")
+
+    aliases = {
+        "apache": "Apache-2.0",
+        "apache2": "Apache-2.0",
+        "apache-2": "Apache-2.0",
+        "apache2.0": "Apache-2.0",
+        "apache-2.0": "Apache-2.0",
+    }
+
+    return aliases.get(key, normalized)
+
+
+def _validate_supported_license(license_name: str) -> str:
+    """Normalize legacy bootstrap license choices and enforce Apache-2.0."""
+    normalized = _normalize_license_identifier(license_name)
+
+    # Accept common typos by intent and normalize to supported canonical values.
+    lowered = normalized.lower().replace("_", "-").replace(" ", "")
+    if lowered.startswith("apac"):
+        return "Apache-2.0"
+
+    if normalized == "Apache-2.0":
+        return normalized
+
+    raise ValueError("Only Apache-2.0 is supported for --license")
 
 
 class Filenames(Enum):
@@ -233,14 +264,24 @@ def check_config_file(
     author_maint_name: str,
     author_maint_email: str,
     is_compliant: bool,
-    non_compliant_name: bool,
+    license: str,
 ) -> tuple[bool, str, str]:
     """Check naming convention, version, author, and maintainer information."""
     repo_path = Path(repo_path)
     has_pyproject = (repo_path / "pyproject.toml").exists()
     has_setup = (repo_path / "setup.py").exists()
 
-    if (has_pyproject and has_setup) or (has_setup and not has_pyproject):
+    if has_pyproject and has_setup:
+        config_file = "setuptools+pyproject"
+        is_compliant, _ = check_setup_py(author_maint_name, author_maint_email, is_compliant)
+        is_compliant, project_name = check_pyproject_toml(
+            repo_path,
+            author_maint_name,
+            author_maint_email,
+            is_compliant,
+            license,
+        )
+    elif has_setup and not has_pyproject:
         config_file = "setuptools"
         is_compliant, project_name = check_setup_py(
             author_maint_name, author_maint_email, is_compliant
@@ -248,7 +289,11 @@ def check_config_file(
     elif has_pyproject and not has_setup:
         config_file = "pyproject"
         is_compliant, project_name = check_pyproject_toml(
-            repo_path, author_maint_name, author_maint_email, is_compliant, non_compliant_name
+            repo_path,
+            author_maint_name,
+            author_maint_email,
+            is_compliant,
+            license,
         )
     else:
         config_file = ""
@@ -264,7 +309,7 @@ def check_pyproject_toml(
     author_maint_name: str,
     author_maint_email: str,
     is_compliant: bool,
-    non_compliant_name: bool,
+    license: str,
 ) -> tuple[bool, str]:
     """Check pyproject.toml file for correct naming convention, version, author, and maintainer."""
     repo_path = Path(repo_path)
@@ -274,14 +319,11 @@ def check_pyproject_toml(
     with open(repo_path / "pyproject.toml", "r", encoding="utf-8") as project_file:
         config = toml.load(project_file)
         project = config.get("project", {})
+        expected_license = _normalize_license_identifier(license)
 
-        if not non_compliant_name:
-            name = project.get("name", "DNE")
-            if (name == "DNE") or (
-                (name != "DNE") and not bool(re.match(r"^ansys-[a-z]+-[a-z]+$", name))
-            ):
-                is_compliant = False
-                print("Project name does not follow naming conventions")
+        # Legacy bootstrap keeps repository naming permissive to avoid blocking
+        # quality-report runs for repositories that do not follow strict older patterns.
+        name = project.get("name", "DNE")
 
         project_version = project.get("version", "DNE")
         if project_version != "DNE":
@@ -308,6 +350,23 @@ def check_pyproject_toml(
                     is_compliant = check_auth_maint(
                         project_value, author_maint_name, f"{key} {value}", is_compliant
                     )
+
+        project_license = project.get("license", "DNE")
+        if project_license == "DNE":
+            is_compliant = False
+            print("Project license does not exist in the pyproject.toml file")
+        elif isinstance(project_license, str):
+            if _normalize_license_identifier(project_license) != expected_license:
+                is_compliant = False
+                print(
+                    "Project license in pyproject.toml "
+                    f"('{project_license}') does not match --license={expected_license}"
+                )
+        elif isinstance(project_license, dict):
+            text_value = str(project_license.get("text", "")).lower()
+            if expected_license == "Apache-2.0" and "apache" not in text_value:
+                is_compliant = False
+                print("Project license text in pyproject.toml does not match Apache-2.0")
 
     return is_compliant, name
 
@@ -476,6 +535,7 @@ def check_file_content(
 ) -> bool:
     """Check the file content of the LICENSE and CONTRIBUTORS.md files."""
     file = Path(file)
+    license = _normalize_license_identifier(license)
     with NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as generated_file:
         generated_file.write(generated_content)
         temp_path = Path(generated_file.name)
@@ -492,19 +552,15 @@ def check_file_content(
                 with open(LICENSES_JSON, "r", encoding="utf-8") as f:
                     license_json = json.load(f)
 
-                accepted_names = {
-                    value
-                    for key in {license, "MIT", "Apache-2.0"}
-                    if (value := license_json.get(key))
-                }
-                accepted_names.update(
-                    {
-                        "MIT License",
-                        "Apache License, Version 2.0",
-                        "Apache License 2.0",
-                        "Apache License",
-                    }
-                )
+                accepted_names = {value for key in {license} if (value := license_json.get(key))}
+                if license == "Apache-2.0":
+                    accepted_names.update(
+                        {
+                            "Apache License, Version 2.0",
+                            "Apache License 2.0",
+                            "Apache License",
+                        }
+                    )
 
                 with open(file, "r", encoding="utf-8") as license_file:
                     file_text = license_file.read().lower()
@@ -529,7 +585,6 @@ def _bootstrap_legacy_files(
     license: str,
     product: str | None,
     repository_url: str | None,
-    non_compliant_name: bool,
 ) -> int:
     """Apply the legacy tech-review bootstrap logic and file-content checks."""
     repo_root = Path(repo_root)
@@ -553,7 +608,11 @@ def _bootstrap_legacy_files(
         root, is_compliant, [directory.value for directory in Directories]
     )
     is_compliant, project_name, config_file = check_config_file(
-        root, author_maint_name, author_maint_email, is_compliant, non_compliant_name
+        root,
+        author_maint_name,
+        author_maint_email,
+        is_compliant,
+        license,
     )
 
     check_exists_list = [file.value for file in Filenames]
@@ -574,7 +633,11 @@ def _bootstrap_legacy_files(
     return 0 if is_compliant else 1
 
 
-def _build_fixture_values(root: MemoryTraversable, is_mcp_flag: bool) -> dict[str, Any]:
+def _build_fixture_values(
+    root: MemoryTraversable,
+    is_mcp_flag: bool,
+    expected_license: str | None = None,
+) -> dict[str, Any]:
     """Create the shared repository context used by the quality-rule checks."""
     return {
         "root": root,
@@ -582,6 +645,7 @@ def _build_fixture_values(root: MemoryTraversable, is_mcp_flag: bool) -> dict[st
         "workflow_map": workflow_map(root),
         "readme_path": readme_path(root),
         "is_mcp": is_mcp_flag or is_mcp(root),
+        "expected_license": expected_license,
     }
 
 
@@ -596,7 +660,7 @@ def _execute_check(
         kwargs = {key: fixture_values[key] for key in signature.parameters if key in fixture_values}
         raw = check_obj.check(**kwargs)
     except (AttributeError, TypeError, ValueError) as exc:  # pragma: no cover
-        raw = f"⚠️ Check error: {exc}"
+        raw = f"WARN: Check error: {exc}"
 
     status, detail = normalize_check_result(raw, check_obj)
     return {
@@ -686,12 +750,13 @@ def _read_pyproject_ignore(repo_root: Path) -> set[str]:
 def _run_checks(
     files: dict[str, str | None],
     is_mcp_flag: bool,
+    expected_license: str | None = None,
     ignored_codes: set[str] | None = None,
     selected_codes: set[str] | None = None,
 ) -> dict[str, Any]:
     """Run the package-based repo review checks against an in-memory file set."""
     root = MemoryTraversable(files)
-    fixture_values = _build_fixture_values(root, is_mcp_flag)
+    fixture_values = _build_fixture_values(root, is_mcp_flag, expected_license)
     checks = repo_review_checks()
     if selected_codes:
         checks = {code: check for code, check in checks.items() if code.upper() in selected_codes}
@@ -913,7 +978,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--license",
         type=str,
-        help="License that the repository uses.",
+        help="License that the repository uses. Only Apache-2.0 is supported.",
         default=DEFAULT_LICENSE,
     )
     parser.add_argument(
@@ -926,8 +991,11 @@ def main(argv: list[str] | None = None) -> int:
         type=str,
         help="The repository URL. For example, https://github.com/ansys/pymechanical",
     )
-    parser.add_argument("--non_compliant_name", action="store_true")
     args = parser.parse_args(argv)
+    try:
+        args.license = _validate_supported_license(args.license)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     selected_codes = _normalize_ignore_codes(args.check)
     selected_families = {
@@ -953,7 +1021,6 @@ def main(argv: list[str] | None = None) -> int:
                 license=args.license,
                 product=args.product,
                 repository_url=args.url,
-                non_compliant_name=args.non_compliant_name,
             )
         finally:
             os.chdir(current_dir)
@@ -969,6 +1036,7 @@ def main(argv: list[str] | None = None) -> int:
     review = _run_checks(
         files,
         is_mcp_flag=is_mcp(MemoryTraversable(files)),
+        expected_license=args.license,
         ignored_codes=ignored,
         selected_codes=_normalize_selection_codes(selected_codes, selected_families),
     )

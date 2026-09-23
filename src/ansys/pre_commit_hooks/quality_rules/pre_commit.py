@@ -111,7 +111,7 @@ class PC003(PreCommit):
             return False
 
         if not has_pedantic:
-            return "⚠️ zizmor found but --pedantic flag not set."
+            return "WARN: zizmor found but --pedantic flag not set."
 
         return True
 
@@ -193,7 +193,7 @@ class PC009(PreCommit):
         ):
             return True
 
-        return "⚠️ autofix_prs: true not set in ci: block."
+        return "WARN: autofix_prs: true not set in ci: block."
 
 
 class PC010(PreCommit):
@@ -216,4 +216,4 @@ class PC010(PreCommit):
         ):
             return True
 
-        return "⚠️ autoupdate_schedule: weekly not found."
+        return "WARN: autoupdate_schedule: weekly not found."

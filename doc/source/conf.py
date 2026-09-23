@@ -107,6 +107,9 @@ source_suffix = {".rst": "restructuredtext"}
 # The master toctree document.
 master_doc = "index"
 
+# Exclude stale generated API pages that duplicate the current CI/CD rule docs.
+exclude_patterns = ["api/src/ansys/pre_commit_hooks/quality_rules/cicd_files/**"]
+
 # Ignore links
 linkcheck_exclude_documents = ["changelog"]
 linkcheck_ignore = [

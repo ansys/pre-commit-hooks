@@ -50,14 +50,10 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
           - id: tech-review
             args:
             - --product={product}
-            - --non_compliant_name
 
      In the preceding code, ``{product}`` is the ``name`` variable under ``[tool.flit.module]`` in
      the ``pyproject.toml`` file. For example, for ``ansys-pre-commit-hooks`` the ``{product}`` is
      ``pre_commit_hooks``.
-
-     The ``--non_compliant_name`` flag is used if the repository does not follow the typical naming
-     convention of ``ansys-*-*``.
 
 ``tech-review`` hook arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -77,14 +73,11 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
       - ``pyansys-core@synopsys.com``
       - Email of the author and maintainer in the ``pyproject.toml`` file.
     * - ``--license``
-      - ``MIT``
-      - License that is being used by your repository.
+      - ``Apache-2.0``
+      - License that is being used by your repository. Only ``Apache-2.0`` is supported.
     * - ``--url``
       - ``https://github.com/ansys/{repo-name}``, replacing ``{repo-name}`` with the name of the repository
       - URL of the repository.
     * - ``--product``
       - Name of the repository's product. For example, ``mechanical`` for ``PyMechanical``.
       - Product for the repository.
-    * - ``--non_compliant_name``
-      - N/A
-      - Flag to use if the repository does not follow the typical naming convention of ``ansys-*-*``.

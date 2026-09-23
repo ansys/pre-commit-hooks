@@ -291,8 +291,11 @@ def normalize_check_result(
         return "na", ""
 
     if isinstance(raw, str):
-        if raw.startswith("⚠️ "):
-            return "warn", raw.removeprefix("⚠️ ")
+        if raw.startswith("FAIL: "):
+            return "fail", raw.removeprefix("FAIL: ")
+
+        if raw.startswith("WARN: "):
+            return "warn", raw.removeprefix("WARN: ")
 
         if raw:
             return "warn", raw
