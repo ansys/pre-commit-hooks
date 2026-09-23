@@ -1,0 +1,92 @@
+
+
+
+
+
+
+The ``src.ansys.pre_commit_hooks`` library
+==========================================
+
+.. py:module:: src.ansys.pre_commit_hooks
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: pre_commit_hooks
+.. tab-set::
+
+
+    .. tab-item:: Submodules
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers`
+            - Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    🗎 add_license_headers</api/src/ansys/pre_commit_hooks/add_license_headers/index>
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+
+Module for initializing package-level imports for Ansys pre-commit hooks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+

@@ -1,0 +1,116 @@
+
+
+
+
+
+
+The ``src.ansys.pre_commit_hooks`` library
+==========================================
+
+.. py:module:: src.ansys.pre_commit_hooks
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: pre_commit_hooks
+.. tab-set::
+
+
+    .. tab-item:: Submodules
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers`
+            - Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.tech_review`
+            - Module for checking if a repository is compliant with required files in the technical review.
+
+
+
+
+
+
+
+
+    .. tab-item:: Attributes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~__version__`
+            - 
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-fa-file"></span> add_license_headers</api/src/ansys/pre_commit_hooks/add_license_headers/index>
+    <span class="nf nf-fa-file"></span> tech_review</api/src/ansys/pre_commit_hooks/tech_review/index>
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+
+Module for initializing package-level imports for Ansys pre-commit hooks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:data:: __version__
+
+
+
