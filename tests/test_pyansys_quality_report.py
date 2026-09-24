@@ -165,7 +165,9 @@ maintainers = [{name = "Example", email = "example@example.com"}]
         encoding="utf-8",
     )
 
-    exit_code = hook.main(["--repo-root", str(repo_path), "--family", "documentation", "--all"])
+    exit_code = hook.main(
+        ["--repo-root", str(repo_path), "--family", "documentation", "--show-all"]
+    )
     output = capsys.readouterr().out
 
     assert exit_code in (0, 1)
@@ -504,30 +506,30 @@ version = "0.1.0"
     assert "\033[31m" in output
 
 
-def test_main_shows_passing_checks_by_default(tmp_path, capsys):
-    """The text report should include passing checks without requiring --all."""
-    repo_path = tmp_path / "quality-demo"
-    repo_path.mkdir()
-    (repo_path / "doc" / "source").mkdir(parents=True)
-    (repo_path / "doc" / "source" / "index.rst").write_text("Home\n====\n", encoding="utf-8")
-
-    exit_code = hook.main(["--repo-root", str(repo_path), "--family", "documentation"])
-    output = capsys.readouterr().out
-
-    assert exit_code in (0, 1)
-    assert "DOC001" in output
-
-
-def test_main_fails_only_hides_passing_checks(tmp_path, capsys):
-    """The --fails-only flag should suppress passing checks in text output."""
+def test_main_show_all_includes_passing_checks(tmp_path, capsys):
+    """The text report should include passing checks when --show-all is provided."""
     repo_path = tmp_path / "quality-demo"
     repo_path.mkdir()
     (repo_path / "doc" / "source").mkdir(parents=True)
     (repo_path / "doc" / "source" / "index.rst").write_text("Home\n====\n", encoding="utf-8")
 
     exit_code = hook.main(
-        ["--repo-root", str(repo_path), "--family", "documentation", "--fails-only"]
+        ["--repo-root", str(repo_path), "--family", "documentation", "--show-all"]
     )
+    output = capsys.readouterr().out
+
+    assert exit_code in (0, 1)
+    assert "DOC001" in output
+
+
+def test_main_default_hides_passing_checks(tmp_path, capsys):
+    """The default text report should suppress passing checks."""
+    repo_path = tmp_path / "quality-demo"
+    repo_path.mkdir()
+    (repo_path / "doc" / "source").mkdir(parents=True)
+    (repo_path / "doc" / "source" / "index.rst").write_text("Home\n====\n", encoding="utf-8")
+
+    exit_code = hook.main(["--repo-root", str(repo_path), "--family", "documentation"])
     output = capsys.readouterr().out
 
     assert exit_code in (0, 1)
