@@ -44,7 +44,7 @@ setup(
         "Jinja2==3.1.6",
         "reuse==6.2.0",
         "requests==2.34.2",
-        "semver==3.0.4",
+        "semver==3.1.0",
         "toml==0.10.2",
     ],
     extras_require={
