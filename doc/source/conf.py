@@ -44,6 +44,10 @@ html_theme_options = {
     },
 }
 
+# Keep the legacy compatibility module out of the canonical API docs.
+# It remains intentionally excluded while the newer quality-report entry point is preferred.
+autoapi_ignore = ["**/tech_review.py"]
+
 # Sphinx extensions
 extensions = [
     "ansys_sphinx_theme.extension.autoapi",
@@ -102,6 +106,9 @@ source_suffix = {".rst": "restructuredtext"}
 
 # The master toctree document.
 master_doc = "index"
+
+# Exclude stale generated API pages that duplicate the current CI/CD rule docs.
+exclude_patterns = ["api/src/ansys/pre_commit_hooks/quality_rules/cicd_files/**"]
 
 # Ignore links
 linkcheck_exclude_documents = ["changelog"]

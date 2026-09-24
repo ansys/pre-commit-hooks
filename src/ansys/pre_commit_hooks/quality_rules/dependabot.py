@@ -1,0 +1,299 @@
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"""Dependabot checks.
+
+This rule set validates the repository Dependabot configuration and expected
+update automation settings.
+
+The checks cover:
+
+* Dependabot config presence
+* schema version validation
+* ecosystem configuration
+* update schedule and grouping policy
+* security-relevant dependency settings
+"""
+
+from __future__ import annotations
+
+import re
+
+from .common import checked_contains, file_contains, file_content, file_exists
+
+__all__ = [
+    "DB001",
+    "DB002",
+    "DB003",
+    "DB004",
+    "DB005",
+    "DB006",
+    "DB007",
+    "DB008",
+    "DB009",
+    "Dependabot",
+]
+
+
+_PATH_DEPENDABOT = ".github/dependabot.yml"
+
+
+class Dependabot:
+    """Dependabot rule family."""
+
+    family = "dependabot"
+
+
+class DB001(Dependabot):
+    """The .github/dependabot.yml file exists."""
+
+    @staticmethod
+    def check(root) -> bool:
+        """Return whether the Dependabot config file exists."""
+        return file_exists(root, _PATH_DEPENDABOT)
+
+
+class DB002(Dependabot):
+    """Dependabot.yml sets version 2."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether the Dependabot config uses the expected schema version."""
+        return checked_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r"^version:\s*2\s*$", re.MULTILINE),
+        )
+
+
+class DB003(Dependabot):
+    """Pip or uv ecosystem is configured."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether a supported dependency ecosystem is configured."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        has_pip = file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
+        )
+
+        has_uv = file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
+        )
+
+        if has_pip:
+            return True
+
+        if has_uv:
+            return "WARN: uv ecosystem configured " "(pip preferred for PyAnsys standard)."
+
+        return False
+
+
+class DB004(Dependabot):
+    """The GitHub Actions ecosystem is configured."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether the GitHub Actions ecosystem is configured."""
+        return checked_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?github-actions["\']?'),
+        )
+
+
+class DB005(Dependabot):
+    """A weekly update interval is set."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether the weekly update interval is configured for enough ecosystems."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        content = file_content(root, _PATH_DEPENDABOT)
+
+        count = len(
+            re.findall(
+                r'interval:\s*["\']?weekly["\']?',
+                content,
+            )
+        )
+
+        if count >= 2:
+            return True
+
+        return f"WARN: Only {count} ecosystem(s) use weekly interval " "(expected ≥2)."
+
+
+class DB006(Dependabot):
+    """Cooldown default-days: 7 is configured."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether the Dependabot cooldown policy is set to seven days."""
+        result = checked_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r"default-days:\s*7"),
+        )
+
+        if result is None:
+            return None
+        if result:
+            return True
+
+        return "WARN: Cooldown default-days: 7 not found in dependabot.yml."
+
+
+class DB007(Dependabot):
+    """Pip uses the lockfile-only versioning strategy."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether pip uses the lockfile-only versioning strategy."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        has_uv = file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
+        )
+
+        has_pip = file_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
+        )
+
+        if has_uv and not has_pip:
+            return None
+
+        result = checked_contains(
+            root,
+            _PATH_DEPENDABOT,
+            re.compile(r'versioning-strategy:\s*["\']?lockfile-only["\']?'),
+        )
+
+        if result is None:
+            return None
+        if result:
+            return True
+
+        return "WARN: versioning-strategy: lockfile-only " "not found for pip ecosystem."
+
+
+class DB008(Dependabot):
+    """Pip groups all dependencies together."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether the pip ecosystem groups dependency updates with a wildcard."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        content = file_content(root, _PATH_DEPENDABOT)
+        if not content:
+            return None
+
+        section_match = re.search(
+            r'-\s*package-ecosystem:\s*["\']?pip["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',
+            content,
+            re.DOTALL,
+        )
+        if not section_match:
+            return None
+
+        section = section_match.group(1)
+        has_groups = bool(re.search(r"\bgroups\s*:", section))
+        has_wildcard_pattern = bool(re.search(r'-\s*["\']?\*["\']?', section))
+
+        if has_groups and has_wildcard_pattern:
+            return True
+
+        return (
+            "WARN: Pip updates are not grouped in the pip dependabot block. "
+            "Add groups with wildcard pattern '*' under package-ecosystem: pip."
+        )
+
+
+class DB009(Dependabot):
+    """GitHub Actions updates are grouped to reduce PR noise."""
+
+    requires = {"DB001", "DB004"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether GitHub Actions updates are grouped for Ansys actions or all actions."""
+        if not file_exists(root, _PATH_DEPENDABOT):
+            return None
+
+        content = file_content(root, _PATH_DEPENDABOT)
+        if not content:
+            return None
+
+        section_match = re.search(
+            r'-\s*package-ecosystem:\s*["\']?github-actions["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',  # noqa: E501
+            content,
+            re.DOTALL,
+        )
+        if not section_match:
+            return None
+
+        section = section_match.group(1)
+        has_groups = bool(re.search(r"\bgroups\s*:", section))
+        has_action_group_pattern = bool(
+            re.search(
+                r'-\s*["\']?(\*|ansys/actions/\*)["\']?',
+                section,
+            )
+        )
+
+        if has_groups and has_action_group_pattern:
+            return True
+
+        return (
+            "WARN: GitHub Actions updates are not grouped in .github/dependabot.yml. "
+            "Add groups with patterns '*' or 'ansys/actions/*' to reduce PR volume."
+        )
