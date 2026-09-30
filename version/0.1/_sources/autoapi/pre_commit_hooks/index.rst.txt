@@ -1,0 +1,38 @@
+:py:mod:`pre_commit_hooks`
+==========================
+
+.. py:module:: pre_commit_hooks
+
+.. autoapi-nested-parse::
+
+   
+   Module for initializing package-level imports for Ansys pre-commit hooks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   add_license_headers/index.rst
+
+

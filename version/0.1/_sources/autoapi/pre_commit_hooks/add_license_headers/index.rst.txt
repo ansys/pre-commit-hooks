@@ -1,0 +1,389 @@
+:py:mod:`pre_commit_hooks.add_license_headers`
+==============================================
+
+.. py:module:: pre_commit_hooks.add_license_headers
+
+.. autoapi-nested-parse::
+
+   Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
+
+   A license header consists of the Ansys copyright statement and licensing information.
+
+   ..
+       !! processed by numpydoc !!
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   pre_commit_hooks.add_license_headers.set_lint_args
+   pre_commit_hooks.add_license_headers.repo_path
+   pre_commit_hooks.add_license_headers.check_dir_exists
+   pre_commit_hooks.add_license_headers.list_noncompliant_files
+   pre_commit_hooks.add_license_headers.set_header_args
+   pre_commit_hooks.add_license_headers.run_reuse
+   pre_commit_hooks.add_license_headers.find_files_missing_header
+   pre_commit_hooks.add_license_headers.main
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   pre_commit_hooks.add_license_headers.DEFAULT_SOURCE_CODE_DIRECTORY
+   pre_commit_hooks.add_license_headers.DEFAULT_TEMPLATE
+   pre_commit_hooks.add_license_headers.DEFAULT_COPYRIGHT
+   pre_commit_hooks.add_license_headers.DEFAULT_LICENSE
+
+
+.. py:data:: DEFAULT_SOURCE_CODE_DIRECTORY
+   :value: 'src'
+
+   
+   Default directory to check files for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_TEMPLATE
+   :value: 'ansys'
+
+   
+   Default template to use for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_COPYRIGHT
+   :value: 'ANSYS, Inc. and/or its affiliates.'
+
+   
+   Default copyright line for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_LICENSE
+   :value: 'MIT'
+
+   
+   Default license for headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: set_lint_args(parser)
+
+   
+   Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **parser: argparse.ArgumentParser**
+           Parser without any lint arguments.
+
+   :Returns:
+
+       :obj:`argparse.Namespace`
+           Parser namespace containing lint arguments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: repo_path()
+
+   
+   Get the path to the root of the git repository.
+
+
+
+   :Returns:
+
+       :class:`python:str`
+           Path to the root of the git repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: check_dir_exists(folder_name) -> bool
+
+   
+   Check if the ``.reuse`` or the location directory exist in the root path of the git repo.
+
+
+   :Parameters:
+
+       **folder_name: str**
+           Folder to check if it exists.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           Returns ``False`` if  the ``.reuse`` or ``{folder_name}`` directory do
+           not exist in the root path of the git repository. Otherwise, ``True``.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: list_noncompliant_files(args, proj)
+
+   
+   Get a list of the files that are missing license headers.
+
+
+   :Parameters:
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+       **proj: project.Project**
+           Project to run `REUSE <https://reuse.software/>`_ on.
+
+   :Returns:
+
+       :class:`python:list`
+           List of the files that are missing license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: set_header_args(parser, loc, year, path, copyright, template)
+
+   
+   Set arguments for `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **parser: argparse.ArgumentParser**
+           Parser containing default license header arguments.
+
+       **loc: str**
+           Location to search for files that are missing license headers.
+
+       **year: int**
+           Current year retrieved by datetime.
+
+       **path: str**
+           Directory to update license headers, or a specific file path to
+           create license headers.
+
+       **copyright: str**
+           Copyright line for license headers.
+
+       **template: str**
+           Name of the template for license headers (name.jinja2).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: run_reuse(args)
+
+   
+   Run `REUSE <https://reuse.software/>`_.
+
+
+   :Parameters:
+
+       **args: argparse.Namespace**
+           Namespace of arguments with their values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: find_files_missing_header()
+
+   
+   Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``1`` if ``REUSE`` changed all noncompliant files.
+           
+           ``2`` if the ``.reuse`` or location directory does not exist in the root path
+           of the GitHub repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: main()
+
+   
+   Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
