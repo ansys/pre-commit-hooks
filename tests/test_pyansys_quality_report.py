@@ -157,7 +157,7 @@ def test_workflow_map_classifies_ci_cd_roles(tmp_path):
         ("CI006", "pr.yml", "- uses: ansys/actions/check-vulnerabilities"),
         ("CI007", "pr.yml", "- uses: ansys/actions/code-style"),
         ("CI008", "release.yml", "- uses: ansys/actions/changelog-fragment"),
-        ("CI009", "main.yml", "- uses: ansys/actions/check-doc-style"),
+        ("CI009", "main.yml", "- uses: ansys/actions/doc-style"),
         ("CI010", "main.yml", "- uses: ansys/actions/doc-build"),
         ("CI011", "main.yml", "- uses: ansys/actions/build-wheelhouse"),
         ("CI012", "main.yml", "- uses: ansys/actions/tests-pytest"),

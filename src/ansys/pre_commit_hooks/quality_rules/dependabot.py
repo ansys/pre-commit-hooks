@@ -37,7 +37,6 @@ The checks cover:
 from __future__ import annotations
 
 from functools import cache
-from pathlib import Path
 
 import yaml
 
@@ -66,12 +65,10 @@ PIP_VERSIONING_STRATEGY = "lockfile-only"
 
 
 @cache
-def _cached_dependabot_config(
-    root: Path, modified_ns: int, size: int
-) -> tuple[bool, bool, dict | None]:
+def _cached_dependabot_config(content: str) -> tuple[bool, bool, dict | None]:
     """Return whether the config exists, is valid YAML, and its mapping."""
     try:
-        config = yaml.safe_load(file_content(root, _PATH_DEPENDABOT))
+        config = yaml.safe_load(content)
     except yaml.YAMLError:
         return True, False, None
 
@@ -82,12 +79,9 @@ def _cached_dependabot_config(
 
 def _dependabot_config(root) -> tuple[bool, bool, dict | None]:
     """Return the cached parsed configuration, invalidating when the file changes."""
-    root = Path(root)
-    path = root / _PATH_DEPENDABOT
     if not file_exists(root, _PATH_DEPENDABOT):
         return False, False, None
-    stat = path.stat()
-    return _cached_dependabot_config(root, stat.st_mtime_ns, stat.st_size)
+    return _cached_dependabot_config(file_content(root, _PATH_DEPENDABOT))
 
 
 def _updates(root) -> list[dict] | None:
