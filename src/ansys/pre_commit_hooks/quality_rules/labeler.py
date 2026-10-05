@@ -35,7 +35,7 @@ The checks cover:
 
 from __future__ import annotations
 
-from .common import checked_contains, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import checked_contains, file_exists
 
 __all__ = [
     "Labeler",

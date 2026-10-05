@@ -402,9 +402,9 @@ def test_db009_warns_when_github_actions_updates_are_not_grouped(tmp_path):
 version: 2
 updates:
     - package-ecosystem: "github-actions"
-        directory: "/"
-        schedule:
-            interval: "weekly"
+      directory: "/"
+      schedule:
+        interval: "weekly"
 """.strip() + "\n",
         encoding="utf-8",
     )
@@ -419,18 +419,16 @@ def test_db009_passes_when_ansys_actions_updates_are_grouped(tmp_path):
     github_dir = tmp_path / ".github"
     github_dir.mkdir(parents=True)
     (github_dir / "dependabot.yml").write_text(
-        """
-version: 2
-updates:
-    - package-ecosystem: "github-actions"
-        directory: "/"
-        schedule:
-            interval: "weekly"
-        groups:
-            ansys-actions:
-                patterns:
-                    - "ansys/actions/*"
-""".strip() + "\n",
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: github-actions\n"
+        "    directory: /\n"
+        "    schedule:\n"
+        "      interval: weekly\n"
+        "    groups:\n"
+        "      ansys-actions:\n"
+        "        patterns:\n"
+        "          - ansys/actions/*\n",
         encoding="utf-8",
     )
 
@@ -442,23 +440,21 @@ def test_db008_warns_when_only_actions_are_grouped(tmp_path):
     github_dir = tmp_path / ".github"
     github_dir.mkdir(parents=True)
     (github_dir / "dependabot.yml").write_text(
-        """
-version: 2
-updates:
-    - package-ecosystem: "pip"
-        directory: "/"
-        schedule:
-            interval: "weekly"
-
-    - package-ecosystem: "github-actions"
-        directory: "/"
-        schedule:
-            interval: "weekly"
-        groups:
-            actions:
-                patterns:
-                    - "*"
-""".strip() + "\n",
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: pip\n"
+        "    directory: /\n"
+        "    schedule:\n"
+        "      interval: weekly\n"
+        "\n"
+        "  - package-ecosystem: github-actions\n"
+        "    directory: /\n"
+        "    schedule:\n"
+        "      interval: weekly\n"
+        "    groups:\n"
+        "      actions:\n"
+        "        patterns:\n"
+        "          - '*'\n",
         encoding="utf-8",
     )
 
@@ -472,22 +468,95 @@ def test_db008_passes_when_pip_updates_are_grouped(tmp_path):
     github_dir = tmp_path / ".github"
     github_dir.mkdir(parents=True)
     (github_dir / "dependabot.yml").write_text(
-        """
-version: 2
-updates:
-    - package-ecosystem: "pip"
-        directory: "/"
-        schedule:
-            interval: "weekly"
-        groups:
-            python-deps:
-                patterns:
-                    - "*"
-""".strip() + "\n",
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: pip\n"
+        "    directory: /\n"
+        "    schedule:\n"
+        "      interval: weekly\n"
+        "    groups:\n"
+        "      python-deps:\n"
+        "        patterns:\n"
+        "          - '*'\n",
         encoding="utf-8",
     )
 
     assert quality_rules.DB008.check(tmp_path) is True
+
+
+def test_db010_rejects_invalid_dependabot_yaml(tmp_path):
+    """DB010 should distinguish valid YAML from malformed configuration files."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    config = github_dir / "dependabot.yml"
+    config.write_text("version: 2\nupdates:\n  - package-ecosystem: pip\n", encoding="utf-8")
+    assert quality_rules.DB010.check(tmp_path) is True
+
+    config.write_text("version: [\n", encoding="utf-8")
+    assert quality_rules.DB010.check(tmp_path) is False
+
+
+def test_db011_requires_non_empty_updates(tmp_path):
+    """DB011 should require at least one update configuration entry."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    config = github_dir / "dependabot.yml"
+    config.write_text("version: 2\nupdates: []\n", encoding="utf-8")
+    assert quality_rules.DB011.check(tmp_path) is False
+
+    config.write_text(
+        "version: 2\nupdates:\n  - package-ecosystem: pip\n    directory: /\n",
+        encoding="utf-8",
+    )
+    assert quality_rules.DB011.check(tmp_path) is True
+
+
+def test_db002_fails_on_invalid_yaml(tmp_path):
+    """DB002 should fail instead of skipping malformed Dependabot YAML."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text("version: [\n", encoding="utf-8")
+
+    assert quality_rules.DB002.check(tmp_path) is False
+
+
+def test_db006_requires_all_configured_cooldowns(tmp_path):
+    """DB006 should warn when any configured ecosystem has the wrong cooldown."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: pip\n"
+        "    cooldown:\n"
+        "      default-days: 7\n"
+        "  - package-ecosystem: github-actions\n"
+        "    cooldown:\n"
+        "      default-days: 1\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.DB006.check(tmp_path)
+    assert isinstance(result, str)
+    assert "github-actions" in result
+
+
+def test_db007_requires_all_pip_updates_to_use_lockfile_only(tmp_path):
+    """DB007 should warn when one of multiple pip entries lacks the strategy."""
+    github_dir = tmp_path / ".github"
+    github_dir.mkdir(parents=True)
+    (github_dir / "dependabot.yml").write_text(
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: pip\n"
+        "    versioning-strategy: lockfile-only\n"
+        "  - package-ecosystem: pip\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.DB007.check(tmp_path)
+    assert isinstance(result, str)
+    assert "pip" in result
 
 
 def test_pm013_accepts_supported_version_formats(tmp_path):

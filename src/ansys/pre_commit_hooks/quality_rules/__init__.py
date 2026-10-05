@@ -106,6 +106,8 @@ from ansys.pre_commit_hooks.quality_rules.dependabot import (
     DB007,
     DB008,
     DB009,
+    DB010,
+    DB011,
     Dependabot,
 )
 from ansys.pre_commit_hooks.quality_rules.documentation import (
@@ -259,6 +261,8 @@ __all__ = [
     "DB007",
     "DB008",
     "DB009",
+    "DB010",
+    "DB011",
     "Dependabot",
     "DOC001",
     "DOC002",

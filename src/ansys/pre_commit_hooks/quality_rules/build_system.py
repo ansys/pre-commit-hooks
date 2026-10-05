@@ -46,7 +46,11 @@ except ModuleNotFoundError:  # pragma: no cover - exercised on Python 3.10.
 else:
     TOMLDecodeError = tomllib.TOMLDecodeError
 
-from .common import checked_contains, file_content, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import (
+    checked_contains,
+    file_content,
+    file_exists,
+)
 
 __all__ = [
     "BS001",

@@ -46,6 +46,7 @@ setup(
         "requests==2.34.2",
         "semver==3.1.0",
         "toml==0.10.2",
+        "PyYAML==6.0.2",
     ],
     extras_require={
         "doc": [

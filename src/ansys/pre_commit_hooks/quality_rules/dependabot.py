@@ -36,9 +36,12 @@ The checks cover:
 
 from __future__ import annotations
 
-import re
+from functools import cache
+from pathlib import Path
 
-from .common import checked_contains, file_contains, file_content, file_exists
+import yaml
+
+from ansys.pre_commit_hooks.quality_rules.common import file_content, file_exists
 
 __all__ = [
     "DB001",
@@ -50,11 +53,59 @@ __all__ = [
     "DB007",
     "DB008",
     "DB009",
+    "DB010",
+    "DB011",
     "Dependabot",
 ]
 
 
 _PATH_DEPENDABOT = ".github/dependabot.yml"
+MIN_WEEKLY_ECOSYSTEMS = 2
+REQUIRED_COOLDOWN_DAYS = 7
+PIP_VERSIONING_STRATEGY = "lockfile-only"
+
+
+@cache
+def _cached_dependabot_config(
+    root: Path, modified_ns: int, size: int
+) -> tuple[bool, bool, dict | None]:
+    """Return whether the config exists, is valid YAML, and its mapping."""
+    try:
+        config = yaml.safe_load(file_content(root, _PATH_DEPENDABOT))
+    except yaml.YAMLError:
+        return True, False, None
+
+    if not isinstance(config, dict):
+        return True, False, None
+    return True, True, config
+
+
+def _dependabot_config(root) -> tuple[bool, bool, dict | None]:
+    """Return the cached parsed configuration, invalidating when the file changes."""
+    root = Path(root)
+    path = root / _PATH_DEPENDABOT
+    if not file_exists(root, _PATH_DEPENDABOT):
+        return False, False, None
+    stat = path.stat()
+    return _cached_dependabot_config(root, stat.st_mtime_ns, stat.st_size)
+
+
+def _updates(root) -> list[dict] | None:
+    """Return configured update entries when the file is present and valid."""
+    present, valid, config = _dependabot_config(root)
+    if not present or not valid:
+        return None
+    if config is None:
+        return None
+    updates = config.get("updates")
+    if not isinstance(updates, list) or not all(isinstance(entry, dict) for entry in updates):
+        return None
+    return updates
+
+
+def _ecosystem_updates(updates: list[dict], ecosystem: str) -> list[dict]:
+    """Return update entries for one package ecosystem."""
+    return [entry for entry in updates if entry.get("package-ecosystem") == ecosystem]
 
 
 class Dependabot:
@@ -80,11 +131,13 @@ class DB002(Dependabot):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the Dependabot config uses the expected schema version."""
-        return checked_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r"^version:\s*2\s*$", re.MULTILINE),
-        )
+        present, valid, config = _dependabot_config(root)
+        if not present:
+            return None
+        if not valid or config is None:
+            return False
+        version = config.get("version")
+        return isinstance(version, int) and version == 2
 
 
 class DB003(Dependabot):
@@ -95,20 +148,12 @@ class DB003(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether a supported dependency ecosystem is configured."""
-        if not file_exists(root, _PATH_DEPENDABOT):
+        updates = _updates(root)
+        if updates is None:
             return None
 
-        has_pip = file_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
-        )
-
-        has_uv = file_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
-        )
+        has_pip = bool(_ecosystem_updates(updates, "pip"))
+        has_uv = bool(_ecosystem_updates(updates, "uv"))
 
         if has_pip:
             return True
@@ -127,11 +172,8 @@ class DB004(Dependabot):
     @staticmethod
     def check(root) -> bool | None:
         """Return whether the GitHub Actions ecosystem is configured."""
-        return checked_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'package-ecosystem:\s*["\']?github-actions["\']?'),
-        )
+        updates = _updates(root)
+        return None if updates is None else bool(_ecosystem_updates(updates, "github-actions"))
 
 
 class DB005(Dependabot):
@@ -142,22 +184,23 @@ class DB005(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the weekly update interval is configured for enough ecosystems."""
-        if not file_exists(root, _PATH_DEPENDABOT):
+        updates = _updates(root)
+        if updates is None:
             return None
 
-        content = file_content(root, _PATH_DEPENDABOT)
-
-        count = len(
-            re.findall(
-                r'interval:\s*["\']?weekly["\']?',
-                content,
-            )
+        count = sum(
+            entry.get("schedule", {}).get("interval") == "weekly"
+            for entry in updates
+            if isinstance(entry.get("schedule"), dict)
         )
 
-        if count >= 2:
+        if count >= MIN_WEEKLY_ECOSYSTEMS:
             return True
 
-        return f"WARN: Only {count} ecosystem(s) use weekly interval " "(expected ≥2)."
+        return (
+            f"WARN: Only {count} ecosystem(s) use weekly interval "
+            f"(expected ≥{MIN_WEEKLY_ECOSYSTEMS})."
+        )
 
 
 class DB006(Dependabot):
@@ -168,18 +211,29 @@ class DB006(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the Dependabot cooldown policy is set to seven days."""
-        result = checked_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r"default-days:\s*7"),
-        )
-
-        if result is None:
+        updates = _updates(root)
+        if updates is None:
             return None
-        if result:
+        cooldowns = [
+            (entry.get("package-ecosystem", "<unknown>"), entry["cooldown"])
+            for entry in updates
+            if isinstance(entry.get("cooldown"), dict)
+        ]
+        if not cooldowns:
+            return f"WARN: Cooldown default-days: {REQUIRED_COOLDOWN_DAYS} not found in dependabot.yml."  # noqa: E501
+
+        invalid = [
+            ecosystem
+            for ecosystem, cooldown in cooldowns
+            if cooldown.get("default-days") != REQUIRED_COOLDOWN_DAYS
+        ]
+        if not invalid:
             return True
 
-        return "WARN: Cooldown default-days: 7 not found in dependabot.yml."
+        return (
+            f"WARN: Cooldown default-days: {REQUIRED_COOLDOWN_DAYS} "
+            f"missing or invalid for: {', '.join(invalid)}."
+        )
 
 
 class DB007(Dependabot):
@@ -190,36 +244,25 @@ class DB007(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether pip uses the lockfile-only versioning strategy."""
-        if not file_exists(root, _PATH_DEPENDABOT):
+        updates = _updates(root)
+        if updates is None:
+            return None
+        pip_updates = _ecosystem_updates(updates, "pip")
+        if not pip_updates:
             return None
 
-        has_uv = file_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'package-ecosystem:\s*["\']?uv["\']?'),
-        )
-
-        has_pip = file_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'package-ecosystem:\s*["\']?pip["\']?'),
-        )
-
-        if has_uv and not has_pip:
-            return None
-
-        result = checked_contains(
-            root,
-            _PATH_DEPENDABOT,
-            re.compile(r'versioning-strategy:\s*["\']?lockfile-only["\']?'),
-        )
-
-        if result is None:
-            return None
-        if result:
+        invalid = [
+            entry.get("package-ecosystem", "<unknown>")
+            for entry in pip_updates
+            if entry.get("versioning-strategy") != PIP_VERSIONING_STRATEGY
+        ]
+        if not invalid:
             return True
 
-        return "WARN: versioning-strategy: lockfile-only " "not found for pip ecosystem."
+        return (
+            f"WARN: versioning-strategy: {PIP_VERSIONING_STRATEGY} "
+            f"missing or invalid for: {', '.join(invalid)}."
+        )
 
 
 class DB008(Dependabot):
@@ -230,26 +273,22 @@ class DB008(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether the pip ecosystem groups dependency updates with a wildcard."""
-        if not file_exists(root, _PATH_DEPENDABOT):
+        updates = _updates(root)
+        if updates is None:
+            return None
+        pip_updates = _ecosystem_updates(updates, "pip")
+        if not pip_updates:
             return None
 
-        content = file_content(root, _PATH_DEPENDABOT)
-        if not content:
-            return None
-
-        section_match = re.search(
-            r'-\s*package-ecosystem:\s*["\']?pip["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',
-            content,
-            re.DOTALL,
-        )
-        if not section_match:
-            return None
-
-        section = section_match.group(1)
-        has_groups = bool(re.search(r"\bgroups\s*:", section))
-        has_wildcard_pattern = bool(re.search(r'-\s*["\']?\*["\']?', section))
-
-        if has_groups and has_wildcard_pattern:
+        if any(
+            isinstance(entry.get("groups"), dict)
+            and any(
+                "*" in group.get("patterns", [])
+                for group in entry["groups"].values()
+                if isinstance(group, dict) and isinstance(group.get("patterns"), list)
+            )
+            for entry in pip_updates
+        ):
             return True
 
         return (
@@ -266,34 +305,55 @@ class DB009(Dependabot):
     @staticmethod
     def check(root) -> bool | None | str:
         """Return whether GitHub Actions updates are grouped for Ansys actions or all actions."""
-        if not file_exists(root, _PATH_DEPENDABOT):
+        updates = _updates(root)
+        if updates is None:
+            return None
+        action_updates = _ecosystem_updates(updates, "github-actions")
+        if not action_updates:
             return None
 
-        content = file_content(root, _PATH_DEPENDABOT)
-        if not content:
-            return None
-
-        section_match = re.search(
-            r'-\s*package-ecosystem:\s*["\']?github-actions["\']?(.*?)(?=\n\s*-\s*package-ecosystem:|\Z)',  # noqa: E501
-            content,
-            re.DOTALL,
-        )
-        if not section_match:
-            return None
-
-        section = section_match.group(1)
-        has_groups = bool(re.search(r"\bgroups\s*:", section))
-        has_action_group_pattern = bool(
-            re.search(
-                r'-\s*["\']?(\*|ansys/actions/\*)["\']?',
-                section,
+        if any(
+            isinstance(entry.get("groups"), dict)
+            and any(
+                pattern in {"*", "ansys/actions/*"}
+                for group in entry["groups"].values()
+                if isinstance(group, dict)
+                for pattern in group.get("patterns", [])
             )
-        )
-
-        if has_groups and has_action_group_pattern:
+            for entry in action_updates
+        ):
             return True
 
         return (
             "WARN: GitHub Actions updates are not grouped in .github/dependabot.yml. "
             "Add groups with patterns '*' or 'ansys/actions/*' to reduce PR volume."
         )
+
+
+class DB010(Dependabot):
+    """The Dependabot configuration is valid YAML."""
+
+    requires = {"DB001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether the Dependabot file parses to a YAML mapping."""
+        present, valid, _ = _dependabot_config(root)
+        if not present:
+            return None
+        return valid
+
+
+class DB011(Dependabot):
+    """The Dependabot configuration has a non-empty updates section."""
+
+    requires = {"DB001", "DB010"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether the updates section exists and contains entries."""
+        present, valid, config = _dependabot_config(root)
+        if not present or not valid:
+            return None
+        updates = config.get("updates")
+        return isinstance(updates, list) and bool(updates)

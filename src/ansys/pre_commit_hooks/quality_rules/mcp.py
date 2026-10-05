@@ -39,7 +39,11 @@ from __future__ import annotations
 
 import re
 
-from .common import file_contains, file_exists, wf_content
+from ansys.pre_commit_hooks.quality_rules.common import (
+    file_contains,
+    file_exists,
+    wf_content,
+)
 
 __all__ = ["MCP", "MCP001", "MCP002", "MCP003", "MCP004", "MCP005", "MCP006", "MCP007"]
 

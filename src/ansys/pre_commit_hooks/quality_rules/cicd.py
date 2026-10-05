@@ -39,7 +39,11 @@ from __future__ import annotations
 from functools import cache
 import re
 
-from .common import all_workflows_content, wf_content, wf_label
+from ansys.pre_commit_hooks.quality_rules.common import (
+    all_workflows_content,
+    wf_content,
+    wf_label,
+)
 
 
 @cache

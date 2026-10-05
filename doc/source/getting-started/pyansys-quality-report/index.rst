@@ -146,10 +146,17 @@ Dependabot (``DB``)
 - ``DB003``: Pip or uv ecosystem is configured.
 - ``DB004``: The GitHub Actions ecosystem is configured.
 - ``DB005``: A weekly update interval is set.
-- ``DB006``: Cooldown default-days: 7 is configured.
-- ``DB007``: Pip uses the lockfile-only versioning strategy.
+- ``DB006``: Cooldown default-days: 7 is configured for at least one ecosystem.
+- ``DB007``: Pip uses the ``lockfile-only`` versioning strategy.
 - ``DB008``: Pip groups all dependencies together.
 - ``DB009``: GitHub Actions updates are grouped to reduce PR noise.
+- ``DB010``: The Dependabot configuration is valid YAML.
+- ``DB011``: The Dependabot configuration has a non-empty updates section.
+
+The Dependabot policy checks require at least two ecosystems to use a weekly
+interval (``DB005``), require ``default-days: 7`` for cooldown (``DB006``), and
+require ``lockfile-only`` for pip versioning (``DB007``). These values are
+defined as module-level policy constants so they can be changed centrally.
 
 Documentation (``DOC``)
 ^^^^^^^^^^^^^^^^^^^^^^^

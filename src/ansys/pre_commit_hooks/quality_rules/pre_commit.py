@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import re
 
-from .common import checked_contains, file_contains, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import checked_contains, file_contains, file_exists
 
 __all__ = [
     "PreCommit",
