@@ -35,7 +35,7 @@ The checks cover:
     - PyAnsys badge
     - PyPI badge
     - Codecov badge
-    - Apache 2.0 license badge
+    - Project license badge
     - GitHub Actions CI badge
 
 * Content sections
@@ -48,7 +48,15 @@ from __future__ import annotations
 
 import re
 
-from ansys.pre_commit_hooks.quality_rules.common import file_contains
+from ansys.pre_commit_hooks.quality_rules.build_system import _load_pyproject
+from ansys.pre_commit_hooks.quality_rules.common import (
+    file_contains,
+    file_content,
+    file_exists,
+)
+from ansys.pre_commit_hooks.quality_rules.project_metadata import (
+    _normalize_license_identifier,
+)
 
 __all__ = [
     "README",
@@ -162,29 +170,58 @@ class RM003(README):
 
 
 class RM004(README):
-    """README has an Apache 2.0 license badge."""
+    """README has a license badge matching project metadata."""
 
     requires = {"RM000"}
 
     @staticmethod
     def check(root, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains an Apache 2.0 license badge."""
+        """Return whether the README license badge matches project metadata."""
         if not readme_path:
             return None
 
+        project = _load_pyproject(root).get("project", {})
+        license_value = project.get("license")
+        if isinstance(license_value, str):
+            license_text = license_value
+        elif isinstance(license_value, dict) and isinstance(license_value.get("text"), str):
+            license_text = license_value["text"]
+        elif isinstance(license_value, dict) and isinstance(license_value.get("file"), str):
+            license_file = license_value["file"]
+            if not file_exists(root, license_file):
+                return None
+            license_text = file_content(root, license_file)
+        else:
+            return None
+
+        project_license = _normalize_license_identifier(license_text)
+        if re.search(r"\bMIT\b", license_text, re.IGNORECASE):
+            project_license = "MIT"
+        elif re.search(r"Apache License(?:,| )? Version 2\.0", license_text, re.IGNORECASE):
+            project_license = "Apache-2.0"
+
+        badge_terms = {
+            "Apache-2.0": r"apache(?:[-_% ]?2(?:[._-]?0)?)?",
+            "MIT": r"mit",
+            "BSD-2-Clause": r"bsd[-_ ]?2[-_ ]?clause",
+            "BSD-3-Clause": r"bsd[-_ ]?3[-_ ]?clause",
+        }
+        license_pattern = badge_terms.get(project_license, re.escape(project_license))
         if file_contains(
             root,
             readme_path,
             re.compile(
-                r"shields\.io[^)\"']*apache|"
-                r"apache[^)\"']*license|"
-                r"img\.shields\.io[^)\"']*license",
+                rf"(?:img\.)?shields\.io[^)\"']*{license_pattern}|"
+                rf"{license_pattern}[^)\"']*license",
                 re.IGNORECASE,
             ),
         ):
             return True
 
-        return f"WARN: Apache 2.0 license badge image not found in {readme_path}."
+        return (
+            f"WARN: {project_license} license badge image not found or does not "
+            f"match project metadata in {readme_path}."
+        )
 
 
 class RM005(README):

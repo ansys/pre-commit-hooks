@@ -28,7 +28,7 @@ an acceptable Python packaging backend.
 The checks cover:
 
 * build-system table presence
-* setuptools, Poetry, Hatchling, Flit, or PDM detection
+* setuptools, Poetry, Hatchling, Flit, PDM, or uv_build detection
 * backend preference validation against the repository standard
 """
 
@@ -78,6 +78,7 @@ _BACKENDS = {
     "poetry.core.masonry.api": ("Poetry", "poetry", "poetry_core"),
     "hatchling.build": ("Hatch", "hatch", "hatchling"),
     "pdm.backend": ("PDM", "pdm", "pdm"),
+    "uv_build": ("uv_build", "uv_build", "uv_build"),
     "maturin": ("Maturin", "maturin", "maturin"),
     "setuptools.build_meta": ("Setuptools", "setuptools", "setuptools"),
     "setuptools.build_meta:__legacy__": ("Setuptools", "setuptools", "setuptools"),

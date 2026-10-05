@@ -68,10 +68,6 @@ _ACTION_PATTERNS = {
         r"^\s*-\s*uses:\s*ansys/actions/code-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
-    "pr_title": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/check-pr-title(?:@|\s|$)",
-        re.IGNORECASE | re.MULTILINE,
-    ),
     "changelog": re.compile(
         r"^\s*-\s*uses:\s*ansys/actions/[^\s#]*changelog[^\s#]*",
         re.IGNORECASE | re.MULTILINE,
@@ -152,7 +148,6 @@ __all__ = [
     "CI017",
     "CI018",
     "CI019",
-    "CI020",
     "CICD",
     "WorkflowActionRule",
 ]
@@ -294,78 +289,72 @@ class CI007(WorkflowActionRule):
 
 
 class CI008(WorkflowActionRule):
-    """The check-pr-title step is present across workflows."""
-
-    pattern = "pr_title"
-
-
-class CI009(WorkflowActionRule):
     """The changelog fragment step is present across workflows."""
 
     pattern = "changelog"
 
 
-class CI010(WorkflowActionRule):
+class CI009(WorkflowActionRule):
     """The doc-style action is used."""
 
     pattern = "doc_style"
 
 
-class CI011(WorkflowActionRule):
+class CI010(WorkflowActionRule):
     """The doc-build action is used."""
 
     pattern = "doc_build"
 
 
-class CI012(WorkflowActionRule):
+class CI011(WorkflowActionRule):
     """The build-wheelhouse action is used."""
 
     pattern = "wheelhouse"
 
 
-class CI013(WorkflowActionRule):
+class CI012(WorkflowActionRule):
     """The pytest test action is used."""
 
     pattern = "tests"
 
 
-class CI014(WorkflowActionRule):
+class CI013(WorkflowActionRule):
     """The update-changelog step is present across workflows."""
 
     pattern = "release"
 
 
-class CI015(WorkflowActionRule):
+class CI014(WorkflowActionRule):
     """The actions-security action is used."""
 
     pattern = "actions_security"
 
 
-class CI016(WorkflowActionRule):
+class CI015(WorkflowActionRule):
     """The build-library action is used."""
 
     pattern = "build_library"
 
 
-class CI017(WorkflowActionRule):
+class CI016(WorkflowActionRule):
     """The doc-deploy-dev action is used."""
 
     pattern = "doc_deploy_dev"
 
 
-class CI018(WorkflowActionRule):
+class CI017(WorkflowActionRule):
     """The doc-deploy-stable action is used."""
 
     pattern = "doc_deploy_stable"
 
 
-class CI019(WorkflowActionRule):
+class CI018(WorkflowActionRule):
     """The doc-deploy-changelog action is used."""
 
     pattern = "doc_deploy_changelog"
 
 
-class CI020(CICD):
+class CI019(CICD):
     """Actions use immutable commit SHAs instead of mutable tags."""
 
     @staticmethod

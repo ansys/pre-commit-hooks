@@ -79,7 +79,6 @@ from ansys.pre_commit_hooks.quality_rules.cicd import (
     CI017,
     CI018,
     CI019,
-    CI020,
     CICD,
 )
 from ansys.pre_commit_hooks.quality_rules.common import (
@@ -250,7 +249,6 @@ __all__ = [
     "CI017",
     "CI018",
     "CI019",
-    "CI020",
     "CICD",
     "DB001",
     "DB002",

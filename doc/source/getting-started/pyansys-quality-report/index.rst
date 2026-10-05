@@ -124,19 +124,18 @@ CI/CD (``CI``)
 - ``CI005``: A labeler job is present across workflows.
 - ``CI006``: The vulnerability check action is used.
 - ``CI007``: The code-style action is used.
-- ``CI008``: The check-pr-title step is present across workflows.
-- ``CI009``: The changelog fragment step is present across workflows.
-- ``CI010``: The doc-style action is used.
-- ``CI011``: The doc-build action is used.
-- ``CI012``: The build-wheelhouse action is used.
-- ``CI013``: The pytest test action is used.
-- ``CI014``: The update-changelog step is present across workflows.
-- ``CI015``: The actions-security action is used.
-- ``CI016``: The build-library action is used.
-- ``CI017``: The doc-deploy-dev action is used.
-- ``CI018``: The doc-deploy-stable action is used.
-- ``CI019``: The doc-deploy-changelog action is used.
-- ``CI020``: Workflow actions are pinned to immutable commit SHAs.
+- ``CI008``: The changelog fragment step is present across workflows.
+- ``CI009``: The doc-style action is used.
+- ``CI010``: The doc-build action is used.
+- ``CI011``: The build-wheelhouse action is used.
+- ``CI012``: The pytest test action is used.
+- ``CI013``: The update-changelog step is present across workflows.
+- ``CI014``: The actions-security action is used.
+- ``CI015``: The build-library action is used.
+- ``CI016``: The doc-deploy-dev action is used.
+- ``CI017``: The doc-deploy-stable action is used.
+- ``CI018``: The doc-deploy-changelog action is used.
+- ``CI019``: Workflow actions are pinned to immutable commit SHAs.
 
 Dependabot (``DB``)
 ^^^^^^^^^^^^^^^^^^^
@@ -240,7 +239,7 @@ README (``RM``)
 - ``RM001``: README has a PyAnsys badge.
 - ``RM002``: README has a PyPI badge.
 - ``RM003``: README has a Codecov badge.
-- ``RM004``: README has an Apache 2.0 license badge.
+- ``RM004``: README has a license badge matching the project metadata.
 - ``RM005``: README has a GH-CI badge.
 - ``RM006``: README has an installation section.
 - ``RM007``: README has a documentation section.

@@ -48,6 +48,9 @@ def test_detect_backend():
     assert _detect_backend(
         ' [build-system]\n\n build-backend = "hatchling.build"\n requires = ["hatchling >= 1"]\n'
     ) == ("Hatch", "hatch")
+    assert _detect_backend(
+        '[build-system]\nrequires = ["uv_build>=0.8.0"]\nbuild-backend = "uv_build"\n'
+    ) == ("uv_build", "uv_build")
     assert _detect_backend('[build-system]\nbuild-backend = "hatchling.build.extra"\n') == (
         "Other",
         "other",
@@ -153,18 +156,17 @@ def test_workflow_map_classifies_ci_cd_roles(tmp_path):
         ("CI005", "pr.yml", "- uses: ansys/actions/label"),
         ("CI006", "pr.yml", "- uses: ansys/actions/check-vulnerabilities"),
         ("CI007", "pr.yml", "- uses: ansys/actions/code-style"),
-        ("CI008", "pr.yml", "- uses: ansys/actions/check-pr-title"),
-        ("CI009", "release.yml", "- uses: ansys/actions/changelog-fragment"),
-        ("CI010", "main.yml", "- uses: ansys/actions/check-doc-style"),
-        ("CI011", "main.yml", "- uses: ansys/actions/doc-build"),
-        ("CI012", "main.yml", "- uses: ansys/actions/build-wheelhouse"),
-        ("CI013", "main.yml", "- uses: ansys/actions/tests-pytest"),
-        ("CI014", "release.yml", "- uses: ansys/actions/release-github"),
-        ("CI015", "main.yml", "- uses: ansys/actions/check-actions-security"),
-        ("CI016", "main.yml", "- uses: ansys/actions/build-library"),
-        ("CI017", "main.yml", "- uses: ansys/actions/doc-deploy-dev"),
-        ("CI018", "release.yml", "- uses: ansys/actions/doc-deploy-stable"),
-        ("CI019", "release.yml", "- uses: ansys/actions/doc-deploy-changelog"),
+        ("CI008", "release.yml", "- uses: ansys/actions/changelog-fragment"),
+        ("CI009", "main.yml", "- uses: ansys/actions/check-doc-style"),
+        ("CI010", "main.yml", "- uses: ansys/actions/doc-build"),
+        ("CI011", "main.yml", "- uses: ansys/actions/build-wheelhouse"),
+        ("CI012", "main.yml", "- uses: ansys/actions/tests-pytest"),
+        ("CI013", "release.yml", "- uses: ansys/actions/release-github"),
+        ("CI014", "main.yml", "- uses: ansys/actions/check-actions-security"),
+        ("CI015", "main.yml", "- uses: ansys/actions/build-library"),
+        ("CI016", "main.yml", "- uses: ansys/actions/doc-deploy-dev"),
+        ("CI017", "release.yml", "- uses: ansys/actions/doc-deploy-stable"),
+        ("CI018", "release.yml", "- uses: ansys/actions/doc-deploy-changelog"),
     ],
 )
 def test_ci_action_rules_require_expected_actions(tmp_path, rule, workflow_name, workflow_body):
@@ -557,6 +559,39 @@ def test_db007_requires_all_pip_updates_to_use_lockfile_only(tmp_path):
     result = quality_rules.DB007.check(tmp_path)
     assert isinstance(result, str)
     assert "pip" in result
+
+
+def test_rm004_matches_readme_badge_to_project_license(tmp_path):
+    """RM004 should accept a badge matching the declared project license."""
+    (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
+    (tmp_path / "README.rst").write_text(
+        ".. image:: https://img.shields.io/badge/License-MIT-yellow.svg\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.RM004.check(tmp_path, "README.rst") is True
+
+
+def test_rm004_rejects_mismatched_license_badge(tmp_path):
+    """RM004 should reject a license badge that differs from project metadata."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nlicense = "Apache-2.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "README.rst").write_text(
+        ".. image:: https://img.shields.io/badge/License-MIT-yellow.svg\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.RM004.check(tmp_path, "README.rst")
+    assert isinstance(result, str)
+    assert "Apache-2.0" in result
+
+
+def test_rm004_is_not_applicable_without_project_license(tmp_path):
+    """RM004 should be not-applicable when project license metadata is unavailable."""
+    (tmp_path / "README.rst").write_text("README\n======\n", encoding="utf-8")
+
+    assert quality_rules.RM004.check(tmp_path, "README.rst") is None
 
 
 def test_pm013_accepts_supported_version_formats(tmp_path):
