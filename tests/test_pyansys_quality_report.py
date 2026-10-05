@@ -649,6 +649,7 @@ def test_hook_covers_all_repo_review_checks():
         "ProjectMetadata",
         "CICDFiles",
         "CICD",
+        "WorkflowActionRule",
         "Dependabot",
         "Documentation",
         "README",

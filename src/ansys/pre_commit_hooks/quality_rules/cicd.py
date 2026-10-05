@@ -36,20 +36,87 @@ The checks cover:
 
 from __future__ import annotations
 
+from functools import cache
 import re
 
 from .common import all_workflows_content, wf_content, wf_label
 
 
+@cache
 def _workflow_text(root) -> str | None:
     """Return merged workflow text, or ``None`` when workflows are unavailable."""
     content = all_workflows_content(root)
     return content or None
 
 
-def _contains_any(content: str, pattern: str) -> bool:
+def _contains_any(content: str, pattern: re.Pattern) -> bool:
     """Return whether the workflow content matches the provided regex pattern."""
-    return bool(re.search(pattern, content, re.IGNORECASE))
+    return bool(pattern.search(content))
+
+
+_ACTION_PATTERNS = {
+    "labeler": re.compile(r"^\s*-\s*uses:\s*[^\s#]*label[^\s#]*", re.IGNORECASE | re.MULTILINE),
+    "vulnerabilities": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/check-vulnerabilities(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "code_style": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/code-style(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "pr_title": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/check-pr-title(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "changelog": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/[^\s#]*changelog[^\s#]*",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "doc_style": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/check-doc-style(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "doc_build": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/doc-build(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "wheelhouse": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/build-wheelhouse(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "tests": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/tests(?:-pytest)?(?:@|\s)|\b(?:pytest|tox)\b",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "release": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/release-github(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "actions_security": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/check-actions-security(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "build_library": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/build-library(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "doc_deploy_dev": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-dev(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "doc_deploy_stable": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-stable(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+    "doc_deploy_changelog": re.compile(
+        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-changelog(?:@|\s|$)",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+}
+
+_ACTION_USE_PATTERN = re.compile(r"^\s*-\s*uses:\s*([^\s#]+)", re.IGNORECASE | re.MULTILINE)
+_SHA_PATTERN = re.compile(r"@[0-9a-f]{40}$", re.IGNORECASE)
+_ROOT_PERMISSIONS_PATTERN = re.compile(r"^permissions:\s*\{\}", re.MULTILINE)
 
 
 def _workflows_for_roles(root, workflow_map: dict, roles: list[str]):
@@ -81,7 +148,9 @@ __all__ = [
     "CI017",
     "CI018",
     "CI019",
+    "CI020",
     "CICD",
+    "WorkflowActionRule",
 ]
 
 
@@ -96,7 +165,23 @@ def _check_action_presence(root, pattern: str) -> bool | None:
     content = _workflow_text(root)
     if not content:
         return None
-    return _contains_any(content, pattern)
+    return _contains_any(content, _ACTION_PATTERNS[pattern])
+
+
+def _action_references(content: str) -> list[str]:
+    """Return action references from workflow uses statements."""
+    return _ACTION_USE_PATTERN.findall(content)
+
+
+class WorkflowActionRule(CICD):
+    """Base class for rules that require a specific workflow action."""
+
+    pattern = ""
+
+    @classmethod
+    def check(cls, root) -> bool | None:
+        """Return whether the configured action is present in workflows."""
+        return _check_action_presence(root, cls.pattern)
 
 
 class CI001(CICD):
@@ -144,9 +229,7 @@ class CI003(CICD):
             return None
 
         missing = [
-            label
-            for _, label, content in present
-            if not re.search(r"^permissions:\s*\{\}", content, re.MULTILINE)
+            label for _, label, content in present if not _ROOT_PERMISSIONS_PATTERN.search(content)
         ]
 
         return True if not missing else f"Missing root permissions: {{}} in: {', '.join(missing)}"
@@ -178,25 +261,19 @@ class CI004(CICD):
         )
 
 
-class CI005(CICD):
+class CI005(WorkflowActionRule):
     """A labeler job is present across workflows."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include a labeler action."""
-        return _check_action_presence(root, r"ansys/actions/[^\s]*label|\blabeler\b")
+    pattern = "labeler"
 
 
-class CI006(CICD):
+class CI006(WorkflowActionRule):
     """The vulnerability check action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include the vulnerability check action."""
-        return _check_action_presence(root, r"ansys/actions/check-vulnerabilities")
+    pattern = "vulnerabilities"
 
 
-class CI007(CICD):
+class CI007(WorkflowActionRule):
     """The code-style action is used."""
 
     @staticmethod
@@ -206,123 +283,99 @@ class CI007(CICD):
         if not content:
             return None
 
-        if _contains_any(content, r"ansys/actions/code-style"):
+        if _contains_any(content, _ACTION_PATTERNS["code_style"]):
             return True
 
         return "WARN: ansys/actions/code-style not found in any workflow file."
 
 
-class CI008(CICD):
+class CI008(WorkflowActionRule):
     """The check-pr-title step is present across workflows."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows enforce the PR title check."""
-        return _check_action_presence(root, r"ansys/actions/check-pr-title|check-pr-title")
+    pattern = "pr_title"
 
 
-class CI009(CICD):
+class CI009(WorkflowActionRule):
     """The changelog fragment step is present across workflows."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows include changelog-fragment validation."""
-        return _check_action_presence(root, r"ansys/actions/[^\s]*changelog|changelog-fragment")
+    pattern = "changelog"
 
 
-class CI010(CICD):
+class CI010(WorkflowActionRule):
     """The doc-style action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include the doc-style action."""
-        return _check_action_presence(root, r"ansys/actions/check-doc-style|doc-style")
+    pattern = "doc_style"
 
 
-class CI011(CICD):
+class CI011(WorkflowActionRule):
     """The doc-build action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include the doc-build action."""
-        return _check_action_presence(root, r"ansys/actions/doc-build|\bdoc-build\b")
+    pattern = "doc_build"
 
 
-class CI012(CICD):
+class CI012(WorkflowActionRule):
     """The build-wheelhouse action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include the build-wheelhouse action."""
-        return _check_action_presence(root, r"ansys/actions/build-wheelhouse|build-wheelhouse")
+    pattern = "wheelhouse"
 
 
-class CI013(CICD):
+class CI013(WorkflowActionRule):
     """The pytest test action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether the workflows include pytest-based tests."""
-        return _check_action_presence(
-            root,
-            r"ansys/actions/tests-pytest|ansys/actions/tests|\btests\b|pytest",
-        )
+    pattern = "tests"
 
 
-class CI014(CICD):
+class CI014(WorkflowActionRule):
     """The update-changelog step is present across workflows."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows include changelog updates during release."""
-        return _check_action_presence(root, r"ansys/actions/release-github|update-changelog")
+    pattern = "release"
 
 
-class CI015(CICD):
+class CI015(WorkflowActionRule):
     """The actions-security action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows include the GitHub Actions security check."""
-        return _check_action_presence(
-            root,
-            r"ansys/actions/check-actions-security|check-actions-security",
-        )
+    pattern = "actions_security"
 
 
-class CI016(CICD):
+class CI016(WorkflowActionRule):
     """The build-library action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows include the build-library action."""
-        return _check_action_presence(root, r"ansys/actions/build-library|\bbuild-library\b")
+    pattern = "build_library"
 
 
-class CI017(CICD):
+class CI017(WorkflowActionRule):
     """The doc-deploy-dev action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows deploy dev docs with the Ansys action."""
-        return _check_action_presence(root, r"ansys/actions/doc-deploy-dev|doc-deploy-dev")
+    pattern = "doc_deploy_dev"
 
 
-class CI018(CICD):
+class CI018(WorkflowActionRule):
     """The doc-deploy-stable action is used."""
 
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows deploy stable docs with the Ansys action."""
-        return _check_action_presence(root, r"ansys/actions/doc-deploy-stable|doc-deploy-stable")
+    pattern = "doc_deploy_stable"
 
 
-class CI019(CICD):
+class CI019(WorkflowActionRule):
     """The doc-deploy-changelog action is used."""
 
+    pattern = "doc_deploy_changelog"
+
+
+class CI020(CICD):
+    """Actions use immutable commit SHAs instead of mutable tags."""
+
     @staticmethod
-    def check(root) -> bool | None:
-        """Return whether workflows deploy changelog docs with the Ansys action."""
-        return _check_action_presence(
-            root, r"ansys/actions/doc-deploy-changelog|doc-deploy-changelog"
-        )
+    def check(root) -> bool | None | str:
+        """Return whether all workflow actions are SHA-pinned."""
+        content = _workflow_text(root)
+        if not content:
+            return None
+
+        unpinned = [
+            reference
+            for reference in _action_references(content)
+            if not _SHA_PATTERN.search(reference)
+        ]
+        if not unpinned:
+            return True
+        return f"WARN: Actions are not SHA-pinned: {', '.join(unpinned)}."

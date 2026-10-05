@@ -136,6 +136,7 @@ CI/CD (``CI``)
 - ``CI017``: The doc-deploy-dev action is used.
 - ``CI018``: The doc-deploy-stable action is used.
 - ``CI019``: The doc-deploy-changelog action is used.
+- ``CI020``: Workflow actions are pinned to immutable commit SHAs.
 
 Dependabot (``DB``)
 ^^^^^^^^^^^^^^^^^^^
