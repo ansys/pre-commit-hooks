@@ -45,7 +45,6 @@ except ImportError:  # pragma: no cover
     from importlib.abc import Traversable
 
 __all__ = [
-    "_first_doc_line",
     "all_workflows_content",
     "checked_contains",
     "file_content",
@@ -57,6 +56,7 @@ __all__ = [
     "wf_content",
     "wf_label",
     "workflow_map",
+    "_first_doc_line",
 ]
 
 

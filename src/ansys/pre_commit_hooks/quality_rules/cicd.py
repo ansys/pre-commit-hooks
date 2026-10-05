@@ -71,7 +71,7 @@ _ACTION_PATTERNS = {
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_style": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-doc-style(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_build": re.compile(
