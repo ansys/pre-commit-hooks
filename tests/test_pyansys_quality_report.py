@@ -13,6 +13,7 @@ import pytest
 from ansys.pre_commit_hooks import quality_rules
 import ansys.pre_commit_hooks.pyansys_quality_report as hook
 from ansys.pre_commit_hooks.quality_rules import project_metadata, security
+from ansys.pre_commit_hooks.quality_rules.build_system import _detect_backend
 from ansys.pre_commit_hooks.quality_rules.common import workflow_map
 from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM013,
@@ -31,6 +32,105 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM032,
     PM033,
 )
+
+
+def test_detect_backend():
+    """The build backend detector should identify common pyproject backends."""
+    assert _detect_backend(
+        '[build-system]\nrequires = ["setuptools>=68"]\nbuild-backend = "setuptools.build_meta"\n'
+    ) == ("Setuptools", "setuptools")
+    assert _detect_backend(
+        '[build-system]\nrequires = ["flit_core >=3.8"]\nbuild-backend = "flit_core.buildapi"\n'
+    ) == ("Flit", "flit")
+    assert _detect_backend(
+        '[build-system]\nrequires = ["poetry-core>=1.0"]\nbuild-backend = "poetry.core.masonry.api"\n'  # noqa: E501
+    ) == ("Poetry", "poetry")
+    assert _detect_backend(
+        ' [build-system]\n\n build-backend = "hatchling.build"\n requires = ["hatchling >= 1"]\n'
+    ) == ("Hatch", "hatch")
+    assert _detect_backend('[build-system]\nbuild-backend = "hatchling.build.extra"\n') == (
+        "Other",
+        "other",
+    )
+    assert _detect_backend("[build-system\n") == ("Unknown", "unknown")
+
+
+def test_build_system_metadata_rules(tmp_path):
+    """Build-system rules should accept complete, consistent metadata."""
+    (tmp_path / "pyproject.toml").write_text(
+        """
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ansys-demo-library"
+version = "1.0.0"
+description = "A demo project."
+requires-python = ">=3.10"
+readme = "README.rst"
+license = {file = "LICENSE"}
+dependencies = ["requests==2.32.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    for rule in (
+        "BS005",
+        "BS006",
+        "BS007",
+        "BS008",
+        "BS009",
+        "BS010",
+        "BS011",
+        "BS012",
+        "BS015",
+        "BS016",
+    ):
+        assert getattr(quality_rules, rule).check(tmp_path) is True
+    assert quality_rules.BS013.check(tmp_path) is True
+    assert quality_rules.BS014.check(tmp_path) is True
+
+
+def test_build_system_metadata_rules_report_missing_and_inconsistent_values(tmp_path):
+    """Build-system rules should identify missing metadata and dependency issues."""
+    (tmp_path / "pyproject.toml").write_text(
+        """
+[build-system]
+requires = []
+build-backend = "hatchling.build"
+
+[project]
+dependencies = ["requests", "Requests>=2.0"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert quality_rules.BS005.check(tmp_path) is True
+    assert quality_rules.BS006.check(tmp_path) is False
+    assert quality_rules.BS007.check(tmp_path) is False
+    assert quality_rules.BS008.check(tmp_path) is False
+    assert quality_rules.BS009.check(tmp_path) is False
+    assert quality_rules.BS010.check(tmp_path) is False
+    assert quality_rules.BS011.check(tmp_path) is False
+    assert quality_rules.BS013.check(tmp_path) == "WARN: Unpinned dependencies: requests."
+    assert quality_rules.BS014.check(tmp_path) == "WARN: Duplicate dependencies: requests."
+
+
+def test_build_system_rules_validate_toml_and_all_build_requirements(tmp_path):
+    """Build-system checks should detect invalid TOML and unpinned requirements."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        '[build-system]\nrequires = ["setuptools>=65", "wheel"]\nbuild-backend = "setuptools.build_meta"\n',  # noqa: E501
+        encoding="utf-8",
+    )
+    assert quality_rules.BS004.check(tmp_path) == "WARN: Unpinned build requirements: wheel."
+
+    pyproject.write_text("[build-system\n", encoding="utf-8")
+    assert quality_rules.BS012.check(tmp_path) is False
 
 
 def test_workflow_map_classifies_ci_cd_roles(tmp_path):

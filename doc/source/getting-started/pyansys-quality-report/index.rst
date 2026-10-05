@@ -100,7 +100,19 @@ Build System (``BS``)
 - ``BS001``: The [build-system] table is declared.
 - ``BS002``: Uses a supported modern build backend.
 - ``BS003``: No legacy setup.py or setup.cfg files are present.
-- ``BS004``: The build backend version is pinned in requires.
+- ``BS004``: All build-system requirements are pinned.
+- ``BS005``: The build backend is explicitly defined.
+- ``BS006``: The build-system requires list is not empty.
+- ``BS007``: The configured backend is represented in build-system requires.
+- ``BS008``: The project name is defined.
+- ``BS009``: The project version is defined.
+- ``BS010``: The project description is defined.
+- ``BS011``: The supported Python version range is declared.
+- ``BS012``: The pyproject.toml file contains valid TOML.
+- ``BS013``: Project dependencies include version pins.
+- ``BS014``: Project dependencies do not contain duplicates.
+- ``BS015``: The project license is defined.
+- ``BS016``: The project readme is defined.
 
 CI/CD (``CI``)
 ^^^^^^^^^^^^^^
