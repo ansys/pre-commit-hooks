@@ -54,9 +54,6 @@ _PATHS_TO_FETCH = [
     ".github/labeler.yml",
     ".github/labels.yml",
     ".github/zizmor.yml",
-    ".github/workflows/ci_cd_main.yml",
-    ".github/workflows/ci_cd_pr.yml",
-    ".github/workflows/ci_cd_release.yml",
     ".pre-commit-config.yaml",
     "pyproject.toml",
     "setup.py",
@@ -671,6 +668,7 @@ def _execute_check(
         "description": _first_doc_line(check_obj),
         "status": status,
         "detail": detail,
+        "detail_is_message": isinstance(raw, str) and bool(raw),
     }
 
 
@@ -910,8 +908,9 @@ def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
             continue
         detail = item["detail"] or ""
         label = _style_status(item["status"], item["status"].upper())
-        print(f"- [{label}] {item['id']} - {item['label']}")
-        if detail:
+        headline = detail if item.get("detail_is_message") else item["label"]
+        print(f"- [{label}] {item['id']} - {headline}")
+        if detail and not item.get("detail_is_message"):
             print(f"  {detail}")
 
 

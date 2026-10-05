@@ -39,11 +39,7 @@ from __future__ import annotations
 from functools import cache
 import re
 
-from ansys.pre_commit_hooks.quality_rules.common import (
-    all_workflows_content,
-    wf_content,
-    wf_label,
-)
+from ansys.pre_commit_hooks.quality_rules.common import all_workflows_content
 
 
 @cache
@@ -59,73 +55,66 @@ def _contains_any(content: str, pattern: re.Pattern) -> bool:
 
 
 _ACTION_PATTERNS = {
-    "labeler": re.compile(r"^\s*-\s*uses:\s*[^\s#]*label[^\s#]*", re.IGNORECASE | re.MULTILINE),
+    "labeler": re.compile(
+        r"^\s*(?:-\s*)?uses:\s*[^\s#]*label[^\s#]*", re.IGNORECASE | re.MULTILINE
+    ),
     "vulnerabilities": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/check-vulnerabilities(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-vulnerabilities(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "code_style": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/code-style(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/code-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "changelog": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/[^\s#]*changelog[^\s#]*",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/[^\s#]*changelog[^\s#]*",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_style": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/check-doc-style(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-doc-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_build": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/doc-build(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-build(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "wheelhouse": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/build-wheelhouse(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/build-wheelhouse(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "tests": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/tests(?:-pytest)?(?:@|\s)|\b(?:pytest|tox)\b",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/tests(?:-pytest)?(?:@|\s)|\b(?:pytest|tox)\b",
         re.IGNORECASE | re.MULTILINE,
     ),
     "release": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/release-github(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/release-github(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "actions_security": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/check-actions-security(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-actions-security(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "build_library": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/build-library(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/build-library(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_dev": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-dev(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-dev(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_stable": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-stable(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-stable(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_changelog": re.compile(
-        r"^\s*-\s*uses:\s*ansys/actions/doc-deploy-changelog(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-changelog(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
 }
 
-_ACTION_USE_PATTERN = re.compile(r"^\s*-\s*uses:\s*([^\s#]+)", re.IGNORECASE | re.MULTILINE)
+_ACTION_USE_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)", re.IGNORECASE | re.MULTILINE)
 _SHA_PATTERN = re.compile(r"@[0-9a-f]{40}$", re.IGNORECASE)
 _ROOT_PERMISSIONS_PATTERN = re.compile(r"^permissions:\s*\{\}", re.MULTILINE)
-
-
-def _workflows_for_roles(root, workflow_map: dict, roles: list[str]):
-    """Collect available workflow content for the requested workflow roles."""
-    return [
-        (role, wf_label(role, workflow_map), content)
-        for role in roles
-        if (content := wf_content(root, role, workflow_map)[1])
-    ]
 
 
 __all__ = [
@@ -196,67 +185,48 @@ class CI002(CICD):
     """Workflows use concurrency blocks."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | None | str:
-        """Return whether the PR and main workflows define concurrency blocks."""
-        present = _workflows_for_roles(
-            root,
-            workflow_map,
-            ["pr", "main"],
-        )
-
-        if not present:
+    def check(root, workflow_map: dict | None = None) -> bool | None | str:
+        """Return whether workflow files define concurrency blocks."""
+        content = _workflow_text(root)
+        if not content:
             return None
 
-        missing = [label for _, label, content in present if "concurrency:" not in content]
-
-        return True if not missing else f"WARN: concurrency: block missing in: {', '.join(missing)}"
+        return (
+            True if "concurrency:" in content else "WARN: concurrency: block missing in workflows."
+        )
 
 
 class CI003(CICD):
     """Workflows set root permissions: {}."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | None | str:
-        """Return whether the PR and release workflows have explicit root permissions."""
-        present = _workflows_for_roles(
-            root,
-            workflow_map,
-            ["pr", "release"],
-        )
-
-        if not present:
+    def check(root, workflow_map: dict | None = None) -> bool | None | str:
+        """Return whether workflow files have explicit root permissions."""
+        content = _workflow_text(root)
+        if not content:
             return None
 
-        missing = [
-            label for _, label, content in present if not _ROOT_PERMISSIONS_PATTERN.search(content)
-        ]
-
-        return True if not missing else f"Missing root permissions: {{}} in: {', '.join(missing)}"
+        return (
+            True
+            if _ROOT_PERMISSIONS_PATTERN.search(content)
+            else "WARN: Missing root permissions: {} in workflows."
+        )
 
 
 class CI004(CICD):
     """Checkout uses persist-credentials: false."""
 
     @staticmethod
-    def check(root, workflow_map: dict) -> bool | None | str:
+    def check(root, workflow_map: dict | None = None) -> bool | None | str:
         """Return whether workflows disable persisting credentials during checkout."""
-        present = _workflows_for_roles(
-            root,
-            workflow_map,
-            ["pr", "release"],
-        )
-
-        if not present:
+        content = _workflow_text(root)
+        if not content:
             return None
-
-        missing = [
-            label for _, label, content in present if "persist-credentials: false" not in content
-        ]
 
         return (
             True
-            if not missing
-            else f"WARN: persist-credentials: false missing in: {', '.join(missing)}"
+            if "persist-credentials: false" in content
+            else "WARN: persist-credentials: false missing in workflows."
         )
 
 

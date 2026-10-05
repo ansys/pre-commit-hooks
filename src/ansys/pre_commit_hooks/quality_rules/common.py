@@ -45,27 +45,19 @@ except ImportError:  # pragma: no cover
     from importlib.abc import Traversable
 
 __all__ = [
-    "file_exists",
+    "_first_doc_line",
+    "all_workflows_content",
+    "checked_contains",
     "file_content",
     "file_contains",
-    "checked_contains",
-    "CANONICAL_WF",
-    "all_workflows_content",
+    "file_exists",
+    "is_mcp",
+    "normalize_check_result",
+    "readme_path",
     "wf_content",
     "wf_label",
     "workflow_map",
-    "readme_path",
-    "is_mcp",
-    "normalize_check_result",
-    "_first_doc_line",
 ]
-
-
-CANONICAL_WF: dict[str, str] = {
-    "main": ".github/workflows/ci_cd_main.yml",
-    "pr": ".github/workflows/ci_cd_pr.yml",
-    "release": ".github/workflows/ci_cd_release.yml",
-}
 
 
 def file_exists(root: Traversable, path: str) -> bool:
@@ -118,11 +110,6 @@ def wf_content(
     workflow_map: dict,
 ) -> tuple[bool, str]:
     """Return the content for the workflow matching the given role."""
-    canonical = CANONICAL_WF[role]
-
-    if file_exists(root, canonical):
-        return True, file_content(root, canonical)
-
     entry = workflow_map.get(role)
 
     if entry and not entry.get("is_fallback"):
@@ -163,7 +150,7 @@ def wf_label(role: str, workflow_map: dict) -> str:
     entry = workflow_map.get(role)
 
     if not entry:
-        return CANONICAL_WF.get(role, role)
+        return role
 
     if entry.get("is_fallback"):
         sources = entry.get("sources", [])
@@ -306,10 +293,10 @@ def normalize_check_result(
         if check_obj is None:
             return "fail", ""
 
-        doc = (check_obj.check.__doc__ or "").strip()
+        doc = (type(check_obj).__doc__ or "").strip()
         lines = [line.strip() for line in doc.splitlines() if line.strip()]
 
-        detail = lines[-1] if len(lines) > 1 else (lines[0] if lines else "")
+        detail = lines[0] if lines else ""
 
         return "fail", detail
 

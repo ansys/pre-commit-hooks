@@ -82,7 +82,6 @@ from ansys.pre_commit_hooks.quality_rules.cicd import (
     CICD,
 )
 from ansys.pre_commit_hooks.quality_rules.common import (
-    CANONICAL_WF,
     _first_doc_line,
     all_workflows_content,
     file_contains,
@@ -209,7 +208,6 @@ __all__ = [
     "wf_label",
     "wf_content",
     "all_workflows_content",
-    "CANONICAL_WF",
     "file_contains",
     "file_content",
     "file_exists",
