@@ -668,7 +668,8 @@ class PM029(ProjectMetadata):
 
 def _normalize_text_for_template_compare(text: str) -> str:
     """Normalize text for stable template comparisons across line endings."""
-    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
+    normalized = "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
+    return re.sub(r"^<(https?://[^<>\s]+)>$", r"\1", normalized, flags=re.MULTILINE)
 
 
 def _file_matches_template(root, repo_file: str, template_file: str) -> bool | None:
@@ -682,9 +683,39 @@ def _file_matches_template(root, repo_file: str, template_file: str) -> bool | N
 
     actual = file_content(root, repo_file)
     expected = template_path.read_text(encoding="utf-8")
-    return _normalize_text_for_template_compare(actual) == _normalize_text_for_template_compare(
-        expected
-    )
+    actual = _normalize_text_for_template_compare(actual)
+    expected = _normalize_text_for_template_compare(expected)
+    if actual == expected:
+        return True
+
+    if template_file == "CONTRIBUTORS.md":
+        contributor = r"\* \[[^\]\n]+\]\(https://github\.com/[A-Za-z0-9-]+\)"
+        return bool(
+            re.fullmatch(
+                rf"# Contributors\n+## Project Lead\n+{contributor}"
+                rf"(?:\n+{contributor})*\n+## Individual Contributors\n+"
+                rf"{contributor}(?:\n+{contributor})*",
+                actual,
+            )
+        )
+
+    pattern_parts = []
+    position = 0
+    placeholders = set()
+    for match in re.finditer(r"\{\{\s*(project_name|doc_repo_name)\s*\}\}", expected):
+        pattern_parts.append(re.escape(expected[position : match.start()]))
+        name = match.group(1)
+        if name in placeholders:
+            pattern_parts.append(rf"(?P={name})")
+        else:
+            pattern_parts.append(rf"(?P<{name}>[^\n]+?)")
+            placeholders.add(name)
+        position = match.end()
+        if expected[position : position + 2] == "'s":
+            pattern_parts.append(r"(?:'s|(?<=[sS])')")
+            position += 2
+    pattern_parts.append(re.escape(expected[position:]))
+    return re.fullmatch("".join(pattern_parts), actual) is not None
 
 
 class PM030(ProjectMetadata):

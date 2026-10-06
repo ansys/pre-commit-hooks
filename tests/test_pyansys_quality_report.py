@@ -1015,6 +1015,54 @@ def test_pm030_accepts_authors_template_markers(tmp_path):
     assert PM030.check(tmp_path) is True
 
 
+@pytest.mark.parametrize(
+    ("filename", "rule"),
+    [
+        ("AUTHORS", PM030),
+        ("CODE_OF_CONDUCT.md", PM031),
+        ("CONTRIBUTING.md", PM032),
+        ("CONTRIBUTORS.md", PM033),
+    ],
+)
+def test_metadata_templates_accept_project_customizations(tmp_path, filename, rule):
+    """Rendered names, actual contributors, and Markdown autolinks should be accepted."""
+    content = (project_metadata._TEMPLATE_DIR / filename).read_text(encoding="utf-8")
+    content = content.replace("{{ project_name }}", "Ansys Demo")
+    content = content.replace("{{ doc_repo_name }}", "Ansys Demo")
+    content = content.replace(
+        "[First Last](https://github.com/ghusername)", "[Lead](https://github.com/lead)"
+    )
+    if filename == "CONTRIBUTORS.md":
+        content += "\n* [Contributor](https://github.com/contributor)\n"
+    if filename == "CODE_OF_CONDUCT.md":
+        content = content.replace(
+            "https://www.contributor-covenant.org/faq",
+            "<https://www.contributor-covenant.org/faq>",
+        )
+    (tmp_path / filename).write_text(content, encoding="utf-8")
+
+    assert rule.check(tmp_path) is True
+
+
+def test_pm032_rejects_inconsistent_project_names(tmp_path):
+    """Repeated project-name placeholders must use the same rendered value."""
+    content = (project_metadata._TEMPLATE_DIR / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    content = content.replace("{{ doc_repo_name }}", "Project One", 1)
+    content = content.replace("{{ doc_repo_name }}", "Project Two")
+    (tmp_path / "CONTRIBUTING.md").write_text(content, encoding="utf-8")
+
+    assert isinstance(PM032.check(tmp_path), str)
+
+
+def test_pm030_accepts_plural_project_name_possessive(tmp_path):
+    """Project display names ending in s may use a trailing possessive apostrophe."""
+    content = (project_metadata._TEMPLATE_DIR / "AUTHORS").read_text(encoding="utf-8")
+    content = content.replace("{{ project_name }}'s", "Ansys Pre-Commit Hooks'")
+    (tmp_path / "AUTHORS").write_text(content, encoding="utf-8")
+
+    assert PM030.check(tmp_path) is True
+
+
 def test_pm031_warns_when_code_of_conduct_template_sections_missing(tmp_path):
     """CODE_OF_CONDUCT should warn when it does not match the template file."""
     (tmp_path / "CODE_OF_CONDUCT.md").write_text("# Code of Conduct\n", encoding="utf-8")
