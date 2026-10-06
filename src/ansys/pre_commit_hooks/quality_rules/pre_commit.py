@@ -39,7 +39,14 @@ from __future__ import annotations
 
 import re
 
-from ansys.pre_commit_hooks.quality_rules.common import checked_contains, file_contains, file_exists
+import yaml
+
+from ansys.pre_commit_hooks.quality_rules.common import (
+    checked_contains,
+    file_contains,
+    file_content,
+    file_exists,
+)
 
 __all__ = [
     "PreCommit",
@@ -165,14 +172,32 @@ class PC007(PreCommit):
 
 
 class PC008(PreCommit):
-    """Pyright is configured."""
+    """A pyright, mypy, or ty type-checking hook is configured."""
 
     requires = {"PC001"}
 
     @staticmethod
     def check(root) -> bool | None:
-        """Return whether pyright is configured."""
-        return checked_contains(root, _PRE_COMMIT_CONFIG, "pyright")
+        """Return whether a supported type checker is configured as a hook."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
+            return None
+
+        try:
+            config = yaml.safe_load(file_content(root, _PRE_COMMIT_CONFIG))
+        except yaml.YAMLError:
+            return False
+
+        if not isinstance(config, dict) or not isinstance(config.get("repos"), list):
+            return False
+
+        for repo in config["repos"]:
+            if not isinstance(repo, dict) or not isinstance(repo.get("hooks"), list):
+                continue
+            for hook in repo["hooks"]:
+                if isinstance(hook, dict) and hook.get("id") in ("pyright", "mypy", "ty"):
+                    return True
+
+        return False
 
 
 class PC009(PreCommit):

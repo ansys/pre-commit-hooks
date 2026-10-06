@@ -908,9 +908,10 @@ def _print_report(review: dict[str, Any], *, show_passes: bool = False) -> None:
             continue
         detail = item["detail"] or ""
         label = _style_status(item["status"], item["status"].upper())
-        headline = detail if item.get("detail_is_message") else item["label"]
+        is_problem = item["status"] in {"warn", "fail"}
+        headline = detail if is_problem and detail else item["label"]
         print(f"- [{label}] {item['id']} - {headline}")
-        if detail and not item.get("detail_is_message"):
+        if detail and not is_problem and detail != headline:
             print(f"  {detail}")
 
 

@@ -1205,6 +1205,74 @@ def test_pm029_fails_when_license_file_mismatches_selected_license(tmp_path):
     assert result == 'FAIL: "The LICENSE file content is missing "Apache License 2.0"'
 
 
+@pytest.mark.parametrize(
+    ("files", "code", "status", "message"),
+    [
+        (
+            {"LICENSE": "MIT License"},
+            "PM015",
+            "WARN",
+            "LICENSE file content is missing a recognized Apache 2.0 statement.",
+        ),
+        (
+            {".github/workflows/custom.yaml": "name: CI\njobs: {}\n"},
+            "CI007",
+            "WARN",
+            "ansys/actions/code-style not found in any workflow file.",
+        ),
+        (
+            {".github/workflows/custom.yaml": "name: CI\njobs: {}\n"},
+            "CI005",
+            "FAIL",
+            "A labeler job is present across workflows.",
+        ),
+    ],
+)
+def test_report_displays_problem_message_once(files, code, status, message, capsys, monkeypatch):
+    """All rule families should report a single problem headline without duplicate detail."""
+    monkeypatch.setattr(hook, "_style_status", lambda status, text: text)
+    review = hook._run_checks(files, False, selected_codes={code})
+    hook._print_report(review)
+
+    output = capsys.readouterr().out
+    assert f"- [{status}] {code} - {message}" in output.splitlines()
+    assert output.count(message) == 1
+    assert "Return whether" not in output
+
+
+@pytest.mark.parametrize("checker", ["pyright", "mypy", "ty"])
+def test_pc008_accepts_supported_type_checker_hooks(tmp_path, checker):
+    """Any supported type-checker hook should satisfy PC008."""
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        f"repos:\n  - repo: local\n    hooks:\n      - id: {checker}\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.PC008.check(tmp_path) is True
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "# pyright mypy ty\nrepos: []\n",
+        "repos:\n  - repo: https://example.com/mypy\n    hooks:\n      - id: codespell\n",
+        "repos:\n  - repo: local\n    hooks:\n      - id: typos\n",
+        "repos: [",
+        "repos: null\n",
+    ],
+)
+def test_pc008_rejects_configs_without_supported_hooks(tmp_path, content):
+    """Mentions outside hook IDs and malformed configurations should not pass."""
+    (tmp_path / ".pre-commit-config.yaml").write_text(content, encoding="utf-8")
+
+    assert quality_rules.PC008.check(tmp_path) is False
+
+
+def test_pc008_skips_missing_config(tmp_path):
+    """A missing pre-commit configuration should remain not applicable."""
+    assert quality_rules.PC008.check(tmp_path) is None
+
+
 def test_normalize_check_result_standardizes_rule_status():
     """Rule evaluation results should normalize to the canonical pass/warn/fail/na model."""
     from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result

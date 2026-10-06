@@ -199,7 +199,7 @@ Pre-commit (``PC``)
 - ``PC005``: Codespell is configured.
 - ``PC006``: Ansys/pre-commit-hooks is configured.
 - ``PC007``: Google/yamlfmt is configured.
-- ``PC008``: Pyright is configured.
+- ``PC008``: A pyright, mypy, or ty type-checking hook is configured.
 - ``PC009``: Autofix_prs: true is enabled.
 - ``PC010``: Autoupdate_schedule: weekly is configured.
 
