@@ -1,21 +1,17 @@
 ``tech-review`` setup
 =====================
 
-The ``tech-review`` hook performs a brief technical review on repositories based on the Ansys
-`technical part of the PyAnsys approval and public release process <https://dev.docs.pyansys.com/getting-started/administration.html#technical>`_
-described in the *PyAnsys developer's guide*.
+The ``tech-review`` hook is a compatibility alias for ``pyansys-quality-report``.
+Both names run the same rule-based repository report. New configurations should
+use ``pyansys-quality-report``; see :doc:`../pyansys-quality-report/index` for
+the current rule catalog, CLI options, output format, and ignore settings.
 
-The hook checks the following aspects of your repository:
-
-- The ``.github``, ``doc``, ``src``, and ``tests`` directories exist in the root of the repository.
-- The ``AUTHORS``, ``CODE_OF_CONDUCT.md``, ``CONTRIBUTING.md``, ``CONTRIBUTORS.md``, ``LICENSE``,
-  ``README.{rst|md}``, and ``.github/dependabot.yml`` files exist.
-
-If any of the directories are missing, the hook fails, and the missing directories are added to the
-repository.
-
-If any of the files are missing, the hook fails, and add the missing files are added to the repository
-using `Jinja templates <https://github.com/ansys/pre-commit-hooks/tree/main/src/ansys/pre_commit_hooks/templates>`_.
+By default, the report only checks the repository and does not create missing
+files or directories. To use the legacy scaffolding behavior, pass
+``--fix-missing``. Missing baseline files are then generated using
+`Jinja templates <https://github.com/ansys/pre-commit-hooks/tree/main/src/ansys/pre_commit_hooks/templates>`_
+before the quality checks run. Existing files are not automatically rewritten
+to resolve every warning or failure.
 
 To get started, add the hook to your ``.pre-commit-config.yaml`` file:
 
@@ -23,8 +19,8 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
 
   .. tab-item:: Product repositories
 
-     The following configuration is required for product libraries, such as ``PyMechanical``,
-     ``PyMAPDL``, or ``PyAEDT``, where ``{product}`` is the name of the product:
+    To enable legacy scaffolding for product libraries such as ``PyMechanical``,
+    ``PyMAPDL``, or ``PyAEDT``, supply the product used in generated README content:
 
      .. code:: yaml
 
@@ -33,14 +29,15 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
           hooks:
           - id: tech-review
             args:
+            - --fix-missing
             - --product={product}
 
      For example, for ``PyMechanical`` the ``{product}`` would be ``mechanical``.
 
   .. tab-item:: Other repositories
 
-     The following configuration is required for libraries that do not fall under the product
-     category, such as ``ansys-pre-commit-hooks``, ``ansys-sphinx-theme``, or ``ansys-actions``:
+    For repositories without product-specific README generation, run the report
+    without bootstrap arguments:
 
      .. code:: yaml
 
@@ -49,11 +46,12 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
           hooks:
           - id: tech-review
             args:
-            - --product={product}
+                 - --repo-root=.
+                 - --show-all
 
-     In the preceding code, ``{product}`` is the ``name`` variable under ``[tool.flit.module]`` in
-     the ``pyproject.toml`` file. For example, for ``ansys-pre-commit-hooks`` the ``{product}`` is
-     ``pre_commit_hooks``.
+               Use a revision containing the current quality-report implementation.
+               To generate missing README content, add ``--fix-missing`` and an explicit
+               ``--product`` value, such as ``pre_commit_hooks`` for this repository.
 
 ``tech-review`` hook arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,16 +66,22 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
       - Description
     * - ``--author_maint_name``
       - ``Synopsys, Inc. and ANSYS, Inc.``
-      - Name of the author and maintainer in the ``pyproject.toml`` file.
+      - Author and maintainer name used by legacy bootstrap, not a rule-policy override.
     * - ``--author_maint_email``
       - ``pyansys-core@synopsys.com``
-      - Email of the author and maintainer in the ``pyproject.toml`` file.
+      - Author and maintainer email used by legacy bootstrap.
     * - ``--license``
       - ``Apache-2.0``
-      - License that is being used by your repository. Only ``Apache-2.0`` is supported.
+      - Expected license for PM028/PM029 and bootstrap. Only ``Apache-2.0`` is supported.
     * - ``--url``
       - ``https://github.com/ansys/{repo-name}``, replacing ``{repo-name}`` with the name of the repository
       - URL of the repository.
     * - ``--product``
-      - Name of the repository's product. For example, ``mechanical`` for ``PyMechanical``.
-      - Product for the repository.
+      - Empty
+      - Product used in generated README content; required when that file must be generated.
+    * - ``--fix-missing``
+      - ``False``
+      - Enable legacy baseline file and directory generation before the report.
+    * - ``--show-all``
+      - ``False``
+      - Include passing checks in the report.

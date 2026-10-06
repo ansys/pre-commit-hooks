@@ -27,6 +27,10 @@ Add the hook to ``.pre-commit-config.yaml``:
      - id: pyansys-quality-report
        args:
        - --repo-root=.
+      - --show-all
+
+    Use a revision that contains the ``pyansys-quality-report`` hook and the rules
+    you need. Omit ``--show-all`` to hide passing checks.
 
 The legacy ``tech-review`` hook is maintained as a compatibility alias and points to
 the same quality report entry point.
@@ -83,6 +87,9 @@ Rule IDs
 Each rule has an ID such as ``PM014`` or ``CI010``. Use IDs to select or ignore
 specific checks.
 
+Rule IDs are renumbered when checks are removed. Update stored ``--check`` and
+``--ignore`` selections when upgrading; old IDs are not compatibility aliases.
+
 To list all available rule IDs and metadata:
 
 .. code:: bash
@@ -110,9 +117,22 @@ Build System (``BS``)
 - ``BS011``: The supported Python version range is declared.
 - ``BS012``: The pyproject.toml file contains valid TOML.
 - ``BS013``: Project dependencies include version pins.
-- ``BS014``: Project dependencies do not contain duplicates.
-- ``BS015``: The project license is defined.
-- ``BS016``: The project readme is defined.
+- ``BS014``: The project license is defined.
+- ``BS015``: The project readme is defined.
+
+Backend detection recognizes setuptools, Flit, Poetry, Hatchling, PDM, Maturin,
+and ``uv_build``. For example:
+
+.. code:: toml
+
+  [build-system]
+  requires = ["uv_build>=0.8.0"]
+  build-backend = "uv_build"
+
+``BS007`` checks that the configured backend package appears in the build
+requirements. ``BS013`` checks regular and optional dependency version
+constraints. Repeating a dependency across optional groups is not a separate
+quality violation.
 
 CI/CD (``CI``)
 ^^^^^^^^^^^^^^
@@ -137,6 +157,15 @@ CI/CD (``CI``)
 - ``CI018``: The doc-deploy-changelog action is used.
 - ``CI019``: Workflow actions are pinned to immutable commit SHAs.
 
+The CI rules scan all ``.yml`` and ``.yaml`` files directly under
+``.github/workflows``. They do not require canonical filenames or separate PR,
+main, and release workflows. ``CI002`` through ``CI004`` check for their
+settings in the combined workflow content, not in every individual file.
+
+Action-presence checks recognize both ``- uses: ...`` steps and named steps
+with a following ``uses: ...`` entry. ``CI009`` expects
+``ansys/actions/doc-style``. A separate ``check-pr-title`` action is not required.
+
 Dependabot (``DB``)
 ^^^^^^^^^^^^^^^^^^^
 
@@ -145,17 +174,23 @@ Dependabot (``DB``)
 - ``DB003``: Pip or uv ecosystem is configured.
 - ``DB004``: The GitHub Actions ecosystem is configured.
 - ``DB005``: A weekly update interval is set.
-- ``DB006``: Cooldown default-days: 7 is configured for at least one ecosystem.
+- ``DB006``: Cooldown default-days: 7 is configured.
 - ``DB007``: Pip uses the ``lockfile-only`` versioning strategy.
 - ``DB008``: Pip groups all dependencies together.
 - ``DB009``: GitHub Actions updates are grouped to reduce PR noise.
 - ``DB010``: The Dependabot configuration is valid YAML.
 - ``DB011``: The Dependabot configuration has a non-empty updates section.
 
-The Dependabot policy checks require at least two ecosystems to use a weekly
-interval (``DB005``), require ``default-days: 7`` for cooldown (``DB006``), and
-require ``lockfile-only`` for pip versioning (``DB007``). These values are
-defined as module-level policy constants so they can be changed centrally.
+Dependabot checks parse YAML rather than searching for text. ``DB010`` requires
+a YAML mapping, and ``DB011`` requires a non-empty list of update mappings.
+The same checks work for local files and the report's in-memory repository snapshot.
+
+The policy checks require at least two update entries to use a weekly interval
+(``DB005``). ``DB006`` requires at least one cooldown mapping and checks that
+every configured cooldown mapping has ``default-days: 7``. ``DB007`` requires
+``lockfile-only`` in every pip update entry. ``DB003`` accepts pip; uv produces
+a warning because pip remains the preferred policy. These values are defined
+as module-level policy constants so they can be changed centrally.
 
 Documentation (``DOC``)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -201,6 +236,26 @@ Pre-commit (``PC``)
 - ``PC007``: Autofix_prs: true is enabled.
 - ``PC008``: Autoupdate_schedule: weekly is configured.
 
+``PC003`` checks the arguments of a configured ``zizmor`` hook. Either form
+satisfies the pedantic policy:
+
+.. code:: yaml
+
+   - id: zizmor
+     args: ["--pedantic"]
+
+.. code:: yaml
+
+   - id: zizmor
+     args:
+       - "--no-progress"
+       - "--persona=pedantic"
+
+``PC006`` accepts any one of the hook IDs ``pyright``, ``mypy``, or ``ty``,
+including local hooks. Both checks parse the YAML hook definitions; comments
+and repository URLs alone do not satisfy them. Blacken-docs and yamlfmt are
+not required by the quality report.
+
 Project Metadata (``PM``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -229,6 +284,32 @@ Project Metadata (``PM``)
 - ``PM027``: The CONTRIBUTORS.md file includes lead and main contributors sections.
 - ``PM028``: Pyproject license matches the selected --license value.
 - ``PM029``: LICENSE file content matches the selected --license value.
+- ``PM030``: AUTHORS follows the expected PyAnsys template structure.
+- ``PM031``: CODE_OF_CONDUCT.md follows the expected template content.
+- ``PM032``: CONTRIBUTING.md follows the expected template content.
+- ``PM033``: CONTRIBUTORS.md follows the expected template content.
+
+Declare the package name, authors, maintainers, license, and support URLs in
+``pyproject.toml``. For example:
+
+.. code:: toml
+
+  [project]
+  name = "ansys-demo-library"
+  license = "Apache-2.0"
+  authors = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+  maintainers = [{name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com"}]
+
+Template checks allow rendered project display names in AUTHORS and
+CONTRIBUTING rather than requiring literal ``{{ project_name }}`` or
+``{{ doc_repo_name }}`` placeholders. Repeated placeholders must use the same
+value. Display names need not equal the package name. AUTHORS also accepts
+the trailing possessive apostrophe for names ending in ``s``.
+
+CODE_OF_CONDUCT accepts equivalent bare URLs and Markdown autolinks.
+CONTRIBUTORS accepts real GitHub-linked names and multiple entries while
+requiring the Project Lead and Individual Contributors sections. Missing
+sections and changes to the required template text still produce warnings.
 
 README (``RM``)
 ^^^^^^^^^^^^^^^
@@ -242,6 +323,12 @@ README (``RM``)
 - ``RM006``: README has an installation section.
 - ``RM007``: README has a documentation section.
 - ``RM008``: README has a license section.
+
+``RM004`` compares the license badge with ``[project].license`` rather than
+assuming an Apache badge. It supports a license string, ``license.text``, and
+``license.file`` metadata, with recognition of common MIT and Apache license
+wording. Without usable license metadata, this check is not applicable.
+This does not change the Apache-only policy of ``PM015`` or ``--license``.
 
 Security (``SEC``)
 ^^^^^^^^^^^^^^^^^^
@@ -270,11 +357,32 @@ Run against the current repository:
 
    pyansys-quality-report --repo-root .
 
-Show only failing and warning checks:
+Passing checks are hidden by default. Include them with:
+
+.. code:: bash
+
+  pyansys-quality-report --repo-root . --show-all
+
+Explicitly use the default view, which also includes not-applicable checks:
 
 .. code:: bash
 
    pyansys-quality-report --repo-root . --fails-only
+
+Do not combine ``--show-all`` and ``--fails-only``.
+
+Warnings and failures display their result message once, rather than a rule
+description followed by the same problem on another line:
+
+.. code:: text
+
+  - [WARN] CI007 - ansys/actions/code-style not found in any workflow file.
+  - [WARN] PM015 - LICENSE file content is missing a recognized Apache 2.0 statement.
+
+For checks without a specific problem message, the rule description is used.
+Warnings do not fail the command. Failures produce exit code 1, as does a
+failed legacy bootstrap. The score uses passing and failing checks only;
+warnings and not-applicable checks do not contribute to it.
 
 Run selected checks:
 
@@ -327,10 +435,10 @@ CLI arguments
      - Run only selected families. Accepts repeated and comma-separated values.
    * - ``--fails-only``
      - ``False``
-     - Show only fail and warning entries in text output.
-   * - ``--all``
-     - ``True``
-     - Keep passing checks visible in text output (default behavior).
+     - Hide passing entries; not-applicable entries remain visible.
+   * - ``--show-all``
+     - ``False``
+     - Include passing checks in text output.
    * - ``--ignore``
      - Empty
      - Ignore selected check IDs. Accepts repeated and comma-separated values.
@@ -339,14 +447,28 @@ CLI arguments
      - Run legacy bootstrap to create missing baseline files/directories before checks.
    * - ``--license``
      - ``Apache-2.0``
-     - License used by legacy bootstrap checks. Only Apache-2.0 is supported.
+     - Expected license for PM028/PM029 and legacy bootstrap. Only Apache-2.0 is supported.
+   * - ``--author_maint_name``
+     - PyAnsys corporate owner
+     - Author/maintainer name used by legacy bootstrap.
+   * - ``--author_maint_email``
+     - ``pyansys-core@synopsys.com``
+     - Author/maintainer email used by legacy bootstrap.
+   * - ``--product``
+     - Empty
+     - Product name used when generating missing README content.
+   * - ``--url``
+     - Empty
+     - Repository URL used by legacy bootstrap.
 
 Legacy note
 ^^^^^^^^^^^
 
-Most repositories should not need legacy bootstrap arguments.
-If you are running with ``--fix-missing``, use only ``--license`` for normal
-workflows.
+Most repositories should not need legacy bootstrap arguments. ``--fix-missing``
+can generate missing baseline files; it is not a general repair command for
+every reported warning or failure. Generated README content requires
+``--product``. Author/maintainer overrides affect the bootstrap, not the
+quality-rule policy defaults.
 
 Additional features
 -------------------

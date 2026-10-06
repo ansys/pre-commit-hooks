@@ -22,8 +22,8 @@ Learn how to set up the available pre-commit hooks:
         :link: technical-review/index
         :link-type: doc
 
-        A hook that performs a brief technical review on repositories based on the
-        Ansys repository requirements.
+        The legacy compatibility alias for the PyAnsys quality report, with
+        optional baseline file generation.
 
         :bdg-primary-line:`Set-up`
 

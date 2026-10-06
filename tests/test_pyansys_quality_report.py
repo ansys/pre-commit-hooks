@@ -90,12 +90,11 @@ test = ["pytest>=8"]
         "BS010",
         "BS011",
         "BS012",
+        "BS014",
         "BS015",
-        "BS016",
     ):
         assert getattr(quality_rules, rule).check(tmp_path) is True
     assert quality_rules.BS013.check(tmp_path) is True
-    assert quality_rules.BS014.check(tmp_path) is True
 
 
 def test_build_system_metadata_rules_report_missing_and_inconsistent_values(tmp_path):
@@ -120,7 +119,22 @@ dependencies = ["requests", "Requests>=2.0"]
     assert quality_rules.BS010.check(tmp_path) is False
     assert quality_rules.BS011.check(tmp_path) is False
     assert quality_rules.BS013.check(tmp_path) == "WARN: Unpinned dependencies: requests."
-    assert quality_rules.BS014.check(tmp_path) == "WARN: Duplicate dependencies: requests."
+    assert quality_rules.BS014.check(tmp_path) is False
+    assert quality_rules.BS015.check(tmp_path) is False
+
+
+def test_build_system_rule_numbers_after_duplicate_check_removal():
+    """The build-system registry should be consecutive with the correct final rules."""
+    checks = {
+        code: type(rule).__doc__
+        for code, rule in quality_rules.repo_review_checks().items()
+        if rule.family == "build_system"
+    }
+
+    assert set(checks) == {f"BS{number:03d}" for number in range(1, 16)}
+    assert checks["BS014"] == "The project license is defined."
+    assert checks["BS015"] == "The project readme is defined."
+    assert "Project dependencies do not contain duplicates." not in checks.values()
 
 
 def test_build_system_rules_validate_toml_and_all_build_requirements(tmp_path):

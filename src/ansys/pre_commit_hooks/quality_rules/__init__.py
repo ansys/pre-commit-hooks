@@ -56,7 +56,6 @@ from ansys.pre_commit_hooks.quality_rules.build_system import (
     BS013,
     BS014,
     BS015,
-    BS016,
     BuildSystem,
 )
 from ansys.pre_commit_hooks.quality_rules.cicd import (
@@ -224,7 +223,6 @@ __all__ = [
     "BS013",
     "BS014",
     "BS015",
-    "BS016",
     "BuildSystem",
     "CI001",
     "CI002",

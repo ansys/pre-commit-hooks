@@ -68,7 +68,6 @@ __all__ = [
     "BS013",
     "BS014",
     "BS015",
-    "BS016",
     "BuildSystem",
 ]
 
@@ -376,28 +375,6 @@ class BS013(BuildSystem):
 
 
 class BS014(BuildSystem):
-    """Project dependencies do not contain duplicates."""
-
-    @staticmethod
-    def check(root) -> bool | None | str:
-        """Return whether regular and optional dependencies are unique."""
-        if not file_exists(root, "pyproject.toml"):
-            return None
-
-        seen = set()
-        duplicates = []
-        for requirement in _dependencies(root):
-            name = _requirement_name(requirement)
-            if name in seen and name not in duplicates:
-                duplicates.append(name)
-            seen.add(name)
-
-        if not duplicates:
-            return True
-        return f"WARN: Duplicate dependencies: {', '.join(duplicates)}."
-
-
-class BS015(BuildSystem):
     """The project license is defined."""
 
     @staticmethod
@@ -409,7 +386,7 @@ class BS015(BuildSystem):
         return bool(_project_field_defined(root, "license") or project.get("license-files"))
 
 
-class BS016(BuildSystem):
+class BS015(BuildSystem):
     """The project readme is defined."""
 
     @staticmethod
