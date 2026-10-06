@@ -58,8 +58,6 @@ __all__ = [
     "PC006",
     "PC007",
     "PC008",
-    "PC009",
-    "PC010",
 ]
 
 _PRE_COMMIT_CONFIG = ".pre-commit-config.yaml"
@@ -92,7 +90,7 @@ class PC002(PreCommit):
 
 
 class PC003(PreCommit):
-    """Zizmor is configured with the --pedantic flag."""
+    """Zizmor is configured with --pedantic or --persona=pedantic."""
 
     requires = {"PC001"}
 
@@ -102,39 +100,35 @@ class PC003(PreCommit):
         if not file_exists(root, _PRE_COMMIT_CONFIG):
             return None
 
-        has_zizmor = file_contains(
-            root,
-            _PRE_COMMIT_CONFIG,
-            "zizmor",
-        )
-
-        has_pedantic = file_contains(
-            root,
-            _PRE_COMMIT_CONFIG,
-            "--pedantic",
-        )
-
-        if not has_zizmor:
+        try:
+            config = yaml.safe_load(file_content(root, _PRE_COMMIT_CONFIG))
+        except yaml.YAMLError:
             return False
 
-        if not has_pedantic:
-            return "WARN: zizmor found but --pedantic flag not set."
+        if not isinstance(config, dict) or not isinstance(config.get("repos"), list):
+            return False
 
-        return True
+        has_zizmor = False
+        for repo in config["repos"]:
+            if not isinstance(repo, dict) or not isinstance(repo.get("hooks"), list):
+                continue
+            for hook in repo["hooks"]:
+                if not isinstance(hook, dict) or hook.get("id") != "zizmor":
+                    continue
+                has_zizmor = True
+                args = hook.get("args", [])
+                if isinstance(args, list) and any(
+                    argument in ("--pedantic", "--persona=pedantic") for argument in args
+                ):
+                    return True
+
+        if has_zizmor:
+            return "WARN: zizmor found but neither --pedantic nor --persona=pedantic is set."
+
+        return False
 
 
 class PC004(PreCommit):
-    """Blacken-docs is configured."""
-
-    requires = {"PC001"}
-
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether blacken-docs is configured."""
-        return checked_contains(root, _PRE_COMMIT_CONFIG, "blacken-docs")
-
-
-class PC005(PreCommit):
     """Codespell is configured."""
 
     requires = {"PC001"}
@@ -145,7 +139,7 @@ class PC005(PreCommit):
         return checked_contains(root, _PRE_COMMIT_CONFIG, "codespell")
 
 
-class PC006(PreCommit):
+class PC005(PreCommit):
     """Ansys/pre-commit-hooks is configured."""
 
     requires = {"PC001"}
@@ -160,18 +154,7 @@ class PC006(PreCommit):
         )
 
 
-class PC007(PreCommit):
-    """Google/yamlfmt is configured."""
-
-    requires = {"PC001"}
-
-    @staticmethod
-    def check(root) -> bool | None:
-        """Return whether yamlfmt is configured."""
-        return checked_contains(root, _PRE_COMMIT_CONFIG, "yamlfmt")
-
-
-class PC008(PreCommit):
+class PC006(PreCommit):
     """A pyright, mypy, or ty type-checking hook is configured."""
 
     requires = {"PC001"}
@@ -200,7 +183,7 @@ class PC008(PreCommit):
         return False
 
 
-class PC009(PreCommit):
+class PC007(PreCommit):
     """Autofix_prs: true is enabled."""
 
     requires = {"PC001"}
@@ -221,7 +204,7 @@ class PC009(PreCommit):
         return "WARN: autofix_prs: true not set in ci: block."
 
 
-class PC010(PreCommit):
+class PC008(PreCommit):
     """Autoupdate_schedule: weekly is configured."""
 
     requires = {"PC001"}

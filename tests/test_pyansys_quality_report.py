@@ -1289,14 +1289,14 @@ def test_report_displays_problem_message_once(files, code, status, message, caps
 
 
 @pytest.mark.parametrize("checker", ["pyright", "mypy", "ty"])
-def test_pc008_accepts_supported_type_checker_hooks(tmp_path, checker):
-    """Any supported type-checker hook should satisfy PC008."""
+def test_pc006_accepts_supported_type_checker_hooks(tmp_path, checker):
+    """Any supported type-checker hook should satisfy PC006."""
     (tmp_path / ".pre-commit-config.yaml").write_text(
         f"repos:\n  - repo: local\n    hooks:\n      - id: {checker}\n",
         encoding="utf-8",
     )
 
-    assert quality_rules.PC008.check(tmp_path) is True
+    assert quality_rules.PC006.check(tmp_path) is True
 
 
 @pytest.mark.parametrize(
@@ -1309,16 +1309,81 @@ def test_pc008_accepts_supported_type_checker_hooks(tmp_path, checker):
         "repos: null\n",
     ],
 )
-def test_pc008_rejects_configs_without_supported_hooks(tmp_path, content):
+def test_pc006_rejects_configs_without_supported_hooks(tmp_path, content):
     """Mentions outside hook IDs and malformed configurations should not pass."""
     (tmp_path / ".pre-commit-config.yaml").write_text(content, encoding="utf-8")
 
-    assert quality_rules.PC008.check(tmp_path) is False
+    assert quality_rules.PC006.check(tmp_path) is False
 
 
-def test_pc008_skips_missing_config(tmp_path):
+def test_pc006_skips_missing_config(tmp_path):
     """A missing pre-commit configuration should remain not applicable."""
-    assert quality_rules.PC008.check(tmp_path) is None
+    assert quality_rules.PC006.check(tmp_path) is None
+
+
+def test_pre_commit_rule_numbers_match_remaining_checks():
+    """The pre-commit registry should be consecutive and omit the removed policies."""
+    checks = {
+        code: type(rule).__doc__
+        for code, rule in quality_rules.repo_review_checks().items()
+        if rule.family == "pre_commit"
+    }
+
+    assert checks == {
+        "PC001": "The .pre-commit-config.yaml file exists.",
+        "PC002": "Ruff-pre-commit is configured.",
+        "PC003": "Zizmor is configured with --pedantic or --persona=pedantic.",
+        "PC004": "Codespell is configured.",
+        "PC005": "Ansys/pre-commit-hooks is configured.",
+        "PC006": "A pyright, mypy, or ty type-checking hook is configured.",
+        "PC007": "Autofix_prs: true is enabled.",
+        "PC008": "Autoupdate_schedule: weekly is configured.",
+    }
+
+
+@pytest.mark.parametrize(
+    "args_yaml",
+    [
+        'args: ["--pedantic"]',
+        'args: ["--no-progress", "--persona=pedantic"]',
+        'args:\n      - "--no-progress"\n      - "--persona=pedantic"',
+    ],
+)
+def test_pc003_accepts_both_pedantic_options(tmp_path, args_yaml):
+    """Zizmor supports both pedantic options in inline and block YAML lists."""
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        "repos:\n"
+        "- repo: https://github.com/zizmorcore/zizmor-pre-commit\n"
+        "  hooks:\n"
+        "  - id: zizmor\n"
+        f"    {args_yaml}\n",
+        encoding="utf-8",
+    )
+
+    assert quality_rules.PC003.check(tmp_path) is True
+
+
+@pytest.mark.parametrize(
+    "args_yaml", ["args: []", "args: ['--persona=regular']", "args: '--pedantic'"]
+)
+def test_pc003_warns_without_pedantic_option(tmp_path, args_yaml):
+    """Only a supported option in the zizmor hook's argument list should pass."""
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        "# --pedantic --persona=pedantic\n"
+        "repos:\n- repo: local\n  hooks:\n"
+        f"  - id: zizmor\n    {args_yaml}\n"
+        "  - id: other\n    args: ['--pedantic']\n",
+        encoding="utf-8",
+    )
+
+    result = quality_rules.PC003.check(tmp_path)
+    assert isinstance(result, str)
+    assert result.startswith("WARN: ")
+
+
+def test_pc003_skips_missing_config(tmp_path):
+    """A missing configuration should remain not applicable."""
+    assert quality_rules.PC003.check(tmp_path) is None
 
 
 def test_normalize_check_result_standardizes_rule_status():

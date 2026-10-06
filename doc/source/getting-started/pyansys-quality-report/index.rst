@@ -194,14 +194,12 @@ Pre-commit (``PC``)
 
 - ``PC001``: The .pre-commit-config.yaml file exists.
 - ``PC002``: Ruff-pre-commit is configured.
-- ``PC003``: Zizmor is configured with the --pedantic flag.
-- ``PC004``: Blacken-docs is configured.
-- ``PC005``: Codespell is configured.
-- ``PC006``: Ansys/pre-commit-hooks is configured.
-- ``PC007``: Google/yamlfmt is configured.
-- ``PC008``: A pyright, mypy, or ty type-checking hook is configured.
-- ``PC009``: Autofix_prs: true is enabled.
-- ``PC010``: Autoupdate_schedule: weekly is configured.
+- ``PC003``: Zizmor is configured with --pedantic or --persona=pedantic.
+- ``PC004``: Codespell is configured.
+- ``PC005``: Ansys/pre-commit-hooks is configured.
+- ``PC006``: A pyright, mypy, or ty type-checking hook is configured.
+- ``PC007``: Autofix_prs: true is enabled.
+- ``PC008``: Autoupdate_schedule: weekly is configured.
 
 Project Metadata (``PM``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^

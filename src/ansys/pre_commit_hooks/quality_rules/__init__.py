@@ -139,8 +139,6 @@ from ansys.pre_commit_hooks.quality_rules.pre_commit import (
     PC006,
     PC007,
     PC008,
-    PC009,
-    PC010,
     PreCommit,
 )
 from ansys.pre_commit_hooks.quality_rules.project_metadata import (
@@ -291,8 +289,6 @@ __all__ = [
     "PC006",
     "PC007",
     "PC008",
-    "PC009",
-    "PC010",
     "PreCommit",
     "PM001",
     "PM002",
