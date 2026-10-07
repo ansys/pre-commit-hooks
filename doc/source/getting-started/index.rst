@@ -22,10 +22,20 @@ Learn how to set up the available pre-commit hooks:
         :link: technical-review/index
         :link-type: doc
 
-        A hook that performs a brief technical review on repositories based on the
-        Ansys repository requirements.
+        The legacy compatibility alias for the PyAnsys quality report, with
+        optional baseline file generation.
 
         :bdg-primary-line:`Set-up`
+
+    .. grid-item-card:: PyAnsys quality report :octicon:`report`
+        :padding: 2 2 2 2
+        :link: pyansys-quality-report/index
+        :link-type: doc
+
+        A rule-based repository quality report with grouped checks, CLI filtering,
+        and machine-readable output.
+
+        :bdg-primary-line:`Set-up` :bdg-primary-line:`CLI`
 
 .. toctree::
    :hidden:
@@ -33,3 +43,4 @@ Learn how to set up the available pre-commit hooks:
 
    add-license-headers/index
    technical-review/index
+   pyansys-quality-report/index

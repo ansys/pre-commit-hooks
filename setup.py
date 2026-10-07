@@ -46,6 +46,7 @@ setup(
         "requests==2.34.2",
         "semver==3.1.0",
         "toml==0.10.2",
+        "PyYAML==6.0.2",
     ],
     extras_require={
         "doc": [
@@ -73,7 +74,8 @@ setup(
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
-            "tech-review=ansys.pre_commit_hooks.tech_review:main",
+            "pyansys-quality-report=ansys.pre_commit_hooks.pyansys_quality_report:main",
+            "tech-review=ansys.pre_commit_hooks.pyansys_quality_report:main",
         ],
     },
 )

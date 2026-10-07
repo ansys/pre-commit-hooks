@@ -36,8 +36,34 @@ The following hooks are currently available:
 * ``add-license-headers``: Add missing license headers to files by using
   `REUSE <https://reuse.software/>`_ . To use this hook, you must
   have ``REUSE`` implemented in your repository.
-* ``tech-review``: Do a technical review of your repository according to
-  `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_
+* ``pyansys-quality-report``: Check repository metadata, workflows, dependency
+   automation, pre-commit hooks, documentation, and security against
+   `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_.
+* ``tech-review``: Compatibility alias for ``pyansys-quality-report``.
+
+Repository quality report
+-------------------------
+
+After installing the package, run the report from your repository root:
+
+.. code:: bash
+
+      pyansys-quality-report --repo-root .
+
+Warnings and failures show their actual result message. Passing checks are
+hidden by default; include them with ``--show-all``:
+
+.. code:: bash
+
+      pyansys-quality-report --repo-root . --show-all
+      pyansys-quality-report --repo-root . --family pre_commit --show-all
+      pyansys-quality-report --metadata
+
+See the `quality report guide
+<https://pre-commit-hooks.docs.ansys.com/version/stable/getting-started/pyansys-quality-report/index.html>`_
+for the current rule catalog, pre-commit configuration, JSON output, and
+selection and ignore options. Rule IDs can change when checks are removed;
+review stored selections when upgrading.
 
 How to install
 --------------
