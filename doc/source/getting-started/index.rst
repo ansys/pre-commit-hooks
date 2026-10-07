@@ -42,4 +42,4 @@ Learn how to set up the available pre-commit hooks:
 
    add-license-headers/index
    technical-review/index
-     pyansys-quality-report/index
+   pyansys-quality-report/index
