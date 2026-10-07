@@ -20,7 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""README quality checks."""
+"""README quality checks.
+
+This rule set validates that the repository README follows PyAnsys
+documentation standards and includes commonly expected project badges.
+
+The checks cover:
+
+* README availability
+    - README.rst (preferred)
+    - README.md (supported but not preferred)
+
+* Badges
+    - PyAnsys badge
+    - PyPI badge
+    - Codecov badge
+    - Project license badge
+    - GitHub Actions CI badge
+
+* Content sections
+    - Installation
+    - Documentation
+    - License
+"""
 
 from __future__ import annotations
 
@@ -96,12 +118,14 @@ class RM000(README):
     """README file exists."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | str:
+    def check(root, readme_path: str | None) -> bool | str:
         """Return whether the repository has a supported README file."""
         if readme_path == "README.rst":
             return True
+
         if readme_path == "README.md":
-            return "WARN: README.md found; README.rst is preferred."
+            return "WARN: README.md found — PyAnsys preferred format is README.rst."
+
         return False
 
 
@@ -109,71 +133,81 @@ class RM001(README):
     """README has a PyAnsys badge."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether the README contains a PyAnsys badge."""
         if not readme_path:
             return None
-        pattern = re.compile(
-            r"badge\.svg[^)\"']*pyansys|"
-            r"pyansys[^)\"']*badge\.svg|"
-            r"img\.shields\.io[^)\"']*pyansys",
-            re.IGNORECASE,
-        )
-        return (
-            True
-            if file_contains(root, readme_path, pattern)
-            else (f"WARN: PyAnsys badge image not found in {readme_path}.")
-        )
+
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"badge\.svg[^)\"']*pyansys|"
+                r"pyansys[^)\"']*badge\.svg|"
+                r"img\.shields\.io[^)\"']*pyansys",
+                re.IGNORECASE,
+            ),
+        ):
+            return True
+
+        return f"WARN: PyAnsys badge image not found in {readme_path}."
 
 
 class RM002(README):
     """README has a PyPI badge."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether the README contains a PyPI badge."""
         if not readme_path:
             return None
-        pattern = re.compile(
-            r"img\.shields\.io[^)\"']*pypi|"
-            r"pypi\.org/project[^)\"']*badge|"
-            r"badge\.fury\.io/py",
-            re.IGNORECASE,
-        )
-        return (
-            True
-            if file_contains(root, readme_path, pattern)
-            else (f"WARN: PyPI badge image not found in {readme_path}.")
-        )
+
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"img\.shields\.io[^)\"']*pypi|"
+                r"pypi\.org/project[^)\"']*badge|"
+                r"badge\.fury\.io/py",
+                re.IGNORECASE,
+            ),
+        ):
+            return True
+
+        return f"WARN: PyPI badge image not found in {readme_path}."
 
 
 class RM003(README):
     """README has a Codecov badge."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether the README contains a Codecov badge."""
         if not readme_path:
             return None
-        pattern = re.compile(
-            r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov",
-            re.IGNORECASE,
-        )
-        return (
-            True
-            if file_contains(root, readme_path, pattern)
-            else (f"WARN: Codecov badge image not found in {readme_path}.")
-        )
+
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"codecov\.io[^)\"']*badge|" r"badge\.svg[^)\"']*codecov",
+                re.IGNORECASE,
+            ),
+        ):
+            return True
+
+        return f"WARN: Codecov badge image not found in {readme_path}."
 
 
 class RM004(README):
     """README has a license badge matching project metadata."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether the README license badge matches project metadata."""
         if not readme_path:
             return None
+
         identifier = _project_license(root)
         if not identifier:
             return None
@@ -185,13 +219,17 @@ class RM004(README):
             "BSD-3-Clause": r"bsd[-_ ]?3[-_ ]?clause",
         }
         license_pattern = badge_terms.get(identifier, re.escape(identifier))
-        pattern = re.compile(
-            rf"(?:img\.)?shields\.io[^)\"']*{license_pattern}|"
-            rf"{license_pattern}[^)\"']*license",
-            re.IGNORECASE,
-        )
-        if file_contains(root, readme_path, pattern):
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                rf"(?:img\.)?shields\.io[^)\"']*{license_pattern}|"
+                rf"{license_pattern}[^)\"']*license",
+                re.IGNORECASE,
+            ),
+        ):
             return True
+
         return (
             f"WARN: {identifier} license badge image not found or does not "
             f"match project metadata in {readme_path}."
@@ -199,52 +237,70 @@ class RM004(README):
 
 
 class RM005(README):
-    """README has a GitHub Actions badge."""
+    """README has a GH-CI badge."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root, readme_path: str | None) -> bool | None | str:
         """Return whether the README contains a GitHub Actions badge."""
         if not readme_path:
             return None
-        pattern = re.compile(
-            r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg",
-            re.IGNORECASE,
-        )
-        return (
-            True
-            if file_contains(root, readme_path, pattern)
-            else (f"WARN: GitHub Actions badge URL not found in {readme_path}.")
-        )
+
+        if file_contains(
+            root,
+            readme_path,
+            re.compile(
+                r"github\.com/[^/]+/[^/]+/actions/workflows/" r'[^)"\']+badge\.svg',
+                re.IGNORECASE,
+            ),
+        ):
+            return True
+
+        return f"WARN: GH-CI workflow badge.svg URL not found in {readme_path}."
 
 
 class RM006(README):
     """README has an installation section."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root, readme_path: str | None) -> bool | None:
         """Return whether the README mentions installation instructions."""
         if not readme_path:
             return None
-        return file_contains(root, readme_path, re.compile(r"install", re.IGNORECASE))
+
+        return file_contains(
+            root,
+            readme_path,
+            re.compile(r"install", re.IGNORECASE),
+        )
 
 
 class RM007(README):
     """README has a documentation section."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root, readme_path: str | None) -> bool | None:
         """Return whether the README contains a documentation section."""
         if not readme_path:
             return None
-        return file_contains(root, readme_path, re.compile(r"documentation", re.IGNORECASE))
+
+        return file_contains(
+            root,
+            readme_path,
+            re.compile(r"documentation", re.IGNORECASE),
+        )
 
 
 class RM008(README):
     """README has a license section."""
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root, readme_path: str | None) -> bool | None:
         """Return whether the README contains a license section."""
         if not readme_path:
             return None
-        return file_contains(root, readme_path, re.compile(r"license", re.IGNORECASE))
+
+        return file_contains(
+            root,
+            readme_path,
+            re.compile(r"license", re.IGNORECASE),
+        )
