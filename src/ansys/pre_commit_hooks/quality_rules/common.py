@@ -51,12 +51,9 @@ def file_content(root: Path, path: str) -> str:
         return ""
 
 
-def file_contains(root: Path, path: str, pattern: str | re.Pattern) -> bool:
-    """Return whether a file contains a literal string or regular expression."""
-    content = file_content(root, path)
-    if isinstance(pattern, str):
-        return pattern in content
-    return bool(pattern.search(content))
+def file_contains(root: Path, path: str, pattern: re.Pattern) -> bool:
+    """Return whether a file's contents match the given regular expression."""
+    return bool(pattern.search(file_content(root, path)))
 
 
 def readme_path(root: Path) -> str | None:
