@@ -84,10 +84,20 @@ _GH_CI_BADGE = re.compile(
     r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.IGNORECASE
 )
 
+
+def _heading_pattern(term: str) -> re.Pattern:
+    """Match a Markdown (``#``) or underlined RST/Setext heading containing ``term``."""
+    title = rf"[^\n]*{term}[^\n]*"
+    return re.compile(
+        rf"^(?:#{{1,6}}[ \t]+{title}|{title}\n[=\-^~\"#*+`]{{3,}})[ \t]*$",
+        re.IGNORECASE | re.MULTILINE,
+    )
+
+
 # Content section patterns.
-_INSTALL_SECTION = re.compile(r"install", re.IGNORECASE)
-_DOCUMENTATION_SECTION = re.compile(r"documentation", re.IGNORECASE)
-_LICENSE_SECTION = re.compile(r"license", re.IGNORECASE)
+_INSTALL_SECTION = _heading_pattern(r"install")
+_DOCUMENTATION_SECTION = _heading_pattern(r"documentation")
+_LICENSE_SECTION = _heading_pattern(r"licen[sc]e")
 
 # Maps a project license to the token expected in its README badge.
 _BADGE_IDENTIFIERS = {
@@ -237,7 +247,7 @@ class RM005(README):
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README mentions installation instructions."""
+        """Return whether the README has an installation heading."""
         return _section_result(root, readme_path, _INSTALL_SECTION)
 
 
@@ -246,7 +256,7 @@ class RM006(README):
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README contains a documentation section."""
+        """Return whether the README has a documentation heading."""
         return _section_result(root, readme_path, _DOCUMENTATION_SECTION)
 
 
@@ -255,5 +265,5 @@ class RM007(README):
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README contains a license section."""
+        """Return whether the README has a license heading."""
         return _section_result(root, readme_path, _LICENSE_SECTION)

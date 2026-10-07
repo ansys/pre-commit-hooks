@@ -28,7 +28,7 @@ import pytest
 
 from ansys.pre_commit_hooks import pyansys_quality_report as report
 from ansys.pre_commit_hooks.quality_rules import repo_review_checks
-from ansys.pre_commit_hooks.quality_rules.readme import RM003
+from ansys.pre_commit_hooks.quality_rules.readme import RM003, RM005, RM006, RM007
 
 
 def test_registry_contains_only_readme_rules():
@@ -78,6 +78,38 @@ def test_rm003_is_not_applicable_with_invalid_pyproject(tmp_path):
     )
 
     assert RM003.check(tmp_path, "README.rst") is None
+
+
+@pytest.mark.parametrize(
+    ("rule", "readme"),
+    [
+        (RM005, "Title\n=====\n\nHow to install\n--------------\n"),
+        (RM005, "# Title\n\n## Installation\n"),
+        (RM006, "Documentation\n^^^^^^^^^^^^^\n"),
+        (RM007, "License\n=======\n"),
+        (RM007, "### Licence\n"),
+    ],
+)
+def test_section_rules_accept_headings(tmp_path, rule, readme):
+    """A matching RST or Markdown heading satisfies the section rule."""
+    (tmp_path / "README.rst").write_text(readme, encoding="utf-8")
+
+    assert rule.check(tmp_path, "README.rst") is True
+
+
+@pytest.mark.parametrize(
+    ("rule", "readme"),
+    [
+        (RM005, "Title\n=====\n\nRun pip install ansys-demo to get started.\n"),
+        (RM006, "Title\n=====\n\nSee the documentation online.\n"),
+        (RM007, ".. image:: https://img.shields.io/badge/License-MIT-yellow.svg\n"),
+    ],
+)
+def test_section_rules_ignore_plain_text_mentions(tmp_path, rule, readme):
+    """The term in body text or a badge URL is not a section heading."""
+    (tmp_path / "README.rst").write_text(readme, encoding="utf-8")
+
+    assert rule.check(tmp_path, "README.rst") is False
 
 
 def test_report_uses_actionable_warning_once(tmp_path, capsys):

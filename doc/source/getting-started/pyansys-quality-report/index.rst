@@ -32,9 +32,13 @@ README rules
 - ``RM002``: README contains a PyPI badge.
 - ``RM003``: README license badge matches ``[project].license`` metadata.
 - ``RM004``: README contains a GitHub Actions badge.
-- ``RM005``: README mentions installation.
-- ``RM006``: README mentions documentation.
-- ``RM007``: README mentions a license.
+- ``RM005``: README has an installation heading.
+- ``RM006``: README has a documentation heading.
+- ``RM007``: README has a license heading.
+
+Section checks require a heading containing the term, either a Markdown ``#``
+heading or an underlined reStructuredText heading. The word elsewhere in the
+text, such as in a badge URL, does not count.
 
 ``RM003`` reads a string license identifier or the ``text`` or ``file`` form
 from ``pyproject.toml``. If project license metadata is not available, the rule
