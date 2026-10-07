@@ -32,7 +32,7 @@ The checks cover:
     - README.md (supported but not preferred)
 
 * Badges
-    - PyAnsys badge
+    - PyAnsys or Ansys badge
     - PyPI badge
     - Project license badge
     - GitHub Actions CI badge
@@ -72,7 +72,8 @@ __all__ = [
 ]
 
 # Badge presence patterns, compiled once and reused across checks.
-_PYANSYS_BADGE = re.compile(
+_ANSYS_BADGE = re.compile(
+    r"img\.shields\.io/badge/(?:py-?)?ansys|"
     r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys",
     re.IGNORECASE,
 )
@@ -153,14 +154,18 @@ def _project_license(root: Path) -> str | None:
 
 
 def _badge_result(
-    root: Path, readme_path: str | None, pattern: re.Pattern, label: str
+    root: Path,
+    readme_path: str | None,
+    pattern: re.Pattern,
+    label: str,
+    severity: str = "WARN",
 ) -> bool | None | str:
     """Return the result for a README badge-presence check."""
     if not readme_path:
         return None
     if file_contains(root, readme_path, pattern):
         return True
-    return f"WARN: {label} not found in {readme_path}."
+    return f"{severity}: {label} not found in {readme_path}."
 
 
 def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool | None:
@@ -190,12 +195,14 @@ class RM000(README):
 
 
 class RM001(README):
-    """README has a PyAnsys badge."""
+    """README has a PyAnsys or Ansys badge."""
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains a PyAnsys badge."""
-        return _badge_result(root, readme_path, _PYANSYS_BADGE, "PyAnsys badge image")
+        """Return whether the README contains a PyAnsys or Ansys badge."""
+        return _badge_result(
+            root, readme_path, _ANSYS_BADGE, "PyAnsys or Ansys badge image", severity="FAIL"
+        )
 
 
 class RM002(README):

@@ -28,7 +28,7 @@ README rules
 ------------
 
 - ``RM000``: README.rst exists; README.md is accepted with a warning.
-- ``RM001``: README contains a PyAnsys badge.
+- ``RM001``: README contains a PyAnsys or Ansys badge; a missing badge fails.
 - ``RM002``: README contains a PyPI badge.
 - ``RM003``: README license badge matches ``[project].license`` metadata.
 - ``RM004``: README contains a GitHub Actions badge.

@@ -28,7 +28,7 @@ import pytest
 
 from ansys.pre_commit_hooks import pyansys_quality_report as report
 from ansys.pre_commit_hooks.quality_rules import repo_review_checks
-from ansys.pre_commit_hooks.quality_rules.readme import RM003, RM005, RM006, RM007
+from ansys.pre_commit_hooks.quality_rules.readme import RM001, RM003, RM005, RM006, RM007
 
 
 def test_registry_contains_only_readme_rules():
@@ -112,16 +112,44 @@ def test_section_rules_ignore_plain_text_mentions(tmp_path, rule, readme):
     assert rule.check(tmp_path, "README.rst") is False
 
 
-def test_report_uses_actionable_warning_once(tmp_path, capsys):
-    """A missing badge should be printed as the single warning headline."""
+def test_report_uses_actionable_failure_once(tmp_path, capsys):
+    """A missing PyAnsys/Ansys badge fails and prints its message once."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     review = report._run_checks(tmp_path, selected_codes={"RM001"})
     report._print_report(review)
 
     output = capsys.readouterr().out
-    message = "PyAnsys badge image not found in README.rst."
+    message = "PyAnsys or Ansys badge image not found in README.rst."
     assert output.count(message) == 1
-    assert f"- [WARN] RM001 - {message}" in output.splitlines()
+    assert f"- [FAIL] RM001 - {message}" in output.splitlines()
+    assert review["tally"]["fail"] == 1
+
+
+@pytest.mark.parametrize(
+    "badge",
+    [
+        ".. image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,AAAA\n",  # noqa: E501
+        ".. image:: https://img.shields.io/badge/Ansys-ffc107.svg\n",
+        "[![PyAnsys](https://img.shields.io/badge/PyAnsys-ffc107.svg)](https://docs.pyansys.com/)\n",  # noqa: E501
+    ],
+)
+def test_rm001_accepts_pyansys_or_ansys_badge(tmp_path, badge):
+    """Either a PyAnsys or an Ansys badge satisfies RM001."""
+    (tmp_path / "README.rst").write_text(badge, encoding="utf-8")
+
+    assert RM001.check(tmp_path, "README.rst") is True
+
+
+def test_rm001_ignores_ansys_github_actions_badge(tmp_path):
+    """The Ansys GitHub organization in a CI badge URL is not an Ansys badge."""
+    (tmp_path / "README.rst").write_text(
+        ".. image:: https://github.com/ansys/demo/actions/workflows/ci.yml/status.svg\n",
+        encoding="utf-8",
+    )
+
+    result = RM001.check(tmp_path, "README.rst")
+    assert isinstance(result, str)
+    assert result.startswith("FAIL: ")
 
 
 def test_cli_emits_json_for_selected_rule(tmp_path, capsys):
