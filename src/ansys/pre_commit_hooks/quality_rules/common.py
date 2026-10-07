@@ -1,5 +1,24 @@
 # Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 """Shared helpers for the initial README quality checks."""
 
@@ -73,42 +92,3 @@ def normalize_check_result(raw: bool | str | None, check_obj: Any) -> tuple[str,
         description = (type(check_obj).__doc__ or "").strip().splitlines()
         return "fail", description[0].strip() if description else ""
     return "fail", str(raw)
-
-
-def project_license(root: Path) -> str | None:
-    """Read a simple SPDX-like license identifier from pyproject metadata."""
-    if not file_exists(root, "pyproject.toml"):
-        return None
-
-    try:
-        import tomllib
-    except ModuleNotFoundError:  # pragma: no cover - Python 3.10 uses toml.
-        import toml as tomllib
-
-    try:
-        metadata = tomllib.loads(file_content(root, "pyproject.toml"))
-    except (TypeError, ValueError):
-        return None
-    project = metadata.get("project")
-    if not isinstance(project, dict):
-        return None
-
-    license_value = project.get("license")
-    if isinstance(license_value, str):
-        license_text = license_value.strip()
-    elif isinstance(license_value, dict) and isinstance(license_value.get("text"), str):
-        license_text = license_value["text"].strip()
-    elif isinstance(license_value, dict) and isinstance(license_value.get("file"), str):
-        license_text = file_content(root, license_value["file"])
-    else:
-        return None
-
-    if re.search(r"\bMIT(?: License)?\b", license_text, re.IGNORECASE):
-        return "MIT"
-    if re.search(r"Apache License(?:,| )? Version 2\.0|Apache-2\.0", license_text, re.IGNORECASE):
-        return "Apache-2.0"
-    if re.search(r"BSD[-_ ]?2[-_ ]?Clause", license_text, re.IGNORECASE):
-        return "BSD-2-Clause"
-    if re.search(r"BSD[-_ ]?3[-_ ]?Clause", license_text, re.IGNORECASE):
-        return "BSD-3-Clause"
-    return license_text
