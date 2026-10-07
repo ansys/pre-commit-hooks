@@ -53,8 +53,8 @@ The initial quality-report release contains README checks. Configure it in
        args: [--repo-root, ., --show-all]
 
 Run ``pyansys-quality-report --repo-root .`` to show warnings and failures.
-Use ``--show-all`` to include passing checks, ``--check RM004`` to select a
-rule, ``--ignore RM003`` to omit one, or ``--json`` for JSON output. The current
+Use ``--show-all`` to include passing checks, ``--check RM003`` to select a
+rule, ``--ignore RM004`` to omit one, or ``--json`` for JSON output. The current
 rules and options are documented in the
 `quality report guide <https://pre-commit-hooks.docs.ansys.com/version/stable/getting-started/pyansys-quality-report/index.html>`_.
 

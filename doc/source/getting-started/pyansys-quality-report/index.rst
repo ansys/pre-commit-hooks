@@ -30,14 +30,13 @@ README rules
 - ``RM000``: README.rst exists; README.md is accepted with a warning.
 - ``RM001``: README contains a PyAnsys badge.
 - ``RM002``: README contains a PyPI badge.
-- ``RM003``: README contains a Codecov badge.
-- ``RM004``: README license badge matches ``[project].license`` metadata.
-- ``RM005``: README contains a GitHub Actions badge.
-- ``RM006``: README mentions installation.
-- ``RM007``: README mentions documentation.
-- ``RM008``: README mentions a license.
+- ``RM003``: README license badge matches ``[project].license`` metadata.
+- ``RM004``: README contains a GitHub Actions badge.
+- ``RM005``: README mentions installation.
+- ``RM006``: README mentions documentation.
+- ``RM007``: README mentions a license.
 
-``RM004`` reads a string license identifier or the ``text`` or ``file`` form
+``RM003`` reads a string license identifier or the ``text`` or ``file`` form
 from ``pyproject.toml``. If project license metadata is not available, the rule
 is not applicable.
 
@@ -50,8 +49,8 @@ or ignore checks with comma-separated or repeated IDs:
 .. code:: bash
 
    pyansys-quality-report --repo-root . --show-all
-   pyansys-quality-report --repo-root . --check RM004
-   pyansys-quality-report --repo-root . --ignore RM003,RM005
+   pyansys-quality-report --repo-root . --check RM003
+   pyansys-quality-report --repo-root . --ignore RM004,RM005
    pyansys-quality-report --repo-root . --json
    pyansys-quality-report --metadata
 

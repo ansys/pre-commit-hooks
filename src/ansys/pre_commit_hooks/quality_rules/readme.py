@@ -34,7 +34,6 @@ The checks cover:
 * Badges
     - PyAnsys badge
     - PyPI badge
-    - Codecov badge
     - Project license badge
     - GitHub Actions CI badge
 
@@ -70,7 +69,6 @@ __all__ = [
     "RM005",
     "RM006",
     "RM007",
-    "RM008",
 ]
 
 # Badge presence patterns, compiled once and reused across checks.
@@ -82,7 +80,6 @@ _PYPI_BADGE = re.compile(
     r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py",
     re.IGNORECASE,
 )
-_CODECOV_BADGE = re.compile(r"codecov\.io[^)\"']*badge|badge\.svg[^)\"']*codecov", re.IGNORECASE)
 _GH_CI_BADGE = re.compile(
     r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.IGNORECASE
 )
@@ -201,15 +198,6 @@ class RM002(README):
 
 
 class RM003(README):
-    """README has a Codecov badge."""
-
-    @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains a Codecov badge."""
-        return _badge_result(root, readme_path, _CODECOV_BADGE, "Codecov badge image")
-
-
-class RM004(README):
     """README has a license badge matching project metadata."""
 
     @staticmethod
@@ -235,7 +223,7 @@ class RM004(README):
         )
 
 
-class RM005(README):
+class RM004(README):
     """README has a GH-CI badge."""
 
     @staticmethod
@@ -244,7 +232,7 @@ class RM005(README):
         return _badge_result(root, readme_path, _GH_CI_BADGE, "GH-CI workflow badge.svg URL")
 
 
-class RM006(README):
+class RM005(README):
     """README has an installation section."""
 
     @staticmethod
@@ -253,7 +241,7 @@ class RM006(README):
         return _section_result(root, readme_path, _INSTALL_SECTION)
 
 
-class RM007(README):
+class RM006(README):
     """README has a documentation section."""
 
     @staticmethod
@@ -262,7 +250,7 @@ class RM007(README):
         return _section_result(root, readme_path, _DOCUMENTATION_SECTION)
 
 
-class RM008(README):
+class RM007(README):
     """README has a license section."""
 
     @staticmethod

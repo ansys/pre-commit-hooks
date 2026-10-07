@@ -32,7 +32,6 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
     RM005,
     RM006,
     RM007,
-    RM008,
 )
 
 __all__ = [
@@ -45,12 +44,11 @@ __all__ = [
     "RM005",
     "RM006",
     "RM007",
-    "RM008",
     "repo_review_checks",
     "repo_review_families",
 ]
 
-QUALITY_RULES = (RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007, RM008)
+QUALITY_RULES = (RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007)
 
 
 def repo_review_checks() -> dict[str, object]:

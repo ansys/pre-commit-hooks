@@ -28,15 +28,15 @@ import pytest
 
 from ansys.pre_commit_hooks import pyansys_quality_report as report
 from ansys.pre_commit_hooks.quality_rules import repo_review_checks
-from ansys.pre_commit_hooks.quality_rules.readme import RM004
+from ansys.pre_commit_hooks.quality_rules.readme import RM003
 
 
 def test_registry_contains_only_readme_rules():
     """The first release exposes only the README rule family."""
-    assert list(repo_review_checks()) == [f"RM{number:03d}" for number in range(9)]
+    assert list(repo_review_checks()) == [f"RM{number:03d}" for number in range(8)]
 
 
-def test_rm004_matches_mit_project_license(tmp_path):
+def test_rm003_matches_mit_project_license(tmp_path):
     """The README license badge should match the project license identifier."""
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
     (tmp_path / "README.rst").write_text(
@@ -44,10 +44,10 @@ def test_rm004_matches_mit_project_license(tmp_path):
         encoding="utf-8",
     )
 
-    assert RM004.check(tmp_path, "README.rst") is True
+    assert RM003.check(tmp_path, "README.rst") is True
 
 
-def test_rm004_warns_on_mismatched_project_license(tmp_path):
+def test_rm003_warns_on_mismatched_project_license(tmp_path):
     """A badge for a different license should warn."""
     (tmp_path / "pyproject.toml").write_text(
         '[project]\nlicense = "Apache-2.0"\n', encoding="utf-8"
@@ -57,19 +57,19 @@ def test_rm004_warns_on_mismatched_project_license(tmp_path):
         encoding="utf-8",
     )
 
-    result = RM004.check(tmp_path, "README.rst")
+    result = RM003.check(tmp_path, "README.rst")
     assert isinstance(result, str)
     assert result.startswith("WARN: Apache-2.0")
 
 
-def test_rm004_is_not_applicable_without_license_metadata(tmp_path):
+def test_rm003_is_not_applicable_without_license_metadata(tmp_path):
     """The license badge check is not applicable without project license metadata."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
 
-    assert RM004.check(tmp_path, "README.rst") is None
+    assert RM003.check(tmp_path, "README.rst") is None
 
 
-def test_rm004_is_not_applicable_with_invalid_pyproject(tmp_path):
+def test_rm003_is_not_applicable_with_invalid_pyproject(tmp_path):
     """Invalid TOML should not crash the README license check."""
     (tmp_path / "pyproject.toml").write_text("[project\nlicense = 'MIT'\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text(
@@ -77,7 +77,7 @@ def test_rm004_is_not_applicable_with_invalid_pyproject(tmp_path):
         encoding="utf-8",
     )
 
-    assert RM004.check(tmp_path, "README.rst") is None
+    assert RM003.check(tmp_path, "README.rst") is None
 
 
 def test_report_uses_actionable_warning_once(tmp_path, capsys):
@@ -105,7 +105,7 @@ def test_cli_emits_json_for_selected_rule(tmp_path, capsys):
 
 
 @pytest.mark.parametrize("license_value", ['"MIT"', '{ text = "MIT License" }'])
-def test_rm004_supports_license_text_metadata(tmp_path, license_value):
+def test_rm003_supports_license_text_metadata(tmp_path, license_value):
     """The license badge rule accepts PEP 639 text metadata."""
     (tmp_path / "pyproject.toml").write_text(
         f"[project]\nlicense = {license_value}\n", encoding="utf-8"
@@ -115,4 +115,4 @@ def test_rm004_supports_license_text_metadata(tmp_path, license_value):
         encoding="utf-8",
     )
 
-    assert RM004.check(tmp_path, "README.rst") is True
+    assert RM003.check(tmp_path, "README.rst") is True
