@@ -17,12 +17,18 @@ Add the hook to ``.pre-commit-config.yaml``:
      hooks:
      - id: pyansys-quality-report
        args: [--repo-root, ., --show-all]
+       verbose: true
 
-Run it directly from a repository root:
+Run the hook on the whole repository with ``pre-commit`` or ``prek``:
 
 .. code:: bash
 
-   pyansys-quality-report --repo-root .
+   pre-commit run pyansys-quality-report --all-files
+   prek run pyansys-quality-report --all-files
+
+The ``verbose: true`` option makes pre-commit print the report even when the hook
+passes. Without it, output from a passing hook, including ``--show-all`` results,
+is hidden.
 
 README rules
 ------------

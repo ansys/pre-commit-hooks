@@ -22,40 +22,17 @@
 
 """Initial README-only quality-check registry."""
 
-from ansys.pre_commit_hooks.quality_rules.readme import (
-    README,
-    RM000,
-    RM001,
-    RM002,
-    RM003,
-    RM004,
-    RM005,
-    RM006,
-    RM007,
-)
+from ansys.pre_commit_hooks.quality_rules.readme import README
 
-__all__ = [
-    "README",
-    "RM000",
-    "RM001",
-    "RM002",
-    "RM003",
-    "RM004",
-    "RM005",
-    "RM006",
-    "RM007",
-    "repo_review_checks",
-    "repo_review_families",
-]
+README_QUALITY_RULES = tuple(sorted(README.__subclasses__(), key=lambda rule: rule.__name__))
 
-QUALITY_RULES = (RM000, RM001, RM002, RM003, RM004, RM005, RM006, RM007)
+# Re-export each rule class so the names in ``__all__`` resolve.
+globals().update({rule.__name__: rule for rule in README_QUALITY_RULES})
+
+__all__ = ["README", "README_QUALITY_RULES", "repo_review_checks"]
+__all__.extend(rule.__name__ for rule in README_QUALITY_RULES)
 
 
 def repo_review_checks() -> dict[str, object]:
     """Return the supported README checks keyed by rule ID."""
-    return {rule.__name__: rule() for rule in QUALITY_RULES}
-
-
-def repo_review_families() -> dict[str, dict[str, str | int]]:
-    """Return metadata for the README rule family."""
-    return {"readme": {"name": "README", "order": 10}}
+    return {rule.__name__: rule() for rule in README_QUALITY_RULES}

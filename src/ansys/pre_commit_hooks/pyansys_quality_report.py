@@ -30,10 +30,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ansys.pre_commit_hooks.quality_rules import (
-    repo_review_checks,
-    repo_review_families,
-)
+from ansys.pre_commit_hooks.quality_rules import repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
     _first_doc_line,
     normalize_check_result,
@@ -60,7 +57,6 @@ def _execute_check(check_obj: Any, code: str, root: Path, detected_readme: str |
     return {
         "id": code,
         "family": check_obj.family,
-        "family_name": repo_review_families()[check_obj.family]["name"],
         "label": type(check_obj).__doc__ or code,
         "description": _first_doc_line(check_obj),
         "status": status,
