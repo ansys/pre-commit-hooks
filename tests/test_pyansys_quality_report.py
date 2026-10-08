@@ -62,22 +62,58 @@ def test_rm003_warns_on_mismatched_project_license(tmp_path):
     assert result.startswith("WARN: Apache-2.0")
 
 
-def test_rm003_is_not_applicable_without_license_metadata(tmp_path):
-    """The license badge check is not applicable without project license metadata."""
+def test_rm003_warns_without_license_metadata(tmp_path):
+    """The license badge cannot be verified without project license metadata."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
 
-    assert RM003.check(tmp_path, "README.rst") is None
+    result = RM003.check(tmp_path, "README.rst")
+    assert isinstance(result, str)
+    assert result.startswith("WARN: No project license found in pyproject.toml")
 
 
-def test_rm003_is_not_applicable_with_invalid_pyproject(tmp_path):
-    """Invalid TOML should not crash the README license check."""
+def test_rm003_warns_with_invalid_pyproject(tmp_path):
+    """Invalid TOML should warn instead of crashing the README license check."""
     (tmp_path / "pyproject.toml").write_text("[project\nlicense = 'MIT'\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text(
         ".. image:: https://img.shields.io/badge/License-MIT-yellow.svg\n",
         encoding="utf-8",
     )
 
-    assert RM003.check(tmp_path, "README.rst") is None
+    result = RM003.check(tmp_path, "README.rst")
+    assert isinstance(result, str)
+    assert result.startswith("WARN: No project license found")
+
+
+def test_missing_readme_is_reported_by_every_rule(tmp_path, capsys):
+    """Without a README no rule is skipped: each one fails or warns."""
+    (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
+
+    review = report._run_checks(tmp_path)
+    statuses = {item["id"]: item["status"] for item in review["results"]}
+
+    assert statuses == {
+        "RM000": "fail",
+        "RM001": "fail",
+        "RM002": "warn",
+        "RM003": "warn",
+        "RM004": "warn",
+        "RM005": "fail",
+        "RM006": "fail",
+        "RM007": "fail",
+    }
+    assert review["tally"] == {"pass": 0, "fail": 5, "warn": 3}
+    report._print_report(review)
+    output = capsys.readouterr().out
+    assert "PyPI badge image not found because no README file exists." in output
+    assert "na=" not in output
+
+
+def test_ignored_rules_are_the_only_way_to_skip_a_rule(tmp_path):
+    """Ignoring a rule removes it from the report."""
+    review = report._run_checks(tmp_path, ignored_codes={"RM001", "RM002"})
+
+    assert "RM001" not in {item["id"] for item in review["results"]}
+    assert "RM002" not in {item["id"] for item in review["results"]}
 
 
 @pytest.mark.parametrize(

@@ -71,12 +71,10 @@ def _first_doc_line(obj: Any) -> str:
     return lines[0] if lines else ""
 
 
-def normalize_check_result(raw: bool | str | None, check_obj: Any) -> tuple[str, str]:
+def normalize_check_result(raw: bool | str, check_obj: Any) -> tuple[str, str]:
     """Normalize a raw README rule result into a status and display message."""
     if raw is True:
         return "pass", ""
-    if raw is None:
-        return "na", ""
     if isinstance(raw, str):
         if raw.startswith("FAIL: "):
             return "fail", raw.removeprefix("FAIL: ")

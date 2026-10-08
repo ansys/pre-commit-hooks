@@ -86,7 +86,6 @@ def _run_checks(
     passed = sum(result["status"] == "pass" for result in results)
     failed = sum(result["status"] == "fail" for result in results)
     warned = sum(result["status"] == "warn" for result in results)
-    not_applicable = sum(result["status"] == "na" for result in results)
     scored = passed + failed
     return {
         "results": results,
@@ -94,7 +93,6 @@ def _run_checks(
             "pass": passed,
             "fail": failed,
             "warn": warned,
-            "na": not_applicable,
         },
         "score": round(passed / scored * 100) if scored else 0,
     }
@@ -122,10 +120,7 @@ def _print_report(review: dict[str, Any], *, show_all: bool = False) -> None:
     print("========================")
     print(f"Score: {review['score']}%")
     tally = review["tally"]
-    print(
-        f"Summary: pass={tally['pass']} fail={tally['fail']} "
-        f"warn={tally['warn']} na={tally['na']}"
-    )
+    print(f"Summary: pass={tally['pass']} fail={tally['fail']} warn={tally['warn']}")
     for item in review["results"]:
         if item["status"] == "pass" and not show_all:
             continue

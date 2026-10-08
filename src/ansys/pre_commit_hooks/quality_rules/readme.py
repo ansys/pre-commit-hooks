@@ -198,7 +198,7 @@ def _badge_result(
     pattern: re.Pattern,
     label: str,
     severity: str = "WARN",
-) -> bool | None | str:
+) -> bool | str:
     """Return the result of a README badge-presence check.
 
     Parameters
@@ -216,18 +216,17 @@ def _badge_result(
 
     Returns
     -------
-    bool, str or None
-        ``True`` if the badge is found, a ``"<severity>: ..."`` message if it is
-        missing, or ``None`` if there is no README.
+    bool or str
+        ``True`` if the badge is found, otherwise a ``"<severity>: ..."`` message.
+        A missing README file also produces the message.
     """
-    if not readme_path:
-        return None
-    if file_contains(root, readme_path, pattern):
+    if readme_path and file_contains(root, readme_path, pattern):
         return True
-    return f"{severity}: {label} not found in {readme_path}."
+    location = f"in {readme_path}" if readme_path else "because no README file exists"
+    return f"{severity}: {label} not found {location}."
 
 
-def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool | None:
+def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool:
     """Return whether a README section heading is present.
 
     Parameters
@@ -241,12 +240,10 @@ def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) ->
 
     Returns
     -------
-    bool or None
-        Whether the heading exists, or ``None`` if there is no README.
+    bool
+        Whether the heading exists. ``False`` if there is no README file.
     """
-    if not readme_path:
-        return None
-    return file_contains(root, readme_path, pattern)
+    return bool(readme_path) and file_contains(root, readme_path, pattern)
 
 
 class README:
@@ -310,12 +307,11 @@ class RM001(README):
 
     Notes
     -----
-    - A missing badge fails.
-    - The rule is not applicable when there is no README.
+    - A missing badge fails, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README contains a PyAnsys or Ansys badge.
 
         Parameters
@@ -327,9 +323,8 @@ class RM001(README):
 
         Returns
         -------
-        bool, str or None
-            ``True`` if the badge is found, a ``"FAIL: ..."`` message if it is
-            missing, or ``None`` if there is no README.
+        bool or str
+            ``True`` if the badge is found, otherwise a ``"FAIL: ..."`` message.
         """
         return _badge_result(
             root, readme_path, _ANSYS_BADGE, "PyAnsys or Ansys badge image", severity="FAIL"
@@ -344,12 +339,11 @@ class RM002(README):
 
     Notes
     -----
-    - A missing badge produces a warning.
-    - The rule is not applicable when there is no README.
+    - A missing badge produces a warning, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README contains a PyPI badge.
 
         Parameters
@@ -361,9 +355,8 @@ class RM002(README):
 
         Returns
         -------
-        bool, str or None
-            ``True`` if the badge is found, a ``"WARN: ..."`` message if it is
-            missing, or ``None`` if there is no README.
+        bool or str
+            ``True`` if the badge is found, otherwise a ``"WARN: ..."`` message.
         """
         return _badge_result(root, readme_path, _PYPI_BADGE, "PyPI badge image")
 
@@ -379,13 +372,14 @@ class RM003(README):
 
     Notes
     -----
-    - A missing badge, or a badge for a different license, produces a warning.
-    - The rule is not applicable when there is no README, when ``pyproject.toml``
-      is missing or invalid, or when it declares no license.
+    - A missing badge, or a badge for a different license, produces a warning,
+      including when there is no README file.
+    - A warning is also produced when ``pyproject.toml`` is missing or invalid, or
+      declares no license, because the badge cannot be verified.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README license badge matches project metadata.
 
         Parameters
@@ -397,27 +391,27 @@ class RM003(README):
 
         Returns
         -------
-        bool, str or None
-            ``True`` if a matching badge is found, a ``"WARN: ..."`` message if not,
-            or ``None`` if the rule is not applicable.
+        bool or str
+            ``True`` if a matching badge is found, otherwise a ``"WARN: ..."`` message.
         """
-        if not readme_path:
-            return None
-
         identifier = _project_license(root)
         if identifier is None:
-            return None
+            return (
+                "WARN: No project license found in pyproject.toml, so the README "
+                "license badge cannot be verified."
+            )
 
         term = _BADGE_IDENTIFIERS.get(identifier, re.escape(identifier))
         pattern = re.compile(
             rf"(?:img\.)?shields\.io[^)\"']*{term}|{term}[^)\"']*license",
             re.IGNORECASE,
         )
-        if file_contains(root, readme_path, pattern):
+        if readme_path and file_contains(root, readme_path, pattern):
             return True
+        location = f"in {readme_path}" if readme_path else "because no README file exists"
         return (
             f"WARN: {identifier} license badge image not found or does not "
-            f"match project metadata in {readme_path}."
+            f"match project metadata {location}."
         )
 
 
@@ -429,12 +423,11 @@ class RM004(README):
 
     Notes
     -----
-    - A missing badge produces a warning.
-    - The rule is not applicable when there is no README.
+    - A missing badge produces a warning, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None | str:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README contains a GitHub Actions badge.
 
         Parameters
@@ -446,9 +439,8 @@ class RM004(README):
 
         Returns
         -------
-        bool, str or None
-            ``True`` if the badge is found, a ``"WARN: ..."`` message if it is
-            missing, or ``None`` if there is no README.
+        bool or str
+            ``True`` if the badge is found, otherwise a ``"WARN: ..."`` message.
         """
         return _badge_result(root, readme_path, _GH_CI_BADGE, "GH-CI workflow badge.svg URL")
 
@@ -463,12 +455,11 @@ class RM005(README):
 
     Notes
     -----
-    - A missing heading fails.
-    - The rule is not applicable when there is no README.
+    - A missing heading fails, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root: Path, readme_path: str | None) -> bool:
         """Return whether the README has an installation heading.
 
         Parameters
@@ -480,9 +471,8 @@ class RM005(README):
 
         Returns
         -------
-        bool or None
-            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
-            if there is no README.
+        bool
+            ``True`` if the heading exists, ``False`` otherwise.
         """
         return _section_result(root, readme_path, _INSTALL_SECTION)
 
@@ -496,12 +486,11 @@ class RM006(README):
 
     Notes
     -----
-    - A missing heading fails.
-    - The rule is not applicable when there is no README.
+    - A missing heading fails, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root: Path, readme_path: str | None) -> bool:
         """Return whether the README has a documentation heading.
 
         Parameters
@@ -513,9 +502,8 @@ class RM006(README):
 
         Returns
         -------
-        bool or None
-            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
-            if there is no README.
+        bool
+            ``True`` if the heading exists, ``False`` otherwise.
         """
         return _section_result(root, readme_path, _DOCUMENTATION_SECTION)
 
@@ -529,12 +517,11 @@ class RM007(README):
 
     Notes
     -----
-    - A missing heading fails.
-    - The rule is not applicable when there is no README.
+    - A missing heading fails, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool | None:
+    def check(root: Path, readme_path: str | None) -> bool:
         """Return whether the README has a license heading.
 
         Parameters
@@ -546,8 +533,7 @@ class RM007(README):
 
         Returns
         -------
-        bool or None
-            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
-            if there is no README.
+        bool
+            ``True`` if the heading exists, ``False`` otherwise.
         """
         return _section_result(root, readme_path, _LICENSE_SECTION)
