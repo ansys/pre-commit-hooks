@@ -33,22 +33,10 @@ is hidden.
 README rules
 ------------
 
-- ``RM000``: README.rst exists; README.md is accepted with a warning.
-- ``RM001``: README contains a PyAnsys or Ansys badge; a missing badge fails.
-- ``RM002``: README contains a PyPI badge.
-- ``RM003``: README license badge matches ``[project].license`` metadata.
-- ``RM004``: README contains a GitHub Actions badge.
-- ``RM005``: README has an installation heading.
-- ``RM006``: README has a documentation heading.
-- ``RM007``: README has a license heading.
-
-Section checks require a heading containing the term, either a Markdown ``#``
-heading or an underlined reStructuredText heading. The word elsewhere in the
-text, such as in a badge URL, does not count.
-
-``RM003`` reads a string license identifier or the ``text`` or ``file`` form
-from ``pyproject.toml``. If project license metadata is not available, the rule
-is not applicable.
+The README rules are ``RM000`` to ``RM007``. Each rule is documented in the
+:doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/readme/index>`,
+including what it checks and whether a failed check produces a warning or a
+failure. Use the rule IDs with the ``--check`` and ``--ignore`` options.
 
 CLI options
 -----------

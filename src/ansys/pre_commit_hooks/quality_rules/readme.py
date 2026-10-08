@@ -87,7 +87,19 @@ _GH_CI_BADGE = re.compile(
 
 
 def _heading_pattern(term: str) -> re.Pattern:
-    """Match a Markdown (``#``) or underlined RST/Setext heading containing ``term``."""
+    """Return a regular expression matching a section heading.
+
+    Parameters
+    ----------
+    term : str
+        Regular expression that the heading text must contain.
+
+    Returns
+    -------
+    re.Pattern
+        Pattern matching a Markdown ``#`` heading or an underlined
+        reStructuredText heading whose text contains ``term``.
+    """
     title = rf"[^\n]*{term}[^\n]*"
     return re.compile(
         rf"^(?:#{{1,6}}[ \t]+{title}|{title}\n[=\-^~\"#*+`]{{3,}})[ \t]*$",
@@ -118,7 +130,21 @@ _LICENSE_IDENTIFIERS: tuple[tuple[re.Pattern, str], ...] = (
 
 
 def _declared_license_text(project: object, root: Path) -> str | None:
-    """Return the license text declared in the ``[project]`` table, if any."""
+    """Return the license text declared in the ``[project]`` table.
+
+    Parameters
+    ----------
+    project : object
+        Parsed ``[project]`` table from ``pyproject.toml``.
+    root : pathlib.Path
+        Repository root directory, used to read a ``license.file`` entry.
+
+    Returns
+    -------
+    str or None
+        The license string, the ``license.text`` value, or the content of the
+        ``license.file`` file. ``None`` if no license is declared.
+    """
     if not isinstance(project, dict):
         return None
 
@@ -134,7 +160,20 @@ def _declared_license_text(project: object, root: Path) -> str | None:
 
 
 def _project_license(root: Path) -> str | None:
-    """Return the project license identifier declared in ``pyproject.toml``."""
+    """Return the project license identifier declared in ``pyproject.toml``.
+
+    Parameters
+    ----------
+    root : pathlib.Path
+        Repository root directory.
+
+    Returns
+    -------
+    str or None
+        ``MIT``, ``Apache-2.0``, ``BSD-2-Clause`` or ``BSD-3-Clause`` for a
+        recognized license, or the declared text for any other license. ``None``
+        if ``pyproject.toml`` is missing, is not valid TOML, or declares no license.
+    """
     if not file_exists(root, "pyproject.toml"):
         return None
 
@@ -160,7 +199,27 @@ def _badge_result(
     label: str,
     severity: str = "WARN",
 ) -> bool | None | str:
-    """Return the result for a README badge-presence check."""
+    """Return the result of a README badge-presence check.
+
+    Parameters
+    ----------
+    root : pathlib.Path
+        Repository root directory.
+    readme_path : str or None
+        Name of the detected README file.
+    pattern : re.Pattern
+        Pattern that identifies the badge.
+    label : str
+        Badge description used in the message.
+    severity : str, default: "WARN"
+        Message prefix used when the badge is missing, ``"WARN"`` or ``"FAIL"``.
+
+    Returns
+    -------
+    bool, str or None
+        ``True`` if the badge is found, a ``"<severity>: ..."`` message if it is
+        missing, or ``None`` if there is no README.
+    """
     if not readme_path:
         return None
     if file_contains(root, readme_path, pattern):
@@ -169,24 +228,67 @@ def _badge_result(
 
 
 def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool | None:
-    """Return whether a README content section is present."""
+    """Return whether a README section heading is present.
+
+    Parameters
+    ----------
+    root : pathlib.Path
+        Repository root directory.
+    readme_path : str or None
+        Name of the detected README file.
+    pattern : re.Pattern
+        Heading pattern created by ``_heading_pattern``.
+
+    Returns
+    -------
+    bool or None
+        Whether the heading exists, or ``None`` if there is no README.
+    """
     if not readme_path:
         return None
     return file_contains(root, readme_path, pattern)
 
 
 class README:
-    """README rule family."""
+    """README rule family.
+
+    Base class of the README quality rules. Each rule is a subclass named
+    ``RM<nnn>`` with a static ``check`` method that receives the repository root
+    and the name of the detected README file.
+    """
 
     family = "readme"
 
 
 class RM000(README):
-    """README file exists."""
+    """README file exists.
+
+    Requires a ``README.rst`` or ``README.md`` file in the repository root.
+
+    Notes
+    -----
+    - ``README.rst`` passes.
+    - ``README.md`` is accepted with a warning, because ``README.rst`` is preferred.
+    - A missing README fails.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | str:
-        """Return whether the repository has a supported README file."""
+        """Return whether the repository has a supported README file.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool or str
+            ``True`` for ``README.rst``, a ``"WARN: ..."`` message for ``README.md``,
+            and ``False`` if no README exists.
+        """
         if readme_path == "README.rst":
             return True
         if readme_path == "README.md":
@@ -195,31 +297,106 @@ class RM000(README):
 
 
 class RM001(README):
-    """README has a PyAnsys or Ansys badge."""
+    """README has a PyAnsys or Ansys badge.
+
+    Looks for a PyAnsys or Ansys badge image, such as an ``img.shields.io`` badge
+    named ``Py-Ansys`` or ``Ansys``, or any badge image URL that contains
+    ``pyansys``. The ``ansys`` organization name in a GitHub URL, for example in a
+    workflow badge, does not count.
+
+    Notes
+    -----
+    - A missing badge fails.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains a PyAnsys or Ansys badge."""
+        """Return whether the README contains a PyAnsys or Ansys badge.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool, str or None
+            ``True`` if the badge is found, a ``"FAIL: ..."`` message if it is
+            missing, or ``None`` if there is no README.
+        """
         return _badge_result(
             root, readme_path, _ANSYS_BADGE, "PyAnsys or Ansys badge image", severity="FAIL"
         )
 
 
 class RM002(README):
-    """README has a PyPI badge."""
+    """README has a PyPI badge.
+
+    Looks for a PyPI badge image: an ``img.shields.io`` PyPI badge, a
+    ``pypi.org/project`` badge link, or a ``badge.fury.io/py`` badge.
+
+    Notes
+    -----
+    - A missing badge produces a warning.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains a PyPI badge."""
+        """Return whether the README contains a PyPI badge.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool, str or None
+            ``True`` if the badge is found, a ``"WARN: ..."`` message if it is
+            missing, or ``None`` if there is no README.
+        """
         return _badge_result(root, readme_path, _PYPI_BADGE, "PyPI badge image")
 
 
 class RM003(README):
-    """README has a license badge matching project metadata."""
+    """README has a license badge matching project metadata.
+
+    Reads the license declared in ``[project].license`` of ``pyproject.toml`` and
+    looks for a license badge for the same license. The declaration can be a license
+    string, a ``license.text`` value, or a ``license.file`` path whose content is
+    read. MIT, Apache-2.0, BSD-2-Clause and BSD-3-Clause are recognized. Any other
+    license is matched by its declared text.
+
+    Notes
+    -----
+    - A missing badge, or a badge for a different license, produces a warning.
+    - The rule is not applicable when there is no README, when ``pyproject.toml``
+      is missing or invalid, or when it declares no license.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README license badge matches project metadata."""
+        """Return whether the README license badge matches project metadata.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool, str or None
+            ``True`` if a matching badge is found, a ``"WARN: ..."`` message if not,
+            or ``None`` if the rule is not applicable.
+        """
         if not readme_path:
             return None
 
@@ -241,36 +418,132 @@ class RM003(README):
 
 
 class RM004(README):
-    """README has a GH-CI badge."""
+    """README has a GH-CI badge.
+
+    Looks for a GitHub Actions workflow badge, a ``badge.svg`` URL under
+    ``github.com/<owner>/<repository>/actions/workflows/``.
+
+    Notes
+    -----
+    - A missing badge produces a warning.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None | str:
-        """Return whether the README contains a GitHub Actions badge."""
+        """Return whether the README contains a GitHub Actions badge.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool, str or None
+            ``True`` if the badge is found, a ``"WARN: ..."`` message if it is
+            missing, or ``None`` if there is no README.
+        """
         return _badge_result(root, readme_path, _GH_CI_BADGE, "GH-CI workflow badge.svg URL")
 
 
 class RM005(README):
-    """README has an installation section."""
+    """README has an installation section.
+
+    Requires a heading that contains ``install``, such as ``Installation`` or
+    ``How to install``. Either a Markdown ``#`` heading or an underlined
+    reStructuredText heading is accepted. The word in body text or in a URL does
+    not count.
+
+    Notes
+    -----
+    - A missing heading fails.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README has an installation heading."""
+        """Return whether the README has an installation heading.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
+            if there is no README.
+        """
         return _section_result(root, readme_path, _INSTALL_SECTION)
 
 
 class RM006(README):
-    """README has a documentation section."""
+    """README has a documentation section.
+
+    Requires a heading that contains ``documentation``. Either a Markdown ``#``
+    heading or an underlined reStructuredText heading is accepted. The word in body
+    text or in a URL does not count.
+
+    Notes
+    -----
+    - A missing heading fails.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README has a documentation heading."""
+        """Return whether the README has a documentation heading.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
+            if there is no README.
+        """
         return _section_result(root, readme_path, _DOCUMENTATION_SECTION)
 
 
 class RM007(README):
-    """README has a license section."""
+    """README has a license section.
+
+    Requires a heading that contains ``license`` or ``licence``. Either a Markdown
+    ``#`` heading or an underlined reStructuredText heading is accepted. The word in
+    body text, or in a badge URL, does not count.
+
+    Notes
+    -----
+    - A missing heading fails.
+    - The rule is not applicable when there is no README.
+    """
 
     @staticmethod
     def check(root: Path, readme_path: str | None) -> bool | None:
-        """Return whether the README has a license heading."""
+        """Return whether the README has a license heading.
+
+        Parameters
+        ----------
+        root : pathlib.Path
+            Repository root directory.
+        readme_path : str or None
+            Name of the detected README file, or ``None`` if there is none.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if the heading exists, ``False`` if it is missing, or ``None``
+            if there is no README.
+        """
         return _section_result(root, readme_path, _LICENSE_SECTION)

@@ -152,6 +152,39 @@ def test_rm001_ignores_ansys_github_actions_badge(tmp_path):
     assert result.startswith("FAIL: ")
 
 
+@pytest.mark.parametrize("option", ["--check", "--ignore"])
+def test_cli_rejects_unknown_rule_ids(tmp_path, capsys, option):
+    """Unknown rule IDs stop the run instead of being silently skipped."""
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--repo-root", str(tmp_path), option, "RM001,RM999,xx1"])
+
+    error = capsys.readouterr().err
+    assert exit_info.value.code == 2
+    assert f"unknown rule ID(s) for {option}: RM999, XX1." in error
+    assert "Available rules: RM000, RM001" in error
+
+
+def test_cli_rejects_unknown_rule_ids_with_metadata(capsys):
+    """Metadata listing also rejects unknown rule IDs."""
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--metadata", "--check", "RM999"])
+
+    assert exit_info.value.code == 2
+    assert "unknown rule ID(s) for --check: RM999." in capsys.readouterr().err
+
+
+def test_cli_accepts_lowercase_rule_ids(tmp_path, capsys):
+    """Rule IDs are case-insensitive."""
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+
+    result = report.main(["--repo-root", str(tmp_path), "--check", "rm000", "--json"])
+
+    assert result == 0
+    assert [item["id"] for item in json.loads(capsys.readouterr().out)["results"]] == ["RM000"]
+
+
 def test_cli_emits_json_for_selected_rule(tmp_path, capsys):
     """The CLI should support selected checks and JSON output."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")

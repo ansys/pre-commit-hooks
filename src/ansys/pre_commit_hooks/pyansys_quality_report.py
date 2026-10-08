@@ -57,7 +57,7 @@ def _execute_check(check_obj: Any, code: str, root: Path, detected_readme: str |
     return {
         "id": code,
         "family": check_obj.family,
-        "label": type(check_obj).__doc__ or code,
+        "label": (type(check_obj).__doc__ or code).strip().splitlines()[0],
         "description": _first_doc_line(check_obj),
         "status": status,
         "detail": detail,
@@ -136,6 +136,17 @@ def _print_report(review: dict[str, Any], *, show_all: bool = False) -> None:
             print(f"  {detail}")
 
 
+def _validate_rule_ids(parser: argparse.ArgumentParser, option: str, codes: set[str]) -> None:
+    """Exit with an error if any rule ID passed to an option does not exist."""
+    available = sorted(repo_review_checks())
+    unknown = sorted(codes.difference(available))
+    if unknown:
+        parser.error(
+            f"unknown rule ID(s) for {option}: {', '.join(unknown)}. "
+            f"Available rules: {', '.join(available)}"
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run README quality checks for a repository."""
     parser = argparse.ArgumentParser(description="Run PyAnsys README quality checks.")
@@ -156,6 +167,9 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("Use only one of --show-all or --fails-only")
 
     selected_codes = _normalize_codes(args.check)
+    ignored_codes = _normalize_codes(args.ignore)
+    _validate_rule_ids(parser, "--check", selected_codes)
+    _validate_rule_ids(parser, "--ignore", ignored_codes)
     selected_families = {
         family.strip().lower() for value in args.family for family in value.split(",")
     }
@@ -172,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
     review = _run_checks(
         root,
         selected_codes=selected_codes,
-        ignored_codes=_normalize_codes(args.ignore),
+        ignored_codes=ignored_codes,
     )
     if args.json:
         print(json.dumps(review, indent=2))
