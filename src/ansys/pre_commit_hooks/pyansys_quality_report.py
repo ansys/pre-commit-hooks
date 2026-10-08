@@ -131,6 +131,26 @@ def _print_report(review: dict[str, Any], *, show_all: bool = False) -> None:
             print(f"  {detail}")
 
 
+def _find_project_root(start: Path) -> Path:
+    """Return the project root for a starting directory.
+
+    Parameters
+    ----------
+    start : pathlib.Path
+        Directory where the search begins, usually the current directory.
+
+    Returns
+    -------
+    pathlib.Path
+        The nearest directory that contains ``pyproject.toml``, searching ``start``
+        and then its parents. ``start`` if none contains one.
+    """
+    for directory in (start, *start.parents):
+        if (directory / "pyproject.toml").is_file():
+            return directory
+    return start
+
+
 def _validate_rule_ids(parser: argparse.ArgumentParser, option: str, codes: set[str]) -> None:
     """Exit with an error if any rule ID passed to an option does not exist."""
     available = sorted(repo_review_checks())
@@ -145,7 +165,6 @@ def _validate_rule_ids(parser: argparse.ArgumentParser, option: str, codes: set[
 def main(argv: list[str] | None = None) -> int:
     """Run README quality checks for a repository."""
     parser = argparse.ArgumentParser(description="Run PyAnsys README quality checks.")
-    parser.add_argument("--repo-root", default=".", help="Repository root to review.")
     parser.add_argument("--json", action="store_true", help="Emit a JSON report.")
     parser.add_argument("--metadata", action="store_true", help="List available rule metadata.")
     parser.add_argument("--check", action="append", default=[], help="Select rule IDs.")
@@ -175,9 +194,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(_metadata_report(selected_codes), indent=2))
         return 0
 
-    root = Path(args.repo_root).resolve()
-    if not root.is_dir():
-        raise FileNotFoundError(f"Repository root not found: {root}")
+    root = _find_project_root(Path.cwd())
     review = _run_checks(
         root,
         selected_codes=selected_codes,

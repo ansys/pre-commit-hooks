@@ -16,7 +16,7 @@ Add the hook to ``.pre-commit-config.yaml``:
      rev: v0.8.0
      hooks:
      - id: pyansys-quality-report
-       args: [--repo-root, ., --show-all]
+       args: [--show-all]
        verbose: true
 
 Run the hook on the whole repository with ``pre-commit`` or ``prek``:
@@ -29,6 +29,9 @@ Run the hook on the whole repository with ``pre-commit`` or ``prek``:
 The ``verbose: true`` option makes pre-commit print the report even when the hook
 passes. Without it, output from a passing hook, including ``--show-all`` results,
 is hidden.
+
+The project root is the nearest directory, starting from the current one and moving
+up, that contains a ``pyproject.toml``. If none does, the current directory is used.
 
 README rules
 ------------
@@ -46,10 +49,10 @@ or ignore checks with comma-separated or repeated IDs:
 
 .. code:: bash
 
-   pyansys-quality-report --repo-root . --show-all
-   pyansys-quality-report --repo-root . --check RM003
-   pyansys-quality-report --repo-root . --ignore RM004,RM005
-   pyansys-quality-report --repo-root . --json
+   pyansys-quality-report --show-all
+   pyansys-quality-report --check RM003
+   pyansys-quality-report --ignore RM004,RM005
+   pyansys-quality-report --json
    pyansys-quality-report --metadata
 
 Warnings and failures display their actual message once. Warnings do not produce

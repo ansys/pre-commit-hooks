@@ -50,7 +50,7 @@ The initial quality-report release contains README checks. Configure it in
      rev: v0.8.0
      hooks:
      - id: pyansys-quality-report
-       args: [--repo-root, ., --show-all]
+       args: [--show-all]
 
 Run ``pre-commit run pyansys-quality-report --all-files`` (or ``prek run
 pyansys-quality-report --all-files``) to show warnings and failures.

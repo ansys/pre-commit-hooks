@@ -23,6 +23,7 @@
 """Tests for the initial README quality-report release."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -189,12 +190,14 @@ def test_rm001_ignores_ansys_github_actions_badge(tmp_path):
 
 
 @pytest.mark.parametrize("option", ["--check", "--ignore"])
-def test_cli_rejects_unknown_rule_ids(tmp_path, capsys, option):
+def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     """Unknown rule IDs stop the run instead of being silently skipped."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
 
     with pytest.raises(SystemExit) as exit_info:
-        report.main(["--repo-root", str(tmp_path), option, "RM001,RM999,xx1"])
+        report.main([option, "RM001,RM999,xx1"])
 
     error = capsys.readouterr().err
     assert exit_info.value.code == 2
@@ -211,21 +214,57 @@ def test_cli_rejects_unknown_rule_ids_with_metadata(capsys):
     assert "unknown rule ID(s) for --check: RM999." in capsys.readouterr().err
 
 
-def test_cli_accepts_lowercase_rule_ids(tmp_path, capsys):
+def test_cli_accepts_lowercase_rule_ids(tmp_path, monkeypatch, capsys):
     """Rule IDs are case-insensitive."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
 
-    result = report.main(["--repo-root", str(tmp_path), "--check", "rm000", "--json"])
+    result = report.main(["--check", "rm000", "--json"])
 
     assert result == 0
     assert [item["id"] for item in json.loads(capsys.readouterr().out)["results"]] == ["RM000"]
 
 
-def test_cli_emits_json_for_selected_rule(tmp_path, capsys):
-    """The CLI should support selected checks and JSON output."""
-    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+def test_find_project_root_uses_nearest_pyproject(tmp_path):
+    """The root is the closest parent that contains a pyproject.toml."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    nested = tmp_path / "src" / "package"
+    nested.mkdir(parents=True)
+    (tmp_path / "src" / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
 
-    result = report.main(["--repo-root", str(tmp_path), "--check", "RM000", "--json"])
+    assert report._find_project_root(nested) == tmp_path / "src"
+    assert report._find_project_root(tmp_path) == tmp_path
+
+
+def test_find_project_root_falls_back_to_start(tmp_path, monkeypatch):
+    """Without any pyproject.toml the starting directory is the root."""
+    monkeypatch.setattr(Path, "is_file", lambda self: False)
+
+    assert report._find_project_root(tmp_path / "a" / "b") == tmp_path / "a" / "b"
+
+
+def test_cli_finds_project_root_from_subdirectory(tmp_path, monkeypatch, capsys):
+    """Running from a subdirectory reviews the project that contains it."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    nested = tmp_path / "src" / "package"
+    nested.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+
+    result = report.main(["--check", "RM000", "--json"])
+
+    assert result == 0
+    assert json.loads(capsys.readouterr().out)["results"][0]["status"] == "pass"
+
+
+def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
+    """The CLI should support selected checks and JSON output."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    result = report.main(["--check", "RM000", "--json"])
     payload = json.loads(capsys.readouterr().out)
 
     assert result == 0
