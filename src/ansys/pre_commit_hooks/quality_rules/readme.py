@@ -291,8 +291,10 @@ class RM000(README):
         """
         if readme_path == "README.rst":
             return True
-        # NOTE: RST format is preferred over MD because `twine check` doesn't do anything with MD file
-        # See https://github.com/pypa/twine/blob/main/twine/commands/check.py#L32 for more information
+        # NOTE: RST format is preferred over MD because `twine check` doesn't
+        # do anything with MD file
+        # See https://github.com/pypa/twine/blob/main/twine/commands/check.py#L32
+        # for more information
         if readme_path == "README.md":
             return "WARN: README.md found — PyAnsys preferred format is README.rst."
         return False
