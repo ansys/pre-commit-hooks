@@ -38,8 +38,8 @@ README rules
 
 The README rules are ``RM000`` to ``RM007``. Each rule is documented in the
 :doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/readme/index>`,
-including what it checks and whether a failed check produces a warning or a
-failure. Use the rule IDs with the ``--check`` and ``--ignore`` options.
+including what it checks and whether an unmet rule produces a ``WARNING`` or an
+``ERROR``. Use the rule IDs with the ``--check`` and ``--ignore`` options.
 
 CLI options
 -----------
@@ -55,7 +55,8 @@ or ignore checks with comma-separated or repeated IDs:
    pyansys-quality-report --json
    pyansys-quality-report --metadata
 
-Warnings and failures display their actual message once. Warnings do not produce
-a non-zero exit code; failures do. The score uses pass and fail results only.
+Every rule reports one of three statuses: ``PASSED``, ``WARNING``, or ``ERROR``.
+Warnings and errors display their actual message once. Warnings do not produce
+a non-zero exit code; errors do. The score uses passed and error results only.
 The ``--family`` option accepts ``readme`` in this release. The ``tech-review``
 hook remains unchanged.
