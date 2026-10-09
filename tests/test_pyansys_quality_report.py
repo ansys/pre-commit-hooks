@@ -154,7 +154,7 @@ def test_result_normalization_cannot_create_an_unsupported_status(raw, expected)
 
 def test_ignored_rules_are_the_only_way_to_skip_a_rule(tmp_path):
     """Ignoring a rule removes it from the report."""
-    review = report._run_checks(tmp_path, ignored_codes={"RM001", "RM002"})
+    review = report._run_checks(tmp_path, ignored_rule_ids={"RM001", "RM002"})
 
     assert "RM001" not in {item["id"] for item in review["results"]}
     assert "RM002" not in {item["id"] for item in review["results"]}
@@ -195,7 +195,7 @@ def test_section_rules_ignore_plain_text_mentions(tmp_path, rule, readme):
 def test_report_uses_actionable_failure_once(tmp_path, capsys):
     """A missing PyAnsys/Ansys badge fails and prints its message once."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
-    review = report._run_checks(tmp_path, selected_codes={"RM001"})
+    review = report._run_checks(tmp_path, selected_rule_ids={"RM001"})
     report._print_report(review)
 
     output = capsys.readouterr().out

@@ -25,190 +25,346 @@
 from __future__ import annotations
 
 import argparse
-import inspect
 import json
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
 
-from ansys.pre_commit_hooks.quality_rules import repo_review_checks
+from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
     ERROR,
     PASSED,
     WARNING,
+    RuleStatus,
     _first_doc_line,
     normalize_check_result,
     readme_path,
 )
 
 
-def _normalize_codes(values: list[str]) -> set[str]:
-    """Split repeated and comma-separated rule IDs into a normalized set."""
-    return {value.strip().upper() for item in values for value in item.split(",") if value.strip()}
+class _RuleResult(TypedDict):
+    """Serialized result for one quality-report rule."""
+
+    id: str
+    family: str
+    label: str
+    description: str
+    status: RuleStatus
+    detail: str
 
 
-def _execute_check(check_obj: Any, code: str, root: Path, detected_readme: str | None) -> dict:
-    """Run one check and normalize its report result."""
-    signature = inspect.signature(check_obj.check)
-    available = {"root": root, "readme_path": detected_readme}
-    kwargs = {name: available[name] for name in signature.parameters if name in available}
-    try:
-        raw = check_obj.check(**kwargs)
-    except (OSError, TypeError, ValueError) as exc:
-        raw = f"ERROR: Check error: {exc}"
+class _StatusTally(TypedDict):
+    """Counts for each public quality-report status."""
 
-    status, detail = normalize_check_result(raw, check_obj)
+    PASSED: int
+    WARNING: int
+    ERROR: int
+
+
+class _QualityReport(TypedDict):
+    """Complete quality-report payload."""
+
+    results: list[_RuleResult]
+    tally: _StatusTally
+    score: int
+
+
+class _RuleMetadata(TypedDict):
+    """Metadata that describes an available quality-report rule."""
+
+    id: str
+    family: str
+    name: str
+    description: str
+
+
+def _normalize_rule_ids(argument_values: list[str]) -> set[str]:
+    """Normalize repeated and comma-separated rule IDs.
+
+    Parameters
+    ----------
+    argument_values : list[str]
+        Values supplied to a repeatable rule-ID command-line option.
+
+    Returns
+    -------
+    set[str]
+        Uppercase rule IDs with surrounding whitespace and empty values
+        removed.
+    """
     return {
-        "id": code,
-        "family": check_obj.family,
-        "label": (type(check_obj).__doc__ or code).strip().splitlines()[0],
-        "description": _first_doc_line(check_obj),
-        "status": status,
-        "detail": detail,
+        rule_id.strip().upper()
+        for argument_value in argument_values
+        for rule_id in argument_value.split(",")
+        if rule_id.strip()
+    }
+
+
+def _execute_check(
+    rule: README,
+    rule_id: str,
+    repository_root: Path,
+    detected_readme_file: str | None,
+) -> _RuleResult:
+    """Execute and serialize one README rule.
+
+    Parameters
+    ----------
+    rule : README
+        Rule instance to execute.
+    rule_id : str
+        Stable identifier for the rule.
+    repository_root : pathlib.Path
+        Repository root directory.
+    detected_readme_file : str or None
+        Detected README path, or ``None`` when no supported README exists.
+
+    Returns
+    -------
+    _RuleResult
+        Normalized rule result ready for text or JSON output.
+    """
+    try:
+        raw_result = rule.check(repository_root, detected_readme_file)
+    except (OSError, TypeError, ValueError) as error:
+        raw_result = f"ERROR: Check error: {error}"
+
+    rule_status, result_detail = normalize_check_result(raw_result, rule)
+    return {
+        "id": rule_id,
+        "family": rule.family,
+        "label": (type(rule).__doc__ or rule_id).strip().splitlines()[0],
+        "description": _first_doc_line(rule),
+        "status": rule_status,
+        "detail": result_detail,
     }
 
 
 def _run_checks(
-    root: Path,
+    repository_root: Path,
     *,
-    selected_codes: set[str] | None = None,
-    ignored_codes: set[str] | None = None,
-) -> dict[str, Any]:
-    """Evaluate registered README checks for a repository directory."""
-    checks = repo_review_checks()
-    selected = {code.upper() for code in selected_codes or set()}
-    ignored = {code.upper() for code in ignored_codes or set()}
-    if selected:
-        checks = {code: item for code, item in checks.items() if code.upper() in selected}
-    readme = readme_path(root)
-    results = [
-        _execute_check(check, code, root, readme)
-        for code, check in checks.items()
-        if code.upper() not in ignored
+    selected_rule_ids: set[str] | None = None,
+    ignored_rule_ids: set[str] | None = None,
+) -> _QualityReport:
+    """Evaluate registered README rules for a repository.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+    selected_rule_ids : set[str] or None, optional
+        Rule IDs to evaluate. All rules are evaluated when omitted or empty.
+    ignored_rule_ids : set[str] or None, optional
+        Rule IDs to omit from the report.
+
+    Returns
+    -------
+    _QualityReport
+        Rule results, status counts, and the resulting score.
+    """
+    registered_rules = repo_review_checks()
+    normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
+    normalized_ignored_ids = {rule_id.upper() for rule_id in ignored_rule_ids or set()}
+    if normalized_selected_ids:
+        registered_rules = {
+            rule_id: rule
+            for rule_id, rule in registered_rules.items()
+            if rule_id.upper() in normalized_selected_ids
+        }
+    detected_readme_file = readme_path(repository_root)
+    rule_results = [
+        _execute_check(rule, rule_id, repository_root, detected_readme_file)
+        for rule_id, rule in registered_rules.items()
+        if rule_id.upper() not in normalized_ignored_ids
     ]
 
-    passed = sum(result["status"] == PASSED for result in results)
-    warned = sum(result["status"] == WARNING for result in results)
-    errors = sum(result["status"] == ERROR for result in results)
-    scored = passed + errors
+    passed_count = sum(rule_result["status"] == PASSED for rule_result in rule_results)
+    warning_count = sum(rule_result["status"] == WARNING for rule_result in rule_results)
+    error_count = sum(rule_result["status"] == ERROR for rule_result in rule_results)
+    scored_rule_count = passed_count + error_count
     return {
-        "results": results,
+        "results": rule_results,
         "tally": {
-            PASSED: passed,
-            WARNING: warned,
-            ERROR: errors,
+            PASSED: passed_count,
+            WARNING: warning_count,
+            ERROR: error_count,
         },
-        "score": round(passed / scored * 100) if scored else 0,
+        "score": (round(passed_count / scored_rule_count * 100) if scored_rule_count else 0),
     }
 
 
-def _metadata_report(selected_codes: set[str] | None = None) -> list[dict[str, str]]:
-    """Return metadata for available README checks."""
-    checks = repo_review_checks()
-    selected = {code.upper() for code in selected_codes or set()}
+def _metadata_report(
+    selected_rule_ids: set[str] | None = None,
+) -> list[_RuleMetadata]:
+    """Return metadata for available README rules.
+
+    Parameters
+    ----------
+    selected_rule_ids : set[str] or None, optional
+        Rule IDs to include. All rules are included when omitted or empty.
+
+    Returns
+    -------
+    list[_RuleMetadata]
+        Metadata records ordered by rule ID.
+    """
+    registered_rules = repo_review_checks()
+    normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     return [
         {
-            "id": code,
-            "family": check.family,
-            "name": _first_doc_line(check),
-            "description": (type(check).__doc__ or "").strip().splitlines()[0],
+            "id": rule_id,
+            "family": rule.family,
+            "name": _first_doc_line(rule),
+            "description": (type(rule).__doc__ or "").strip().splitlines()[0],
         }
-        for code, check in sorted(checks.items())
-        if not selected or code.upper() in selected
+        for rule_id, rule in sorted(registered_rules.items())
+        if not normalized_selected_ids or rule_id.upper() in normalized_selected_ids
     ]
 
 
-def _print_report(review: dict[str, Any], *, show_all: bool = False) -> None:
-    """Print the report, using problem messages as warning/failure headlines."""
+def _print_report(quality_report: _QualityReport, *, show_all: bool = False) -> None:
+    """Print a human-readable quality report.
+
+    Parameters
+    ----------
+    quality_report : _QualityReport
+        Report returned by ``_run_checks``.
+    show_all : bool, default: False
+        Whether to include rules with a ``PASSED`` status.
+    """
     print("PyAnsys quality report")
     print("========================")
-    print(f"Score: {review['score']}%")
-    tally = review["tally"]
-    print(f"Summary: {PASSED}={tally[PASSED]} {WARNING}={tally[WARNING]} {ERROR}={tally[ERROR]}")
-    for item in review["results"]:
-        if item["status"] == PASSED and not show_all:
+    print(f"Score: {quality_report['score']}%")
+    status_tally = quality_report["tally"]
+    print(
+        f"Summary: {PASSED}={status_tally[PASSED]} "
+        f"{WARNING}={status_tally[WARNING]} {ERROR}={status_tally[ERROR]}"
+    )
+    for rule_result in quality_report["results"]:
+        if rule_result["status"] == PASSED and not show_all:
             continue
-        detail = item["detail"] or ""
-        headline = detail if item["status"] in {WARNING, ERROR} and detail else item["label"]
-        print(f"- [{item['status']}] {item['id']} - {headline}")
-        if detail and item["status"] not in {WARNING, ERROR} and detail != headline:
-            print(f"  {detail}")
+        result_detail = rule_result["detail"]
+        display_headline = (
+            result_detail
+            if rule_result["status"] in {WARNING, ERROR} and result_detail
+            else rule_result["label"]
+        )
+        print(f"- [{rule_result['status']}] {rule_result['id']} - " f"{display_headline}")
+        if (
+            result_detail
+            and rule_result["status"] not in {WARNING, ERROR}
+            and result_detail != display_headline
+        ):
+            print(f"  {result_detail}")
 
 
-def _find_project_root(start: Path) -> Path:
+def _find_project_root(start_directory: Path) -> Path:
     """Return the project root for a starting directory.
 
     Parameters
     ----------
-    start : pathlib.Path
+    start_directory : pathlib.Path
         Directory where the search begins, usually the current directory.
 
     Returns
     -------
     pathlib.Path
-        The nearest directory that contains ``pyproject.toml``, searching ``start``
-        and then its parents. ``start`` if none contains one.
+        Nearest directory that contains ``pyproject.toml``, searching
+        ``start_directory`` and then its parents. ``start_directory`` is
+        returned if none contains one.
     """
-    for directory in (start, *start.parents):
+    for directory in (start_directory, *start_directory.parents):
         if (directory / "pyproject.toml").is_file():
             return directory
-    return start
+    return start_directory
 
 
-def _validate_rule_ids(parser: argparse.ArgumentParser, option: str, codes: set[str]) -> None:
-    """Exit with an error if any rule ID passed to an option does not exist."""
-    available = sorted(repo_review_checks())
-    unknown = sorted(codes.difference(available))
-    if unknown:
-        parser.error(
-            f"unknown rule ID(s) for {option}: {', '.join(unknown)}. "
-            f"Available rules: {', '.join(available)}"
+def _validate_rule_ids(
+    argument_parser: argparse.ArgumentParser,
+    option_name: str,
+    rule_ids: set[str],
+) -> None:
+    """Validate rule IDs supplied to a command-line option.
+
+    Parameters
+    ----------
+    argument_parser : argparse.ArgumentParser
+        Parser used to report invalid input.
+    option_name : str
+        Command-line option associated with ``rule_ids``.
+    rule_ids : set[str]
+        Normalized rule IDs to validate.
+    """
+    available_rule_ids = sorted(repo_review_checks())
+    unknown_rule_ids = sorted(rule_ids.difference(available_rule_ids))
+    if unknown_rule_ids:
+        argument_parser.error(
+            f"unknown rule ID(s) for {option_name}: {', '.join(unknown_rule_ids)}. "
+            f"Available rules: {', '.join(available_rule_ids)}"
         )
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run README quality checks for a repository."""
-    parser = argparse.ArgumentParser(description="Run PyAnsys README quality checks.")
-    parser.add_argument("--json", action="store_true", help="Emit a JSON report.")
-    parser.add_argument("--metadata", action="store_true", help="List available rule metadata.")
-    parser.add_argument("--check", action="append", default=[], help="Select rule IDs.")
-    parser.add_argument("--family", action="append", default=[], help="Select rule family.")
-    parser.add_argument("--ignore", action="append", default=[], help="Ignore rule IDs.")
-    parser.add_argument("--show-all", action="store_true", help="Include passing checks.")
-    parser.add_argument(
+    """Run README quality checks for a repository.
+
+    Parameters
+    ----------
+    argv : list[str] or None, optional
+        Command-line arguments without the executable name. ``sys.argv`` is
+        used when omitted.
+
+    Returns
+    -------
+    int
+        ``1`` when any rule reports ``ERROR``, otherwise ``0``.
+    """
+    argument_parser = argparse.ArgumentParser(description="Run PyAnsys README quality checks.")
+    argument_parser.add_argument("--json", action="store_true", help="Emit a JSON report.")
+    argument_parser.add_argument(
+        "--metadata", action="store_true", help="List available rule metadata."
+    )
+    argument_parser.add_argument("--check", action="append", default=[], help="Select rule IDs.")
+    argument_parser.add_argument(
+        "--family", action="append", default=[], help="Select rule family."
+    )
+    argument_parser.add_argument("--ignore", action="append", default=[], help="Ignore rule IDs.")
+    argument_parser.add_argument("--show-all", action="store_true", help="Include passing checks.")
+    argument_parser.add_argument(
         "--fails-only",
         action="store_true",
         help="Show warnings and errors only (the default).",
     )
-    args = parser.parse_args(argv)
-    if args.show_all and args.fails_only:
-        parser.error("Use only one of --show-all or --fails-only")
+    arguments = argument_parser.parse_args(argv)
+    if arguments.show_all and arguments.fails_only:
+        argument_parser.error("Use only one of --show-all or --fails-only")
 
-    selected_codes = _normalize_codes(args.check)
-    ignored_codes = _normalize_codes(args.ignore)
-    _validate_rule_ids(parser, "--check", selected_codes)
-    _validate_rule_ids(parser, "--ignore", ignored_codes)
-    selected_families = {
-        family.strip().lower() for value in args.family for family in value.split(",")
+    selected_rule_ids = _normalize_rule_ids(arguments.check)
+    ignored_rule_ids = _normalize_rule_ids(arguments.ignore)
+    _validate_rule_ids(argument_parser, "--check", selected_rule_ids)
+    _validate_rule_ids(argument_parser, "--ignore", ignored_rule_ids)
+    selected_rule_families = {
+        family.strip().lower()
+        for argument_value in arguments.family
+        for family in argument_value.split(",")
     }
-    if selected_families and selected_families - {"readme"}:
-        parser.error("This release supports only the readme rule family")
+    if selected_rule_families and selected_rule_families - {"readme"}:
+        argument_parser.error("This release supports only the readme rule family")
 
-    if args.metadata:
-        print(json.dumps(_metadata_report(selected_codes), indent=2))
+    if arguments.metadata:
+        print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
         return 0
 
-    root = _find_project_root(Path.cwd())
-    review = _run_checks(
-        root,
-        selected_codes=selected_codes,
-        ignored_codes=ignored_codes,
+    repository_root = _find_project_root(Path.cwd())
+    quality_report = _run_checks(
+        repository_root,
+        selected_rule_ids=selected_rule_ids,
+        ignored_rule_ids=ignored_rule_ids,
     )
-    if args.json:
-        print(json.dumps(review, indent=2))
-        return 1 if review["tally"][ERROR] else 0
+    if arguments.json:
+        print(json.dumps(quality_report, indent=2))
+        return 1 if quality_report["tally"][ERROR] else 0
 
-    _print_report(review, show_all=args.show_all)
-    return 1 if review["tally"][ERROR] else 0
+    _print_report(quality_report, show_all=arguments.show_all)
+    return 1 if quality_report["tally"][ERROR] else 0
 
 
 if __name__ == "__main__":

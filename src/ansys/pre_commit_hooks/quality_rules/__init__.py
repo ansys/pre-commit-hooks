@@ -24,15 +24,23 @@
 
 from ansys.pre_commit_hooks.quality_rules.readme import README
 
-README_QUALITY_RULES = tuple(sorted(README.__subclasses__(), key=lambda rule: rule.__name__))
+README_QUALITY_RULES: tuple[type[README], ...] = tuple(
+    sorted(README.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
 
 # Re-export each rule class so the names in ``__all__`` resolve.
-globals().update({rule.__name__: rule for rule in README_QUALITY_RULES})
+globals().update({rule_class.__name__: rule_class for rule_class in README_QUALITY_RULES})
 
 __all__ = ["README", "README_QUALITY_RULES", "repo_review_checks"]
-__all__.extend(rule.__name__ for rule in README_QUALITY_RULES)
+__all__.extend(rule_class.__name__ for rule_class in README_QUALITY_RULES)
 
 
-def repo_review_checks() -> dict[str, object]:
-    """Return the supported README checks keyed by rule ID."""
-    return {rule.__name__: rule() for rule in README_QUALITY_RULES}
+def repo_review_checks() -> dict[str, README]:
+    """Return the registered README rule instances.
+
+    Returns
+    -------
+    dict[str, README]
+        Rule instances keyed by their rule IDs.
+    """
+    return {rule_class.__name__: rule_class() for rule_class in README_QUALITY_RULES}
