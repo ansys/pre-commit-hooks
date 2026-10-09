@@ -22,6 +22,7 @@
 
 """Tests for the initial README quality-report release."""
 
+from io import StringIO
 import json
 from pathlib import Path
 
@@ -201,8 +202,54 @@ def test_report_uses_actionable_failure_once(tmp_path, capsys):
     output = capsys.readouterr().out
     message = "PyAnsys or Ansys badge image not found in README.rst."
     assert output.count(message) == 1
-    assert f"- [ERROR] RM001 - {message}" in output.splitlines()
+    assert f"  ERROR   RM001  {message}" in output.splitlines()
     assert review["tally"]["ERROR"] == 1
+
+
+def test_report_colors_each_status(tmp_path, capsys):
+    """The colored report should assign a distinct color to every status."""
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    review = report._run_checks(
+        tmp_path,
+        selected_rule_ids={"RM000", "RM001", "RM002"},
+    )
+
+    report._print_report(review, show_all=True, colors_enabled=True)
+
+    output = capsys.readouterr().out
+    assert "\033[32mPASSED " in output
+    assert "\033[33mWARNING" in output
+    assert "\033[31mERROR  " in output
+    assert output.count("\033[0m") >= 4
+
+
+@pytest.mark.parametrize(
+    ("color_mode", "environment", "expected"),
+    [
+        ("always", {"NO_COLOR": "1"}, True),
+        ("never", {"FORCE_COLOR": "1"}, False),
+        ("auto", {"NO_COLOR": ""}, False),
+        ("auto", {"FORCE_COLOR": "1"}, True),
+        ("auto", {}, False),
+    ],
+)
+def test_color_selection_for_non_terminal_stream(color_mode, environment, expected):
+    """Explicit modes and standard environment variables should control color."""
+    assert report._colors_enabled(color_mode, StringIO(), environment) is expected
+
+
+def test_report_without_visible_checks_has_clear_message(tmp_path, capsys):
+    """A passing default report should explain why no checks are listed."""
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    review = report._run_checks(tmp_path, selected_rule_ids={"RM000"})
+
+    report._print_report(review)
+
+    output = capsys.readouterr().out
+    assert "Status summary" in output
+    assert "Checks" in output
+    assert "No warnings or errors." in output
+    assert "\033[" not in output
 
 
 @pytest.mark.parametrize(
@@ -393,6 +440,34 @@ def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
     assert result == 0
     assert [item["id"] for item in payload["results"]] == ["RM000"]
     assert payload["results"][0]["status"] == "PASSED"
+
+
+def test_cli_colors_captured_output_by_default(tmp_path, monkeypatch, capsys):
+    """The CLI should color pre-commit and CI output by default."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    result = report.main(["--check", "RM000", "--show-all"])
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "\033[32mPASSED " in output
+    assert "RM000" in output
+
+
+def test_cli_can_disable_color(tmp_path, monkeypatch, capsys):
+    """The CLI should support plain output when requested."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    result = report.main(["--check", "RM000", "--show-all", "--color", "never"])
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "\033[" not in output
+    assert "PASSED" in output
 
 
 def test_cli_exit_code_distinguishes_warnings_from_errors(tmp_path, monkeypatch, capsys):

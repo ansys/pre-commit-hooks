@@ -52,10 +52,16 @@ or ignore checks with comma-separated or repeated IDs:
    pyansys-quality-report --show-all
    pyansys-quality-report --check RM003
    pyansys-quality-report --ignore RM004,RM005
+   pyansys-quality-report --color always
    pyansys-quality-report --json
    pyansys-quality-report --metadata
 
 Every rule reports one of three statuses: ``PASSED``, ``WARNING``, or ``ERROR``.
+The text report colors these statuses green, yellow, and red by default,
+including captured pre-commit and CI output. Use ``--color never`` for plain
+text or ``--color auto`` to enable colors only for interactive terminals. In
+automatic mode, ``NO_COLOR`` disables color and a nonzero ``FORCE_COLOR`` value
+enables it.
 Warnings and errors display their actual message once. Warnings do not produce
 a non-zero exit code; errors do. The score uses passed and error results only.
 The ``--family`` option accepts ``readme`` in this release. The ``tech-review``

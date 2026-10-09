@@ -25,9 +25,12 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 import json
+import os
 from pathlib import Path
-from typing import TypedDict
+import sys
+from typing import Final, Literal, TextIO, TypeAlias, TypedDict
 
 from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
@@ -39,6 +42,16 @@ from ansys.pre_commit_hooks.quality_rules.common import (
     normalize_check_result,
     readme_path,
 )
+
+ColorMode: TypeAlias = Literal["auto", "always", "never"]
+
+_ANSI_RESET: Final = "\033[0m"
+_ANSI_BOLD: Final = "\033[1m"
+_STATUS_COLORS: Final[dict[RuleStatus, str]] = {
+    PASSED: "\033[32m",
+    WARNING: "\033[33m",
+    ERROR: "\033[31m",
+}
 
 
 class _RuleResult(TypedDict):
@@ -75,6 +88,103 @@ class _RuleMetadata(TypedDict):
     family: str
     name: str
     description: str
+
+
+def _colors_enabled(
+    color_mode: ColorMode,
+    output_stream: TextIO,
+    environment: Mapping[str, str],
+) -> bool:
+    """Return whether ANSI colors should be emitted.
+
+    Parameters
+    ----------
+    color_mode : {"auto", "always", "never"}
+        Requested color behavior.
+    output_stream : typing.TextIO
+        Stream that receives the report.
+    environment : collections.abc.Mapping[str, str]
+        Process environment used to inspect ``NO_COLOR`` and ``FORCE_COLOR``.
+
+    Returns
+    -------
+    bool
+        Whether ANSI color sequences should be included.
+    """
+    if color_mode == "always":
+        return True
+    if color_mode == "never" or "NO_COLOR" in environment:
+        return False
+    if environment.get("FORCE_COLOR", "") not in {"", "0"}:
+        return True
+    return output_stream.isatty()
+
+
+def _styled(text: str, ansi_style: str, *, colors_enabled: bool) -> str:
+    """Apply an ANSI style when colors are enabled.
+
+    Parameters
+    ----------
+    text : str
+        Text to style.
+    ansi_style : str
+        ANSI escape sequence applied before the text.
+    colors_enabled : bool
+        Whether to include ANSI escape sequences.
+
+    Returns
+    -------
+    str
+        Styled text, or the original text when colors are disabled.
+    """
+    if not colors_enabled:
+        return text
+    return f"{ansi_style}{text}{_ANSI_RESET}"
+
+
+def _status_text(status: RuleStatus, *, colors_enabled: bool) -> str:
+    """Format a status using its assigned color.
+
+    Parameters
+    ----------
+    status : RuleStatus
+        Status to format.
+    colors_enabled : bool
+        Whether to include ANSI escape sequences.
+
+    Returns
+    -------
+    str
+        Left-aligned status text with optional color.
+    """
+    padded_status = f"{status:<7}"
+    return _styled(
+        padded_status,
+        _STATUS_COLORS[status],
+        colors_enabled=colors_enabled,
+    )
+
+
+def _overall_status(quality_report: _QualityReport) -> RuleStatus:
+    """Return the highest status present in a quality report.
+
+    Parameters
+    ----------
+    quality_report : _QualityReport
+        Report returned by ``_run_checks``.
+
+    Returns
+    -------
+    RuleStatus
+        ``ERROR`` when errors are present, otherwise ``WARNING`` when warnings
+        are present, and ``PASSED`` otherwise.
+    """
+    status_tally = quality_report["tally"]
+    if status_tally[ERROR]:
+        return ERROR
+    if status_tally[WARNING]:
+        return WARNING
+    return PASSED
 
 
 def _normalize_rule_ids(argument_values: list[str]) -> set[str]:
@@ -221,7 +331,12 @@ def _metadata_report(
     ]
 
 
-def _print_report(quality_report: _QualityReport, *, show_all: bool = False) -> None:
+def _print_report(
+    quality_report: _QualityReport,
+    *,
+    show_all: bool = False,
+    colors_enabled: bool = False,
+) -> None:
     """Print a human-readable quality report.
 
     Parameters
@@ -230,25 +345,51 @@ def _print_report(quality_report: _QualityReport, *, show_all: bool = False) -> 
         Report returned by ``_run_checks``.
     show_all : bool, default: False
         Whether to include rules with a ``PASSED`` status.
+    colors_enabled : bool, default: False
+        Whether to color status text with ANSI escape sequences.
     """
-    print("PyAnsys quality report")
-    print("========================")
-    print(f"Score: {quality_report['score']}%")
-    status_tally = quality_report["tally"]
-    print(
-        f"Summary: {PASSED}={status_tally[PASSED]} "
-        f"{WARNING}={status_tally[WARNING]} {ERROR}={status_tally[ERROR]}"
+    title = "PyAnsys quality report"
+    print(_styled(title, _ANSI_BOLD, colors_enabled=colors_enabled))
+    print("=" * len(title))
+
+    overall_status = _overall_status(quality_report)
+    formatted_score = _styled(
+        f"{quality_report['score']}%",
+        _STATUS_COLORS[overall_status],
+        colors_enabled=colors_enabled,
     )
-    for rule_result in quality_report["results"]:
-        if rule_result["status"] == PASSED and not show_all:
-            continue
+    print(f"Score: {formatted_score}")
+
+    status_tally = quality_report["tally"]
+    print()
+    print(_styled("Status summary", _ANSI_BOLD, colors_enabled=colors_enabled))
+    for status in (PASSED, WARNING, ERROR):
+        print(
+            f"  {_status_text(status, colors_enabled=colors_enabled)} " f"{status_tally[status]:>3}"
+        )
+
+    visible_results = [
+        rule_result
+        for rule_result in quality_report["results"]
+        if show_all or rule_result["status"] != PASSED
+    ]
+    print()
+    print(_styled("Checks", _ANSI_BOLD, colors_enabled=colors_enabled))
+    if not visible_results:
+        print("  No warnings or errors.")
+        return
+
+    for rule_result in visible_results:
         result_detail = rule_result["detail"]
         display_headline = (
             result_detail
             if rule_result["status"] in {WARNING, ERROR} and result_detail
             else rule_result["label"]
         )
-        print(f"- [{rule_result['status']}] {rule_result['id']} - " f"{display_headline}")
+        print(
+            f"  {_status_text(rule_result['status'], colors_enabled=colors_enabled)} "
+            f"{rule_result['id']}  {display_headline}"
+        )
         if (
             result_detail
             and rule_result["status"] not in {WARNING, ERROR}
@@ -333,6 +474,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Show warnings and errors only (the default).",
     )
+    argument_parser.add_argument(
+        "--color",
+        choices=("auto", "always", "never"),
+        default="always",
+        help="Control ANSI colors (default: always).",
+    )
     arguments = argument_parser.parse_args(argv)
     if arguments.show_all and arguments.fails_only:
         argument_parser.error("Use only one of --show-all or --fails-only")
@@ -363,7 +510,16 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(quality_report, indent=2))
         return 1 if quality_report["tally"][ERROR] else 0
 
-    _print_report(quality_report, show_all=arguments.show_all)
+    colors_enabled = _colors_enabled(
+        arguments.color,
+        sys.stdout,
+        os.environ,
+    )
+    _print_report(
+        quality_report,
+        show_all=arguments.show_all,
+        colors_enabled=colors_enabled,
+    )
     return 1 if quality_report["tally"][ERROR] else 0
 
 

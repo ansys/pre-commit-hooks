@@ -56,8 +56,9 @@ The initial quality-report release contains README checks. Configure it in
 Run ``pre-commit run pyansys-quality-report --all-files`` (or ``prek run
 pyansys-quality-report --all-files``) to show warnings and errors.
 Use ``--show-all`` to include passing checks, ``--check RM003`` to select a
-rule, ``--ignore RM004`` to omit one, or ``--json`` for JSON output. The current
-rules and options are documented in the
+rule, ``--ignore RM004`` to omit one, ``--color never`` for plain output, or
+``--json`` for JSON output. Colors are enabled by default, including for
+captured output. The current rules and options are documented in the
 `quality report guide <https://pre-commit-hooks.docs.ansys.com/version/stable/getting-started/pyansys-quality-report/index.html>`_.
 
 How to install
