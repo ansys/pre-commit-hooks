@@ -25,35 +25,57 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
-from typing import Any
+from typing import Any, Final, Literal, TypeAlias
 
 __all__ = [
     "_first_doc_line",
-    "file_contains",
+    "ERROR",
     "file_content",
     "file_exists",
     "normalize_check_result",
+    "PASSED",
     "readme_path",
+    "RuleStatus",
+    "WARNING",
 ]
+
+RuleStatus: TypeAlias = Literal["PASSED", "WARNING", "ERROR"]
+PASSED: Final[RuleStatus] = "PASSED"
+WARNING: Final[RuleStatus] = "WARNING"
+ERROR: Final[RuleStatus] = "ERROR"
+
+
+def _repository_file(root: Path, path: str) -> Path | None:
+    """Return a resolved repository file path without allowing path traversal."""
+    try:
+        resolved_root = root.resolve()
+        resolved_path = resolved_root.joinpath(path).resolve()
+        resolved_path.relative_to(resolved_root)
+    except (OSError, RuntimeError, ValueError):
+        return None
+    return resolved_path
 
 
 def file_exists(root: Path, path: str) -> bool:
     """Return whether a file exists under the repository root."""
-    return root.joinpath(path).is_file()
-
-
-def file_content(root: Path, path: str) -> str:
-    """Return file text, or an empty string when it cannot be read."""
+    resolved_path = _repository_file(root, path)
+    if resolved_path is None:
+        return False
     try:
-        return root.joinpath(path).read_text(encoding="utf-8")
+        return resolved_path.is_file()
+    except OSError:
+        return False
+
+
+def file_content(root: Path, path: str) -> str | None:
+    """Return repository file text, or ``None`` when it cannot be read safely."""
+    resolved_path = _repository_file(root, path)
+    if resolved_path is None:
+        return None
+    try:
+        return resolved_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError, ValueError):
-        return ""
-
-
-def file_contains(root: Path, path: str, pattern: re.Pattern) -> bool:
-    """Return whether a file's contents match the given regular expression."""
-    return bool(pattern.search(file_content(root, path)))
+        return None
 
 
 def readme_path(root: Path) -> str | None:
@@ -71,19 +93,17 @@ def _first_doc_line(obj: Any) -> str:
     return lines[0] if lines else ""
 
 
-def normalize_check_result(raw: bool | str, check_obj: Any) -> tuple[str, str]:
+def normalize_check_result(raw: bool | str, check_obj: Any) -> tuple[RuleStatus, str]:
     """Normalize a raw README rule result into a status and display message."""
     if raw is True:
-        return "pass", ""
+        return PASSED, ""
     if isinstance(raw, str):
-        if raw.startswith("FAIL: "):
-            return "fail", raw.removeprefix("FAIL: ")
-        if raw.startswith("WARN: "):
-            return "warn", raw.removeprefix("WARN: ")
-        if raw:
-            return "warn", raw
-        return "fail", ""
+        if raw.startswith("ERROR: "):
+            return ERROR, raw.removeprefix("ERROR: ")
+        if raw.startswith("WARNING: "):
+            return WARNING, raw.removeprefix("WARNING: ")
+        return ERROR, f"Invalid check result: {raw!r}"
     if raw is False:
         description = (type(check_obj).__doc__ or "").strip().splitlines()
-        return "fail", description[0].strip() if description else ""
-    return "fail", str(raw)
+        return ERROR, description[0].strip() if description else ""
+    return ERROR, f"Invalid check result type: {type(raw).__name__}"

@@ -45,8 +45,11 @@ The checks cover:
 
 from __future__ import annotations
 
+from html import unescape
 from pathlib import Path
 import re
+from typing import Callable
+from urllib.parse import unquote, urlsplit
 
 try:
     import tomllib
@@ -54,7 +57,6 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``
     import toml as tomllib
 
 from ansys.pre_commit_hooks.quality_rules.common import (
-    file_contains,
     file_content,
     file_exists,
 )
@@ -71,19 +73,26 @@ __all__ = [
     "RM007",
 ]
 
-# Badge presence patterns, compiled once and reused across checks.
-_ANSYS_BADGE = re.compile(
-    r"img\.shields\.io/badge/(?:py-?)?ansys|"
-    r"badge\.svg[^)\"']*pyansys|pyansys[^)\"']*badge\.svg|img\.shields\.io[^)\"']*pyansys",
-    re.IGNORECASE,
+# Image declarations are parsed before badge URLs are classified. This keeps a
+# badge check from matching ordinary prose or a link target on another line.
+_RST_IMAGE_URL = re.compile(
+    r"^[ \t]*\.\.[ \t]+(?:\|[^\n|]+\|[ \t]+)?image::[ \t]+(?P<url>\S+)[ \t]*$",
+    re.IGNORECASE | re.MULTILINE,
 )
-_PYPI_BADGE = re.compile(
-    r"img\.shields\.io[^)\"']*pypi|pypi\.org/project[^)\"']*badge|badge\.fury\.io/py",
-    re.IGNORECASE,
+_MARKDOWN_IMAGE_URL = re.compile(
+    r"!\[[^\]\n]*\]\([ \t]*(?:<(?P<angle>[^>\n]+)>|(?P<plain>[^\s)\n]+))",
 )
-_GH_CI_BADGE = re.compile(
-    r"github\.com/[^/]+/[^/]+/actions/workflows/[^)\"']+badge\.svg", re.IGNORECASE
+_MARKDOWN_REFERENCE_IMAGE = re.compile(r"!\[(?P<alt>[^\]\n]*)\]\[(?P<reference>[^\]\n]*)\]")
+_MARKDOWN_REFERENCE_DEFINITION = re.compile(
+    r"^[ \t]{0,3}\[(?P<label>[^\]\n]+)\]:[ \t]*" r"(?:<(?P<angle>[^>\n]+)>|(?P<plain>\S+))",
+    re.MULTILINE,
 )
+_HTML_IMAGE_URL = re.compile(
+    r"<img\b[^>]*\bsrc[ \t]*=[ \t]*(?P<quote>[\"'])(?P<url>.*?)" r"(?P=quote)",
+    re.IGNORECASE | re.DOTALL,
+)
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+_SHIELDS_HOSTS = frozenset({"img.shields.io", "shields.io"})
 
 
 def _heading_pattern(term: str) -> re.Pattern:
@@ -114,19 +123,140 @@ _LICENSE_SECTION = _heading_pattern(r"licen[sc]e")
 
 # Maps a project license to the token expected in its README badge.
 _BADGE_IDENTIFIERS = {
-    "Apache-2.0": r"apache(?:[-_% ]?2(?:[._-]?0)?)?",
+    "Apache-2.0": r"apache[-_ .]*2(?:[._-]*0)?",
     "MIT": r"mit",
-    "BSD-2-Clause": r"bsd[-_ ]?2[-_ ]?clause",
-    "BSD-3-Clause": r"bsd[-_ ]?3[-_ ]?clause",
+    "BSD-2-Clause": r"bsd[-_ .]*2[-_ .]*clause",
+    "BSD-3-Clause": r"bsd[-_ .]*3[-_ .]*clause",
 }
 
 # Recognizes a normalized license identifier from declared license text.
 _LICENSE_IDENTIFIERS: tuple[tuple[re.Pattern, str], ...] = (
-    (re.compile(r"\bMIT(?: License)?\b", re.IGNORECASE), "MIT"),
+    (re.compile(r"\bMIT(?: License)?\b(?![-_])", re.IGNORECASE), "MIT"),
     (re.compile(r"Apache License(?:,| )? Version 2\.0|Apache-2\.0", re.IGNORECASE), "Apache-2.0"),
-    (re.compile(r"BSD[-_ ]?2[-_ ]?Clause", re.IGNORECASE), "BSD-2-Clause"),
-    (re.compile(r"BSD[-_ ]?3[-_ ]?Clause", re.IGNORECASE), "BSD-3-Clause"),
+    (re.compile(r"BSD[-_ ]?2[-_ ]?Clause\b(?![-_])", re.IGNORECASE), "BSD-2-Clause"),
+    (re.compile(r"BSD[-_ ]?3[-_ ]?Clause\b(?![-_])", re.IGNORECASE), "BSD-3-Clause"),
 )
+
+
+def _normalized_reference_label(label: str) -> str:
+    """Return a normalized Markdown reference label."""
+    return " ".join(label.split()).casefold()
+
+
+def _visible_markup(content: str) -> str:
+    """Remove HTML comments and Markdown fenced code blocks."""
+    lines: list[str] = []
+    fence_character = ""
+    fence_length = 0
+    for line in _HTML_COMMENT.sub("", content).splitlines(keepends=True):
+        stripped = line.lstrip()
+        indentation = len(line) - len(stripped)
+        fence = re.match(r"(`{3,}|~{3,})", stripped) if indentation <= 3 else None
+        if not fence_character:
+            if fence:
+                fence_character = fence.group()[0]
+                fence_length = len(fence.group())
+            else:
+                lines.append(line)
+        elif re.fullmatch(
+            rf"{re.escape(fence_character)}{{{fence_length},}}[ \t]*",
+            stripped.rstrip("\r\n"),
+        ):
+            fence_character = ""
+            fence_length = 0
+    return "".join(lines)
+
+
+def _image_urls(content: str) -> tuple[str, ...]:
+    """Return image source URLs declared in README markup."""
+    content = _visible_markup(content)
+    urls = [match.group("url") for match in _RST_IMAGE_URL.finditer(content)]
+    urls.extend(
+        match.group("angle") or match.group("plain")
+        for match in _MARKDOWN_IMAGE_URL.finditer(content)
+    )
+    urls.extend(match.group("url") for match in _HTML_IMAGE_URL.finditer(content))
+
+    definitions = {
+        _normalized_reference_label(match.group("label")): (
+            match.group("angle") or match.group("plain")
+        )
+        for match in _MARKDOWN_REFERENCE_DEFINITION.finditer(content)
+    }
+    for match in _MARKDOWN_REFERENCE_IMAGE.finditer(content):
+        label = match.group("reference") or match.group("alt")
+        url = definitions.get(_normalized_reference_label(label))
+        if url:
+            urls.append(url)
+
+    return tuple(dict.fromkeys(unescape(url.strip()) for url in urls if url.strip()))
+
+
+def _url_host_and_path(url: str) -> tuple[str, str]:
+    """Return a normalized host and decoded path for an image URL."""
+    try:
+        parsed = urlsplit(url)
+        if parsed.hostname is None and not url.startswith(("/", "#")):
+            parsed = urlsplit(f"//{url}")
+        host = (parsed.hostname or "").rstrip(".").casefold()
+    except ValueError:
+        return "", ""
+    return host, unquote(parsed.path).casefold()
+
+
+def _is_ansys_badge(url: str) -> bool:
+    """Return whether an image URL identifies a PyAnsys or Ansys badge."""
+    host, path = _url_host_and_path(url)
+    if host in _SHIELDS_HOSTS and path.startswith("/badge/"):
+        badge_name = path.removeprefix("/badge/")
+        if re.match(r"(?:py[-_ ]?)?ansys(?:[-_./]|$)", badge_name):
+            return True
+    return bool(re.search(r"(?:^|[/_.-])py[-_ ]?ansys(?:[/_.-]|$)", path))
+
+
+def _is_pypi_badge(url: str) -> bool:
+    """Return whether an image URL identifies a PyPI badge."""
+    host, path = _url_host_and_path(url)
+    return (
+        (host in _SHIELDS_HOSTS and path.startswith(("/pypi/", "/badge/pypi-")))
+        or (host == "badge.fury.io" and path.startswith("/py/"))
+        or (host == "pypi.org" and path.startswith("/project/"))
+    )
+
+
+def _is_github_actions_badge(url: str) -> bool:
+    """Return whether an image URL identifies a GitHub Actions badge."""
+    host, path = _url_host_and_path(url)
+    return host == "github.com" and bool(
+        re.fullmatch(r"/[^/]+/[^/]+/actions/workflows/[^/]+/badge\.svg", path)
+    )
+
+
+def _license_badge_matcher(identifier: str) -> Callable[[str], bool]:
+    """Return a predicate for a Shields badge with the declared license."""
+    term = _BADGE_IDENTIFIERS.get(identifier)
+    if term is None:
+        if len(identifier) > 128 or "\n" in identifier:
+            return lambda url: False
+        words = re.findall(r"[a-z0-9]+", identifier.casefold())
+        if not words:
+            return lambda url: False
+        term = r"[-_ .]*".join(re.escape(word) for word in words)
+
+    pattern = re.compile(
+        rf"(?:^|[-_./])(?:license[-_ .]+{term}|{term}[-_ .]+license)(?=[-_./]|$)",
+        re.IGNORECASE,
+    )
+
+    def matches(url: str) -> bool:
+        host, path = _url_host_and_path(url)
+        return (
+            host in _SHIELDS_HOSTS
+            and path.startswith("/badge/")
+            and bool(pattern.search(path.removeprefix("/badge/")))
+        )
+
+    return matches
 
 
 def _declared_license_text(project: object, root: Path) -> str | None:
@@ -150,12 +280,15 @@ def _declared_license_text(project: object, root: Path) -> str | None:
 
     value = project.get("license")
     if isinstance(value, str):
-        return value.strip()
+        return value.strip() or None
     if isinstance(value, dict):
         if isinstance(value.get("text"), str):
-            return value["text"].strip()
+            return value["text"].strip() or None
         if isinstance(value.get("file"), str):
-            return file_content(root, value["file"])
+            content = file_content(root, value["file"])
+            if content is None:
+                return None
+            return content.strip() or None
     return None
 
 
@@ -177,8 +310,11 @@ def _project_license(root: Path) -> str | None:
     if not file_exists(root, "pyproject.toml"):
         return None
 
+    pyproject = file_content(root, "pyproject.toml")
+    if pyproject is None:
+        return None
     try:
-        metadata = tomllib.loads(file_content(root, "pyproject.toml"))
+        metadata = tomllib.loads(pyproject)
     except (TypeError, ValueError):
         return None
 
@@ -186,6 +322,8 @@ def _project_license(root: Path) -> str | None:
     if license_text is None:
         return None
 
+    if "\n" not in license_text and re.search(r"\b(?:AND|OR|WITH)\b", license_text):
+        return license_text
     for pattern, identifier in _LICENSE_IDENTIFIERS:
         if pattern.search(license_text):
             return identifier
@@ -195,9 +333,9 @@ def _project_license(root: Path) -> str | None:
 def _badge_result(
     root: Path,
     readme_path: str | None,
-    pattern: re.Pattern,
+    matcher: Callable[[str], bool],
     label: str,
-    severity: str = "WARN",
+    severity: str = "WARNING",
 ) -> bool | str:
     """Return the result of a README badge-presence check.
 
@@ -207,12 +345,12 @@ def _badge_result(
         Repository root directory.
     readme_path : str or None
         Name of the detected README file.
-    pattern : re.Pattern
-        Pattern that identifies the badge.
+    matcher : Callable[[str], bool]
+        Predicate that identifies a badge image URL.
     label : str
         Badge description used in the message.
-    severity : str, default: "WARN"
-        Message prefix used when the badge is missing, ``"WARN"`` or ``"FAIL"``.
+    severity : str, default: "WARNING"
+        Message prefix used when the badge is missing, ``"WARNING"`` or ``"ERROR"``.
 
     Returns
     -------
@@ -220,13 +358,17 @@ def _badge_result(
         ``True`` if the badge is found, otherwise a ``"<severity>: ..."`` message.
         A missing README file also produces the message.
     """
-    if readme_path and file_contains(root, readme_path, pattern):
-        return True
+    if readme_path:
+        content = file_content(root, readme_path)
+        if content is None:
+            return f"ERROR: {readme_path} could not be read as UTF-8."
+        if any(matcher(url) for url in _image_urls(content)):
+            return True
     location = f"in {readme_path}" if readme_path else "because no README file exists"
     return f"{severity}: {label} not found {location}."
 
 
-def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool:
+def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) -> bool | str:
     """Return whether a README section heading is present.
 
     Parameters
@@ -240,10 +382,16 @@ def _section_result(root: Path, readme_path: str | None, pattern: re.Pattern) ->
 
     Returns
     -------
-    bool
-        Whether the heading exists. ``False`` if there is no README file.
+    bool or str
+        Whether the heading exists. ``False`` if there is no README file, or an
+        ``"ERROR: ..."`` message if the README cannot be read as UTF-8.
     """
-    return bool(readme_path) and file_contains(root, readme_path, pattern)
+    if readme_path is None:
+        return False
+    content = file_content(root, readme_path)
+    if content is None:
+        return f"ERROR: {readme_path} could not be read as UTF-8."
+    return bool(pattern.search(content))
 
 
 class README:
@@ -266,7 +414,7 @@ class RM000(README):
     -----
     - ``README.rst`` passes.
     - ``README.md`` is accepted with a warning, because ``README.rst`` is preferred.
-    - A missing README fails.
+    - A missing README produces an error.
     """
 
     @staticmethod
@@ -283,8 +431,8 @@ class RM000(README):
         Returns
         -------
         bool or str
-            ``True`` for ``README.rst``, a ``"WARN: ..."`` message for ``README.md``,
-            and ``False`` if no README exists.
+            ``True`` for ``README.rst``, a ``"WARNING: ..."`` message for
+            ``README.md``, and ``False`` if no README exists.
         """
         if readme_path == "README.rst":
             return True
@@ -293,7 +441,7 @@ class RM000(README):
         # See https://github.com/pypa/twine/blob/main/twine/commands/check.py#L32
         # for more information
         if readme_path == "README.md":
-            return "WARN: README.md found — PyAnsys preferred format is README.rst."
+            return "WARNING: README.md found; the PyAnsys preferred format is README.rst."
         return False
 
 
@@ -307,7 +455,7 @@ class RM001(README):
 
     Notes
     -----
-    - A missing badge fails, including when there is no README file.
+    - A missing badge produces an error, including when there is no README file.
     """
 
     @staticmethod
@@ -324,10 +472,14 @@ class RM001(README):
         Returns
         -------
         bool or str
-            ``True`` if the badge is found, otherwise a ``"FAIL: ..."`` message.
+            ``True`` if the badge is found, otherwise an ``"ERROR: ..."`` message.
         """
         return _badge_result(
-            root, readme_path, _ANSYS_BADGE, "PyAnsys or Ansys badge image", severity="FAIL"
+            root,
+            readme_path,
+            _is_ansys_badge,
+            "PyAnsys or Ansys badge image",
+            severity="ERROR",
         )
 
 
@@ -356,9 +508,9 @@ class RM002(README):
         Returns
         -------
         bool or str
-            ``True`` if the badge is found, otherwise a ``"WARN: ..."`` message.
+            ``True`` if the badge is found, otherwise a ``"WARNING: ..."`` message.
         """
-        return _badge_result(root, readme_path, _PYPI_BADGE, "PyPI badge image")
+        return _badge_result(root, readme_path, _is_pypi_badge, "PyPI badge image")
 
 
 class RM003(README):
@@ -392,26 +544,20 @@ class RM003(README):
         Returns
         -------
         bool or str
-            ``True`` if a matching badge is found, otherwise a ``"WARN: ..."`` message.
+            ``True`` if a matching badge is found, otherwise a ``"WARNING: ..."`` message.
         """
         identifier = _project_license(root)
         if identifier is None:
             return (
-                "WARN: No project license found in pyproject.toml, so the README "
+                "WARNING: No project license found in pyproject.toml, so the README "
                 "license badge cannot be verified."
             )
 
-        term = _BADGE_IDENTIFIERS.get(identifier, re.escape(identifier))
-        pattern = re.compile(
-            rf"(?:img\.)?shields\.io[^)\"']*{term}|{term}[^)\"']*license",
-            re.IGNORECASE,
-        )
-        if readme_path and file_contains(root, readme_path, pattern):
-            return True
-        location = f"in {readme_path}" if readme_path else "because no README file exists"
-        return (
-            f"WARN: {identifier} license badge image not found or does not "
-            f"match project metadata {location}."
+        return _badge_result(
+            root,
+            readme_path,
+            _license_badge_matcher(identifier),
+            f"{identifier} license badge image matching project metadata",
         )
 
 
@@ -440,9 +586,11 @@ class RM004(README):
         Returns
         -------
         bool or str
-            ``True`` if the badge is found, otherwise a ``"WARN: ..."`` message.
+            ``True`` if the badge is found, otherwise a ``"WARNING: ..."`` message.
         """
-        return _badge_result(root, readme_path, _GH_CI_BADGE, "GH-CI workflow badge.svg URL")
+        return _badge_result(
+            root, readme_path, _is_github_actions_badge, "GH-CI workflow badge.svg URL"
+        )
 
 
 class RM005(README):
@@ -455,11 +603,11 @@ class RM005(README):
 
     Notes
     -----
-    - A missing heading fails, including when there is no README file.
+    - A missing heading produces an error, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README has an installation heading.
 
         Parameters
@@ -471,8 +619,9 @@ class RM005(README):
 
         Returns
         -------
-        bool
-            ``True`` if the heading exists, ``False`` otherwise.
+        bool or str
+            ``True`` if the heading exists, ``False`` otherwise, or an
+            ``"ERROR: ..."`` message if the README cannot be read.
         """
         return _section_result(root, readme_path, _INSTALL_SECTION)
 
@@ -486,11 +635,11 @@ class RM006(README):
 
     Notes
     -----
-    - A missing heading fails, including when there is no README file.
+    - A missing heading produces an error, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README has a documentation heading.
 
         Parameters
@@ -502,8 +651,9 @@ class RM006(README):
 
         Returns
         -------
-        bool
-            ``True`` if the heading exists, ``False`` otherwise.
+        bool or str
+            ``True`` if the heading exists, ``False`` otherwise, or an
+            ``"ERROR: ..."`` message if the README cannot be read.
         """
         return _section_result(root, readme_path, _DOCUMENTATION_SECTION)
 
@@ -517,11 +667,11 @@ class RM007(README):
 
     Notes
     -----
-    - A missing heading fails, including when there is no README file.
+    - A missing heading produces an error, including when there is no README file.
     """
 
     @staticmethod
-    def check(root: Path, readme_path: str | None) -> bool:
+    def check(root: Path, readme_path: str | None) -> bool | str:
         """Return whether the README has a license heading.
 
         Parameters
@@ -533,7 +683,8 @@ class RM007(README):
 
         Returns
         -------
-        bool
-            ``True`` if the heading exists, ``False`` otherwise.
+        bool or str
+            ``True`` if the heading exists, ``False`` otherwise, or an
+            ``"ERROR: ..."`` message if the README cannot be read.
         """
         return _section_result(root, readme_path, _LICENSE_SECTION)

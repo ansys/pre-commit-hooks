@@ -32,6 +32,9 @@ from typing import Any
 
 from ansys.pre_commit_hooks.quality_rules import repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
+    ERROR,
+    PASSED,
+    WARNING,
     _first_doc_line,
     normalize_check_result,
     readme_path,
@@ -51,7 +54,7 @@ def _execute_check(check_obj: Any, code: str, root: Path, detected_readme: str |
     try:
         raw = check_obj.check(**kwargs)
     except (OSError, TypeError, ValueError) as exc:
-        raw = f"WARN: Check error: {exc}"
+        raw = f"ERROR: Check error: {exc}"
 
     status, detail = normalize_check_result(raw, check_obj)
     return {
@@ -83,16 +86,16 @@ def _run_checks(
         if code.upper() not in ignored
     ]
 
-    passed = sum(result["status"] == "pass" for result in results)
-    failed = sum(result["status"] == "fail" for result in results)
-    warned = sum(result["status"] == "warn" for result in results)
-    scored = passed + failed
+    passed = sum(result["status"] == PASSED for result in results)
+    warned = sum(result["status"] == WARNING for result in results)
+    errors = sum(result["status"] == ERROR for result in results)
+    scored = passed + errors
     return {
         "results": results,
         "tally": {
-            "pass": passed,
-            "fail": failed,
-            "warn": warned,
+            PASSED: passed,
+            WARNING: warned,
+            ERROR: errors,
         },
         "score": round(passed / scored * 100) if scored else 0,
     }
@@ -120,14 +123,14 @@ def _print_report(review: dict[str, Any], *, show_all: bool = False) -> None:
     print("========================")
     print(f"Score: {review['score']}%")
     tally = review["tally"]
-    print(f"Summary: pass={tally['pass']} fail={tally['fail']} warn={tally['warn']}")
+    print(f"Summary: {PASSED}={tally[PASSED]} {WARNING}={tally[WARNING]} {ERROR}={tally[ERROR]}")
     for item in review["results"]:
-        if item["status"] == "pass" and not show_all:
+        if item["status"] == PASSED and not show_all:
             continue
         detail = item["detail"] or ""
-        headline = detail if item["status"] in {"warn", "fail"} and detail else item["label"]
-        print(f"- [{item['status'].upper()}] {item['id']} - {headline}")
-        if detail and item["status"] not in {"warn", "fail"} and detail != headline:
+        headline = detail if item["status"] in {WARNING, ERROR} and detail else item["label"]
+        print(f"- [{item['status']}] {item['id']} - {headline}")
+        if detail and item["status"] not in {WARNING, ERROR} and detail != headline:
             print(f"  {detail}")
 
 
@@ -174,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--fails-only",
         action="store_true",
-        help="Show warnings and failures only (the default).",
+        help="Show warnings and errors only (the default).",
     )
     args = parser.parse_args(argv)
     if args.show_all and args.fails_only:
@@ -202,10 +205,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.json:
         print(json.dumps(review, indent=2))
-        return 1 if review["tally"]["fail"] else 0
+        return 1 if review["tally"][ERROR] else 0
 
     _print_report(review, show_all=args.show_all)
-    return 1 if review["tally"]["fail"] else 0
+    return 1 if review["tally"][ERROR] else 0
 
 
 if __name__ == "__main__":
