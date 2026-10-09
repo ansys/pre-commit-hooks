@@ -27,9 +27,19 @@ Learn how to set up the available pre-commit hooks:
 
         :bdg-primary-line:`Set-up`
 
+    .. grid-item-card:: PyAnsys quality report :octicon:`report`
+        :padding: 2 2 2 2
+        :link: pyansys-quality-report/index
+        :link-type: doc
+
+        README-focused rule checks with CLI filtering and JSON output.
+
+        :bdg-primary-line:`Set-up` :bdg-primary-line:`CLI`
+
 .. toctree::
    :hidden:
    :maxdepth: 3
 
    add-license-headers/index
    technical-review/index
+   pyansys-quality-report/index

@@ -38,6 +38,28 @@ The following hooks are currently available:
   have ``REUSE`` implemented in your repository.
 * ``tech-review``: Do a technical review of your repository according to
   `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_
+* ``pyansys-quality-report``: Check README quality with selectable rules and a
+  machine-readable JSON report.
+
+The initial quality-report release contains README checks. Configure it in
+``.pre-commit-config.yaml``:
+
+.. code:: yaml
+
+   - repo: https://github.com/ansys/pre-commit-hooks
+     rev: v0.8.0
+     hooks:
+     - id: pyansys-quality-report
+       args: [--show-all]
+       verbose: true
+
+Run ``pre-commit run pyansys-quality-report --all-files`` (or ``prek run
+pyansys-quality-report --all-files``) to show warnings and errors.
+Use ``--show-all`` to include passing checks, ``--check RM003`` to select a
+rule, ``--ignore RM004`` to omit one, ``--color never`` for plain output, or
+``--json`` for JSON output. Colors are enabled by default, including for
+captured output. The current rules and options are documented in the
+`quality report guide <https://pre-commit-hooks.docs.ansys.com/version/stable/getting-started/pyansys-quality-report/index.html>`_.
 
 How to install
 --------------
