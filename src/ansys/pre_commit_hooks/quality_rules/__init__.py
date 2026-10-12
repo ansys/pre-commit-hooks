@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Initial README-only quality-check registry."""
+"""Quality-check registry subpackage."""
 
 from ansys.pre_commit_hooks.quality_rules.readme import README
 

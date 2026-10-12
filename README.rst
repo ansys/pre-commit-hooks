@@ -41,8 +41,8 @@ The following hooks are currently available:
 * ``pyansys-quality-report``: Check README quality with selectable rules and a
   machine-readable JSON report.
 
-The initial quality-report release contains README checks. Configure it in
-``.pre-commit-config.yaml``:
+The initial quality-report release contains README checks. Configure it in the
+``.pre-commit-config.yaml`` file:
 
 .. code:: yaml
 

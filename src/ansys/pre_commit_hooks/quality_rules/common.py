@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Shared helpers for the initial README quality checks."""
+"""Shared helpers for quality check rules."""
 
 from __future__ import annotations
 
@@ -121,7 +121,7 @@ def file_exists(repository_root: Path, relative_path: str) -> bool:
 
 
 def file_content(repository_root: Path, relative_path: str) -> str | None:
-    """Read a UTF-8 repository file without allowing path traversal.
+    """Read a repository file (as UTF-8) without allowing path traversal.
 
     Parameters
     ----------
