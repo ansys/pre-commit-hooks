@@ -36,7 +36,7 @@ up, that contains a ``pyproject.toml``. If none does, the current directory is u
 README rules
 ------------
 
-The README rules are ``RM000`` to ``RM007``. Each rule is documented in the
+The README rules are formatted as ``RMXXX``. Each rule is documented in the
 :doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/readme/index>`,
 including what it checks and whether an unmet rule produces a ``WARNING`` or an
 ``ERROR``. Use the rule IDs with the ``--check`` and ``--ignore`` options.
