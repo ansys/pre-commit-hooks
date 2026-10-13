@@ -24,7 +24,6 @@
 
 from __future__ import annotations
 
-import argparse
 import builtins
 from collections.abc import Mapping
 import json
@@ -32,6 +31,8 @@ import os
 from pathlib import Path
 import sys
 from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
+
+import click
 
 from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
@@ -427,7 +428,6 @@ def _find_project_root(start_directory: Path) -> Path:
 
 
 def _validate_rule_ids(
-    argument_parser: argparse.ArgumentParser,
     option_name: str,
     rule_ids: set[str],
 ) -> None:
@@ -435,8 +435,6 @@ def _validate_rule_ids(
 
     Parameters
     ----------
-    argument_parser : argparse.ArgumentParser
-        Parser used to report invalid input.
     option_name : str
         Command-line option associated with ``rule_ids``.
     rule_ids : set[str]
@@ -445,10 +443,81 @@ def _validate_rule_ids(
     available_rule_ids = sorted(repo_review_checks())
     unknown_rule_ids = sorted(rule_ids.difference(available_rule_ids))
     if unknown_rule_ids:
-        argument_parser.error(
+        raise click.UsageError(
             f"unknown rule ID(s) for {option_name}: {', '.join(unknown_rule_ids)}. "
             f"Available rules: {', '.join(available_rule_ids)}"
         )
+
+
+@click.command(help="Run PyAnsys README quality checks.")
+@click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
+@click.option("--metadata", is_flag=True, help="List available rule metadata.")
+@click.option("--check", "check", multiple=True, help="Select rule IDs.")
+@click.option("--family", multiple=True, help="Select rule family.")
+@click.option("--ignore", multiple=True, help="Ignore rule IDs.")
+@click.option("--show-all", is_flag=True, help="Include passing checks.")
+@click.option(
+    "--fails-only",
+    is_flag=True,
+    help="Show warnings and errors only (the default).",
+)
+@click.option(
+    "--color",
+    type=click.Choice(["auto", "always", "never"]),
+    default="always",
+    help="Control ANSI colors (default: always).",
+)
+def _cli(
+    json_output: bool,
+    metadata: bool,
+    check: tuple[str, ...],
+    family: tuple[str, ...],
+    ignore: tuple[str, ...],
+    show_all: bool,
+    fails_only: bool,
+    color: ColorMode,
+) -> int:
+    """Run README quality checks and return the process exit code."""
+    if show_all and fails_only:
+        raise click.UsageError("Use only one of --show-all or --fails-only")
+
+    selected_rule_ids = _normalize_rule_ids(list(check))
+    ignored_rule_ids = _normalize_rule_ids(list(ignore))
+    _validate_rule_ids("--check", selected_rule_ids)
+    _validate_rule_ids("--ignore", ignored_rule_ids)
+    selected_rule_families = {
+        rule_family.strip().lower()
+        for argument_value in family
+        for rule_family in argument_value.split(",")
+    }
+    if selected_rule_families and selected_rule_families - {"readme"}:
+        raise click.UsageError("This release supports only the readme rule family")
+
+    if metadata:
+        autoflush_print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
+        return 0
+
+    repository_root = _find_project_root(Path.cwd())
+    quality_report = _run_checks(
+        repository_root,
+        selected_rule_ids=selected_rule_ids,
+        ignored_rule_ids=ignored_rule_ids,
+    )
+    if json_output:
+        autoflush_print(json.dumps(quality_report, indent=2))
+        return 1 if quality_report["tally"][ERROR] else 0
+
+    colors_enabled = _colors_enabled(
+        color,
+        sys.stdout,
+        os.environ,
+    )
+    _print_report(
+        quality_report,
+        show_all=show_all,
+        colors_enabled=colors_enabled,
+    )
+    return 1 if quality_report["tally"][ERROR] else 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -465,69 +534,17 @@ def main(argv: list[str] | None = None) -> int:
     int
         ``1`` when any rule reports ``ERROR``, otherwise ``0``.
     """
-    argument_parser = argparse.ArgumentParser(description="Run PyAnsys README quality checks.")
-    argument_parser.add_argument("--json", action="store_true", help="Emit a JSON report.")
-    argument_parser.add_argument(
-        "--metadata", action="store_true", help="List available rule metadata."
-    )
-    argument_parser.add_argument("--check", action="append", default=[], help="Select rule IDs.")
-    argument_parser.add_argument(
-        "--family", action="append", default=[], help="Select rule family."
-    )
-    argument_parser.add_argument("--ignore", action="append", default=[], help="Ignore rule IDs.")
-    argument_parser.add_argument("--show-all", action="store_true", help="Include passing checks.")
-    argument_parser.add_argument(
-        "--fails-only",
-        action="store_true",
-        help="Show warnings and errors only (the default).",
-    )
-    argument_parser.add_argument(
-        "--color",
-        choices=("auto", "always", "never"),
-        default="always",
-        help="Control ANSI colors (default: always).",
-    )
-    arguments = argument_parser.parse_args(argv)
-    if arguments.show_all and arguments.fails_only:
-        argument_parser.error("Use only one of --show-all or --fails-only")
-
-    selected_rule_ids = _normalize_rule_ids(arguments.check)
-    ignored_rule_ids = _normalize_rule_ids(arguments.ignore)
-    _validate_rule_ids(argument_parser, "--check", selected_rule_ids)
-    _validate_rule_ids(argument_parser, "--ignore", ignored_rule_ids)
-    selected_rule_families = {
-        family.strip().lower()
-        for argument_value in arguments.family
-        for family in argument_value.split(",")
-    }
-    if selected_rule_families and selected_rule_families - {"readme"}:
-        argument_parser.error("This release supports only the readme rule family")
-
-    if arguments.metadata:
-        autoflush_print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
-        return 0
-
-    repository_root = _find_project_root(Path.cwd())
-    quality_report = _run_checks(
-        repository_root,
-        selected_rule_ids=selected_rule_ids,
-        ignored_rule_ids=ignored_rule_ids,
-    )
-    if arguments.json:
-        autoflush_print(json.dumps(quality_report, indent=2))
-        return 1 if quality_report["tally"][ERROR] else 0
-
-    colors_enabled = _colors_enabled(
-        arguments.color,
-        sys.stdout,
-        os.environ,
-    )
-    _print_report(
-        quality_report,
-        show_all=arguments.show_all,
-        colors_enabled=colors_enabled,
-    )
-    return 1 if quality_report["tally"][ERROR] else 0
+    try:
+        # standalone_mode=False returns the callback's value instead of exiting.
+        return _cli.main(args=argv, standalone_mode=False)
+    except click.exceptions.Exit as exit_request:
+        return exit_request.exit_code
+    except click.ClickException as click_error:
+        click_error.show()
+        raise SystemExit(click_error.exit_code) from click_error
+    except click.Abort as abort_request:
+        click.echo("Aborted!", err=True)
+        raise SystemExit(1) from abort_request
 
 
 if __name__ == "__main__":
