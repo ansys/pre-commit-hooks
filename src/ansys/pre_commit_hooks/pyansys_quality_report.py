@@ -25,12 +25,13 @@
 from __future__ import annotations
 
 import argparse
+import builtins
 from collections.abc import Mapping
 import json
 import os
 from pathlib import Path
 import sys
-from typing import Final, Literal, TextIO, TypeAlias, TypedDict
+from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import (
@@ -52,6 +53,12 @@ _STATUS_COLORS: Final[dict[RuleStatus, str]] = {
     WARNING: "\033[33m",
     ERROR: "\033[31m",
 }
+
+
+def autoflush_print(*args: object, **kwargs: Any) -> None:
+    """Call :func:`print` and always flush so output appears immediately."""
+    kwargs["flush"] = True
+    builtins.print(*args, **kwargs)
 
 
 class _RuleResult(TypedDict):
@@ -349,8 +356,8 @@ def _print_report(
         Whether to color status text with ANSI escape sequences.
     """
     title = "PyAnsys quality report"
-    print(_styled(title, _ANSI_BOLD, colors_enabled=colors_enabled))
-    print("=" * len(title))
+    autoflush_print(_styled(title, _ANSI_BOLD, colors_enabled=colors_enabled))
+    autoflush_print("=" * len(title))
 
     overall_status = _overall_status(quality_report)
     formatted_score = _styled(
@@ -358,13 +365,13 @@ def _print_report(
         _STATUS_COLORS[overall_status],
         colors_enabled=colors_enabled,
     )
-    print(f"Score: {formatted_score}")
+    autoflush_print(f"Score: {formatted_score}")
 
     status_tally = quality_report["tally"]
-    print()
-    print(_styled("Status summary", _ANSI_BOLD, colors_enabled=colors_enabled))
+    autoflush_print()
+    autoflush_print(_styled("Status summary", _ANSI_BOLD, colors_enabled=colors_enabled))
     for status in (PASSED, WARNING, ERROR):
-        print(
+        autoflush_print(
             f"  {_status_text(status, colors_enabled=colors_enabled)} " f"{status_tally[status]:>3}"
         )
 
@@ -373,10 +380,10 @@ def _print_report(
         for rule_result in quality_report["results"]
         if show_all or rule_result["status"] != PASSED
     ]
-    print()
-    print(_styled("Checks", _ANSI_BOLD, colors_enabled=colors_enabled))
+    autoflush_print()
+    autoflush_print(_styled("Checks", _ANSI_BOLD, colors_enabled=colors_enabled))
     if not visible_results:
-        print("  No warnings or errors.")
+        autoflush_print("  No warnings or errors.")
         return
 
     for rule_result in visible_results:
@@ -386,7 +393,7 @@ def _print_report(
             if rule_result["status"] in {WARNING, ERROR} and result_detail
             else rule_result["label"]
         )
-        print(
+        autoflush_print(
             f"  {_status_text(rule_result['status'], colors_enabled=colors_enabled)} "
             f"{rule_result['id']}  {display_headline}"
         )
@@ -395,7 +402,7 @@ def _print_report(
             and rule_result["status"] not in {WARNING, ERROR}
             and result_detail != display_headline
         ):
-            print(f"  {result_detail}")
+            autoflush_print(f"  {result_detail}")
 
 
 def _find_project_root(start_directory: Path) -> Path:
@@ -497,7 +504,7 @@ def main(argv: list[str] | None = None) -> int:
         argument_parser.error("This release supports only the readme rule family")
 
     if arguments.metadata:
-        print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
+        autoflush_print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
         return 0
 
     repository_root = _find_project_root(Path.cwd())
@@ -507,7 +514,7 @@ def main(argv: list[str] | None = None) -> int:
         ignored_rule_ids=ignored_rule_ids,
     )
     if arguments.json:
-        print(json.dumps(quality_report, indent=2))
+        autoflush_print(json.dumps(quality_report, indent=2))
         return 1 if quality_report["tally"][ERROR] else 0
 
     colors_enabled = _colors_enabled(

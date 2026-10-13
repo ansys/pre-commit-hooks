@@ -24,8 +24,9 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from pathlib import Path
-from typing import ClassVar, Final, Literal, Protocol, TypeAlias
+from typing import ClassVar, Final, Protocol, TypeAlias
 
 __all__ = [
     "_first_doc_line",
@@ -41,10 +42,24 @@ __all__ = [
 ]
 
 RuleCheckResult: TypeAlias = bool | str
-RuleStatus: TypeAlias = Literal["PASSED", "WARNING", "ERROR"]
-PASSED: Final[RuleStatus] = "PASSED"
-WARNING: Final[RuleStatus] = "WARNING"
-ERROR: Final[RuleStatus] = "ERROR"
+
+
+class RuleStatus(str, Enum):
+    """Public status of a quality rule."""
+
+    PASSED = "PASSED"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+    # Python 3.10 has no ``StrEnum``; keep ``str()`` and formatting returning the value.
+    def __str__(self) -> str:
+        """Return the string representation of the status."""
+        return self.value
+
+
+PASSED: Final[RuleStatus] = RuleStatus.PASSED
+WARNING: Final[RuleStatus] = RuleStatus.WARNING
+ERROR: Final[RuleStatus] = RuleStatus.ERROR
 
 
 class _QualityRule(Protocol):
