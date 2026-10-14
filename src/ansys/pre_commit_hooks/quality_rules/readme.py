@@ -43,6 +43,9 @@ The checks cover:
     - License
 """
 
+# TODO: Add README rules that check for documentation links (contributing guide, issues page).
+# Agree on the README structure first, otherwise the checks may fail on repositories without it.
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
