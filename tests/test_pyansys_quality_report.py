@@ -42,9 +42,10 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 )
 
 
-def test_registry_contains_only_readme_rules():
-    """The first release exposes only the README rule family."""
-    assert list(repo_review_checks()) == [f"RM{number:03d}" for number in range(8)]
+def test_registry_contains_every_rule_family():
+    """The registry exposes the README and project metadata rule families."""
+    assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
+    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM"}
 
 
 def test_rm003_matches_mit_project_license(tmp_path):
@@ -99,7 +100,7 @@ def test_missing_readme_is_reported_by_every_rule(tmp_path, capsys):
     """Without a README no rule is skipped: each one fails or warns."""
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"]}
 
     assert statuses == {
@@ -372,7 +373,90 @@ def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     error = capsys.readouterr().err
     assert exit_info.value.code == 2
     assert f"unknown rule ID(s) for {option}: RM999, XX1." in error
-    assert "Available rules: RM000, RM001" in error
+    assert "Available rules: PM001" in error
+    assert "RM000, RM001" in error
+
+
+def test_cli_reads_ignored_rules_from_pyproject(tmp_path, monkeypatch, capsys):
+    """Rule IDs under [tool.pyansys-quality-report] are merged with --ignore."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.pyansys-quality-report]\nignore = ["rm005"]\n', encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    report.main(["--ignore", "RM006", "--json"])
+
+    ids = {item["id"] for item in json.loads(capsys.readouterr().out)["results"]}
+    assert "RM005" not in ids
+    assert "RM006" not in ids
+    assert "RM007" in ids
+
+
+@pytest.mark.parametrize(
+    ("ignore_value", "message"),
+    [('["RM999"]', "unknown rule ID(s)"), ('"RM005"', "must be a list of strings")],
+)
+def test_cli_rejects_invalid_pyproject_ignore(tmp_path, monkeypatch, capsys, ignore_value, message):
+    """Invalid ignore settings in pyproject.toml stop the run."""
+    (tmp_path / "pyproject.toml").write_text(
+        f"[tool.pyansys-quality-report]\nignore = {ignore_value}\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exit_info:
+        report.main([])
+
+    assert exit_info.value.code == 2
+    assert message in capsys.readouterr().err
+
+
+def test_project_metadata_family_runs_by_default(tmp_path, monkeypatch):
+    """Every family runs unless --family narrows the selection."""
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "ansys-foo-bar"\n', "utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    default_ids = {item["id"] for item in report._run_checks(tmp_path)["results"]}
+    family_ids = {
+        item["id"]
+        for item in report._run_checks(tmp_path, selected_families={"project_metadata"})["results"]
+    }
+    by_id = {
+        item["id"]: item
+        for item in report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
+    }
+
+    assert {"RM000", "PM001"} <= default_ids
+    assert family_ids and all(rule_id.startswith("PM") for rule_id in family_ids)
+    assert by_id["PM012"]["status"] == "PASSED"
+    assert by_id["PM012"]["family"] == "project_metadata"
+
+
+@pytest.mark.parametrize(
+    ("version_line", "expected"),
+    [
+        ('version = "1.2.3"', "PASSED"),
+        ('version = "1.2.3rc1"', "PASSED"),
+        ('version = "1.2.dev0"', "PASSED"),
+        ('version = "1.2.3-beta.1"', "WARNING"),
+        ('dynamic = ["version"]', "PASSED"),
+    ],
+)
+def test_pm013_version_formats(tmp_path, version_line, expected):
+    """Only N.N.N[{a|b|rc}N], dev versions and dynamic versions are accepted."""
+    (tmp_path / "pyproject.toml").write_text(f"[project]\n{version_line}\n", encoding="utf-8")
+
+    results = report._run_checks(tmp_path, selected_rule_ids={"PM013"})["results"]
+
+    assert results[0]["status"] == expected
+
+
+def test_unknown_rule_family_is_rejected(capsys):
+    """Unsupported rule families stop the run."""
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--family", "nope"])
+
+    assert exit_info.value.code == 2
+    assert "unknown rule family(ies): nope" in capsys.readouterr().err
 
 
 def test_cli_rejects_unknown_rule_ids_with_metadata(capsys):
@@ -624,7 +708,7 @@ def test_unreadable_readme_is_an_error_for_every_content_rule(tmp_path):
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
     (tmp_path / "README.rst").write_bytes(b"\xff")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"] if item["id"] != "RM000"}
 
     assert set(statuses.values()) == {"ERROR"}

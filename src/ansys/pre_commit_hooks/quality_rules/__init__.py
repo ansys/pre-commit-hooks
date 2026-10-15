@@ -22,25 +22,65 @@
 
 """Quality-check registry subpackage."""
 
+from collections.abc import Iterable
+
+from ansys.pre_commit_hooks.quality_rules.common import _QualityRule
+from ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
 from ansys.pre_commit_hooks.quality_rules.readme import README
 
 README_QUALITY_RULES: tuple[type[README], ...] = tuple(
     sorted(README.__subclasses__(), key=lambda rule_class: rule_class.__name__)
 )
+PROJECT_METADATA_QUALITY_RULES: tuple[type[ProjectMetadata], ...] = tuple(
+    sorted(ProjectMetadata.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
+
+# Maps each rule family name to its rule classes.
+RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
+    README.family: README_QUALITY_RULES,
+    ProjectMetadata.family: PROJECT_METADATA_QUALITY_RULES,
+}
+# Families evaluated when no ``--family`` is requested.
+DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
 
 # Re-export each rule class so the names in ``__all__`` resolve.
-globals().update({rule_class.__name__: rule_class for rule_class in README_QUALITY_RULES})
+globals().update(
+    {
+        rule_class.__name__: rule_class
+        for rule_classes in RULE_FAMILIES.values()
+        for rule_class in rule_classes
+    }
+)
 
-__all__ = ["README", "README_QUALITY_RULES", "repo_review_checks"]
-__all__.extend(rule_class.__name__ for rule_class in README_QUALITY_RULES)
+__all__ = [
+    "DEFAULT_RULE_FAMILIES",
+    "PROJECT_METADATA_QUALITY_RULES",
+    "README",
+    "README_QUALITY_RULES",
+    "RULE_FAMILIES",
+    "ProjectMetadata",
+    "repo_review_checks",
+]
+__all__.extend(
+    rule_class.__name__ for rule_classes in RULE_FAMILIES.values() for rule_class in rule_classes
+)
 
 
-def repo_review_checks() -> dict[str, README]:
-    """Return the registered README rule instances.
+def repo_review_checks(families: Iterable[str] = DEFAULT_RULE_FAMILIES) -> dict[str, _QualityRule]:
+    """Return the registered rule instances for the requested families.
+
+    Parameters
+    ----------
+    families : collections.abc.Iterable[str], default: every family
+        Rule family names to include.
 
     Returns
     -------
-    dict[str, README]
+    dict[str, _QualityRule]
         Rule instances keyed by their rule IDs.
     """
-    return {rule_class.__name__: rule_class() for rule_class in README_QUALITY_RULES}
+    return {
+        rule_class.__name__: rule_class()
+        for family in families
+        for rule_class in RULE_FAMILIES[family]
+    }
