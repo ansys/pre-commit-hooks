@@ -39,6 +39,7 @@ setup(
     url="https://github.com/ansys/pre-commit-hooks",
     python_requires=">=3.10,<4",
     install_requires=[
+        "click==8.3.1",
         "GitPython==3.2.0",
         "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
@@ -74,6 +75,7 @@ setup(
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
             "tech-review=ansys.pre_commit_hooks.tech_review:main",
+            "pyansys-quality-report=ansys.pre_commit_hooks.pyansys_quality_report:main",
         ],
     },
 )
