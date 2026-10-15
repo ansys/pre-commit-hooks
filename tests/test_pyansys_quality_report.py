@@ -372,7 +372,57 @@ def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     error = capsys.readouterr().err
     assert exit_info.value.code == 2
     assert f"unknown rule ID(s) for {option}: RM999, XX1." in error
-    assert "Available rules: RM000, RM001" in error
+    assert "Available rules: PM001" in error
+    assert "RM000, RM001" in error
+
+
+def test_project_metadata_family_is_opt_in(tmp_path, monkeypatch, capsys):
+    """Project metadata rules run only when requested by family or rule ID."""
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "ansys-foo-bar"\n', "utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    default_ids = {item["id"] for item in report._run_checks(tmp_path)["results"]}
+    family_ids = {
+        item["id"]
+        for item in report._run_checks(tmp_path, selected_families={"project_metadata"})["results"]
+    }
+    by_id = {
+        item["id"]: item
+        for item in report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
+    }
+
+    assert not any(rule_id.startswith("PM") for rule_id in default_ids)
+    assert family_ids and all(rule_id.startswith("PM") for rule_id in family_ids)
+    assert by_id["PM012"]["status"] == "PASSED"
+    assert by_id["PM012"]["family"] == "project_metadata"
+
+
+@pytest.mark.parametrize(
+    ("version_line", "expected"),
+    [
+        ('version = "1.2.3"', "PASSED"),
+        ('version = "1.2.3rc1"', "PASSED"),
+        ('version = "1.2.dev0"', "PASSED"),
+        ('version = "1.2.3-beta.1"', "WARNING"),
+        ('dynamic = ["version"]', "PASSED"),
+    ],
+)
+def test_pm013_version_formats(tmp_path, version_line, expected):
+    """Only N.N.N[{a|b|rc}N], dev versions and dynamic versions are accepted."""
+    (tmp_path / "pyproject.toml").write_text(f"[project]\n{version_line}\n", encoding="utf-8")
+
+    results = report._run_checks(tmp_path, selected_rule_ids={"PM013"})["results"]
+
+    assert results[0]["status"] == expected
+
+
+def test_unknown_rule_family_is_rejected(capsys):
+    """Unsupported rule families stop the run."""
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--family", "nope"])
+
+    assert exit_info.value.code == 2
+    assert "unknown rule family(ies): nope" in capsys.readouterr().err
 
 
 def test_cli_rejects_unknown_rule_ids_with_metadata(capsys):

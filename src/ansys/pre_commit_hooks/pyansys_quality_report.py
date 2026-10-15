@@ -34,13 +34,18 @@ from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
 
-from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
+from ansys.pre_commit_hooks.quality_rules import (
+    DEFAULT_RULE_FAMILIES,
+    RULE_FAMILIES,
+    repo_review_checks,
+)
 from ansys.pre_commit_hooks.quality_rules.common import (
     ERROR,
     PASSED,
     WARNING,
     RuleStatus,
     _first_doc_line,
+    _QualityRule,
     normalize_check_result,
     readme_path,
 )
@@ -217,17 +222,43 @@ def _normalize_rule_ids(argument_values: list[str]) -> set[str]:
     }
 
 
+def _families_to_run(
+    selected_families: set[str] | None,
+    selected_rule_ids: set[str] | None,
+) -> tuple[str, ...]:
+    """Return the rule families to evaluate.
+
+    Parameters
+    ----------
+    selected_families : set[str] or None
+        Explicitly requested families.
+    selected_rule_ids : set[str] or None
+        Explicitly requested rule IDs.
+
+    Returns
+    -------
+    tuple[str, ...]
+        The requested families, every family when only rule IDs are given, or the
+        default families otherwise.
+    """
+    if selected_families:
+        return tuple(sorted(selected_families))
+    if selected_rule_ids:
+        return tuple(RULE_FAMILIES)
+    return DEFAULT_RULE_FAMILIES
+
+
 def _execute_check(
-    rule: README,
+    rule: _QualityRule,
     rule_id: str,
     repository_root: Path,
     detected_readme_file: str | None,
 ) -> _RuleResult:
-    """Execute and serialize one README rule.
+    """Execute and serialize one rule.
 
     Parameters
     ----------
-    rule : README
+    rule : _QualityRule
         Rule instance to execute.
     rule_id : str
         Stable identifier for the rule.
@@ -262,24 +293,29 @@ def _run_checks(
     *,
     selected_rule_ids: set[str] | None = None,
     ignored_rule_ids: set[str] | None = None,
+    selected_families: set[str] | None = None,
 ) -> _QualityReport:
-    """Evaluate registered README rules for a repository.
+    """Evaluate registered rules for a repository.
 
     Parameters
     ----------
     repository_root : pathlib.Path
         Repository root directory.
     selected_rule_ids : set[str] or None, optional
-        Rule IDs to evaluate. All rules are evaluated when omitted or empty.
+        Rule IDs to evaluate. All rules of the evaluated families are used when
+        omitted or empty.
     ignored_rule_ids : set[str] or None, optional
         Rule IDs to omit from the report.
+    selected_families : set[str] or None, optional
+        Rule families to evaluate. Defaults to the README family, or to every
+        family when ``selected_rule_ids`` is given.
 
     Returns
     -------
     _QualityReport
         Rule results, status counts, and the resulting score.
     """
-    registered_rules = repo_review_checks()
+    registered_rules = repo_review_checks(_families_to_run(selected_families, selected_rule_ids))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     normalized_ignored_ids = {rule_id.upper() for rule_id in ignored_rule_ids or set()}
     if normalized_selected_ids:
@@ -312,20 +348,23 @@ def _run_checks(
 
 def _metadata_report(
     selected_rule_ids: set[str] | None = None,
+    selected_families: set[str] | None = None,
 ) -> list[_RuleMetadata]:
-    """Return metadata for available README rules.
+    """Return metadata for available rules.
 
     Parameters
     ----------
     selected_rule_ids : set[str] or None, optional
         Rule IDs to include. All rules are included when omitted or empty.
+    selected_families : set[str] or None, optional
+        Rule families to include. Every family is listed when omitted or empty.
 
     Returns
     -------
     list[_RuleMetadata]
         Metadata records ordered by rule ID.
     """
-    registered_rules = repo_review_checks()
+    registered_rules = repo_review_checks(selected_families or tuple(RULE_FAMILIES))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     return [
         {
@@ -440,7 +479,7 @@ def _validate_rule_ids(
     rule_ids : set[str]
         Normalized rule IDs to validate.
     """
-    available_rule_ids = sorted(repo_review_checks())
+    available_rule_ids = sorted(repo_review_checks(tuple(RULE_FAMILIES)))
     unknown_rule_ids = sorted(rule_ids.difference(available_rule_ids))
     if unknown_rule_ids:
         raise click.UsageError(
@@ -453,7 +492,7 @@ def _validate_rule_ids(
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
-@click.option("--family", multiple=True, help="Select rule family.")
+@click.option("--family", multiple=True, help="Select rule family (readme, project_metadata).")
 @click.option("--ignore", multiple=True, help="Ignore rule IDs.")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")
 @click.option(
@@ -489,12 +528,19 @@ def _cli(
         rule_family.strip().lower()
         for argument_value in family
         for rule_family in argument_value.split(",")
+        if rule_family.strip()
     }
-    if selected_rule_families and selected_rule_families - {"readme"}:
-        raise click.UsageError("This release supports only the readme rule family")
+    unknown_families = selected_rule_families - set(RULE_FAMILIES)
+    if unknown_families:
+        raise click.UsageError(
+            f"unknown rule family(ies): {', '.join(sorted(unknown_families))}. "
+            f"Available families: {', '.join(RULE_FAMILIES)}"
+        )
 
     if metadata:
-        autoflush_print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
+        autoflush_print(
+            json.dumps(_metadata_report(selected_rule_ids, selected_rule_families), indent=2)
+        )
         return 0
 
     repository_root = _find_project_root(Path.cwd())
@@ -502,6 +548,7 @@ def _cli(
         repository_root,
         selected_rule_ids=selected_rule_ids,
         ignored_rule_ids=ignored_rule_ids,
+        selected_families=selected_rule_families,
     )
     if json_output:
         autoflush_print(json.dumps(quality_report, indent=2))
