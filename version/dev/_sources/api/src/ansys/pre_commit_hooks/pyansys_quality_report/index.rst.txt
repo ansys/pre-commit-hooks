@@ -1,0 +1,149 @@
+
+
+
+
+
+
+The ``pyansys_quality_report.py`` module
+========================================
+
+.. py:module:: src.ansys.pre_commit_hooks.pyansys_quality_report
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: pyansys_quality_report
+.. tab-set::
+
+
+
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~autoflush_print`
+            - Call :func:`print` and always flush so output appears immediately.
+
+
+          * - :py:obj:`~main`
+            - Run README quality checks for a repository.
+
+
+
+    .. tab-item:: Attributes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~ColorMode`
+            - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Run the initial README checks for a repository.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: autoflush_print(*args: object, **kwargs: Any) -> None
+
+   
+   Call :func:`print` and always flush so output appears immediately.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: main(argv: list[str] | None = None) -> int
+
+   
+   Run README quality checks for a repository.
+
+
+   :Parameters:
+
+       **argv** : :class:`python:list`\[:class:`python:str`] :obj:`or` :data:`python:None`, :obj:`optional`
+           Command-line arguments without the executable name. ``sys.argv`` is
+           used when omitted.
+
+
+
+   :Returns:
+
+       :class:`python:int`
+           ``1`` when any rule reports ``ERROR``, otherwise ``0``.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:type:: ColorMode
+   :canonical: Literal['auto', 'always', 'never']
+
+
+
+

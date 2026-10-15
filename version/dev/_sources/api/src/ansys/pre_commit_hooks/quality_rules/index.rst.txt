@@ -1,0 +1,155 @@
+
+
+
+
+
+
+The ``quality_rules`` package
+=================================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: quality_rules
+.. tab-set::
+
+
+    .. tab-item:: Submodules
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.common`
+            - Shared helpers for quality check rules.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme`
+            - README quality checks.
+
+
+
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~repo_review_checks`
+            - Return the registered README rule instances.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~README_QUALITY_RULES`
+            - 
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-fa-file"></span> common</api/src/ansys/pre_commit_hooks/quality_rules/common/index>
+    <span class="nf nf-fa-file"></span> readme</api/src/ansys/pre_commit_hooks/quality_rules/readme/index>
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+
+Quality-check registry subpackage.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: repo_review_checks() -> dict[str, ansys.pre_commit_hooks.quality_rules.readme.README]
+
+   
+   Return the registered README rule instances.
+
+
+
+
+
+   :Returns:
+
+       :class:`python:dict`\[:class:`python:str`, :obj:`README`]
+           Rule instances keyed by their rule IDs.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: README_QUALITY_RULES
+   :type:  tuple[type[ansys.pre_commit_hooks.quality_rules.readme.README], ...]
+
+
+
