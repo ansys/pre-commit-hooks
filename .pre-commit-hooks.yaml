@@ -5,9 +5,16 @@
   language: python
   files: '(src|examples|tests)/.*\.(py)|\.(proto)'
   require_serial: true
+- id: "pyansys-quality-report"
+  name: "PyAnsys Quality Report"
+  description: "Generate a PyAnsys repository quality summary"
+  entry: pyansys-quality-report
+  language: python
+  pass_filenames: false
+
 - id: "tech-review"
-  name: "Ansys Technical Review"
-  description: "Perform initial technical review on a repository"
-  entry: tech-review
+  name: "PyAnsys Quality Report (deprecated alias)"
+  description: "Deprecated compatibility alias for pyansys-quality-report"
+  entry: pyansys-quality-report
   language: python
   pass_filenames: false

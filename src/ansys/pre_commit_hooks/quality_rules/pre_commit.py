@@ -1,0 +1,227 @@
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"""Pre-commit configuration checks.
+
+This rule set validates the repository pre-commit configuration and required
+repository automation hooks.
+
+The checks cover:
+
+* .pre-commit-config.yaml presence
+* ruff-pre-commit configuration
+* zizmor configuration and pedantic mode
+* formatting and spelling hooks
+* ansys/pre-commit-hooks integration
+* repository maintenance settings such as autofix and weekly updates
+"""
+
+from __future__ import annotations
+
+import re
+
+import yaml
+
+from ansys.pre_commit_hooks.quality_rules.common import (
+    checked_contains,
+    file_contains,
+    file_content,
+    file_exists,
+)
+
+__all__ = [
+    "PreCommit",
+    "PC001",
+    "PC002",
+    "PC003",
+    "PC004",
+    "PC005",
+    "PC006",
+    "PC007",
+    "PC008",
+]
+
+_PRE_COMMIT_CONFIG = ".pre-commit-config.yaml"
+
+
+class PreCommit:
+    """Pre-commit rule family."""
+
+    family = "pre_commit"
+
+
+class PC001(PreCommit):
+    """The .pre-commit-config.yaml file exists."""
+
+    @staticmethod
+    def check(root) -> bool:
+        """Return whether the pre-commit configuration exists."""
+        return file_exists(root, _PRE_COMMIT_CONFIG)
+
+
+class PC002(PreCommit):
+    """Ruff-pre-commit is configured."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether ruff-pre-commit is configured."""
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "ruff-pre-commit")
+
+
+class PC003(PreCommit):
+    """Zizmor is configured with --pedantic or --persona=pedantic."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether zizmor is configured with the pedantic option."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
+            return None
+
+        try:
+            config = yaml.safe_load(file_content(root, _PRE_COMMIT_CONFIG))
+        except yaml.YAMLError:
+            return False
+
+        if not isinstance(config, dict) or not isinstance(config.get("repos"), list):
+            return False
+
+        has_zizmor = False
+        for repo in config["repos"]:
+            if not isinstance(repo, dict) or not isinstance(repo.get("hooks"), list):
+                continue
+            for hook in repo["hooks"]:
+                if not isinstance(hook, dict) or hook.get("id") != "zizmor":
+                    continue
+                has_zizmor = True
+                args = hook.get("args", [])
+                if isinstance(args, list) and any(
+                    argument in ("--pedantic", "--persona=pedantic") for argument in args
+                ):
+                    return True
+
+        if has_zizmor:
+            return "WARN: zizmor found but neither --pedantic nor --persona=pedantic is set."
+
+        return False
+
+
+class PC004(PreCommit):
+    """Codespell is configured."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether codespell is configured."""
+        return checked_contains(root, _PRE_COMMIT_CONFIG, "codespell")
+
+
+class PC005(PreCommit):
+    """Ansys/pre-commit-hooks is configured."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether the shared Ansys pre-commit hooks are configured."""
+        return checked_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "ansys/pre-commit-hooks",
+        )
+
+
+class PC006(PreCommit):
+    """A pyright, mypy, or ty type-checking hook is configured."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None:
+        """Return whether a supported type checker is configured as a hook."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
+            return None
+
+        try:
+            config = yaml.safe_load(file_content(root, _PRE_COMMIT_CONFIG))
+        except yaml.YAMLError:
+            return False
+
+        if not isinstance(config, dict) or not isinstance(config.get("repos"), list):
+            return False
+
+        for repo in config["repos"]:
+            if not isinstance(repo, dict) or not isinstance(repo.get("hooks"), list):
+                continue
+            for hook in repo["hooks"]:
+                if isinstance(hook, dict) and hook.get("id") in ("pyright", "mypy", "ty"):
+                    return True
+
+        return False
+
+
+class PC007(PreCommit):
+    """Autofix_prs: true is enabled."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether automatic pull-request fixes are enabled."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
+            return None
+
+        if file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            "autofix_prs: true",
+        ):
+            return True
+
+        return "WARN: autofix_prs: true not set in ci: block."
+
+
+class PC008(PreCommit):
+    """Autoupdate_schedule: weekly is configured."""
+
+    requires = {"PC001"}
+
+    @staticmethod
+    def check(root) -> bool | None | str:
+        """Return whether the pre-commit autoupdate schedule is weekly."""
+        if not file_exists(root, _PRE_COMMIT_CONFIG):
+            return None
+
+        if file_contains(
+            root,
+            _PRE_COMMIT_CONFIG,
+            re.compile(
+                r"autoupdate_schedule:\s*weekly",
+            ),
+        ):
+            return True
+
+        return "WARN: autoupdate_schedule: weekly not found."

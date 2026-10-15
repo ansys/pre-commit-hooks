@@ -10,3 +10,9 @@ DNE
 pytest
 Synopsys
 synopsys
+Dependabot
+dependabot
+uv
+config
+Cooldown
+numpydoc
