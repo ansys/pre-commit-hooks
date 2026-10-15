@@ -228,29 +228,21 @@ def _normalize_rule_ids(argument_values: list[str]) -> set[str]:
     }
 
 
-def _families_to_run(
-    selected_families: set[str] | None,
-    selected_rule_ids: set[str] | None,
-) -> tuple[str, ...]:
+def _families_to_run(selected_families: set[str] | None) -> tuple[str, ...]:
     """Return the rule families to evaluate.
 
     Parameters
     ----------
     selected_families : set[str] or None
         Explicitly requested families.
-    selected_rule_ids : set[str] or None
-        Explicitly requested rule IDs.
 
     Returns
     -------
     tuple[str, ...]
-        The requested families, every family when only rule IDs are given, or the
-        default families otherwise.
+        The requested families, or every family when none is requested.
     """
     if selected_families:
         return tuple(sorted(selected_families))
-    if selected_rule_ids:
-        return tuple(RULE_FAMILIES)
     return DEFAULT_RULE_FAMILIES
 
 
@@ -313,15 +305,14 @@ def _run_checks(
     ignored_rule_ids : set[str] or None, optional
         Rule IDs to omit from the report.
     selected_families : set[str] or None, optional
-        Rule families to evaluate. Defaults to the README family, or to every
-        family when ``selected_rule_ids`` is given.
+        Rule families to evaluate. Defaults to every family.
 
     Returns
     -------
     _QualityReport
         Rule results, status counts, and the resulting score.
     """
-    registered_rules = repo_review_checks(_families_to_run(selected_families, selected_rule_ids))
+    registered_rules = repo_review_checks(_families_to_run(selected_families))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     normalized_ignored_ids = {rule_id.upper() for rule_id in ignored_rule_ids or set()}
     if normalized_selected_ids:

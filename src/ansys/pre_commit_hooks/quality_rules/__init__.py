@@ -41,7 +41,7 @@ RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
     ProjectMetadata.family: PROJECT_METADATA_QUALITY_RULES,
 }
 # Families evaluated when no ``--family`` is requested.
-DEFAULT_RULE_FAMILIES: tuple[str, ...] = (README.family,)
+DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
 
 # Re-export each rule class so the names in ``__all__`` resolve.
 globals().update(
@@ -71,7 +71,7 @@ def repo_review_checks(families: Iterable[str] = DEFAULT_RULE_FAMILIES) -> dict[
 
     Parameters
     ----------
-    families : collections.abc.Iterable[str], default: ``("readme",)``
+    families : collections.abc.Iterable[str], default: every family
         Rule family names to include.
 
     Returns

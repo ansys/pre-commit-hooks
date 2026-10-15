@@ -42,9 +42,10 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 )
 
 
-def test_registry_contains_only_readme_rules():
-    """The first release exposes only the README rule family."""
-    assert list(repo_review_checks()) == [f"RM{number:03d}" for number in range(8)]
+def test_registry_contains_every_rule_family():
+    """The registry exposes the README and project metadata rule families."""
+    assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
+    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM"}
 
 
 def test_rm003_matches_mit_project_license(tmp_path):
@@ -99,7 +100,7 @@ def test_missing_readme_is_reported_by_every_rule(tmp_path, capsys):
     """Without a README no rule is skipped: each one fails or warns."""
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"]}
 
     assert statuses == {
@@ -409,8 +410,8 @@ def test_cli_rejects_invalid_pyproject_ignore(tmp_path, monkeypatch, capsys, ign
     assert message in capsys.readouterr().err
 
 
-def test_project_metadata_family_is_opt_in(tmp_path, monkeypatch, capsys):
-    """Project metadata rules run only when requested by family or rule ID."""
+def test_project_metadata_family_runs_by_default(tmp_path, monkeypatch):
+    """Every family runs unless --family narrows the selection."""
     (tmp_path / "pyproject.toml").write_text('[project]\nname = "ansys-foo-bar"\n', "utf-8")
     monkeypatch.chdir(tmp_path)
 
@@ -424,7 +425,7 @@ def test_project_metadata_family_is_opt_in(tmp_path, monkeypatch, capsys):
         for item in report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
     }
 
-    assert not any(rule_id.startswith("PM") for rule_id in default_ids)
+    assert {"RM000", "PM001"} <= default_ids
     assert family_ids and all(rule_id.startswith("PM") for rule_id in family_ids)
     assert by_id["PM012"]["status"] == "PASSED"
     assert by_id["PM012"]["family"] == "project_metadata"
@@ -707,7 +708,7 @@ def test_unreadable_readme_is_an_error_for_every_content_rule(tmp_path):
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
     (tmp_path / "README.rst").write_bytes(b"\xff")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"] if item["id"] != "RM000"}
 
     assert set(statuses.values()) == {"ERROR"}
