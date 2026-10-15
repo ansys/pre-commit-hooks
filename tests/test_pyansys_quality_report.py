@@ -376,6 +376,39 @@ def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     assert "RM000, RM001" in error
 
 
+def test_cli_reads_ignored_rules_from_pyproject(tmp_path, monkeypatch, capsys):
+    """Rule IDs under [tool.pyansys-quality-report] are merged with --ignore."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.pyansys-quality-report]\nignore = ["rm005"]\n', encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    report.main(["--ignore", "RM006", "--json"])
+
+    ids = {item["id"] for item in json.loads(capsys.readouterr().out)["results"]}
+    assert "RM005" not in ids
+    assert "RM006" not in ids
+    assert "RM007" in ids
+
+
+@pytest.mark.parametrize(
+    ("ignore_value", "message"),
+    [('["RM999"]', "unknown rule ID(s)"), ('"RM005"', "must be a list of strings")],
+)
+def test_cli_rejects_invalid_pyproject_ignore(tmp_path, monkeypatch, capsys, ignore_value, message):
+    """Invalid ignore settings in pyproject.toml stop the run."""
+    (tmp_path / "pyproject.toml").write_text(
+        f"[tool.pyansys-quality-report]\nignore = {ignore_value}\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exit_info:
+        report.main([])
+
+    assert exit_info.value.code == 2
+    assert message in capsys.readouterr().err
+
+
 def test_project_metadata_family_is_opt_in(tmp_path, monkeypatch, capsys):
     """Project metadata rules run only when requested by family or rule ID."""
     (tmp_path / "pyproject.toml").write_text('[project]\nname = "ansys-foo-bar"\n', "utf-8")

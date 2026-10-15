@@ -34,6 +34,11 @@ from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
+    import toml as tomllib
+
 from ansys.pre_commit_hooks.quality_rules import (
     DEFAULT_RULE_FAMILIES,
     RULE_FAMILIES,
@@ -46,6 +51,7 @@ from ansys.pre_commit_hooks.quality_rules.common import (
     RuleStatus,
     _first_doc_line,
     _QualityRule,
+    file_content,
     normalize_check_result,
     readme_path,
 )
@@ -488,12 +494,50 @@ def _validate_rule_ids(
         )
 
 
+def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
+    """Read ignored rule IDs from ``[tool.pyansys-quality-report]``.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+
+    Returns
+    -------
+    set[str]
+        Normalized rule IDs listed under the ``ignore`` key. The set is empty when
+        ``pyproject.toml`` is missing or has no such key.
+
+    Raises
+    ------
+    click.UsageError
+        If ``pyproject.toml`` is invalid TOML or ``ignore`` is not a list of strings.
+    """
+    pyproject_content = file_content(repository_root, "pyproject.toml")
+    if pyproject_content is None:
+        return set()
+    try:
+        pyproject_data = tomllib.loads(pyproject_content)
+    except (TypeError, ValueError) as error:
+        raise click.UsageError(f"pyproject.toml is not valid TOML: {error}") from error
+
+    tool_settings = pyproject_data.get("tool", {}).get("pyansys-quality-report", {})
+    ignored_values = tool_settings.get("ignore", []) if isinstance(tool_settings, dict) else []
+    if not isinstance(ignored_values, list) or not all(
+        isinstance(value, str) for value in ignored_values
+    ):
+        raise click.UsageError(
+            "[tool.pyansys-quality-report] ignore in pyproject.toml must be a list of strings"
+        )
+    return _normalize_rule_ids(ignored_values)
+
+
 @click.command(help="Run PyAnsys README quality checks.")
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
 @click.option("--family", multiple=True, help="Select rule family (readme, project_metadata).")
-@click.option("--ignore", multiple=True, help="Ignore rule IDs.")
+@click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")
 @click.option(
     "--fails-only",
@@ -544,10 +588,12 @@ def _cli(
         return 0
 
     repository_root = _find_project_root(Path.cwd())
+    configured_ignored_rule_ids = _pyproject_ignored_rule_ids(repository_root)
+    _validate_rule_ids("[tool.pyansys-quality-report] ignore", configured_ignored_rule_ids)
     quality_report = _run_checks(
         repository_root,
         selected_rule_ids=selected_rule_ids,
-        ignored_rule_ids=ignored_rule_ids,
+        ignored_rule_ids=ignored_rule_ids | configured_ignored_rule_ids,
         selected_families=selected_rule_families,
     )
     if json_output:
