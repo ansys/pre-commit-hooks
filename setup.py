@@ -40,7 +40,7 @@ setup(
     python_requires=">=3.10,<4",
     install_requires=[
         "click==8.3.1",
-        "GitPython==3.1.62",
+        "GitPython==3.2.0",
         "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
         "reuse==6.2.0",

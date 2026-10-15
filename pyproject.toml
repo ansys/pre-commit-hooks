@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools>=65.5.1",
-    "GitPython==3.1.62",
+    "GitPython==3.2.0",
     "Jinja2==3.1.6",
     "reuse==6.2.0",
     "requests==2.34.2",
@@ -21,7 +21,7 @@ authors = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@syno
 maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
 dependencies = [
     "click==8.3.1",
-    "GitPython==3.1.62",
+    "GitPython==3.2.0",
     "importlib-metadata==9.0.1",
     "Jinja2==3.1.6",
     "reuse==6.2.0",
