@@ -17,3 +17,9 @@
   entry: hashed-pre-commit
   language: python
   files: '(\.pre-commit-config\.yaml)'
+- id: "pyansys-quality-report"
+  name: "PyAnsys Quality Report"
+  description: "Check repository README quality"
+  entry: pyansys-quality-report
+  language: python
+  pass_filenames: false

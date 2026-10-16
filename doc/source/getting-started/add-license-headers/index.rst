@@ -23,7 +23,7 @@ To get started, add the hook to your ``.pre-commit-config.yaml`` file:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.5.2
+    rev: v0.8.0
     hooks:
     - id: add-license-headers
 
@@ -37,7 +37,7 @@ so the ``.pre-commit-config.yaml`` file looks like this:
 .. code:: yaml
 
   - repo: https://github.com/ansys/pre-commit-hooks
-    rev: v0.5.2
+    rev: v0.8.0
     hooks:
     - id: add-license-headers
       args:
@@ -50,7 +50,7 @@ template is used to generate the license headers for files.
 The template contains the following variables:
 
 - ``{{ copyright_line }}``: Contains the current year and the phrase
-  "ANSYS, Inc. and/or its affiliates." by default.
+  "Synopsys, Inc. and ANSYS, Inc. All rights reserved." by default.
 - ``{{ expression }}``: Contains the SPDX-License-Identifier expression, which is "MIT" by default.
 
 ``add-license-headers`` hook arguments
@@ -65,13 +65,13 @@ The template contains the following variables:
       - Default value
       - Description
     * - ``--custom_copyright``
-      - ``ANSYS, Inc. and/or its affiliates.``
+      - ``Synopsys, Inc. and ANSYS, Inc. All rights reserved.``
       - Copyright line to include in the license header.
     * - ``--custom_template``
       - ``ansys``
       - Name of the ``.jinja2`` template file located in the ``.reuse/templates/`` directory.
     * - ``--custom_license``
-      - ``MIT``
+      - ``MIT`` or ``Apache-2.0``
       - SPDX-License-Identifier expression to include in the license header. To view
         the list of valid SPDX license expressions, see the
         `SPDX License List <https://github.com/spdx/license-list-data/tree/main/text>`_.

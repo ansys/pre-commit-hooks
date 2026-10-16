@@ -13,3 +13,11 @@ Known issues and limitations
     To request support for an unrecognized file type, open an
     `issue <https://github.com/ansys/pre-commit-hooks/issues>`_ in the ``ansys/pre-commit-hooks``
     repository.
+
+.. dropdown:: I am getting a "OSError: [WinError 1314] A required privilege is not held by the client" error when running the hook on Windows
+    :animate: fade-in-slide-down
+
+    This issue is fixed in version 0.7.1 and later. If you are using an older version of the hook
+    and do not want to upgrade, you can fix this issue by enabling Developer Mode on Windows. To
+    enable Developer Mode, see Microsoft's `Settings for developers <https://learn.microsoft.com/en-us/windows/advanced-settings/developer-mode>`_
+    documentation.

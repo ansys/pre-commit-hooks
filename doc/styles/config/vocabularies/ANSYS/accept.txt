@@ -2,7 +2,11 @@ API
 ANSYS
 Ansys
 ansys
+Synopsys
+synopsys
 maint
 DNE
 [Jj]inja
 pytest
+Synopsys
+synopsys

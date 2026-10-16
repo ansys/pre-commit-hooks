@@ -1,36 +1,8 @@
 """Installation file for ansys-pre-commit-hooks."""
 
 import os
-import sys
 
 from setuptools import find_namespace_packages, setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-
-SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "ansys")
-
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-from ansys.pre_commit_hooks.tech_review import JSON_URL, LICENSES_JSON, download_license_json
-
-
-class CustomInstallCommand(install):
-    """Custom install command to download the license json file."""
-
-    def run(self):
-        """Download the license json file."""
-        install.run(self)
-        download_license_json(JSON_URL, LICENSES_JSON)
-
-
-class CustomDevelopCommand(develop):
-    """Custom develop command to download the license json file."""
-
-    def run(self):
-        """Download the license json file."""
-        develop.run(self)
-        download_license_json(JSON_URL, LICENSES_JSON)
-
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "src", "ansys", "pre_commit_hooks", "VERSION"), encoding="utf-8") as f:
@@ -50,10 +22,10 @@ setup(
     description=description,
     long_description=long_description,
     license="MIT",
-    author="ANSYS, Inc.",
-    author_email="pyansys.core@ansys.com",
-    maintainer="ANSYS, Inc.",
-    maintainer_email="pyansys.core@ansys.com",
+    author="Synopsys, Inc. and ANSYS, Inc.",
+    author_email="pyansys-core@synopsys.com",
+    maintainer="Synopsys, Inc. and ANSYS, Inc.",
+    maintainer_email="pyansys-core@synopsys.com",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -67,27 +39,28 @@ setup(
     url="https://github.com/ansys/pre-commit-hooks",
     python_requires=">=3.10,<4",
     install_requires=[
-        "GitPython==3.1.46",
-        "importlib-metadata==8.7.1",
+        "click==8.3.1",
+        "GitPython==3.2.0",
+        "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
         "PyYAML>=6.0",
         "reuse==6.2.0",
-        "requests==2.32.5",
-        "semver==3.0.4",
+        "requests==2.34.2",
+        "semver==3.1.0",
         "toml==0.10.2",
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.7.0",
-            "numpydoc==1.10.0",
+            "ansys-sphinx-theme[autoapi]==1.9.0",
+            "numpydoc==1.11.0",
             "sphinx==8.2.3",
             "sphinx-autodoc-typehints==3.1.0",
-            "sphinx-copybutton==0.5.1",
+            "sphinx-copybutton==0.5.2",
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==9.0.2",
-            "pytest-cov==7.0.0",
+            "pytest==9.1.1",
+            "pytest-cov==7.1.0",
         ],
     },
     project_urls={
@@ -99,15 +72,12 @@ setup(
         "Changelog": "https://github.com/ansys/pre-commit-hooks/blob/main/doc/source/changelog.rst",
     },
     include_package_data=True,
-    cmdclass={
-        "develop": CustomDevelopCommand,
-        "install": CustomInstallCommand,
-    },
     entry_points={
         "console_scripts": [
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
             "hashed-pre-commit=ansys.pre_commit_hooks.hashed_pre_commit:main",
             "tech-review=ansys.pre_commit_hooks.tech_review:main",
+            "pyansys-quality-report=ansys.pre_commit_hooks.pyansys_quality_report:main",
         ],
     },
 )

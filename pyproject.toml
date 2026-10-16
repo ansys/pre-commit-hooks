@@ -1,11 +1,11 @@
 [build-system]
 requires = [
-    "setuptools>=42.0",
-    "GitPython==3.1.46",
+    "setuptools>=65.5.1",
+    "GitPython==3.2.0",
     "Jinja2==3.1.6",
     "reuse==6.2.0",
-    "requests==2.32.5",
-    "semver==3.0.4",
+    "requests==2.34.2",
+    "semver==3.1.0",
     "toml==0.10.2",
     "wheel",
 ]
@@ -17,16 +17,17 @@ dynamic = ["version", "classifiers", "description", "readme", "scripts"]
 requires-python = ">=3.10,<4"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
-maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+authors = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
+maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
 dependencies = [
-    "GitPython==3.1.46",
-    "importlib-metadata==8.7.1",
+    "click==8.3.1",
+    "GitPython==3.2.0",
+    "importlib-metadata==9.0.1",
     "Jinja2==3.1.6",
     "PyYAML>=6.0",
     "reuse==6.2.0",
-    "requests==2.32.5",
-    "semver==3.0.4",
+    "requests==2.34.2",
+    "semver==3.1.0",
     "toml==0.10.2",
 ]
 
@@ -43,19 +44,20 @@ classifiers = {file = """
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 """}
 
 [project.optional-dependencies]
 doc = [
-    "ansys-sphinx-theme[autoapi]==1.7.0",
-    "numpydoc==1.10.0",
+    "ansys-sphinx-theme[autoapi]==1.9.0",
+    "numpydoc==1.11.0",
     "sphinx==8.2.3",
     "sphinx-autodoc-typehints==3.1.0",
-    "sphinx-copybutton==0.5.1",
+    "sphinx-copybutton==0.5.2",
 ]
 tests = [
-    "pytest==9.0.2",
-    "pytest-cov==7.0.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
 ]
 
 [project.urls]
@@ -106,13 +108,13 @@ title_format = "`{version} <https://github.com/ansys/pre-commit-hooks/releases/t
 issue_format = "`#{issue} <https://github.com/ansys/pre-commit-hooks/pull/{issue}>`_"
 
 [[tool.towncrier.type]]
-directory = "added"
-name = "Added"
+directory = "breaking"
+name = "Breaking"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "changed"
-name = "Changed"
+directory = "added"
+name = "Added"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -121,18 +123,13 @@ name = "Fixed"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "dependencies"
-name = "Dependencies"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "miscellaneous"
-name = "Miscellaneous"
-showcontent = true
-
-[[tool.towncrier.type]]
 directory = "documentation"
 name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependencies"
+name = "Dependencies"
 showcontent = true
 
 [[tool.towncrier.type]]
@@ -141,6 +138,17 @@ name = "Maintenance"
 showcontent = true
 
 [[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
+
+[[tool.towncrier.type]]
 directory = "test"
 name = "Test"
 showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+

@@ -1,4 +1,4 @@
-# Copyright (C) 2023 - 2026 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,6 +22,7 @@
 
 import argparse
 from datetime import date as dt
+import io
 import os
 from pathlib import Path
 import shutil
@@ -36,7 +37,7 @@ import ansys.pre_commit_hooks.add_license_headers as hook
 git_repo = git.Repo(Path.cwd(), search_parent_directories=True)
 REPO_PATH = git_repo.git.rev_parse("--show-toplevel")
 START_YEAR = "2023"
-DEFAULT_COPYRIGHT = "ANSYS, Inc. and/or its affiliates."
+DEFAULT_COPYRIGHT = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
 
 
 def set_up_repo(tmp_path, template_path, template_name, license_path, license_name):
@@ -123,19 +124,18 @@ def add_argv_run(repo, tmp_file, custom_args):
 
 def check_ansys_header(file_name):
     """Check file contains all copyright and license header components."""
-    file = open(file_name, "r", encoding="utf8")
-    count = 0
-    for line in file:
-        count += 1
-        if count == 1:
-            assert "ANSYS, Inc. and/or its affiliates" in line
-        if count == 2:
-            assert "MIT" in line
-        if count == 5:
-            assert "Permission is hereby granted" in line
-        if count > 5:
-            break
-    file.close()
+    with open(file_name, "r", encoding="utf8") as file:
+        count = 0
+        for line in file:
+            count += 1
+            if count == 1:
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
+            if count == 2:
+                assert "MIT" in line
+            if count == 5:
+                assert "Permission is hereby granted" in line
+            if count > 5:
+                break
 
 
 @pytest.mark.add_license_headers
@@ -154,17 +154,16 @@ def test_custom_start_year(tmp_path: pytest.TempPathFactory):
     # Assert the hook fails because it added the header
     assert add_argv_run(repo, tmp_file, custom_args) == 1
 
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        # Assert the copyright line's time range is
-        # from 2023 to the current year
-        if count == 1:
-            assert f"{START_YEAR} - {dt.today().year}" in line
-        if count > 1:
-            break
-    file.close()
+    with open(tmp_file, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            # Assert the copyright line's time range is
+            # from 2023 to the current year
+            if count == 1:
+                assert f"{START_YEAR} - {dt.today().year}" in line
+            if count > 1:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -184,16 +183,15 @@ def test_start_year_same_as_current(tmp_path: pytest.TempPathFactory):
     # Assert the hook fails because it added the header
     assert add_argv_run(repo, tmp_file, [tmp_file]) == 1
 
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        # Assert the copyright line's time range is from 2023 to the current year
-        if count == 1:
-            assert f"Copyright (C) {dt.today().year} ANSYS, Inc." in line
-        if count > 1:
-            break
-    file.close()
+    with open(tmp_file, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            # Assert the copyright line's time range is from 2023 to the current year
+            if count == 1:
+                assert f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc." in line
+            if count > 1:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -226,19 +224,18 @@ def test_custom_args(tmp_path: pytest.TempPathFactory):
     add_argv_run(repo, tmp_file, custom_args)
 
     # Check that custom copyright, template, and license are in the tmp_file header
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        if count == 1:
-            assert "The Educational Community License" in line
-        if count == 5:
-            assert "Super cool copyright" in line
-        if count == 6:
-            assert "ECL-1.0" in line
-        if count > 6:
-            break
-    file.close()
+    with open(tmp_file, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            if count == 1:
+                assert "The Educational Community License" in line
+            if count == 5:
+                assert "Super cool copyright" in line
+            if count == 6:
+                assert "ECL-1.0" in line
+            if count > 6:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -353,20 +350,19 @@ def test_no_license_check(tmp_path: pytest.TempPathFactory):
 
     assert add_argv_run(repo, tmp_file, custom_args) == 1
 
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        # Assert that only the copyright line is in the file
-        if count == 1:
-            assert "ANSYS, Inc. and/or its affiliates" in line
-        if count == 2:
-            assert "MIT" not in line
-        if count == 5:
-            assert "Permission is hereby granted" not in line
-        if count > 5:
-            break
-    file.close()
+    with open(tmp_file, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            # Assert that only the copyright line is in the file
+            if count == 1:
+                assert "Synopsys, Inc. and ANSYS, Inc." in line
+            if count == 2:
+                assert "MIT" not in line
+            if count == 5:
+                assert "Permission is hereby granted" not in line
+            if count > 5:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -393,19 +389,18 @@ def test_header_doesnt_change(tmp_path: pytest.TempPathFactory):
     # Update header file that has no changes
     assert add_argv_run(repo, new_files, new_files) == 0
 
-    file = open(tmp_file, "r")
-    count = 0
-    for line in file:
-        count += 1
-        if count == 2:
-            assert "MIT" in line
-        # Ensure header was updated correctly and didn't add
-        # an extra SPDX-Identifier line
-        if count == 3:
-            assert "MIT" not in line
-        if count > 3:
-            break
-    file.close()
+    with open(tmp_file, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            if count == 2:
+                assert "MIT" in line
+            # Ensure header was updated correctly and didn't add
+            # an extra SPDX-Identifier line
+            if count == 3:
+                assert "MIT" not in line
+            if count > 3:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -443,15 +438,12 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
 
     # Change jinja file
     orig_jinja = os.path.join(tmp_path, ".reuse", "templates", template_name)
-    tmp_jinja = open("tmp_jinja", "w")
-
-    with open(orig_jinja, "r+") as f:
-        for line in f:
-            if line.startswith("The Educational Community"):
-                line = line.replace("The Educational Community", "The PyAnsys Community")
-            tmp_jinja.write(line)
-        tmp_jinja.close()
-        f.close()
+    with open("tmp_jinja", "w") as tmp_jinja:
+        with open(orig_jinja, "r+") as f:
+            for line in f:
+                if line.startswith("The Educational Community"):
+                    line = line.replace("The Educational Community", "The PyAnsys Community")
+                tmp_jinja.write(line)
 
     shutil.copyfile("tmp_jinja", orig_jinja)
     os.remove("tmp_jinja")
@@ -471,10 +463,10 @@ def test_update_changed_header(tmp_path: pytest.TempPathFactory):
     add_argv_run(repo, new_files, custom_args)
 
     # Check that "New Permission" is in the tmp file header
-    file = open(tmp_file, "r")
-    for line in file:
-        if "The PyAnsys Community" in line:
-            assert "The PyAnsys Community" in line
+    with open(tmp_file, "r") as file:
+        for line in file:
+            if "The PyAnsys Community" in line:
+                assert "The PyAnsys Community" in line
 
     os.chdir(REPO_PATH)
 
@@ -503,6 +495,108 @@ def test_copy_assets(tmp_path: pytest.TempPathFactory):
     assert add_argv_run(repo, new_files, new_files) == 1
 
     check_ansys_header(tmp_file)
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_creates_symlink(tmp_path):
+    """Test that mkdirs_and_link creates a symlink when permissions allow."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    asset_dir = str(dest_dir)
+
+    hook.mkdirs_and_link(asset_dir, str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    dest_file = dest_dir / "ansys.jinja2"
+    assert dest_file.exists()
+    assert dest_file.read_text() == "template content"
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_fallback_copy_on_oserror(tmp_path, monkeypatch):
+    """Test that mkdirs_and_link falls back to copying when symlink raises OSError."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    asset_dir = str(dest_dir)
+
+    # Simulate Windows symlink privilege error
+    monkeypatch.setattr(
+        Path,
+        "symlink_to",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            OSError(1314, "A required privilege is not held by the client")
+        ),
+    )
+
+    hook.mkdirs_and_link(asset_dir, str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    dest_file = dest_dir / "ansys.jinja2"
+    assert dest_file.exists()
+    assert not dest_file.is_symlink()
+    assert dest_file.read_text() == "template content"
+
+
+@pytest.mark.add_license_headers
+def test_mkdirs_and_link_skips_existing_symlink(tmp_path):
+    """Test that mkdirs_and_link skips creation when symlink points to the correct source."""
+    src_dir = tmp_path / "hook_assets"
+    src_dir.mkdir()
+    src_file = src_dir / "ansys.jinja2"
+    src_file.write_text("template content")
+
+    dest_dir = tmp_path / "repo" / ".reuse" / "templates"
+    dest_dir.mkdir(parents=True)
+    dest_file = dest_dir / "ansys.jinja2"
+
+    try:
+        dest_file.symlink_to(src_file)
+    except OSError:
+        pytest.skip("Symlinks not supported on this platform/environment")
+
+    mtime_before = src_file.stat().st_mtime
+
+    hook.mkdirs_and_link(str(dest_dir), str(src_dir), str(dest_dir), "ansys.jinja2")
+
+    # File should still exist and be unchanged
+    assert dest_file.is_symlink()
+    assert dest_file.read_text() == "template content"
+    assert src_file.stat().st_mtime == mtime_before
+
+
+@pytest.mark.add_license_headers
+def test_add_header_skips_unknown_comment_style(tmp_path, monkeypatch):
+    """Test add_header skips files when no comment style can be inferred."""
+    test_file = tmp_path / "unknown.ext"
+    test_file.write_text("content\n", encoding="utf-8")
+
+    called = {"add_header_to_file": False}
+
+    def _fake_add_header_to_file(**_kwargs):
+        called["add_header_to_file"] = True
+
+    monkeypatch.setattr("reuse.cli.annotate.get_comment_style", lambda _path: None)
+    monkeypatch.setattr("reuse.cli.annotate.add_header_to_file", _fake_add_header_to_file)
+
+    out = io.StringIO()
+    hook.add_header(
+        [DEFAULT_COPYRIGHT],
+        ["MIT"],
+        f"{dt.today().year}",
+        str(test_file),
+        "ansys.jinja2",
+        True,
+        out,
+    )
+
+    assert not called["add_header_to_file"]
+    assert "Skipping" in out.getvalue()
 
 
 @pytest.mark.add_license_headers
@@ -585,21 +679,23 @@ def test_index_exception(tmp_path: pytest.TempPathFactory):
 
     # Assert the single line comment changed to
     # a multiline comment. This causes an IndexError in the hook
-    file = open(test_filename, "r")
-    count = 0
-    for line in file:
-        count += 1
-        if count == 1:
-            assert "/*" in line
-        # Ensure header was updated correctly and didn't add
-        # an extra SPDX-Identifier line
-        if count == 2:
-            assert f" * Copyright (C) 2023 - {dt.today().year} ANSYS, Inc. Unauthorized use" in line
-        if count == 3:
-            assert "*/" in line
-        if count > 4:
-            break
-    file.close()
+    with open(test_filename, "r") as file:
+        count = 0
+        for line in file:
+            count += 1
+            if count == 1:
+                assert "/*" in line
+            # Ensure header was updated correctly and didn't add
+            # an extra SPDX-Identifier line
+            if count == 2:
+                assert (
+                    f" * Copyright (C) 2023 - {dt.today().year} ANSYS, Inc. Unauthorized use"
+                    in line
+                )
+            if count == 3:
+                assert "*/" in line
+            if count > 4:
+                break
 
     os.chdir(REPO_PATH)
 
@@ -632,9 +728,84 @@ def test_license_year_update(tmp_path: pytest.TempPathFactory):
         # Run the hook on the tmp_license file
         add_argv_run(repo, tmp_license, custom_args)
         # Check the license year is correctly updated
-        check_license_year(tmp_license, DEFAULT_COPYRIGHT, START_YEAR, dt.today().year)
+        check_license_year(tmp_license, DEFAULT_COPYRIGHT, str(year), dt.today().year)
         # Git add the updated tmp_license file
         repo.index.add([tmp_license])
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_get_start_year_from_git_new_repo(tmp_path: pytest.TempPathFactory):
+    """Test that get_start_year_from_git returns the current year for a brand-new repo."""
+    os.chdir(tmp_path)
+    repo = init_repo(tmp_path)
+    year = hook.get_start_year_from_git(repo)
+    assert year == dt.today().year
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_get_start_year_from_git_detects_first_commit_year(tmp_path: pytest.TempPathFactory):
+    """Test that get_start_year_from_git returns the year of the *first* commit.
+
+    Creates a repo with a backdated initial commit so the result is deterministic
+    regardless of when the test suite is run.
+    """
+    from datetime import datetime
+
+    os.chdir(tmp_path)
+    git.Repo.init(tmp_path)
+    repo = git.Repo(tmp_path)
+
+    # Back-dated initial commit — gitpython requires timezone-aware datetimes
+    from datetime import timezone
+
+    old_date = datetime(2020, 6, 15, tzinfo=timezone.utc)
+    readme = tmp_path / "README.md"
+    readme.write_text("initial")
+    repo.index.add([str(readme)])
+    repo.index.commit("initial commit", author_date=old_date, commit_date=old_date)
+
+    # A more recent commit — must not affect the result
+    readme.write_text("updated")
+    repo.index.add([str(readme)])
+    repo.index.commit("recent commit")
+
+    year = hook.get_start_year_from_git(repo)
+    assert year == 2020
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_start_year_autodetected_from_git(tmp_path: pytest.TempPathFactory):
+    """End-to-end test: when --start_year is omitted the hook uses the first commit year.
+
+    A fresh repo is initialised so the first commit year equals the current year.
+    Running the hook without ``--start_year`` should therefore produce a copyright
+    line that contains only the current year (no range).
+    """
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    os.chdir(tmp_path)
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Run the hook with NO --start_year argument
+    assert add_argv_run(repo, tmp_file, [tmp_file]) == 1
+
+    with open(tmp_file, "r") as f:
+        first_line = f.readline()
+
+    # New repo: first commit is in the current year, so the copyright should
+    # contain only the current year (no multi-year range).
+    assert (
+        f"Copyright (C) {dt.today().year} Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+        in first_line
+    )
 
     os.chdir(REPO_PATH)
 
@@ -659,11 +830,17 @@ def test_date_update(tmp_path: pytest.TempPathFactory):
     years = ["2022", "2023", str(dt.today().year)]
 
     # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}"
-    # and "{current_year}"
+    # and "{current_year}" (contained within the preserved range)
     for year in years:
         custom_args = [tmp_file, f"--start_year={year}"]
         # Git add tmp_file and run hook with custom arguments
-        assert add_argv_run(repo, tmp_file, custom_args) == 1
+        result = add_argv_run(repo, tmp_file, custom_args)
+        # When the start year differs from the current year the hook must update the
+        # header (return code 1).  When start_year equals the current year and files
+        # already have the current year as their end year (set during earlier
+        # iterations), the hook preserves the existing range and returns 0.
+        if str(year) != str(dt.today().year):
+            assert result == 1
         # Check the license year is correctly updated
         check_license_year(tmp_file, DEFAULT_COPYRIGHT, year, str(dt.today().year))
         # Add file with updated header
@@ -673,15 +850,14 @@ def test_date_update(tmp_path: pytest.TempPathFactory):
 
 
 def check_license_year(license_file, copyright, start_year, current_year):
-    file = open(license_file, "r")
-
-    for line in file:
-        if copyright in line:
-            if start_year != current_year:
-                assert f"{start_year} - {current_year}" in line
-            else:
-                assert current_year in line
-        return
+    with open(license_file, "r") as file:
+        for line in file:
+            if copyright in line:
+                if str(start_year) != str(current_year):
+                    assert f"{start_year} - {current_year}" in line
+                else:
+                    assert str(current_year) in line
+                return
 
 
 def test_invalid_start_year(tmp_path: pytest.TempPathFactory):
@@ -769,6 +945,201 @@ def get_line_endings(tmp_file):
             return "Mac"
 
 
+def check_apache_header(file_name):
+    """Check file contains all Apache-2.0 copyright and license header components."""
+    with open(file_name, "r", encoding="utf8") as file:
+        content = file.read()
+        assert "Synopsys, Inc. and ANSYS, Inc." in content
+        assert "Apache-2.0" in content
+        assert "Apache License, Version 2.0" in content
+        assert "http://www.apache.org/licenses/LICENSE-2.0" in content
+        # Confirm there is no MIT text in the header
+        assert "Permission is hereby granted" not in content
+
+
+@pytest.mark.add_license_headers
+def test_apache_header_added(tmp_path: pytest.TempPathFactory):
+    """Test that a file with no header gets an Apache-2.0 header when it's the custom license."""
+    # Set template and license names (use default ansys template; Apache-2.0 is in assets)
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    custom_args = [tmp_file, "--custom_license=Apache-2.0"]
+
+    # Assert the hook fails because it added the header
+    assert add_argv_run(repo, tmp_file, custom_args) == 1
+
+    check_apache_header(tmp_file)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_mit_header_replaced_with_apache(tmp_path: pytest.TempPathFactory):
+    """Test that a file with an MIT header is fully replaced with Apache-2.0 when requested."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # First, add an MIT header to the file
+    mit_args = [tmp_file]
+    add_argv_run(repo, tmp_file, mit_args)
+    repo.index.add([tmp_file])
+
+    # Verify the MIT header was added
+    with open(tmp_file, "r") as f:
+        content = f.read()
+    assert "MIT" in content
+    assert "Permission is hereby granted" in content
+
+    # Now re-run with Apache-2.0 — the MIT header should be fully replaced
+    apache_args = [tmp_file, "--custom_license=Apache-2.0"]
+    assert add_argv_run(repo, tmp_file, apache_args) == 1
+
+    check_apache_header(tmp_file)
+
+    # Ensure the old MIT license text is gone
+    with open(tmp_file, "r") as f:
+        new_content = f.read()
+    assert "Permission is hereby granted" not in new_content
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_no_duplicate_prints_on_license_switch(
+    tmp_path: pytest.TempPathFactory, capsys: pytest.CaptureFixture
+):
+    """Test that switching from MIT to Apache-2.0 prints each changed file exactly once."""
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # First run: add the MIT header
+    add_argv_run(repo, tmp_file, [tmp_file])
+    repo.index.add([tmp_file])
+    capsys.readouterr()  # discard output from the MIT-header run
+
+    # Second run: switch to Apache-2.0 — triggers the license-switch branch
+    add_argv_run(repo, tmp_file, [tmp_file, "--custom_license=Apache-2.0"])
+
+    captured = capsys.readouterr()
+    file_lines = [
+        line for line in captured.out.splitlines() if "Successfully changed header" in line
+    ]
+    assert len(file_lines) == 1, (
+        f"Expected 'Successfully changed header' to appear exactly once, "
+        f"but got {len(file_lines)} time(s):\n{captured.out}"
+    )
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_mit_license_file_replaced_with_apache(tmp_path: pytest.TempPathFactory):
+    """Test that LICENSE file is regenerated as Apache-2.0 when it's the custom license."""
+    template_name = "ansys.jinja2"
+    license_name = "Apache-2.0.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = (
+        Path(REPO_PATH)
+        / "src"
+        / "ansys"
+        / "pre_commit_hooks"
+        / "assets"
+        / "LICENSES"
+        / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file (this copies a MIT LICENSE file)
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+    tmp_license = Path(tmp_path) / "LICENSE"
+
+    # Confirm the starting LICENSE file is MIT
+    with open(tmp_license, "r") as f:
+        starting_content = f.read()
+    assert "Permission is hereby granted" in starting_content
+
+    custom_args = [tmp_file, "--custom_license=Apache-2.0"]
+    add_argv_run(repo, tmp_file, custom_args)
+
+    # Confirm the LICENSE file is now Apache-2.0
+    with open(tmp_license, "r") as f:
+        new_content = f.read()
+
+    assert "Apache License" in new_content
+    assert "Version 2.0" in new_content
+    assert "http://www.apache.org/licenses/LICENSE-2.0" in new_content
+    # MIT text must be gone
+    assert "Permission is hereby granted" not in new_content
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_apache_license_year_update_preserves_boilerplate(tmp_path):
+    """Test that updating the year in an Apache-2.0 LICENSE does not corrupt the boilerplate.
+
+    Regression test: the 'January 2004' text in the Apache boilerplate header must not
+    be replaced with the current year when the copyright year is updated.
+    """
+    hook_loc = Path(REPO_PATH) / "src" / "ansys" / "pre_commit_hooks"
+    template_dir = hook_loc / "assets" / "LICENSES"
+    license_file = tmp_path / "LICENSE"
+
+    # Generate an Apache-2.0 LICENSE file with a fixed start year
+    hook.generate_license_file(template_dir, "2023", license_file, "Apache-2.0")
+
+    initial_content = license_file.read_text(encoding="utf-8")
+    assert "January 2004" in initial_content
+    assert "Copyright 2023 Synopsys, Inc. and ANSYS, Inc." in initial_content
+
+    # Simulate a year-span update (e.g., a new calendar year)
+    hook.update_license_file(license_file, "2023 - 2026", "Apache-2.0")
+
+    updated_content = license_file.read_text(encoding="utf-8")
+    assert (
+        "January 2004" in updated_content
+    ), "The Apache boilerplate 'January 2004' must not be overwritten by the year update"
+    assert "Copyright 2023 - 2026 Synopsys, Inc. and ANSYS, Inc." in updated_content
+
+
 @pytest.mark.add_license_headers
 def test_line_endings(tmp_path: pytest.TempPathFactory):
     """Test line endings remain the same before and after running the hook."""
@@ -799,5 +1170,57 @@ def test_line_endings(tmp_path: pytest.TempPathFactory):
     # Assert line endings haven't changed
     assert file_line_endings_before == get_line_endings(tmp_file)
     assert license_line_endings_before == get_line_endings(tmp_license)
+
+    os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_copyright_holder_change_replaces_not_duplicates(tmp_path: pytest.TempPathFactory):
+    """Test that changing the copyright holder replaces the old line instead of adding a new one.
+
+    Regression test: when a file already has a valid header with the *old* copyright phrase
+    (e.g. 'ANSYS, Inc. and/or its affiliates.') and the hook is re-run with a new phrase
+    (e.g. 'Synopsys, Inc. and ANSYS, Inc. All rights reserved.'), the header must be
+    fully replaced — not duplicated — so only one copyright line exists in the file.
+    """
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    old_copyright = "ANSYS, Inc. and/or its affiliates."
+    new_copyright = "Synopsys, Inc. and ANSYS, Inc. All rights reserved."
+
+    # First run: add header with the *old* copyright phrase
+    old_args = [tmp_file, f"--custom_copyright={old_copyright}"]
+    assert add_argv_run(repo, tmp_file, old_args) == 1
+    repo.index.add([tmp_file])
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_first_run = f.read()
+    assert old_copyright in content_after_first_run
+    assert new_copyright not in content_after_first_run
+
+    # Second run: re-run with the new copyright phrase (default)
+    new_args = [tmp_file, f"--custom_copyright={new_copyright}"]
+    assert add_argv_run(repo, tmp_file, new_args) == 1
+
+    with open(tmp_file, "r", encoding="utf-8") as f:
+        content_after_second_run = f.read()
+
+    # The new phrase must be present
+    assert new_copyright in content_after_second_run
+    # The old phrase must be gone
+    assert old_copyright not in content_after_second_run
+    # Exactly one copyright line (no duplicates)
+    copyright_line_count = sum(
+        1 for line in content_after_second_run.splitlines() if "Copyright" in line
+    )
+    assert copyright_line_count == 1, (
+        f"Expected exactly 1 copyright line, found {copyright_line_count}:\n"
+        f"{content_after_second_run}"
+    )
 
     os.chdir(REPO_PATH)
