@@ -96,11 +96,32 @@ __all__ = [
 _PYPROJECT: Final = "pyproject.toml"
 _LICENSE: Final = "LICENSE"
 _CODEOWNERS: Final = ".github/CODEOWNERS"
+_AUTHORS: Final = "AUTHORS"
+_CONTRIBUTORS: Final = "CONTRIBUTORS.md"
 
 _DEFAULT_AUTHOR: Final = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL: Final = "pyansys-core@synopsys.com"
 
+_DOCS_DIRECTORIES: Final = ("docs", "doc")
+_TESTS_DIRECTORIES: Final = ("tests", "test")
+_TASK_RUNNER_FILES: Final = (
+    "tox.ini",
+    "noxfile.py",
+    "noxfile.toml",
+    "pixi.toml",
+    "justfile",
+    "Makefile",
+)
+_REQUIRED_PROJECT_URLS: Final = ("Issues", "Discussions", "Documentation")
+
 _POETRY_BACKEND: Final = re.compile(r"poetry[._-]core")
+_POETRY_LICENSE: Final = re.compile(r"\[tool\.poetry\][\s\S]*?license\s*=")
+_PROJECT_NAME: Final = re.compile(r"""^name\s*=\s*["']([^"']+)["']""", re.MULTILINE)
+_PROJECT_VERSION: Final = re.compile(r"""^version\s*=\s*["']([^"']+)["']""", re.MULTILINE)
+_CODEOWNER_ENTRY: Final = re.compile(r"^\s*[^#\n]+\s+@\S+", re.MULTILINE)
+_LEAD_HEADING: Final = re.compile(r"^##\s+Project\s+Lead\b", re.MULTILINE)
+_INDIVIDUAL_HEADING: Final = re.compile(r"^##\s+Individual\s+Contributors\b", re.MULTILINE)
+_CONTRIBUTOR_BULLET: Final = re.compile(r"^\*\s+\[[^\]]+\]\([^)]+\)", re.MULTILINE)
 
 
 def _has_any_file(repository_root: Path, relative_paths: Sequence[str]) -> bool:
@@ -134,7 +155,17 @@ def _missing(relative_path: str) -> str:
 
 def _has_url_entry(content: str, key: str) -> bool:
     """Return whether a top-level ``key = "http(s)://..."`` entry exists."""
-    return bool(re.search(rf"^{key}\s*=\s*[\"']https?://", content, re.MULTILINE))
+    return bool(re.search(rf"^{re.escape(key)}\s*=\s*[\"']https?://", content, re.MULTILINE))
+
+
+def _has_default_contact(content: str, key: str) -> bool:
+    """Return whether the ``key = [...]`` block lists the default author name and email."""
+    block_match = re.search(rf"{re.escape(key)}\s*=\s*\[([\s\S]*?)\]", content)
+    block = block_match.group(1) if block_match else ""
+    return bool(
+        re.search(rf'name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']', block)
+        and re.search(rf'email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']', block)
+    )
 
 
 class ProjectMetadata(ABC):
@@ -173,7 +204,7 @@ class PM001(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the AUTHORS file is present."""
-        return file_exists(repository_root, "AUTHORS")
+        return file_exists(repository_root, _AUTHORS)
 
 
 class PM002(ProjectMetadata):
@@ -209,7 +240,7 @@ class PM005(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the contributors file is present."""
-        return file_exists(repository_root, "CONTRIBUTORS.md")
+        return file_exists(repository_root, _CONTRIBUTORS)
 
 
 class PM006(ProjectMetadata):
@@ -267,7 +298,7 @@ class PM011(ProjectMetadata):
             return _missing(_PYPROJECT)
 
         if _POETRY_BACKEND.search(content):
-            return bool(re.search(r"\[tool\.poetry\][\s\S]*?license\s*=", content))
+            return bool(_POETRY_LICENSE.search(content))
 
         return bool(
             re.search(r"license-files\s*=", content)
@@ -286,7 +317,7 @@ class PM012(ProjectMetadata):
         if content is None:
             return _missing(_PYPROJECT)
 
-        match = re.search(r'^name\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE)
+        match = _PROJECT_NAME.search(content)
         if not match:
             return "WARNING: project name not found in pyproject.toml."
 
@@ -313,7 +344,7 @@ class PM013(ProjectMetadata):
         if content is None:
             return _missing(_PYPROJECT)
 
-        match = re.search(r'^version\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE)
+        match = _PROJECT_VERSION.search(content)
         if not match:
             # The build backend resolves a dynamic version (for example from __init__.py).
             if PM013._DYNAMIC_VERSION.search(content):
@@ -339,15 +370,9 @@ class PM014(ProjectMetadata):
         if content is None:
             return _missing(_PYPROJECT)
 
-        def block_ok(key: str) -> bool:
-            block_match = re.search(rf"{key}\s*=\s*\[([\s\S]*?)\]", content)
-            block = block_match.group(1) if block_match else ""
-            return bool(
-                re.search(rf'name\s*=\s*["\']{re.escape(_DEFAULT_AUTHOR)}["\']', block)
-                and re.search(rf'email\s*=\s*["\']{re.escape(_DEFAULT_EMAIL)}["\']', block)
-            )
-
-        if block_ok("authors") and block_ok("maintainers"):
+        if _has_default_contact(content, "authors") and _has_default_contact(
+            content, "maintainers"
+        ):
             return True
         return (
             "WARNING: author/maintainer metadata does not match "
@@ -380,7 +405,7 @@ class PM016(ProjectMetadata):
         if content is None:
             return _missing(_CODEOWNERS)
 
-        if re.search(r"^\s*[^#\n]+\s+@\S+", content, re.MULTILINE):
+        if _CODEOWNER_ENTRY.search(content):
             return True
         return f"WARNING: {_CODEOWNERS} exists but has no owner entries."
 
@@ -416,7 +441,7 @@ class PM021(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a documentation directory is present."""
-        return _has_any_directory(repository_root, ("docs", "doc"))
+        return _has_any_directory(repository_root, _DOCS_DIRECTORIES)
 
 
 class PM022(ProjectMetadata):
@@ -425,7 +450,7 @@ class PM022(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a test directory is present."""
-        return _has_any_directory(repository_root, ("tests", "test"))
+        return _has_any_directory(repository_root, _TESTS_DIRECTORIES)
 
 
 class PM024(ProjectMetadata):
@@ -434,17 +459,7 @@ class PM024(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a task runner is configured for the project."""
-        return _has_any_file(
-            repository_root,
-            (
-                "tox.ini",
-                "noxfile.py",
-                "noxfile.toml",
-                "pixi.toml",
-                "justfile",
-                "Makefile",
-            ),
-        )
+        return _has_any_file(repository_root, _TASK_RUNNER_FILES)
 
 
 class PM025(ProjectMetadata):
@@ -457,11 +472,7 @@ class PM025(ProjectMetadata):
         if content is None:
             return _missing(_PYPROJECT)
 
-        missing = [
-            key
-            for key in ("Issues", "Discussions", "Documentation")
-            if not _has_url_entry(content, key)
-        ]
+        missing = [key for key in _REQUIRED_PROJECT_URLS if not _has_url_entry(content, key)]
         if not missing:
             return True
         return "WARNING: missing support/contact project URLs in pyproject.toml: " + ", ".join(
@@ -475,15 +486,12 @@ class PM026(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether AUTHORS includes at least one entry and the corporate owner."""
-        content = _read(repository_root, "AUTHORS")
+        content = _read(repository_root, _AUTHORS)
         if content is None:
-            return _missing("AUTHORS")
+            return _missing(_AUTHORS)
 
-        lines = [
-            line.strip()
-            for line in content.splitlines()
-            if line.strip() and not line.startswith("#")
-        ]
+        stripped_lines = (line.strip() for line in content.splitlines())
+        lines = [line for line in stripped_lines if line and not line.startswith("#")]
         if not lines:
             return "WARNING: AUTHORS exists but has no contributor ownership entries."
         if not any(_DEFAULT_AUTHOR in line for line in lines):
@@ -497,16 +505,15 @@ class PM027(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether CONTRIBUTORS.md includes lead and contributor details."""
-        content = _read(repository_root, "CONTRIBUTORS.md")
+        content = _read(repository_root, _CONTRIBUTORS)
         if content is None:
-            return _missing("CONTRIBUTORS.md")
+            return _missing(_CONTRIBUTORS)
 
-        has_lead_heading = bool(re.search(r"^##\s+Project\s+Lead\b", content, re.MULTILINE))
-        has_individual_heading = bool(
-            re.search(r"^##\s+Individual\s+Contributors\b", content, re.MULTILINE)
-        )
-        has_bullets = bool(re.search(r"^\*\s+\[[^\]]+\]\([^)]+\)", content, re.MULTILINE))
-        if has_lead_heading and has_individual_heading and has_bullets:
+        if (
+            _LEAD_HEADING.search(content)
+            and _INDIVIDUAL_HEADING.search(content)
+            and _CONTRIBUTOR_BULLET.search(content)
+        ):
             return True
         return (
             "WARNING: CONTRIBUTORS.md should include 'Project Lead' and 'Individual "
