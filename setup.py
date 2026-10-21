@@ -39,7 +39,7 @@ setup(
     url="https://github.com/ansys/pre-commit-hooks",
     python_requires=">=3.10,<4",
     install_requires=[
-        "click==8.3.1",
+        "click==8.5.0",
         "GitPython==3.2.0",
         "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
