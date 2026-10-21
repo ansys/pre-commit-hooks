@@ -422,13 +422,13 @@ def test_project_metadata_family_runs_by_default(tmp_path, monkeypatch):
     }
     by_id = {
         item["id"]: item
-        for item in report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
+        for item in report._run_checks(tmp_path, selected_rule_ids={"PM011"})["results"]
     }
 
     assert {"RM000", "PM001"} <= default_ids
     assert family_ids and all(rule_id.startswith("PM") for rule_id in family_ids)
-    assert by_id["PM012"]["status"] == "PASSED"
-    assert by_id["PM012"]["family"] == "project_metadata"
+    assert by_id["PM011"]["status"] == "PASSED"
+    assert by_id["PM011"]["family"] == "project_metadata"
 
 
 @pytest.mark.parametrize(
@@ -441,11 +441,11 @@ def test_project_metadata_family_runs_by_default(tmp_path, monkeypatch):
         ('dynamic = ["version"]', "PASSED"),
     ],
 )
-def test_pm013_version_formats(tmp_path, version_line, expected):
+def test_pm012_version_formats(tmp_path, version_line, expected):
     """Only N.N.N[{a|b|rc}N], dev versions and dynamic versions are accepted."""
     (tmp_path / "pyproject.toml").write_text(f"[project]\n{version_line}\n", encoding="utf-8")
 
-    results = report._run_checks(tmp_path, selected_rule_ids={"PM013"})["results"]
+    results = report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
 
     assert results[0]["status"] == expected
 

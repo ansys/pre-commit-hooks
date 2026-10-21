@@ -74,6 +74,7 @@ __all__ = [
     "PM004",
     "PM005",
     "PM006",
+    "PM007",
     "PM008",
     "PM009",
     "PM010",
@@ -84,12 +85,11 @@ __all__ = [
     "PM015",
     "PM016",
     "PM017",
+    "PM018",
+    "PM019",
+    "PM020",
     "PM021",
     "PM022",
-    "PM024",
-    "PM025",
-    "PM026",
-    "PM027",
     "ProjectMetadata",
 ]
 
@@ -252,7 +252,7 @@ class PM006(ProjectMetadata):
         return file_exists(repository_root, _LICENSE)
 
 
-class PM008(ProjectMetadata):
+class PM007(ProjectMetadata):
     """The SECURITY.md file exists."""
 
     @staticmethod
@@ -261,7 +261,7 @@ class PM008(ProjectMetadata):
         return file_exists(repository_root, "SECURITY.md")
 
 
-class PM009(ProjectMetadata):
+class PM008(ProjectMetadata):
     """The .github/CODEOWNERS file exists."""
 
     @staticmethod
@@ -270,7 +270,7 @@ class PM009(ProjectMetadata):
         return file_exists(repository_root, _CODEOWNERS)
 
 
-class PM010(ProjectMetadata):
+class PM009(ProjectMetadata):
     """Pyproject.toml references the README file."""
 
     @staticmethod
@@ -287,7 +287,7 @@ class PM010(ProjectMetadata):
         return False
 
 
-class PM011(ProjectMetadata):
+class PM010(ProjectMetadata):
     """Pyproject.toml references the LICENSE file."""
 
     @staticmethod
@@ -307,7 +307,7 @@ class PM011(ProjectMetadata):
         )
 
 
-class PM012(ProjectMetadata):
+class PM011(ProjectMetadata):
     """Project name follows the ansys-*-* convention."""
 
     @staticmethod
@@ -327,7 +327,7 @@ class PM012(ProjectMetadata):
         return f"WARNING: project name '{name}' does not match ansys-*-*."
 
 
-class PM013(ProjectMetadata):
+class PM012(ProjectMetadata):
     """Project version follows an accepted versioning scheme."""
 
     # Only the subset supported by the PyAnsys tooling: N.N.N[{a|b|rc}N] or PEP 440 dev.
@@ -347,12 +347,12 @@ class PM013(ProjectMetadata):
         match = _PROJECT_VERSION.search(content)
         if not match:
             # The build backend resolves a dynamic version (for example from __init__.py).
-            if PM013._DYNAMIC_VERSION.search(content):
+            if PM012._DYNAMIC_VERSION.search(content):
                 return True
             return "WARNING: project version not found in pyproject.toml."
 
         version = match.group(1)
-        if PM013._RELEASE.fullmatch(version) or PM013._DEV.fullmatch(version):
+        if PM012._RELEASE.fullmatch(version) or PM012._DEV.fullmatch(version):
             return True
         return (
             f"WARNING: project version '{version}' does not follow N.N.N[{{a|b|rc}}N] "
@@ -360,7 +360,7 @@ class PM013(ProjectMetadata):
         )
 
 
-class PM014(ProjectMetadata):
+class PM013(ProjectMetadata):
     """Project author and maintainer metadata matches PyAnsys defaults."""
 
     @staticmethod
@@ -380,7 +380,7 @@ class PM014(ProjectMetadata):
         )
 
 
-class PM015(ProjectMetadata):
+class PM014(ProjectMetadata):
     """The LICENSE file includes recognized Apache 2.0 license wording."""
 
     @staticmethod
@@ -395,7 +395,7 @@ class PM015(ProjectMetadata):
         return "WARNING: LICENSE file content is missing a recognized Apache 2.0 statement."
 
 
-class PM016(ProjectMetadata):
+class PM015(ProjectMetadata):
     """The .github/CODEOWNERS file contains at least one valid owner entry."""
 
     @staticmethod
@@ -410,7 +410,7 @@ class PM016(ProjectMetadata):
         return f"WARNING: {_CODEOWNERS} exists but has no owner entries."
 
 
-class PM017(ProjectMetadata):
+class PM016(ProjectMetadata):
     """Project declares supported Python versions with explicit bounds."""
 
     @staticmethod
@@ -431,11 +431,11 @@ class PM017(ProjectMetadata):
             content = _read(repository_root, relative_path)
             match = re.search(rf'{key}\s*=\s*["\']([^"\']+)["\']', content) if content else None
             if match:
-                return PM017._validate_python_version_spec(match.group(1))
+                return PM016._validate_python_version_spec(match.group(1))
         return "WARNING: requires-python is not declared in pyproject.toml or setup.py."
 
 
-class PM021(ProjectMetadata):
+class PM017(ProjectMetadata):
     """The project includes a docs directory."""
 
     @staticmethod
@@ -444,7 +444,7 @@ class PM021(ProjectMetadata):
         return _has_any_directory(repository_root, _DOCS_DIRECTORIES)
 
 
-class PM022(ProjectMetadata):
+class PM018(ProjectMetadata):
     """The project includes a tests directory."""
 
     @staticmethod
@@ -453,7 +453,7 @@ class PM022(ProjectMetadata):
         return _has_any_directory(repository_root, _TESTS_DIRECTORIES)
 
 
-class PM024(ProjectMetadata):
+class PM019(ProjectMetadata):
     """The project supports a task runner such as nox, tox, or pixi."""
 
     @staticmethod
@@ -462,7 +462,7 @@ class PM024(ProjectMetadata):
         return _has_any_file(repository_root, _TASK_RUNNER_FILES)
 
 
-class PM025(ProjectMetadata):
+class PM020(ProjectMetadata):
     """Project contact and support links are provided in pyproject metadata."""
 
     @staticmethod
@@ -480,7 +480,7 @@ class PM025(ProjectMetadata):
         )
 
 
-class PM026(ProjectMetadata):
+class PM021(ProjectMetadata):
     """The AUTHORS file contains compliant contributor ownership information."""
 
     @staticmethod
@@ -499,7 +499,7 @@ class PM026(ProjectMetadata):
         return True
 
 
-class PM027(ProjectMetadata):
+class PM022(ProjectMetadata):
     """The CONTRIBUTORS.md file includes lead and main contributors sections."""
 
     @staticmethod
