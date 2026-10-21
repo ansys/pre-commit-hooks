@@ -1,0 +1,37 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.check_same_content`
+============================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.check_same_content(before_hook, after_hook)
+
+   
+   Check if file before the hook ran is the same as after the hook ran.
+
+
+   :Parameters:
+
+       **before_hook: str**
+           Path to file before add-license-headers was run.
+
+       **after_hook: str**
+           Path to file after add-license-headers was run.
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` if the files have the same content.
+           ``False`` if the files have different content.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

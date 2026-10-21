@@ -1,0 +1,98 @@
+
+
+
+
+
+
+:class:`Directories`
+====================
+
+.. py:class:: src.ansys.pre_commit_hooks.tech_review.Directories(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   
+   Enum of directories to check.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+.. py:currentmodule:: Directories
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~GITHUB`
+            - 
+          * - :py:attr:`~DOC`
+            - 
+          * - :py:attr:`~SRC`
+            - 
+          * - :py:attr:`~TESTS`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.tech_review import Directories
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: GITHUB
+   :value: '.github'
+
+
+.. py:attribute:: DOC
+   :value: 'doc'
+
+
+.. py:attribute:: SRC
+   :value: 'src'
+
+
+.. py:attribute:: TESTS
+   :value: 'tests'
+
+
+
+
+
+

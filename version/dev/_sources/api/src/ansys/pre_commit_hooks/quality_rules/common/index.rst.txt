@@ -1,0 +1,292 @@
+
+
+
+
+
+
+The ``common.py`` module
+========================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.common
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: common
+.. tab-set::
+
+
+
+
+
+    .. tab-item:: Enums
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.common.RuleStatus`
+            - Public status of a quality rule.
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~file_exists`
+            - Return whether a repository file exists.
+
+
+          * - :py:obj:`~file_content`
+            - Read a repository file (as UTF-8) without allowing path traversal.
+
+
+          * - :py:obj:`~readme_path`
+            - Return the preferred README path for a repository.
+
+
+          * - :py:obj:`~_first_doc_line`
+            - Return the first non-empty line of a rule check docstring.
+
+
+          * - :py:obj:`~normalize_check_result`
+            - Normalize a rule return value into a public status and detail.
+
+
+
+    .. tab-item:: Attributes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~RuleCheckResult`
+            - 
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~PASSED`
+            - 
+
+
+          * - :py:obj:`~WARNING`
+            - 
+
+
+          * - :py:obj:`~ERROR`
+            - 
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_enum"></span> RuleStatus</api/src/ansys/pre_commit_hooks/quality_rules/common/RuleStatus>
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Shared helpers for quality check rules.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: file_exists(repository_root: pathlib.Path, relative_path: str) -> bool
+
+   
+   Return whether a repository file exists.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Root directory that contains the file.
+
+       **relative_path** : :class:`python:str`
+           File path relative to ``repository_root``.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>`
+           ``True`` when the path resolves to a regular file within the
+           repository, otherwise ``False``.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: file_content(repository_root: pathlib.Path, relative_path: str) -> str | None
+
+   
+   Read a repository file (as UTF-8) without allowing path traversal.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Root directory that contains the file.
+
+       **relative_path** : :class:`python:str`
+           File path relative to ``repository_root``.
+
+
+
+   :Returns:
+
+       :class:`python:str` or :data:`python:None`
+           File content, or ``None`` when the path is unsafe or the file cannot
+           be read as UTF-8.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:function:: readme_path(repository_root: pathlib.Path) -> str | None
+
+   
+   Return the preferred README path for a repository.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+
+
+   :Returns:
+
+       :class:`python:str` or :data:`python:None`
+           ``"README.rst"`` when present, otherwise ``"README.md"`` when
+           present. ``None`` is returned when neither file exists.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+.. py:function:: normalize_check_result(raw_result: object, rule: _QualityRule) -> tuple[RuleStatus, str]
+
+   
+   Normalize a rule return value into a public status and detail.
+
+
+   :Parameters:
+
+       **raw_result** : :obj:`object`
+           Value returned by a rule check.
+
+       **rule** : :obj:`_QualityRule`
+           Rule that produced ``raw_result``.
+
+
+
+   :Returns:
+
+       :class:`python:tuple`\[:obj:`RuleStatus`, :class:`python:str`]
+           Public status and its display detail. Invalid return values are
+           converted to ``ERROR``.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: PASSED
+   :type:  Final[RuleStatus]
+
+.. py:data:: WARNING
+   :type:  Final[RuleStatus]
+
+.. py:data:: ERROR
+   :type:  Final[RuleStatus]
+
+.. py:type:: RuleCheckResult
+   :canonical: bool | str
+
+
+
+
