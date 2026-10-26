@@ -149,9 +149,11 @@ def _has_any_directory(repository_root: Path, relative_paths: Sequence[str]) -> 
 
 def _read(repository_root: Path, relative_path: str) -> str | None:
     """Return file content, or ``None`` if the file is missing or unreadable."""
-    if not file_exists(repository_root, relative_path):
-        return None
-    return file_content(repository_root, relative_path)
+    return (
+        None
+        if not file_exists(repository_root, relative_path)
+        else file_content(repository_root, relative_path)
+    )
 
 
 def _missing(relative_path: str) -> str:
