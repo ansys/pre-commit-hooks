@@ -31,6 +31,7 @@ import pytest
 from ansys.pre_commit_hooks import pyansys_quality_report as report
 from ansys.pre_commit_hooks.quality_rules import repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result
+from ansys.pre_commit_hooks.quality_rules.project_metadata import PM002, PM003, PM004, PM007
 from ansys.pre_commit_hooks.quality_rules.readme import (
     RM001,
     RM002,
@@ -46,6 +47,50 @@ def test_registry_contains_every_rule_family():
     """The registry exposes the README and project metadata rule families."""
     assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
     assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM"}
+
+
+@pytest.mark.parametrize(
+    "paths",
+    [
+        (),
+        ("CHANGELOG.md",),
+        ("doc/source/changelog.rst",),
+        ("CHANGELOG.md", "doc/source/changelog.rst"),
+    ],
+)
+def test_pm002_accepts_either_changelog_location(tmp_path, paths):
+    """A root Markdown or documentation RST changelog satisfies PM002."""
+    for relative_path in paths:
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("Changelog\n", encoding="utf-8")
+
+    assert PM002.check(tmp_path, None) is bool(paths)
+
+
+@pytest.mark.parametrize("relative_path", ["CHANGELOG.md", "doc/source/changelog.rst"])
+def test_pm002_rejects_directories(tmp_path, relative_path):
+    """A directory named like a changelog does not satisfy PM002."""
+    (tmp_path / relative_path).mkdir(parents=True)
+
+    assert PM002.check(tmp_path, None) is False
+
+
+@pytest.mark.parametrize(
+    ("rule", "filename"),
+    [
+        (PM003, "CODE_OF_CONDUCT.md"),
+        (PM004, "CONTRIBUTING.md"),
+        (PM007, "SECURITY.md"),
+    ],
+)
+def test_metadata_file_checks_preserve_expected_filenames(tmp_path, rule, filename):
+    """Governance file checks require their expected repository files."""
+    assert rule.check(tmp_path, None) is False
+
+    (tmp_path / filename).write_text("Project policy\n", encoding="utf-8")
+
+    assert rule.check(tmp_path, None) is True
 
 
 def test_rm003_matches_mit_project_license(tmp_path):

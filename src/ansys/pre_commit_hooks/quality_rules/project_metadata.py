@@ -28,7 +28,7 @@ The checks cover:
 
 * Governance and repository files
     - AUTHORS
-    - CHANGELOG.md
+    - CHANGELOG.md or doc/source/changelog.rst
     - CODE_OF_CONDUCT.md
     - CONTRIBUTING.md
     - CONTRIBUTORS.md
@@ -97,7 +97,12 @@ _PYPROJECT: Final = "pyproject.toml"
 _LICENSE: Final = "LICENSE"
 _CODEOWNERS: Final = ".github/CODEOWNERS"
 _AUTHORS: Final = "AUTHORS"
+_CHANGELOG: Final = "CHANGELOG.md"
+_DOC_CHANGELOG: Final = "doc/source/changelog.rst"
+_CODE_OF_CONDUCT: Final = "CODE_OF_CONDUCT.md"
+_CONTRIBUTING: Final = "CONTRIBUTING.md"
 _CONTRIBUTORS: Final = "CONTRIBUTORS.md"
+_SECURITY: Final = "SECURITY.md"
 
 _DEFAULT_AUTHOR: Final = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL: Final = "pyansys-core@synopsys.com"
@@ -208,12 +213,12 @@ class PM001(ProjectMetadata):
 
 
 class PM002(ProjectMetadata):
-    """The CHANGELOG.md file exists."""
+    """The CHANGELOG.md or doc/source/changelog.rst file exists."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the changelog file is present."""
-        return file_exists(repository_root, "CHANGELOG.md")
+        return _has_any_file(repository_root, (_CHANGELOG, _DOC_CHANGELOG))
 
 
 class PM003(ProjectMetadata):
@@ -222,7 +227,7 @@ class PM003(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the code-of-conduct file is present."""
-        return file_exists(repository_root, "CODE_OF_CONDUCT.md")
+        return file_exists(repository_root, _CODE_OF_CONDUCT)
 
 
 class PM004(ProjectMetadata):
@@ -231,7 +236,7 @@ class PM004(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the contributing guide is present."""
-        return file_exists(repository_root, "CONTRIBUTING.md")
+        return file_exists(repository_root, _CONTRIBUTING)
 
 
 class PM005(ProjectMetadata):
@@ -258,7 +263,7 @@ class PM007(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the security policy file is present."""
-        return file_exists(repository_root, "SECURITY.md")
+        return file_exists(repository_root, _SECURITY)
 
 
 class PM008(ProjectMetadata):
