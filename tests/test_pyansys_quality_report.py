@@ -29,9 +29,15 @@ from pathlib import Path
 import pytest
 
 from ansys.pre_commit_hooks import pyansys_quality_report as report
-from ansys.pre_commit_hooks.quality_rules import repo_review_checks
+from ansys.pre_commit_hooks.quality_rules import project_metadata, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result
-from ansys.pre_commit_hooks.quality_rules.project_metadata import PM002, PM003, PM004, PM007
+from ansys.pre_commit_hooks.quality_rules.project_metadata import (
+    PM002,
+    PM003,
+    PM004,
+    PM007,
+    PM014,
+)
 from ansys.pre_commit_hooks.quality_rules.readme import (
     RM001,
     RM002,
@@ -91,6 +97,45 @@ def test_metadata_file_checks_preserve_expected_filenames(tmp_path, rule, filena
     (tmp_path / filename).write_text("Project policy\n", encoding="utf-8")
 
     assert rule.check(tmp_path, None) is True
+
+
+_LICENSE_TEMPLATES = Path(project_metadata.__file__).resolve().parents[1] / "assets" / "LICENSES"
+
+
+@pytest.mark.parametrize("template_name", ["MIT.txt", "Apache-2.0.txt"])
+def test_pm014_accepts_standard_license_text(tmp_path, template_name):
+    """A LICENSE file with the standard MIT or Apache 2.0 text satisfies PM014."""
+    license_text = (_LICENSE_TEMPLATES / template_name).read_text(encoding="utf-8")
+    (tmp_path / "LICENSE").write_text(license_text.replace("{{ year_span }}", "2026"), "utf-8")
+
+    assert PM014.check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    "license_text",
+    [
+        "MIT License\n\nPermission is hereby granted, free of charge\n",
+        "Apache License\n                           Version 2.0, January 2004\n",
+        "BSD 3-Clause License\n",
+    ],
+)
+def test_pm014_rejects_partial_or_other_license_text(tmp_path, license_text):
+    """Keyword mentions or truncated texts do not satisfy PM014."""
+    (tmp_path / "LICENSE").write_text(license_text, encoding="utf-8")
+
+    result = PM014.check(tmp_path, None)
+    assert isinstance(result, str)
+    assert result.startswith("WARNING: LICENSE file text does not match")
+
+
+def test_pm014_rejects_modified_standard_text(tmp_path):
+    """Changing a clause of the standard MIT text makes PM014 warn."""
+    license_text = (_LICENSE_TEMPLATES / "MIT.txt").read_text(encoding="utf-8")
+    (tmp_path / "LICENSE").write_text(
+        license_text.replace("free of charge", "for a fee"), encoding="utf-8"
+    )
+
+    assert isinstance(PM014.check(tmp_path, None), str)
 
 
 def test_rm003_matches_mit_project_license(tmp_path):

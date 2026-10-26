@@ -45,7 +45,7 @@ The checks cover:
     - Support URLs are declared
 
 * Licensing
-    - LICENSE file contains recognized Apache 2.0 wording
+    - LICENSE file contains recognized MIT or Apache 2.0 wording
 
 * Repository layout
     - Documentation and tests directories
@@ -102,6 +102,7 @@ _DOC_CHANGELOG: Final = "doc/source/changelog.rst"
 _CODE_OF_CONDUCT: Final = "CODE_OF_CONDUCT.md"
 _CONTRIBUTING: Final = "CONTRIBUTING.md"
 _CONTRIBUTORS: Final = "CONTRIBUTORS.md"
+_LICENSE_TEMPLATES: Final = Path(__file__).resolve().parents[1] / "assets" / "LICENSES"
 _SECURITY: Final = "SECURITY.md"
 
 _DEFAULT_AUTHOR: Final = "Synopsys, Inc. and ANSYS, Inc."
@@ -156,6 +157,21 @@ def _read(repository_root: Path, relative_path: str) -> str | None:
 def _missing(relative_path: str) -> str:
     """Return the warning used when a file needed for a check is unavailable."""
     return f"WARNING: {relative_path} not found or not readable, so this check was skipped."
+
+
+def _collapse_whitespace(text: str) -> str:
+    """Return text with every run of whitespace replaced by a single space."""
+    return " ".join(text.split())
+
+
+def _license_body_matches(content: str, template_name: str, start: str, end: str) -> bool:
+    """Return whether ``content`` contains the standard license body from a template.
+
+    Whitespace is collapsed on both sides so that line wrapping differences are ignored.
+    """
+    template = (_LICENSE_TEMPLATES / template_name).read_text(encoding="utf-8")
+    body = template[template.index(start) : template.index(end) + len(end)]
+    return _collapse_whitespace(body) in _collapse_whitespace(content)
 
 
 def _has_url_entry(content: str, key: str) -> bool:
@@ -386,18 +402,24 @@ class PM013(ProjectMetadata):
 
 
 class PM014(ProjectMetadata):
-    """The LICENSE file includes recognized Apache 2.0 license wording."""
+    """The LICENSE file contains the standard MIT or Apache 2.0 license text."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the LICENSE file contains expected Apache 2.0 text."""
+        """Return whether the LICENSE file contains the standard MIT or Apache 2.0 text."""
         content = _read(repository_root, _LICENSE)
         if content is None:
             return _missing(_LICENSE)
 
-        if "Apache License" in content:
+        if _collapse_whitespace(content).startswith("MIT License") and _license_body_matches(
+            content, "MIT.txt", "Permission is hereby granted", "SOFTWARE."
+        ):
             return True
-        return "WARNING: LICENSE file content is missing a recognized Apache 2.0 statement."
+        if _license_body_matches(
+            content, "Apache-2.0.txt", "Apache License", "END OF TERMS AND CONDITIONS"
+        ):
+            return True
+        return "WARNING: LICENSE file text does not match the standard MIT or Apache 2.0 license."
 
 
 class PM015(ProjectMetadata):
