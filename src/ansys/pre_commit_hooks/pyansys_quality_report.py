@@ -527,7 +527,11 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
-@click.option("--family", multiple=True, help="Select rule family (readme, project_metadata).")
+@click.option(
+    "--family",
+    multiple=True,
+    help="Select rule family (readme, project_metadata, cicd).",
+)
 @click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")
 @click.option(

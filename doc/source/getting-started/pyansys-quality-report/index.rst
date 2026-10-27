@@ -64,5 +64,15 @@ automatic mode, ``NO_COLOR`` disables color and a nonzero ``FORCE_COLOR`` value
 enables it.
 Warnings and errors display their actual message once. Warnings do not produce
 a non-zero exit code; errors do. The score uses passed and error results only.
-The ``--family`` option accepts ``readme`` in this release. The ``tech-review``
-hook remains unchanged.
+The ``--family`` option accepts ``readme``, ``project_metadata``, and ``cicd``.
+The ``tech-review`` hook remains unchanged.
+
+CI/CD rules
+-----------
+
+The CI/CD rules are formatted as ``CIXXX``. They read the workflow files under
+``.github/workflows`` and check for required ``ansys/actions`` reusable actions and
+for SHA-pinned action references. Each rule is documented in the
+:doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/cicd/index>`.
+Concurrency, root permissions, and credential persistence are enforced by the
+zizmor check in ``ansys/actions/check-actions-security`` and are not repeated here.

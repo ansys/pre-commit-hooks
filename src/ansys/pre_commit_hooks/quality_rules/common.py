@@ -30,6 +30,7 @@ from typing import ClassVar, Final, Protocol, TypeAlias
 
 __all__ = [
     "_first_doc_line",
+    "all_workflows_content",
     "ERROR",
     "file_content",
     "file_exists",
@@ -158,6 +159,41 @@ def file_content(repository_root: Path, relative_path: str) -> str | None:
         return resolved_file.read_text(encoding="utf-8")
     except (OSError, UnicodeError, ValueError):
         return None
+
+
+def all_workflows_content(repository_root: Path) -> str | None:
+    """Return the merged text of the GitHub Actions workflow files.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains ``.github/workflows``.
+
+    Returns
+    -------
+    str or None
+        Contents of every readable ``.yml`` and ``.yaml`` file under
+        ``.github/workflows``, joined by newlines, or ``None`` when no such
+        content exists.
+    """
+    workflows_directory = _repository_file(repository_root, ".github/workflows")
+    if workflows_directory is None:
+        return None
+    try:
+        workflow_files = sorted(
+            path
+            for path in workflows_directory.iterdir()
+            if path.suffix in {".yml", ".yaml"} and path.is_file()
+        )
+    except OSError:
+        return None
+
+    contents = []
+    for workflow_file in workflow_files:
+        text = file_content(repository_root, f".github/workflows/{workflow_file.name}")
+        if text is not None:
+            contents.append(text)
+    return "\n".join(contents) or None
 
 
 def readme_path(repository_root: Path) -> str | None:
