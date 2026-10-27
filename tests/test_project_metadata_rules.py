@@ -80,9 +80,13 @@ def test_support_urls_reject_wrong_tables_and_invalid_values(tmp_path, content):
     ("spec", "valid"),
     [
         (">=3.10,<4", True),
+        (">=3.10", True),
+        (">3.9", True),
         (">3.9,<=3.14", True),
         (" <4 , >=3.10 ", True),
-        (">=3.10,!=3.11.*", False),
+        (">=3.10,!=3.11.*", True),
+        ("<4", False),
+        (">-3.10", False),
         (">=3.10,3.14", False),
         (">=3.10,<garbage", False),
         ("~=3.10", False),
@@ -91,7 +95,7 @@ def test_support_urls_reject_wrong_tables_and_invalid_values(tmp_path, content):
     ],
 )
 def test_requires_python_parses_strict_specifiers(tmp_path, spec, valid):
-    """Require valid specifier syntax and both bounding comparators."""
+    """Require valid syntax and a lower bound while allowing an optional upper bound."""
     _write_pyproject(tmp_path, f'[project]\nrequires-python = "{spec}"\n')
     result = PM016.check(tmp_path, None)
 
@@ -107,9 +111,10 @@ def test_requires_python_ignores_other_tables(tmp_path):
     _assert_warning(PM016.check(tmp_path, None), "not declared")
 
 
-def test_requires_python_preserves_setup_fallback(tmp_path):
+@pytest.mark.parametrize("spec", [">=3.10", ">=3.10,<4"])
+def test_requires_python_preserves_setup_fallback(tmp_path, spec):
     """Retain validation of legacy setup.py declarations."""
-    (tmp_path / "setup.py").write_text('setup(python_requires=">=3.10,<4")', encoding="utf-8")
+    (tmp_path / "setup.py").write_text(f'setup(python_requires="{spec}")', encoding="utf-8")
     assert PM016.check(tmp_path, None) is True
 
 
@@ -183,6 +188,8 @@ def test_readme_rejects_invalid_declarations(tmp_path, declaration, message):
     ("spec", "versions", "valid"),
     [
         (">=3.10,<3.13", ["3.10", "3.11", "3.12"], True),
+        (">=3.12", ["3.12", "3.13", "3.14"], True),
+        (">=3.12", ["3.11"], False),
         (">=3.10,<3.13", ["3.9", "3.13"], False),
         (">=3.10,<4,!=3.11.*", ["3.11"], False),
         (">=3.10.2,<3.11", ["3.10"], True),

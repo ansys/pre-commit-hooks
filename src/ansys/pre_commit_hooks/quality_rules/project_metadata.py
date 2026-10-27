@@ -41,7 +41,7 @@ The checks cover:
     - Project name follows the ``ansys-*-*`` convention
     - Project version follows the accepted versioning schemes
     - Author and maintainer metadata is configured
-    - Supported Python versions have explicit bounds
+    - Supported Python versions have an explicit minimum; an upper bound is optional
     - Python version classifiers agree with requires-python
     - Support URLs are declared
 
@@ -209,7 +209,7 @@ def _project_table(data: dict[str, object]) -> dict[str, object] | str:
 
 
 def _python_specifiers(spec: object) -> SpecifierSet | str:
-    """Parse an explicit Python support range with lower and upper comparators."""
+    """Parse a Python support range with an explicit minimum and optional upper bound."""
     if not isinstance(spec, str) or not spec.strip():
         return "WARNING: requires-python must be a non-empty version specifier string."
     try:
@@ -217,10 +217,10 @@ def _python_specifiers(spec: object) -> SpecifierSet | str:
     except InvalidSpecifier:
         return f"WARNING: requires-python '{spec}' is not a valid version specifier."
     operators = {specifier.operator for specifier in specifiers}
-    if not operators.intersection({">", ">="}) or not operators.intersection({"<", "<="}):
+    if not operators.intersection({">", ">="}):
         return (
-            f"WARNING: requires-python '{spec}' must declare explicit lower and upper "
-            "bounds, for example >=3.10,<4."
+            f"WARNING: requires-python '{spec}' must declare an explicit lower bound, "
+            "for example >=3.10 or >=3.10,<4."
         )
     return specifiers
 
@@ -585,17 +585,17 @@ class PM015(ProjectMetadata):
 
 
 class PM016(ProjectMetadata):
-    """Project declares supported Python versions with explicit bounds."""
+    """Project declares a minimum supported Python version; an upper bound is optional."""
 
     @staticmethod
     def _validate_python_version_spec(spec: str) -> RuleCheckResult:
-        """Validate that a Python version spec defines lower and upper bounds."""
+        """Validate that a Python version spec defines a lower bound."""
         result = _python_specifiers(spec)
         return result if isinstance(result, str) else True
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether Python support is declared with both lower and upper bounds."""
+        """Return whether Python support has valid syntax and an explicit lower bound."""
         if file_exists(repository_root, _PYPROJECT):
             data = _pyproject_data(repository_root)
             if isinstance(data, str):
