@@ -1,8 +1,7 @@
 ``pyansys-quality-report`` setup
 ================================
 
-The ``pyansys-quality-report`` command runs README and project metadata quality
-checks.
+The ``pyansys-quality-report`` command runs repository quality checks.
 
 Setup
 -----
@@ -32,13 +31,14 @@ is hidden.
 The project root is the nearest directory, starting from the current one and moving
 up, that contains a ``pyproject.toml``. If none does, the current directory is used.
 
-README rules
-------------
+Rules
+-----
 
-The README rules are formatted as ``RMXXX``. Each rule is documented in the
-:doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/readme/index>`,
-including what it checks and whether an unmet rule produces a ``WARNING`` or an
-``ERROR``. Use the rule IDs with the ``--check`` and ``--ignore`` options.
+Checks are grouped into rule families, and each rule has a unique ID.
+Use ``--metadata`` to list the available rules and their descriptions.
+Select individual rules with ``--check``, exclude them with ``--ignore``,
+or select a family with ``--family``. All registered families run by default.
+Use ``--help`` to see the available command options.
 
 CLI options
 -----------
@@ -63,33 +63,4 @@ automatic mode, ``NO_COLOR`` disables color and a nonzero ``FORCE_COLOR`` value
 enables it.
 Warnings and errors display their actual message once. Warnings do not produce
 a non-zero exit code; errors do. The score uses passed and error results only.
-The ``--family`` option accepts ``readme`` and ``project_metadata``. Both families
-run by default. The ``tech-review`` hook remains unchanged.
-
-Project metadata rules
-----------------------
-
-The project metadata rules use ``PMXXX`` IDs. In addition to repository layout,
-governance, and licensing checks, they validate:
-
-* ``PM002``: ``CHANGELOG.md`` exists, or ``doc/source/changelog.rst`` has an RST
-  title with a matching underline and non-placeholder content.
-* ``PM009``: README file references in ``[project].readme`` exist inside the
-  repository. String and file-table declarations are supported, as are
-  setuptools dynamic README file references. Inline README text needs no file.
-* ``PM016``: ``requires-python`` is parsed with
-  ``packaging.specifiers.SpecifierSet`` and contains an explicit lower
-  (``>`` or ``>=``) and upper (``<`` or ``<=``) comparator. The existing
-  ``setup.py`` fallback is retained.
-* ``PM020``: Issues, Discussions, and Documentation HTTP(S) URLs belong to
-  ``[project.urls]``. Quoted and unquoted TOML keys are accepted; matching text
-  in other tables or comments does not count.
-* ``PM023``: Python minor-version classifiers are declared in
-  ``[project].classifiers`` and each series has at least one stable patch
-  release allowed by ``requires-python``. This does not require classifiers
-  for every version the specifier could allow. Dynamic classifiers that cannot
-  be checked statically produce a warning.
-
-Malformed TOML and invalid or unverifiable declarations produce explicit
-warnings. These content checks warn rather than fail the hook; missing
-changelog files and a missing README declaration remain errors.
+The ``tech-review`` hook remains unchanged.
