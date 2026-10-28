@@ -523,7 +523,7 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
     return _normalize_rule_ids(ignored_values)
 
 
-@click.command(help="Run PyAnsys README quality checks.")
+@click.command(help="Run PyAnsys repository quality checks.")
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")

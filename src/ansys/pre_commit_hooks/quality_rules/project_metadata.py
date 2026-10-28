@@ -41,7 +41,8 @@ The checks cover:
     - Project name follows the ``ansys-*-*`` convention
     - Project version follows the accepted versioning schemes
     - Author and maintainer metadata is configured
-    - Supported Python versions have explicit bounds
+    - Supported Python versions have an explicit minimum; an upper bound is optional
+    - Python version classifiers agree with requires-python
     - Support URLs are declared
 
 * Licensing
@@ -60,12 +61,20 @@ from pathlib import Path
 import re
 from typing import ClassVar, Final
 
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
+
 from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,
     _repository_file,
     file_content,
     file_exists,
 )
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
+    import toml as tomllib
 
 __all__ = [
     "PM001",
@@ -90,6 +99,7 @@ __all__ = [
     "PM020",
     "PM021",
     "PM022",
+    "PM023",
     "ProjectMetadata",
 ]
 
@@ -176,9 +186,97 @@ def _license_body_matches(content: str, template_name: str, start: str, end: str
     return _collapse_whitespace(body) in _collapse_whitespace(content)
 
 
-def _has_url_entry(content: str, key: str) -> bool:
-    """Return whether a top-level ``key = "http(s)://..."`` entry exists."""
-    return bool(re.search(rf"^{re.escape(key)}\s*=\s*[\"']https?://", content, re.MULTILINE))
+def _pyproject_data(repository_root: Path) -> dict[str, object] | str:
+    """Parse project metadata or return an explicit warning."""
+    content = _read(repository_root, _PYPROJECT)
+    if content is None:
+        return _missing(_PYPROJECT)
+    try:
+        return tomllib.loads(content)
+    except ValueError as error:
+        return f"WARNING: {_PYPROJECT} is not valid TOML: {error}"
+
+
+def _project_table(data: dict[str, object]) -> dict[str, object] | str:
+    """Return the project table or an explicit warning."""
+    project = data.get("project")
+    if not isinstance(project, dict):
+        return "WARNING: pyproject.toml must contain a [project] table."
+    dynamic = project.get("dynamic", [])
+    if not isinstance(dynamic, list) or not all(isinstance(key, str) for key in dynamic):
+        return "WARNING: project.dynamic must be a list of strings."
+    return project
+
+
+def _python_specifiers(spec: object) -> SpecifierSet | str:
+    """Parse a Python support range with an explicit minimum and optional upper bound."""
+    if not isinstance(spec, str) or not spec.strip():
+        return "WARNING: requires-python must be a non-empty version specifier string."
+    try:
+        specifiers = SpecifierSet(spec)
+    except InvalidSpecifier:
+        return f"WARNING: requires-python '{spec}' is not a valid version specifier."
+    operators = {specifier.operator for specifier in specifiers}
+    if not operators.intersection({">", ">="}):
+        return (
+            f"WARNING: requires-python '{spec}' must declare an explicit lower bound, "
+            "for example >=3.10 or >=3.10,<4."
+        )
+    return specifiers
+
+
+def _supports_python_minor(specifiers: SpecifierSet, version: str) -> bool:
+    """Return whether a Python minor series has an allowed stable patch release."""
+    minor = Version(version).release
+    candidates = {Version(f"{version}.0")}
+    # Membership can change at a specifier boundary or immediately after it.
+    for specifier in specifiers:
+        try:
+            boundary = Version(specifier.version.removesuffix(".*"))
+        except InvalidVersion:
+            # Arbitrary equality (===) can name a non-version, not a Python release.
+            return False
+        if boundary.release[:2] == minor:
+            patch = boundary.release[2] if len(boundary.release) > 2 else 0
+            candidates.update({Version(f"{version}.{patch}"), Version(f"{version}.{patch + 1}")})
+    return any(specifiers.contains(candidate) for candidate in candidates)
+
+
+def _has_rst_changelog_content(content: str) -> bool:
+    """Require an RST title followed by non-placeholder content."""
+    lines = content.splitlines()
+    placeholders = {"todo", "tbd", "placeholder", "coming soon", "no releases yet"}
+    for index in range(len(lines) - 1):
+        title, underline = lines[index].strip(), lines[index + 1].strip()
+        if (
+            not title
+            or title.startswith("..")
+            or not any(character.isalnum() for character in title)
+            or len(underline) < len(title)
+            or len(set(underline)) != 1
+            or underline[0] not in '=-~^"#*+'
+        ):
+            continue
+        for body_index in range(index + 2, len(lines)):
+            line = lines[body_index].strip()
+            if (
+                not line
+                or line.startswith("..")
+                or not any(character.isalnum() for character in line)
+                or line.lower().rstrip(".:") in placeholders
+            ):
+                continue
+            if body_index + 1 < len(lines):
+                next_line = lines[body_index + 1].strip()
+                if (
+                    len(next_line) >= len(line)
+                    and len(set(next_line)) == 1
+                    and next_line[0] in '=-~^"#*+'
+                ):
+                    continue
+            return True
+        return False
+    return False
 
 
 def _has_default_contact(content: str, key: str) -> bool:
@@ -231,12 +329,24 @@ class PM001(ProjectMetadata):
 
 
 class PM002(ProjectMetadata):
-    """The CHANGELOG.md or doc/source/changelog.rst file exists."""
+    """CHANGELOG.md exists or doc/source/changelog.rst has a title and content."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the changelog file is present."""
-        return _has_any_file(repository_root, (_CHANGELOG, _DOC_CHANGELOG))
+        """Check the Markdown changelog or validate the RST fallback."""
+        if file_exists(repository_root, _CHANGELOG):
+            return True
+        if not file_exists(repository_root, _DOC_CHANGELOG):
+            return False
+        content = _read(repository_root, _DOC_CHANGELOG)
+        if content is None:
+            return _missing(_DOC_CHANGELOG)
+        if _has_rst_changelog_content(content):
+            return True
+        return (
+            f"WARNING: {_DOC_CHANGELOG} must contain a valid RST title and "
+            "non-placeholder content."
+        )
 
 
 class PM003(ProjectMetadata):
@@ -294,20 +404,55 @@ class PM008(ProjectMetadata):
 
 
 class PM009(ProjectMetadata):
-    """Pyproject.toml references the README file."""
+    """Pyproject.toml declares README content and referenced files exist."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether pyproject.toml references the expected README file."""
-        content = _read(repository_root, _PYPROJECT)
-        if content is None:
-            return _missing(_PYPROJECT)
-
-        if (readme_file or "README.rst") in content:
-            return True
-        if "README" in content:
-            return "WARNING: readme key found but exact README filename not confirmed."
-        return False
+        """Validate static README declarations and setuptools dynamic file references."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        project = _project_table(data)
+        if isinstance(project, str):
+            return project
+        readme = project.get("readme")
+        dynamic = project.get("dynamic", [])
+        is_dynamic = isinstance(dynamic, list) and "readme" in dynamic
+        if readme is None and is_dynamic:
+            tool = data.get("tool")
+            setuptools = tool.get("setuptools") if isinstance(tool, dict) else None
+            dynamic = setuptools.get("dynamic") if isinstance(setuptools, dict) else None
+            readme = dynamic.get("readme") if isinstance(dynamic, dict) else None
+            if readme is None:
+                return "WARNING: Dynamic README content cannot be verified statically."
+        if readme is None:
+            return False
+        if isinstance(readme, dict):
+            if "file" in readme and "text" in readme:
+                return "WARNING: README metadata must not declare both file and text."
+            if "text" in readme and "file" not in readme:
+                text = readme["text"]
+                if isinstance(text, str) and text.strip():
+                    return True
+                return "WARNING: project.readme.text must be a non-empty string."
+            readme = readme.get("file")
+        if not is_dynamic and not isinstance(readme, str):
+            return "WARNING: project.readme must declare a single file path or inline text."
+        paths = [readme] if isinstance(readme, str) else readme
+        if (
+            not isinstance(paths, list)
+            or not paths
+            or not all(isinstance(path, str) and path.strip() for path in paths)
+        ):
+            return "WARNING: README metadata must declare a file path or inline text."
+        missing = [
+            path
+            for path in paths
+            if isinstance(path, str) and not file_exists(repository_root, path)
+        ]
+        if missing:
+            return "WARNING: Referenced README files not found in repository: " + ", ".join(missing)
+        return True
 
 
 class PM010(ProjectMetadata):
@@ -440,27 +585,33 @@ class PM015(ProjectMetadata):
 
 
 class PM016(ProjectMetadata):
-    """Project declares supported Python versions with explicit bounds."""
+    """Project declares a minimum supported Python version; an upper bound is optional."""
 
     @staticmethod
     def _validate_python_version_spec(spec: str) -> RuleCheckResult:
-        """Validate that a Python version spec defines lower and upper bounds."""
-        if not re.search(r">=\d+\.\d+", spec) or not re.search(r"[<,]=?\d+", spec):
-            return (
-                f"WARNING: requires-python '{spec}' does not declare a supported PyAnsys "
-                "version range. Use >=3.10,<4 or a more recent support window."
-            )
-        return True
+        """Validate that a Python version spec defines a lower bound."""
+        result = _python_specifiers(spec)
+        return result if isinstance(result, str) else True
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether Python support is declared with both lower and upper bounds."""
-        sources = ((_PYPROJECT, "requires-python"), ("setup.py", "python_requires"))
-        for relative_path, key in sources:
-            content = _read(repository_root, relative_path)
-            match = re.search(rf'{key}\s*=\s*["\']([^"\']+)["\']', content) if content else None
-            if match:
-                return PM016._validate_python_version_spec(match.group(1))
+        """Return whether Python support has valid syntax and an explicit lower bound."""
+        if file_exists(repository_root, _PYPROJECT):
+            data = _pyproject_data(repository_root)
+            if isinstance(data, str):
+                return data
+            project = _project_table(data)
+            if isinstance(project, str):
+                return project
+            if "requires-python" in project:
+                result = _python_specifiers(project["requires-python"])
+                return result if isinstance(result, str) else True
+        content = _read(repository_root, "setup.py")
+        match = (
+            re.search(r'python_requires\s*=\s*["\']([^"\']+)["\']', content) if content else None
+        )
+        if match:
+            return PM016._validate_python_version_spec(match.group(1))
         return "WARNING: requires-python is not declared in pyproject.toml or setup.py."
 
 
@@ -497,11 +648,20 @@ class PM020(ProjectMetadata):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether key support URLs are declared under project.urls."""
-        content = _read(repository_root, _PYPROJECT)
-        if content is None:
-            return _missing(_PYPROJECT)
-
-        missing = [key for key in _REQUIRED_PROJECT_URLS if not _has_url_entry(content, key)]
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        project = _project_table(data)
+        if isinstance(project, str):
+            return project
+        urls = project.get("urls")
+        if not isinstance(urls, dict):
+            return "WARNING: Support URLs must be declared in [project.urls]."
+        missing = []
+        for key in _REQUIRED_PROJECT_URLS:
+            url = urls.get(key)
+            if not isinstance(url, str) or not re.fullmatch(r"https?://\S+", url):
+                missing.append(key)
         if not missing:
             return True
         return "WARNING: missing support/contact project URLs in pyproject.toml: " + ", ".join(
@@ -548,3 +708,44 @@ class PM022(ProjectMetadata):
             "WARNING: CONTRIBUTORS.md should include 'Project Lead' and 'Individual "
             "Contributors' sections with at least one contributor entry."
         )
+
+
+class PM023(ProjectMetadata):
+    """Python version classifiers are present and compatible with requires-python."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check that every declared Python minor series has a supported patch release."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        project = _project_table(data)
+        if isinstance(project, str):
+            return project
+        specifiers = _python_specifiers(project.get("requires-python"))
+        if isinstance(specifiers, str):
+            return specifiers
+        classifiers = project.get("classifiers")
+        dynamic = project.get("dynamic", [])
+        if classifiers is None and isinstance(dynamic, list) and "classifiers" in dynamic:
+            return "WARNING: Dynamic Python classifiers cannot be verified statically."
+        if not isinstance(classifiers, list) or not all(
+            isinstance(classifier, str) for classifier in classifiers
+        ):
+            return "WARNING: project.classifiers must list supported Python minor versions."
+        versions = [
+            match.group(1)
+            for classifier in classifiers
+            if isinstance(classifier, str)
+            and (match := re.fullmatch(r"Programming Language :: Python :: (\d+\.\d+)", classifier))
+        ]
+        if not versions:
+            return "WARNING: No Python minor-version classifiers declared in project.classifiers."
+        incompatible = [
+            version for version in versions if not _supports_python_minor(specifiers, version)
+        ]
+        if incompatible:
+            return "WARNING: Python classifiers incompatible with requires-python: " + ", ".join(
+                incompatible
+            )
+        return True

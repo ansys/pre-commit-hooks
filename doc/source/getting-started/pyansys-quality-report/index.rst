@@ -1,9 +1,7 @@
 ``pyansys-quality-report`` setup
 ================================
 
-The ``pyansys-quality-report`` command runs repository quality checks. Its first
-release provides README checks only; additional rule families can be introduced
-in later releases.
+The ``pyansys-quality-report`` command runs repository quality checks.
 
 Setup
 -----
@@ -33,13 +31,14 @@ is hidden.
 The project root is the nearest directory, starting from the current one and moving
 up, that contains a ``pyproject.toml``. If none does, the current directory is used.
 
-README rules
-------------
+Rules
+-----
 
-The README rules are formatted as ``RMXXX``. Each rule is documented in the
-:doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/readme/index>`,
-including what it checks and whether an unmet rule produces a ``WARNING`` or an
-``ERROR``. Use the rule IDs with the ``--check`` and ``--ignore`` options.
+Checks are grouped into rule families, and each rule has a unique ID.
+Use ``--metadata`` to list the available rules and their descriptions.
+Select individual rules with ``--check``, exclude them with ``--ignore``,
+or select a family with ``--family``. All registered families run by default.
+Use ``--help`` to see the available command options.
 
 CLI options
 -----------
@@ -64,15 +63,4 @@ automatic mode, ``NO_COLOR`` disables color and a nonzero ``FORCE_COLOR`` value
 enables it.
 Warnings and errors display their actual message once. Warnings do not produce
 a non-zero exit code; errors do. The score uses passed and error results only.
-The ``--family`` option accepts ``readme``, ``project_metadata``, and ``cicd``.
 The ``tech-review`` hook remains unchanged.
-
-CI/CD rules
------------
-
-The CI/CD rules are formatted as ``CIXXX``. They read the workflow files under
-``.github/workflows`` and check for required ``ansys/actions`` reusable actions and
-for SHA-pinned action references. Each rule is documented in the
-:doc:`API reference </api/src/ansys/pre_commit_hooks/quality_rules/cicd/index>`.
-Concurrency, root permissions, and credential persistence are enforced by the
-zizmor check in ``ansys/actions/check-actions-security`` and are not repeated here.
