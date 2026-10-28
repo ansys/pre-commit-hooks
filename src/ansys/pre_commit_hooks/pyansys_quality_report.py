@@ -34,13 +34,24 @@ from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
 
-from ansys.pre_commit_hooks.quality_rules import README, repo_review_checks
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
+    import toml as tomllib
+
+from ansys.pre_commit_hooks.quality_rules import (
+    DEFAULT_RULE_FAMILIES,
+    RULE_FAMILIES,
+    repo_review_checks,
+)
 from ansys.pre_commit_hooks.quality_rules.common import (
     ERROR,
     PASSED,
     WARNING,
     RuleStatus,
     _first_doc_line,
+    _QualityRule,
+    file_content,
     normalize_check_result,
     readme_path,
 )
@@ -217,17 +228,35 @@ def _normalize_rule_ids(argument_values: list[str]) -> set[str]:
     }
 
 
+def _families_to_run(selected_families: set[str] | None) -> tuple[str, ...]:
+    """Return the rule families to evaluate.
+
+    Parameters
+    ----------
+    selected_families : set[str] or None
+        Explicitly requested families.
+
+    Returns
+    -------
+    tuple[str, ...]
+        The requested families, or every family when none is requested.
+    """
+    if selected_families:
+        return tuple(sorted(selected_families))
+    return DEFAULT_RULE_FAMILIES
+
+
 def _execute_check(
-    rule: README,
+    rule: _QualityRule,
     rule_id: str,
     repository_root: Path,
     detected_readme_file: str | None,
 ) -> _RuleResult:
-    """Execute and serialize one README rule.
+    """Execute and serialize one rule.
 
     Parameters
     ----------
-    rule : README
+    rule : _QualityRule
         Rule instance to execute.
     rule_id : str
         Stable identifier for the rule.
@@ -262,24 +291,28 @@ def _run_checks(
     *,
     selected_rule_ids: set[str] | None = None,
     ignored_rule_ids: set[str] | None = None,
+    selected_families: set[str] | None = None,
 ) -> _QualityReport:
-    """Evaluate registered README rules for a repository.
+    """Evaluate registered rules for a repository.
 
     Parameters
     ----------
     repository_root : pathlib.Path
         Repository root directory.
     selected_rule_ids : set[str] or None, optional
-        Rule IDs to evaluate. All rules are evaluated when omitted or empty.
+        Rule IDs to evaluate. All rules of the evaluated families are used when
+        omitted or empty.
     ignored_rule_ids : set[str] or None, optional
         Rule IDs to omit from the report.
+    selected_families : set[str] or None, optional
+        Rule families to evaluate. Defaults to every family.
 
     Returns
     -------
     _QualityReport
         Rule results, status counts, and the resulting score.
     """
-    registered_rules = repo_review_checks()
+    registered_rules = repo_review_checks(_families_to_run(selected_families))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     normalized_ignored_ids = {rule_id.upper() for rule_id in ignored_rule_ids or set()}
     if normalized_selected_ids:
@@ -312,20 +345,23 @@ def _run_checks(
 
 def _metadata_report(
     selected_rule_ids: set[str] | None = None,
+    selected_families: set[str] | None = None,
 ) -> list[_RuleMetadata]:
-    """Return metadata for available README rules.
+    """Return metadata for available rules.
 
     Parameters
     ----------
     selected_rule_ids : set[str] or None, optional
         Rule IDs to include. All rules are included when omitted or empty.
+    selected_families : set[str] or None, optional
+        Rule families to include. Every family is listed when omitted or empty.
 
     Returns
     -------
     list[_RuleMetadata]
         Metadata records ordered by rule ID.
     """
-    registered_rules = repo_review_checks()
+    registered_rules = repo_review_checks(selected_families or tuple(RULE_FAMILIES))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
     return [
         {
@@ -440,7 +476,7 @@ def _validate_rule_ids(
     rule_ids : set[str]
         Normalized rule IDs to validate.
     """
-    available_rule_ids = sorted(repo_review_checks())
+    available_rule_ids = sorted(repo_review_checks(tuple(RULE_FAMILIES)))
     unknown_rule_ids = sorted(rule_ids.difference(available_rule_ids))
     if unknown_rule_ids:
         raise click.UsageError(
@@ -449,12 +485,50 @@ def _validate_rule_ids(
         )
 
 
+def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
+    """Read ignored rule IDs from ``[tool.pyansys-quality-report]``.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+
+    Returns
+    -------
+    set[str]
+        Normalized rule IDs listed under the ``ignore`` key. The set is empty when
+        ``pyproject.toml`` is missing or has no such key.
+
+    Raises
+    ------
+    click.UsageError
+        If ``pyproject.toml`` is invalid TOML or ``ignore`` is not a list of strings.
+    """
+    pyproject_content = file_content(repository_root, "pyproject.toml")
+    if pyproject_content is None:
+        return set()
+    try:
+        pyproject_data = tomllib.loads(pyproject_content)
+    except (TypeError, ValueError) as error:
+        raise click.UsageError(f"pyproject.toml is not valid TOML: {error}") from error
+
+    tool_settings = pyproject_data.get("tool", {}).get("pyansys-quality-report", {})
+    ignored_values = tool_settings.get("ignore", []) if isinstance(tool_settings, dict) else []
+    if not isinstance(ignored_values, list) or not all(
+        isinstance(value, str) for value in ignored_values
+    ):
+        raise click.UsageError(
+            "[tool.pyansys-quality-report] ignore in pyproject.toml must be a list of strings"
+        )
+    return _normalize_rule_ids(ignored_values)
+
+
 @click.command(help="Run PyAnsys README quality checks.")
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
-@click.option("--family", multiple=True, help="Select rule family.")
-@click.option("--ignore", multiple=True, help="Ignore rule IDs.")
+@click.option("--family", multiple=True, help="Select rule family (readme, project_metadata).")
+@click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")
 @click.option(
     "--fails-only",
@@ -489,19 +563,29 @@ def _cli(
         rule_family.strip().lower()
         for argument_value in family
         for rule_family in argument_value.split(",")
+        if rule_family.strip()
     }
-    if selected_rule_families and selected_rule_families - {"readme"}:
-        raise click.UsageError("This release supports only the readme rule family")
+    unknown_families = selected_rule_families - set(RULE_FAMILIES)
+    if unknown_families:
+        raise click.UsageError(
+            f"unknown rule family(ies): {', '.join(sorted(unknown_families))}. "
+            f"Available families: {', '.join(RULE_FAMILIES)}"
+        )
 
     if metadata:
-        autoflush_print(json.dumps(_metadata_report(selected_rule_ids), indent=2))
+        autoflush_print(
+            json.dumps(_metadata_report(selected_rule_ids, selected_rule_families), indent=2)
+        )
         return 0
 
     repository_root = _find_project_root(Path.cwd())
+    configured_ignored_rule_ids = _pyproject_ignored_rule_ids(repository_root)
+    _validate_rule_ids("[tool.pyansys-quality-report] ignore", configured_ignored_rule_ids)
     quality_report = _run_checks(
         repository_root,
         selected_rule_ids=selected_rule_ids,
-        ignored_rule_ids=ignored_rule_ids,
+        ignored_rule_ids=ignored_rule_ids | configured_ignored_rule_ids,
+        selected_families=selected_rule_families,
     )
     if json_output:
         autoflush_print(json.dumps(quality_report, indent=2))

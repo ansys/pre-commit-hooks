@@ -29,8 +29,15 @@ from pathlib import Path
 import pytest
 
 from ansys.pre_commit_hooks import pyansys_quality_report as report
-from ansys.pre_commit_hooks.quality_rules import repo_review_checks
+from ansys.pre_commit_hooks.quality_rules import project_metadata, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import normalize_check_result
+from ansys.pre_commit_hooks.quality_rules.project_metadata import (
+    PM002,
+    PM003,
+    PM004,
+    PM007,
+    PM014,
+)
 from ansys.pre_commit_hooks.quality_rules.readme import (
     RM001,
     RM002,
@@ -42,9 +49,93 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 )
 
 
-def test_registry_contains_only_readme_rules():
-    """The first release exposes only the README rule family."""
-    assert list(repo_review_checks()) == [f"RM{number:03d}" for number in range(8)]
+def test_registry_contains_every_rule_family():
+    """The registry exposes the README and project metadata rule families."""
+    assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
+    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM"}
+
+
+@pytest.mark.parametrize(
+    "paths",
+    [
+        (),
+        ("CHANGELOG.md",),
+        ("doc/source/changelog.rst",),
+        ("CHANGELOG.md", "doc/source/changelog.rst"),
+    ],
+)
+def test_pm002_accepts_either_changelog_location(tmp_path, paths):
+    """A root Markdown or documentation RST changelog satisfies PM002."""
+    for relative_path in paths:
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("Changelog\n=========\n\n1.0.0\n-----\nFixed a bug.\n", encoding="utf-8")
+
+    assert PM002.check(tmp_path, None) is bool(paths)
+
+
+@pytest.mark.parametrize("relative_path", ["CHANGELOG.md", "doc/source/changelog.rst"])
+def test_pm002_rejects_directories(tmp_path, relative_path):
+    """A directory named like a changelog does not satisfy PM002."""
+    (tmp_path / relative_path).mkdir(parents=True)
+
+    assert PM002.check(tmp_path, None) is False
+
+
+@pytest.mark.parametrize(
+    ("rule", "filename"),
+    [
+        (PM003, "CODE_OF_CONDUCT.md"),
+        (PM004, "CONTRIBUTING.md"),
+        (PM007, "SECURITY.md"),
+    ],
+)
+def test_metadata_file_checks_preserve_expected_filenames(tmp_path, rule, filename):
+    """Governance file checks require their expected repository files."""
+    assert rule.check(tmp_path, None) is False
+
+    (tmp_path / filename).write_text("Project policy\n", encoding="utf-8")
+
+    assert rule.check(tmp_path, None) is True
+
+
+_LICENSE_TEMPLATES = Path(project_metadata.__file__).resolve().parents[1] / "assets" / "LICENSES"
+
+
+@pytest.mark.parametrize("template_name", ["MIT.txt", "Apache-2.0.txt"])
+def test_pm014_accepts_standard_license_text(tmp_path, template_name):
+    """A LICENSE file with the standard MIT or Apache 2.0 text satisfies PM014."""
+    license_text = (_LICENSE_TEMPLATES / template_name).read_text(encoding="utf-8")
+    (tmp_path / "LICENSE").write_text(license_text.replace("{{ year_span }}", "2026"), "utf-8")
+
+    assert PM014.check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    "license_text",
+    [
+        "MIT License\n\nPermission is hereby granted, free of charge\n",
+        "Apache License\n                           Version 2.0, January 2004\n",
+        "BSD 3-Clause License\n",
+    ],
+)
+def test_pm014_rejects_partial_or_other_license_text(tmp_path, license_text):
+    """Keyword mentions or truncated texts do not satisfy PM014."""
+    (tmp_path / "LICENSE").write_text(license_text, encoding="utf-8")
+
+    result = PM014.check(tmp_path, None)
+    assert isinstance(result, str)
+    assert result.startswith("WARNING: LICENSE file text does not match")
+
+
+def test_pm014_rejects_modified_standard_text(tmp_path):
+    """Changing a clause of the standard MIT text makes PM014 warn."""
+    license_text = (_LICENSE_TEMPLATES / "MIT.txt").read_text(encoding="utf-8")
+    (tmp_path / "LICENSE").write_text(
+        license_text.replace("free of charge", "for a fee"), encoding="utf-8"
+    )
+
+    assert isinstance(PM014.check(tmp_path, None), str)
 
 
 def test_rm003_matches_mit_project_license(tmp_path):
@@ -99,7 +190,7 @@ def test_missing_readme_is_reported_by_every_rule(tmp_path, capsys):
     """Without a README no rule is skipped: each one fails or warns."""
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"]}
 
     assert statuses == {
@@ -372,7 +463,90 @@ def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     error = capsys.readouterr().err
     assert exit_info.value.code == 2
     assert f"unknown rule ID(s) for {option}: RM999, XX1." in error
-    assert "Available rules: RM000, RM001" in error
+    assert "Available rules: PM001" in error
+    assert "RM000, RM001" in error
+
+
+def test_cli_reads_ignored_rules_from_pyproject(tmp_path, monkeypatch, capsys):
+    """Rule IDs under [tool.pyansys-quality-report] are merged with --ignore."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.pyansys-quality-report]\nignore = ["rm005"]\n', encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    report.main(["--ignore", "RM006", "--json"])
+
+    ids = {item["id"] for item in json.loads(capsys.readouterr().out)["results"]}
+    assert "RM005" not in ids
+    assert "RM006" not in ids
+    assert "RM007" in ids
+
+
+@pytest.mark.parametrize(
+    ("ignore_value", "message"),
+    [('["RM999"]', "unknown rule ID(s)"), ('"RM005"', "must be a list of strings")],
+)
+def test_cli_rejects_invalid_pyproject_ignore(tmp_path, monkeypatch, capsys, ignore_value, message):
+    """Invalid ignore settings in pyproject.toml stop the run."""
+    (tmp_path / "pyproject.toml").write_text(
+        f"[tool.pyansys-quality-report]\nignore = {ignore_value}\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exit_info:
+        report.main([])
+
+    assert exit_info.value.code == 2
+    assert message in capsys.readouterr().err
+
+
+def test_project_metadata_family_runs_by_default(tmp_path, monkeypatch):
+    """Every family runs unless --family narrows the selection."""
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "ansys-foo-bar"\n', "utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    default_ids = {item["id"] for item in report._run_checks(tmp_path)["results"]}
+    family_ids = {
+        item["id"]
+        for item in report._run_checks(tmp_path, selected_families={"project_metadata"})["results"]
+    }
+    by_id = {
+        item["id"]: item
+        for item in report._run_checks(tmp_path, selected_rule_ids={"PM011"})["results"]
+    }
+
+    assert {"RM000", "PM001"} <= default_ids
+    assert family_ids and all(rule_id.startswith("PM") for rule_id in family_ids)
+    assert by_id["PM011"]["status"] == "PASSED"
+    assert by_id["PM011"]["family"] == "project_metadata"
+
+
+@pytest.mark.parametrize(
+    ("version_line", "expected"),
+    [
+        ('version = "1.2.3"', "PASSED"),
+        ('version = "1.2.3rc1"', "PASSED"),
+        ('version = "1.2.dev0"', "PASSED"),
+        ('version = "1.2.3-beta.1"', "WARNING"),
+        ('dynamic = ["version"]', "PASSED"),
+    ],
+)
+def test_pm012_version_formats(tmp_path, version_line, expected):
+    """Only N.N.N[{a|b|rc}N], dev versions and dynamic versions are accepted."""
+    (tmp_path / "pyproject.toml").write_text(f"[project]\n{version_line}\n", encoding="utf-8")
+
+    results = report._run_checks(tmp_path, selected_rule_ids={"PM012"})["results"]
+
+    assert results[0]["status"] == expected
+
+
+def test_unknown_rule_family_is_rejected(capsys):
+    """Unsupported rule families stop the run."""
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--family", "nope"])
+
+    assert exit_info.value.code == 2
+    assert "unknown rule family(ies): nope" in capsys.readouterr().err
 
 
 def test_cli_rejects_unknown_rule_ids_with_metadata(capsys):
@@ -624,7 +798,7 @@ def test_unreadable_readme_is_an_error_for_every_content_rule(tmp_path):
     (tmp_path / "pyproject.toml").write_text('[project]\nlicense = "MIT"\n', encoding="utf-8")
     (tmp_path / "README.rst").write_bytes(b"\xff")
 
-    review = report._run_checks(tmp_path)
+    review = report._run_checks(tmp_path, selected_families={"readme"})
     statuses = {item["id"]: item["status"] for item in review["results"] if item["id"] != "RM000"}
 
     assert set(statuses.values()) == {"ERROR"}
