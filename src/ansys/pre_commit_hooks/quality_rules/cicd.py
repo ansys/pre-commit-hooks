@@ -31,9 +31,6 @@ The checks cover:
 * At least one workflow file exists
 * Required ``ansys/actions`` reusable actions are used
 * Action references are pinned to immutable commit SHAs
-
-Concurrency, root permissions, and credential persistence are enforced by the
-zizmor check in ``ansys/actions/check-actions-security`` and are not repeated here.
 """
 
 from __future__ import annotations
@@ -76,7 +73,7 @@ _ACTION_PATTERNS: Final[dict[str, re.Pattern[str]]] = {
         re.IGNORECASE | re.MULTILINE,
     ),
     "tests": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/tests(?:-pytest)?(?:@|\s|$)",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/tests-pytest(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "release": re.compile(

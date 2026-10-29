@@ -39,7 +39,7 @@ _RULE_ACTIONS = {
     "CI006": "ansys/actions/doc-style",
     "CI007": "ansys/actions/doc-build",
     "CI008": "ansys/actions/build-wheelhouse",
-    "CI009": "ansys/actions/tests",
+    "CI009": "ansys/actions/tests-pytest",
     "CI010": "ansys/actions/release-github",
     "CI011": "ansys/actions/check-actions-security",
     "CI012": "ansys/actions/build-library",
@@ -123,11 +123,15 @@ def test_action_rules_warn_when_action_is_missing(tmp_path, rule_id):
 
 
 def test_tests_rule_ignores_mentions_of_pytest_or_tox(tmp_path):
-    """CI009 requires the tests action, not a pytest or tox command in a run step."""
+    """CI009 requires the tests-pytest action, not a shell command or generic tests action."""
     _write_workflow(
         tmp_path,
         "    steps:\n      - run: pytest tests\n      - run: tox -e py\n",
     )
+
+    assert _rule("CI009").check(tmp_path, None).startswith("WARNING:")
+
+    _write_workflow(tmp_path, _uses_line("ansys/actions/tests"))
 
     assert _rule("CI009").check(tmp_path, None).startswith("WARNING:")
 
@@ -139,7 +143,7 @@ def test_tests_rule_ignores_mentions_of_pytest_or_tox(tmp_path):
 def test_workflow_files_are_merged_from_yml_and_yaml_only(tmp_path):
     """Workflow content combines .yml and .yaml files and ignores other files."""
     _write_workflow(tmp_path, _uses_line("actions/labeler"), name="labels.yml")
-    _write_workflow(tmp_path, _uses_line("ansys/actions/tests"), name="tests.yaml")
+    _write_workflow(tmp_path, _uses_line("ansys/actions/tests-pytest"), name="tests.yaml")
     _write_workflow(tmp_path, _uses_line("ansys/actions/doc-build"), name="notes.txt")
 
     content = all_workflows_content(tmp_path)
