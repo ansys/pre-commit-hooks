@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Run the initial README checks for a repository."""
+"""Run PyAnsys repository quality checks."""
 
 from __future__ import annotations
 
@@ -555,7 +555,7 @@ def _cli(
     fails_only: bool,
     color: ColorMode,
 ) -> int:
-    """Run README quality checks and return the process exit code."""
+    """Run repository quality checks and return the process exit code."""
     if show_all and fails_only:
         raise click.UsageError("Use only one of --show-all or --fails-only")
 
@@ -609,7 +609,7 @@ def _cli(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run README quality checks for a repository.
+    """Run repository quality checks.
 
     Parameters
     ----------

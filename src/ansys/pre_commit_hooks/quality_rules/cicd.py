@@ -23,8 +23,8 @@
 """CI/CD content checks.
 
 This rule set validates the GitHub Actions workflow policy for repository
-automation. Every ``.yml`` and ``.yaml`` file under ``.github/workflows`` is
-searched as one block of text.
+automation. Every ``.yml`` and ``.yaml`` file directly under
+``.github/workflows`` is searched as text.
 
 The checks cover:
 
@@ -41,13 +41,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 import re
-from typing import ClassVar
+from typing import ClassVar, Final
 
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult, all_workflows_content
 
-_NO_WORKFLOWS = "WARNING: No workflow files found under .github/workflows."
+_NO_WORKFLOWS: Final[str] = "WARNING: No workflow files found under .github/workflows."
 
-_ACTION_PATTERNS: dict[str, re.Pattern[str]] = {
+_ACTION_PATTERNS: Final[dict[str, re.Pattern[str]]] = {
     "labeler": re.compile(
         r"^\s*(?:-\s*)?uses:\s*[^\s#]*label[^\s#]*", re.IGNORECASE | re.MULTILINE
     ),
@@ -105,8 +105,10 @@ _ACTION_PATTERNS: dict[str, re.Pattern[str]] = {
     ),
 }
 
-_ACTION_USE_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)", re.IGNORECASE | re.MULTILINE)
-_SHA_PATTERN = re.compile(r"@[0-9a-f]{40}$", re.IGNORECASE)
+_ACTION_USE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"^\s*(?:-\s*)?uses:\s*([^\s#]+)", re.IGNORECASE | re.MULTILINE
+)
+_SHA_PATTERN: Final[re.Pattern[str]] = re.compile(r"[^@\s]+@[0-9a-f]{40}", re.IGNORECASE)
 
 __all__ = [
     "CI001",
@@ -129,15 +131,17 @@ __all__ = [
 ]
 
 
-def _action_presence(repository_root: Path, pattern_name: str, action_name: str) -> RuleCheckResult:
-    """Return whether a workflow action matching ``pattern_name`` is used.
+def _check_action_presence(
+    repository_root: Path, action_pattern: re.Pattern[str], action_name: str
+) -> RuleCheckResult:
+    """Check whether a workflow uses the required action.
 
     Parameters
     ----------
     repository_root : pathlib.Path
         Repository root directory.
-    pattern_name : str
-        Key of the pattern in ``_ACTION_PATTERNS``.
+    action_pattern : re.Pattern[str]
+        Compiled pattern matching the required action reference.
     action_name : str
         Action name reported when the action is missing.
 
@@ -149,7 +153,7 @@ def _action_presence(repository_root: Path, pattern_name: str, action_name: str)
     content = all_workflows_content(repository_root)
     if content is None:
         return _NO_WORKFLOWS
-    if _ACTION_PATTERNS[pattern_name].search(content):
+    if action_pattern.search(content):
         return True
     return f"WARNING: {action_name} not found in any workflow file."
 
@@ -199,7 +203,9 @@ class CI002(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a labeler action is used."""
-        return _action_presence(repository_root, "labeler", "A labeler action")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["labeler"], "A labeler action"
+        )
 
 
 class CI003(CICD):
@@ -208,8 +214,10 @@ class CI003(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the vulnerability check action is used."""
-        return _action_presence(
-            repository_root, "vulnerabilities", "ansys/actions/check-vulnerabilities"
+        return _check_action_presence(
+            repository_root,
+            _ACTION_PATTERNS["vulnerabilities"],
+            "ansys/actions/check-vulnerabilities",
         )
 
 
@@ -219,7 +227,9 @@ class CI004(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the code-style action is used."""
-        return _action_presence(repository_root, "code_style", "ansys/actions/code-style")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["code_style"], "ansys/actions/code-style"
+        )
 
 
 class CI005(CICD):
@@ -228,7 +238,9 @@ class CI005(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a changelog fragment action is used."""
-        return _action_presence(repository_root, "changelog", "A changelog fragment action")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["changelog"], "A changelog fragment action"
+        )
 
 
 class CI006(CICD):
@@ -237,7 +249,9 @@ class CI006(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-style action is used."""
-        return _action_presence(repository_root, "doc_style", "ansys/actions/doc-style")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["doc_style"], "ansys/actions/doc-style"
+        )
 
 
 class CI007(CICD):
@@ -246,7 +260,9 @@ class CI007(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-build action is used."""
-        return _action_presence(repository_root, "doc_build", "ansys/actions/doc-build")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["doc_build"], "ansys/actions/doc-build"
+        )
 
 
 class CI008(CICD):
@@ -255,7 +271,9 @@ class CI008(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the build-wheelhouse action is used."""
-        return _action_presence(repository_root, "wheelhouse", "ansys/actions/build-wheelhouse")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["wheelhouse"], "ansys/actions/build-wheelhouse"
+        )
 
 
 class CI009(CICD):
@@ -264,7 +282,9 @@ class CI009(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the tests action is used."""
-        return _action_presence(repository_root, "tests", "ansys/actions/tests")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["tests"], "ansys/actions/tests"
+        )
 
 
 class CI010(CICD):
@@ -273,7 +293,9 @@ class CI010(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the release-github action is used."""
-        return _action_presence(repository_root, "release", "ansys/actions/release-github")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["release"], "ansys/actions/release-github"
+        )
 
 
 class CI011(CICD):
@@ -282,8 +304,10 @@ class CI011(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the check-actions-security action is used."""
-        return _action_presence(
-            repository_root, "actions_security", "ansys/actions/check-actions-security"
+        return _check_action_presence(
+            repository_root,
+            _ACTION_PATTERNS["actions_security"],
+            "ansys/actions/check-actions-security",
         )
 
 
@@ -293,7 +317,9 @@ class CI012(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the build-library action is used."""
-        return _action_presence(repository_root, "build_library", "ansys/actions/build-library")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["build_library"], "ansys/actions/build-library"
+        )
 
 
 class CI013(CICD):
@@ -302,7 +328,9 @@ class CI013(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-deploy-dev action is used."""
-        return _action_presence(repository_root, "doc_deploy_dev", "ansys/actions/doc-deploy-dev")
+        return _check_action_presence(
+            repository_root, _ACTION_PATTERNS["doc_deploy_dev"], "ansys/actions/doc-deploy-dev"
+        )
 
 
 class CI014(CICD):
@@ -311,8 +339,10 @@ class CI014(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-deploy-stable action is used."""
-        return _action_presence(
-            repository_root, "doc_deploy_stable", "ansys/actions/doc-deploy-stable"
+        return _check_action_presence(
+            repository_root,
+            _ACTION_PATTERNS["doc_deploy_stable"],
+            "ansys/actions/doc-deploy-stable",
         )
 
 
@@ -322,8 +352,10 @@ class CI015(CICD):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-deploy-changelog action is used."""
-        return _action_presence(
-            repository_root, "doc_deploy_changelog", "ansys/actions/doc-deploy-changelog"
+        return _check_action_presence(
+            repository_root,
+            _ACTION_PATTERNS["doc_deploy_changelog"],
+            "ansys/actions/doc-deploy-changelog",
         )
 
 
@@ -343,7 +375,7 @@ class CI016(CICD):
             for reference in _ACTION_USE_PATTERN.findall(content)
             if not reference.startswith("./")
         ]
-        unpinned = list(dict.fromkeys(ref for ref in references if not _SHA_PATTERN.search(ref)))
+        unpinned = list(dict.fromkeys(ref for ref in references if not _SHA_PATTERN.fullmatch(ref)))
         if not unpinned:
             return True
         return f"WARNING: Actions are not SHA-pinned: {', '.join(unpinned)}."

@@ -184,6 +184,15 @@ def test_ci016_reports_unpinned_actions(tmp_path):
     assert result == "WARNING: Actions are not SHA-pinned: actions/checkout@v4."
 
 
+def test_ci016_rejects_references_with_multiple_at_signs(tmp_path):
+    """A 40-character suffix is not enough when the reference syntax is malformed."""
+    _write_workflow(tmp_path, _uses_line("actions/checkout", f"v4@{_SHA}"))
+
+    assert _rule("CI016").check(tmp_path, None) == (
+        f"WARNING: Actions are not SHA-pinned: actions/checkout@v4@{_SHA}."
+    )
+
+
 def test_all_cicd_rules_pass_with_full_workflow_policy(tmp_path):
     """A workflow that uses every required action with SHA pins passes every CI/CD rule."""
     steps = "".join(_uses_line(action, _SHA) for action in _RULE_ACTIONS.values())
