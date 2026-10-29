@@ -1,0 +1,244 @@
+
+
+
+
+
+
+The ``add_license_headers.py`` module
+=====================================
+
+.. py:module:: src.ansys.pre_commit_hooks.add_license_headers
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: add_license_headers
+.. tab-set::
+
+
+
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.set_lint_args`
+            - Add lint arguments to the parser for `REUSE <https://reuse.software/>`_.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.link_assets`
+            - Link the default template and/or license from the assets folder to your git repo.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.mkdirs_and_link`
+            - Make .reuse or LICENSES directory and create symbolic link to file.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.list_noncompliant_files`
+            - Get a list of the files that are missing license headers.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.set_header_args`
+            - Set arguments for `REUSE <https://reuse.software/>`_.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.check_exists`
+            - Check if the committed file is missing its header.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.check_same_content`
+            - Check if file before the hook ran is the same as after the hook ran.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.add_hook_changes`
+            - Add earlier hook changes to updated file with header.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.get_full_paths`
+            - Update file paths to be absolute paths with system separators.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.update_license_file`
+            - Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.cleanup`
+            - Unlink the default asset files, and remove directories if empty.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.find_files_missing_header`
+            - Find files that are missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.add_license_headers.main`
+            - Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~DEFAULT_TEMPLATE`
+            - Default template to use for license headers.
+
+
+          * - :py:obj:`~DEFAULT_COPYRIGHT`
+            - Default copyright line for license headers.
+
+
+          * - :py:obj:`~DEFAULT_LICENSE`
+            - Default license for headers.
+
+
+          * - :py:obj:`~DEFAULT_START_YEAR`
+            - 
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    𝑓(x) set_lint_args</api/src/ansys/pre_commit_hooks/add_license_headers/set_lint_args>
+    𝑓(x) link_assets</api/src/ansys/pre_commit_hooks/add_license_headers/link_assets>
+    𝑓(x) mkdirs_and_link</api/src/ansys/pre_commit_hooks/add_license_headers/mkdirs_and_link>
+    𝑓(x) list_noncompliant_files</api/src/ansys/pre_commit_hooks/add_license_headers/list_noncompliant_files>
+    𝑓(x) set_header_args</api/src/ansys/pre_commit_hooks/add_license_headers/set_header_args>
+    𝑓(x) check_exists</api/src/ansys/pre_commit_hooks/add_license_headers/check_exists>
+    𝑓(x) check_same_content</api/src/ansys/pre_commit_hooks/add_license_headers/check_same_content>
+    𝑓(x) add_hook_changes</api/src/ansys/pre_commit_hooks/add_license_headers/add_hook_changes>
+    𝑓(x) get_full_paths</api/src/ansys/pre_commit_hooks/add_license_headers/get_full_paths>
+    𝑓(x) update_license_file</api/src/ansys/pre_commit_hooks/add_license_headers/update_license_file>
+    𝑓(x) cleanup</api/src/ansys/pre_commit_hooks/add_license_headers/cleanup>
+    𝑓(x) find_files_missing_header</api/src/ansys/pre_commit_hooks/add_license_headers/find_files_missing_header>
+    𝑓(x) main</api/src/ansys/pre_commit_hooks/add_license_headers/main>
+
+
+
+
+
+
+Description
+-----------
+
+Module for running `REUSE <https://reuse.software/>`_ to add missing license headers to files.
+
+A license header consists of the Ansys copyright statement and licensing information.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:data:: DEFAULT_TEMPLATE
+   :value: 'ansys'
+
+
+   
+   Default template to use for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_COPYRIGHT
+   :value: 'ANSYS, Inc. and/or its affiliates.'
+
+
+   
+   Default copyright line for license headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_LICENSE
+   :value: 'MIT'
+
+
+   
+   Default license for headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: DEFAULT_START_YEAR
+
+
+

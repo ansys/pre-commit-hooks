@@ -1,0 +1,185 @@
+
+
+
+
+
+
+The ``quality_rules`` package
+=================================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+.. py:currentmodule:: quality_rules
+.. tab-set::
+
+
+    .. tab-item:: Submodules
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.common`
+            - Shared helpers for quality check rules.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata`
+            - Project metadata checks.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme`
+            - README quality checks.
+
+
+
+
+
+
+
+    .. tab-item:: Functions
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~repo_review_checks`
+            - Return the registered rule instances for the requested families.
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~README_QUALITY_RULES`
+            - 
+
+
+          * - :py:obj:`~PROJECT_METADATA_QUALITY_RULES`
+            - 
+
+
+          * - :py:obj:`~RULE_FAMILIES`
+            - 
+
+
+          * - :py:obj:`~DEFAULT_RULE_FAMILIES`
+            - 
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-fa-file"></span> common</api/src/ansys/pre_commit_hooks/quality_rules/common/index>
+    <span class="nf nf-fa-file"></span> project_metadata</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/index>
+    <span class="nf nf-fa-file"></span> readme</api/src/ansys/pre_commit_hooks/quality_rules/readme/index>
+
+
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+
+Quality-check registry subpackage.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:function:: repo_review_checks(families: collections.abc.Iterable[str] = DEFAULT_RULE_FAMILIES) -> dict[str, ansys.pre_commit_hooks.quality_rules.common._QualityRule]
+
+   
+   Return the registered rule instances for the requested families.
+
+
+   :Parameters:
+
+       **families** : :obj:`collections.abc.Iterable`\[:class:`python:str`], default: :obj:`every` :obj:`family`
+           Rule family names to include.
+
+
+
+   :Returns:
+
+       :class:`python:dict`\[:class:`python:str`, :obj:`_QualityRule`]
+           Rule instances keyed by their rule IDs.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+.. py:data:: README_QUALITY_RULES
+   :type:  tuple[type[ansys.pre_commit_hooks.quality_rules.readme.README], ...]
+
+.. py:data:: PROJECT_METADATA_QUALITY_RULES
+   :type:  tuple[type[ansys.pre_commit_hooks.quality_rules.project_metadata.ProjectMetadata], ...]
+
+.. py:data:: RULE_FAMILIES
+   :type:  dict[str, tuple[type[ansys.pre_commit_hooks.quality_rules.common._QualityRule], ...]]
+
+.. py:data:: DEFAULT_RULE_FAMILIES
+   :type:  tuple[str, ...]
+
+
+

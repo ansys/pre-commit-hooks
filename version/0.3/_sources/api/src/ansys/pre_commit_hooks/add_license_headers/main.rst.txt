@@ -1,0 +1,25 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.main`
+==============================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.main()
+
+   
+   Find files missing license headers and run `REUSE <https://reuse.software/>`_ on them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

@@ -1,0 +1,137 @@
+
+
+
+
+
+
+:class:`ProjectMetadata`
+========================
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.project_metadata.ProjectMetadata
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   
+   Project metadata rule family.
+
+   Base class of the project metadata quality rules. Each rule is a subclass
+   named ``PM<nnn>`` with a static ``check`` method that receives the repository
+   root and the name of the detected README file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: ProjectMetadata
+
+Overview
+--------
+
+.. tab-set::
+
+   .. tab-item:: Abstract methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Evaluate a project metadata rule.
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~family`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: family
+   :type:  ClassVar[str]
+   :value: 'project_metadata'
+
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+   :abstractmethod:
+
+
+   
+   Evaluate a project metadata rule.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Detected README path, or ``None`` when no supported README exists.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           Raw rule result consumed by the quality-report runner.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,156 @@
+
+
+
+
+
+
+The ``readme.py`` module
+========================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.readme
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: readme
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.README`
+            - README rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM000`
+            - README file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM001`
+            - README has a PyAnsys or Ansys badge.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM002`
+            - README has a PyPI badge.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM003`
+            - README has a license badge matching project metadata.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM004`
+            - README has a GH-CI badge.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM005`
+            - README has an installation section.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM006`
+            - README has a documentation section.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.readme.RM007`
+            - README has a license section.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> README</api/src/ansys/pre_commit_hooks/quality_rules/readme/README>
+    <span class="nf nf-cod-symbol_class"></span> RM000</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM000>
+    <span class="nf nf-cod-symbol_class"></span> RM001</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM001>
+    <span class="nf nf-cod-symbol_class"></span> RM002</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM002>
+    <span class="nf nf-cod-symbol_class"></span> RM003</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM003>
+    <span class="nf nf-cod-symbol_class"></span> RM004</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM004>
+    <span class="nf nf-cod-symbol_class"></span> RM005</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM005>
+    <span class="nf nf-cod-symbol_class"></span> RM006</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM006>
+    <span class="nf nf-cod-symbol_class"></span> RM007</api/src/ansys/pre_commit_hooks/quality_rules/readme/RM007>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+README quality checks.
+
+This rule set validates that the repository README follows PyAnsys
+documentation standards and includes commonly expected project badges.
+
+The checks cover:
+
+* README availability
+    - README.rst (preferred)
+    - README.md (supported but not preferred)
+
+* Badges
+    - PyAnsys or Ansys badge
+    - PyPI badge
+    - Project license badge
+    - GitHub Actions CI badge
+
+* Content sections
+    - Installation
+    - Documentation
+    - License
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+
