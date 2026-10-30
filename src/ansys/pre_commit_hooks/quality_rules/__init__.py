@@ -24,6 +24,7 @@
 
 from collections.abc import Iterable
 
+from ansys.pre_commit_hooks.quality_rules.cicd import CICD
 from ansys.pre_commit_hooks.quality_rules.common import _QualityRule
 from ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
 from ansys.pre_commit_hooks.quality_rules.readme import README
@@ -34,11 +35,15 @@ README_QUALITY_RULES: tuple[type[README], ...] = tuple(
 PROJECT_METADATA_QUALITY_RULES: tuple[type[ProjectMetadata], ...] = tuple(
     sorted(ProjectMetadata.__subclasses__(), key=lambda rule_class: rule_class.__name__)
 )
+CICD_QUALITY_RULES: tuple[type[CICD], ...] = tuple(
+    sorted(CICD.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
 
 # Maps each rule family name to its rule classes.
 RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
     README.family: README_QUALITY_RULES,
     ProjectMetadata.family: PROJECT_METADATA_QUALITY_RULES,
+    CICD.family: CICD_QUALITY_RULES,
 }
 # Families evaluated when no ``--family`` is requested.
 DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
@@ -53,6 +58,8 @@ globals().update(
 )
 
 __all__ = [
+    "CICD",
+    "CICD_QUALITY_RULES",
     "DEFAULT_RULE_FAMILIES",
     "PROJECT_METADATA_QUALITY_RULES",
     "README",
