@@ -35,7 +35,7 @@ _RULE_ACTIONS = {
     "CI002": "actions/labeler",
     "CI003": "ansys/actions/check-vulnerabilities",
     "CI004": "ansys/actions/code-style",
-    "CI005": "ansys/actions/changelog-fragment",
+    "CI005": "ansys/actions/doc-changelog",
     "CI006": "ansys/actions/doc-style",
     "CI007": "ansys/actions/doc-build",
     "CI008": "ansys/actions/build-wheelhouse",
@@ -120,6 +120,13 @@ def test_action_rules_warn_when_action_is_missing(tmp_path, rule_id):
 
     assert isinstance(result, str)
     assert result.startswith("WARNING:")
+
+
+def test_changelog_rule_rejects_nonstandard_action_name(tmp_path):
+    """CI005 requires the documented doc-changelog action."""
+    _write_workflow(tmp_path, _uses_line("ansys/actions/changelog-fragment"))
+
+    assert _rule("CI005").check(tmp_path, None).startswith("WARNING:")
 
 
 def test_tests_rule_ignores_mentions_of_pytest_or_tox(tmp_path):

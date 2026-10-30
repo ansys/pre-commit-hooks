@@ -57,7 +57,7 @@ _ACTION_PATTERNS: Final[dict[str, re.Pattern[str]]] = {
         re.IGNORECASE | re.MULTILINE,
     ),
     "changelog": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/[^\s#]*changelog[^\s#]*",
+        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-changelog(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_style": re.compile(
@@ -230,13 +230,15 @@ class CI004(CICD):
 
 
 class CI005(CICD):
-    """A changelog fragment action is used."""
+    """The doc-changelog action is used."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a changelog fragment action is used."""
+        """Return whether the doc-changelog action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["changelog"], "A changelog fragment action"
+            repository_root,
+            _ACTION_PATTERNS["changelog"],
+            "ansys/actions/doc-changelog",
         )
 
 
@@ -274,13 +276,15 @@ class CI008(CICD):
 
 
 class CI009(CICD):
-    """The pytest tests action is used."""
+    """The tests-pytest action is used."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the tests action is used."""
+        """Return whether the tests-pytest action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["tests"], "ansys/actions/tests"
+            repository_root,
+            _ACTION_PATTERNS["tests"],
+            "ansys/actions/tests-pytest",
         )
 
 
