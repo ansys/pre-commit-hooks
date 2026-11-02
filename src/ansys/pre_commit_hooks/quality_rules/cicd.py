@@ -43,61 +43,62 @@ from typing import ClassVar, Final
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult, all_workflows_content
 
 _NO_WORKFLOWS: Final[str] = "WARNING: No workflow files found under .github/workflows."
+_ORG_REPO_NAME: Final[str] = "ansys/actions"
 
 _ACTION_PATTERNS: Final[dict[str, re.Pattern[str]]] = {
     "labeler": re.compile(
         r"^\s*(?:-\s*)?uses:\s*[^\s#]*label[^\s#]*", re.IGNORECASE | re.MULTILINE
     ),
     "vulnerabilities": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-vulnerabilities(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/check-vulnerabilities(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "code_style": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/code-style(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/code-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "changelog": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-changelog(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-changelog(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_style": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-style(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-style(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_build": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-build(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-build(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "wheelhouse": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/build-wheelhouse(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/build-wheelhouse(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "tests": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/tests-pytest(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/tests-pytest(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "release": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/release-github(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/release-github(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "actions_security": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/check-actions-security(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/check-actions-security(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "build_library": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/build-library(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/build-library(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_dev": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-dev(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-deploy-dev(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_stable": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-stable(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-deploy-stable(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
     "doc_deploy_changelog": re.compile(
-        r"^\s*(?:-\s*)?uses:\s*ansys/actions/doc-deploy-changelog(?:@|\s|$)",
+        rf"^\s*(?:-\s*)?uses:\s*{_ORG_REPO_NAME}/doc-deploy-changelog(?:@|\s|$)",
         re.IGNORECASE | re.MULTILINE,
     ),
 }
@@ -214,7 +215,7 @@ class CI003(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["vulnerabilities"],
-            "ansys/actions/check-vulnerabilities",
+            f"{_ORG_REPO_NAME}/check-vulnerabilities",
         )
 
 
@@ -225,7 +226,7 @@ class CI004(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the code-style action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["code_style"], "ansys/actions/code-style"
+            repository_root, _ACTION_PATTERNS["code_style"], f"{_ORG_REPO_NAME}/code-style"
         )
 
 
@@ -238,7 +239,7 @@ class CI005(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["changelog"],
-            "ansys/actions/doc-changelog",
+            f"{_ORG_REPO_NAME}/doc-changelog",
         )
 
 
@@ -249,7 +250,7 @@ class CI006(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-style action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["doc_style"], "ansys/actions/doc-style"
+            repository_root, _ACTION_PATTERNS["doc_style"], f"{_ORG_REPO_NAME}/doc-style"
         )
 
 
@@ -260,7 +261,7 @@ class CI007(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-build action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["doc_build"], "ansys/actions/doc-build"
+            repository_root, _ACTION_PATTERNS["doc_build"], f"{_ORG_REPO_NAME}/doc-build"
         )
 
 
@@ -271,7 +272,7 @@ class CI008(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the build-wheelhouse action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["wheelhouse"], "ansys/actions/build-wheelhouse"
+            repository_root, _ACTION_PATTERNS["wheelhouse"], f"{_ORG_REPO_NAME}/build-wheelhouse"
         )
 
 
@@ -284,7 +285,7 @@ class CI009(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["tests"],
-            "ansys/actions/tests-pytest",
+            f"{_ORG_REPO_NAME}/tests-pytest",
         )
 
 
@@ -295,7 +296,7 @@ class CI010(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the release-github action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["release"], "ansys/actions/release-github"
+            repository_root, _ACTION_PATTERNS["release"], f"{_ORG_REPO_NAME}/release-github"
         )
 
 
@@ -308,7 +309,7 @@ class CI011(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["actions_security"],
-            "ansys/actions/check-actions-security",
+            f"{_ORG_REPO_NAME}/check-actions-security",
         )
 
 
@@ -319,7 +320,7 @@ class CI012(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the build-library action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["build_library"], "ansys/actions/build-library"
+            repository_root, _ACTION_PATTERNS["build_library"], f"{_ORG_REPO_NAME}/build-library"
         )
 
 
@@ -330,7 +331,7 @@ class CI013(CICD):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the doc-deploy-dev action is used."""
         return _check_action_presence(
-            repository_root, _ACTION_PATTERNS["doc_deploy_dev"], "ansys/actions/doc-deploy-dev"
+            repository_root, _ACTION_PATTERNS["doc_deploy_dev"], f"{_ORG_REPO_NAME}/doc-deploy-dev"
         )
 
 
@@ -343,7 +344,7 @@ class CI014(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["doc_deploy_stable"],
-            "ansys/actions/doc-deploy-stable",
+            f"{_ORG_REPO_NAME}/doc-deploy-stable",
         )
 
 
@@ -356,7 +357,7 @@ class CI015(CICD):
         return _check_action_presence(
             repository_root,
             _ACTION_PATTERNS["doc_deploy_changelog"],
-            "ansys/actions/doc-deploy-changelog",
+            f"{_ORG_REPO_NAME}/doc-deploy-changelog",
         )
 
 
