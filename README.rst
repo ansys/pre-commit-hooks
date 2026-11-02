@@ -38,7 +38,7 @@ The following hooks are currently available:
   have ``REUSE`` implemented in your repository.
 * ``tech-review``: Do a technical review of your repository according to
   `Ansys repository requirements <https://dev.docs.pyansys.com/packaging/structure.html>`_
-* ``pyansys-quality-report``: Check Pyansys quality
+* ``pyansys-quality-report``: Check PyAnsys quality
    with selectable rules and a machine-readable JSON report.
 
 Configure the quality report in the ``.pre-commit-config.yaml`` file:
