@@ -20,6 +20,8 @@ updates:
   - package-ecosystem: "github-actions"
     cooldown:
       default-days: 7
+      exclude:
+        - "ansys/actions/*"
     directory: "/"
     schedule:
       interval: "weekly"
