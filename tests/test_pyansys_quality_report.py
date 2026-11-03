@@ -402,7 +402,7 @@ def test_badge_rules_accept_supported_image_markup(tmp_path, rule, badge):
 def test_badge_rules_do_not_cross_from_an_unrelated_image_into_prose(tmp_path, rule, prose):
     """Text after an unrelated image should not satisfy a badge check."""
     (tmp_path / "README.rst").write_text(
-        ".. image:: https://img.shields.io/badge/build-passing-green.svg\n" f"\n{prose}\n",
+        f".. image:: https://img.shields.io/badge/build-passing-green.svg\n\n{prose}\n",
         encoding="utf-8",
     )
 
