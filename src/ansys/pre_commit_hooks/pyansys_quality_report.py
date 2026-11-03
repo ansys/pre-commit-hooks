@@ -409,7 +409,7 @@ def _print_report(
     autoflush_print(_styled("Status summary", _ANSI_BOLD, colors_enabled=colors_enabled))
     for status in (PASSED, WARNING, ERROR):
         autoflush_print(
-            f"  {_status_text(status, colors_enabled=colors_enabled)} " f"{status_tally[status]:>3}"
+            f"  {_status_text(status, colors_enabled=colors_enabled)} {status_tally[status]:>3}"
         )
 
     visible_results = [

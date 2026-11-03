@@ -344,8 +344,7 @@ class PM002(ProjectMetadata):
         if _has_rst_changelog_content(content):
             return True
         return (
-            f"WARNING: {_DOC_CHANGELOG} must contain a valid RST title and "
-            "non-placeholder content."
+            f"WARNING: {_DOC_CHANGELOG} must contain a valid RST title and non-placeholder content."
         )
 
 
