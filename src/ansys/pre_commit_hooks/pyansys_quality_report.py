@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Run the initial README checks for a repository."""
+"""Run PyAnsys repository quality checks."""
 
 from __future__ import annotations
 
@@ -523,11 +523,15 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
     return _normalize_rule_ids(ignored_values)
 
 
-@click.command(help="Run PyAnsys README quality checks.")
+@click.command(help="Run PyAnsys repository quality checks.")
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
-@click.option("--family", multiple=True, help="Select rule family (readme, project_metadata).")
+@click.option(
+    "--family",
+    multiple=True,
+    help="Select rule family (readme, project_metadata, cicd).",
+)
 @click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")
 @click.option(
@@ -551,7 +555,7 @@ def _cli(
     fails_only: bool,
     color: ColorMode,
 ) -> int:
-    """Run README quality checks and return the process exit code."""
+    """Run repository quality checks and return the process exit code."""
     if show_all and fails_only:
         raise click.UsageError("Use only one of --show-all or --fails-only")
 
@@ -605,7 +609,7 @@ def _cli(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run README quality checks for a repository.
+    """Run repository quality checks.
 
     Parameters
     ----------

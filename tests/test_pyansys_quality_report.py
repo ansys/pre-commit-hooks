@@ -50,9 +50,9 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 
 
 def test_registry_contains_every_rule_family():
-    """The registry exposes the README and project metadata rule families."""
+    """The registry exposes the README, project metadata, and CI/CD rule families."""
     assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
-    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM"}
+    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM", "CI"}
 
 
 @pytest.mark.parametrize(
@@ -463,7 +463,7 @@ def test_cli_rejects_unknown_rule_ids(tmp_path, monkeypatch, capsys, option):
     error = capsys.readouterr().err
     assert exit_info.value.code == 2
     assert f"unknown rule ID(s) for {option}: RM999, XX1." in error
-    assert "Available rules: PM001" in error
+    assert "Available rules: CI001" in error
     assert "RM000, RM001" in error
 
 
