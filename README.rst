@@ -1,6 +1,6 @@
 Ansys pre-commit hooks
 ======================
-|pyansys| |python| |pypi| |GH-CI| |MIT| |black| |pre-commit-ci|
+|pyansys| |python| |pypi| |GH-CI| |MIT| |ruff| |pre-commit-ci|
 
 .. |pyansys| image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC
    :target: https://docs.pyansys.com/
@@ -22,9 +22,9 @@ Ansys pre-commit hooks
    :target: https://opensource.org/licenses/MIT
    :alt: MIT
 
-.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
-   :target: https://github.com/psf/black
-   :alt: Black
+.. |ruff| image:: https://img.shields.io/badge/code%20style-ruff-D7FF64.svg?style=flat
+   :target: https://github.com/astral-sh/ruff
+   :alt: Ruff
 
 .. |pre-commit-ci| image:: https://results.pre-commit.ci/badge/github/ansys/pre-commit-hooks/main.svg
    :target: https://results.pre-commit.ci/latest/github/ansys/pre-commit-hooks/main
@@ -172,8 +172,8 @@ These environment commands are provided:
 Raw testing
 ^^^^^^^^^^^
 
-If required, you can always call style commands, such as `black`_, `isort`_,
-and `flake8`_, or unit testing commands, such as `pytest`_, from the command line.
+If required, you can call ``ruff check --fix .`` and ``ruff format .`` with
+`Ruff`_, or unit testing commands, such as `pytest`_, from the command line.
 However, calling these commands does not guarantee that your project is
 being tested in an isolated environment, which is the reason why tools like
 ``tox`` exist.
@@ -222,9 +222,7 @@ the building requirements and then execute the build module with these commands:
 
 
 .. LINKS AND REFERENCES
-.. _black: https://github.com/psf/black
-.. _flake8: https://flake8.pycqa.org/en/latest/
-.. _isort: https://github.com/PyCQA/isort
+.. _Ruff: https://docs.astral.sh/ruff/
 .. _pip: https://pypi.org/project/pip/
 .. _pre-commit: https://pre-commit.com/
 .. _PyAnsys Developer's Guide: https://dev.docs.pyansys.com/

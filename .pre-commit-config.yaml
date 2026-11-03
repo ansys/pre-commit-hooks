@@ -1,19 +1,11 @@
 repos:
 
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 26.10.1
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.17.3
   hooks:
-  - id: black
-
-- repo: https://github.com/pycqa/isort
-  rev: 10.0.0b2
-  hooks:
-  - id: isort
-
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.5.0
-  hooks:
-  - id: flake8
+  - id: ruff-check
+    args: [--fix]
+  - id: ruff-format
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.3
@@ -21,13 +13,6 @@ repos:
   - id: codespell
     additional_dependencies:
       - tomli
-
-- repo: https://github.com/pycqa/pydocstyle
-  rev: 6.3.0
-  hooks:
-  - id: pydocstyle
-    additional_dependencies: [toml]
-    exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
