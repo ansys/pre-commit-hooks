@@ -34,7 +34,13 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"PC{number:03d}" for number in range(1, 7))
+_RULE_IDS = tuple(f"PC{number:03d}" for number in range(1, 11))
+_RECOMMENDED_HOOKS = {
+    "PC007": "check-merge-conflict",
+    "PC008": "debug-statements",
+    "PC009": "check-yaml",
+    "PC010": "trailing-whitespace",
+}
 _VALID_CONFIGURATION = """\
 repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -54,6 +60,13 @@ repos:
 - repo: local
   hooks:
   - id: mypy
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+  hooks:
+  - id: check-merge-conflict
+  - id: debug-statements
+  - id: check-yaml
+  - id: trailing-whitespace
 """
 
 
@@ -66,7 +79,7 @@ def test_registry_contains_all_pre_commit_rules() -> None:
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "pre_commit" for rule in rules.values())
-    assert len(PRE_COMMIT_QUALITY_RULES) == 6
+    assert len(PRE_COMMIT_QUALITY_RULES) == 10
     assert all(issubclass(rule, PreCommit) for rule in PRE_COMMIT_QUALITY_RULES)
 
 
@@ -130,7 +143,7 @@ def test_invalid_configuration_reports_errors(tmp_path: Path, content: str) -> N
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 0, "ERROR": 5}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 0, "ERROR": 9}
     assert all(result["detail"] for result in review["results"] if result["id"] != "PC001")
 
 
@@ -139,7 +152,7 @@ def test_non_utf8_configuration_reports_errors(tmp_path: Path) -> None:
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 0, "ERROR": 5}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 0, "ERROR": 9}
 
 
 def test_configuration_cannot_escape_repository(tmp_path: Path) -> None:
@@ -151,7 +164,7 @@ def test_configuration_cannot_escape_repository(tmp_path: Path) -> None:
 
     review = report._run_checks(repository, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 0, "WARNING": 0, "ERROR": 6}
+    assert review["tally"] == {"PASSED": 0, "WARNING": 0, "ERROR": 10}
 
 
 @pytest.mark.parametrize("option", ["--pedantic", "--persona=pedantic"])
@@ -264,7 +277,7 @@ def test_comments_and_unrelated_values_do_not_satisfy_checks(tmp_path: Path) -> 
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 2, "ERROR": 3}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 6, "ERROR": 3}
 
 
 @pytest.mark.parametrize(
@@ -284,7 +297,7 @@ def test_ci_settings_are_not_checked(tmp_path: Path, ci_settings: str) -> None:
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 6, "WARNING": 0, "ERROR": 0}
+    assert review["tally"] == {"PASSED": 10, "WARNING": 0, "ERROR": 0}
     assert tuple(result["id"] for result in review["results"]) == _RULE_IDS
 
 
@@ -297,7 +310,7 @@ def test_malformed_repository_entries_do_not_crash_rules(tmp_path: Path) -> None
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 2, "ERROR": 3}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 6, "ERROR": 3}
 
 
 def test_cli_lists_pre_commit_metadata(capsys: pytest.CaptureFixture[str]) -> None:
@@ -317,8 +330,10 @@ def test_cli_supports_pre_commit_family_and_rule_filtering(
 
     assert report.main(["--json", "--family", "pre_commit", "--ignore", "PC006"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert [result["id"] for result in payload["results"]] == list(_RULE_IDS[:-1])
-    assert payload["tally"] == {"PASSED": 5, "WARNING": 0, "ERROR": 0}
+    assert [result["id"] for result in payload["results"]] == [
+        rule_id for rule_id in _RULE_IDS if rule_id != "PC006"
+    ]
+    assert payload["tally"] == {"PASSED": 9, "WARNING": 0, "ERROR": 0}
 
     assert report.main(["--json", "--check", "PC006"]) == 0
     payload = json.loads(capsys.readouterr().out)
@@ -328,11 +343,11 @@ def test_cli_supports_pre_commit_family_and_rule_filtering(
 @pytest.mark.parametrize(
     ("content", "expected_exit_code", "expected_tally"),
     [
-        ("repos: []\n", 1, {"PASSED": 1, "WARNING": 2, "ERROR": 3}),
+        ("repos: []\n", 1, {"PASSED": 1, "WARNING": 6, "ERROR": 3}),
         (
             _VALID_CONFIGURATION.replace("args: [--pedantic]", "args: []"),
             0,
-            {"PASSED": 5, "WARNING": 1, "ERROR": 0},
+            {"PASSED": 9, "WARNING": 1, "ERROR": 0},
         ),
     ],
 )
@@ -365,7 +380,66 @@ def test_missing_optional_hooks_only_warn(
     assert report.main(["--json", "--family", "pre_commit"]) == 0
 
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 4, "WARNING": 2, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 8, "WARNING": 2, "ERROR": 0}
     statuses = {result["id"]: result["status"] for result in payload["results"]}
     assert statuses["PC003"] == "WARNING"
     assert statuses["PC006"] == "WARNING"
+
+
+@pytest.mark.parametrize(("rule_id", "hook_id"), _RECOMMENDED_HOOKS.items())
+def test_recommended_hooks_are_checked_independently(
+    tmp_path: Path, rule_id: str, hook_id: str
+) -> None:
+    _write_configuration(tmp_path, _VALID_CONFIGURATION.replace(f"  - id: {hook_id}\n", ""))
+
+    results = {
+        result["id"]: result
+        for result in report._run_checks(tmp_path, selected_families={"pre_commit"})["results"]
+    }
+
+    assert results[rule_id]["status"] == "WARNING"
+    assert results[rule_id]["detail"] == f"No {hook_id} hook is configured."
+    assert all(
+        result["status"] == "PASSED" for other_id, result in results.items() if other_id != rule_id
+    )
+
+
+@pytest.mark.parametrize(("rule_id", "hook_id"), _RECOMMENDED_HOOKS.items())
+@pytest.mark.parametrize(
+    "hook_entry",
+    [
+        "# - id: {hook_id}",
+        "- id: {hook_id}-wrapper",
+        "- id: other\n    name: {hook_id}",
+        "- id: other\n    additional_dependencies: [{hook_id}]",
+        "- id: [{hook_id}]",
+    ],
+)
+def test_recommended_hooks_require_exact_ids(
+    tmp_path: Path, rule_id: str, hook_id: str, hook_entry: str
+) -> None:
+    _write_configuration(
+        tmp_path,
+        "repos:\n- repo: https://github.com/pre-commit/pre-commit-hooks\n  hooks:\n  "
+        + hook_entry.format(hook_id=hook_id)
+        + "\n",
+    )
+
+    assert repo_review_checks()[rule_id].check(tmp_path, None) == (
+        f"WARNING: No {hook_id} hook is configured."
+    )
+
+
+def test_missing_recommended_hooks_do_not_fail_cli(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    content = _VALID_CONFIGURATION
+    for hook_id in _RECOMMENDED_HOOKS.values():
+        content = content.replace(f"  - id: {hook_id}\n", "")
+    _write_configuration(tmp_path, content)
+    monkeypatch.chdir(tmp_path)
+
+    assert report.main(["--json", "--family", "pre_commit"]) == 0
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["tally"] == {"PASSED": 6, "WARNING": 4, "ERROR": 0}
