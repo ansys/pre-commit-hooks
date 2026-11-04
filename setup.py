@@ -43,6 +43,7 @@ setup(
         "GitPython==3.2.1",
         "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
+        "PyYAML==6.0.3",
         "reuse==6.2.0",
         "requests==2.34.2",
         "semver==3.1.0",
