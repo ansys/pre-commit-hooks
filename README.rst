@@ -46,7 +46,7 @@ Configure the quality report in the ``.pre-commit-config.yaml`` file:
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.8.0
+     rev: v0.8.1
      hooks:
      - id: pyansys-quality-report
        args: [--show-all]
