@@ -37,6 +37,7 @@ __all__ = [
     "normalize_check_result",
     "PASSED",
     "readme_path",
+    "RECOMMENDATION",
     "RuleCheckResult",
     "RuleStatus",
     "WARNING",
@@ -49,6 +50,7 @@ class RuleStatus(str, Enum):
     """Public status of a quality rule."""
 
     PASSED = "PASSED"
+    RECOMMENDATION = "RECOMMENDATION"
     WARNING = "WARNING"
     ERROR = "ERROR"
 
@@ -59,6 +61,7 @@ class RuleStatus(str, Enum):
 
 
 PASSED: Final[RuleStatus] = RuleStatus.PASSED
+RECOMMENDATION: Final[RuleStatus] = RuleStatus.RECOMMENDATION
 WARNING: Final[RuleStatus] = RuleStatus.WARNING
 ERROR: Final[RuleStatus] = RuleStatus.ERROR
 
@@ -258,6 +261,8 @@ def normalize_check_result(raw_result: object, rule: _QualityRule) -> tuple[Rule
     if isinstance(raw_result, str):
         if raw_result.startswith("ERROR: "):
             return ERROR, raw_result.removeprefix("ERROR: ")
+        if raw_result.startswith("RECOMMENDATION: "):
+            return RECOMMENDATION, raw_result.removeprefix("RECOMMENDATION: ")
         if raw_result.startswith("WARNING: "):
             return WARNING, raw_result.removeprefix("WARNING: ")
         return ERROR, f"Invalid check result: {raw_result!r}"

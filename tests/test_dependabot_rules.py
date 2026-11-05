@@ -118,7 +118,7 @@ def test_yaml_path_preference_is_deterministic(tmp_path: Path) -> None:
 def test_missing_configuration_is_error(tmp_path: Path, rule_id: str) -> None:
     review = report._run_checks(tmp_path, selected_rule_ids={rule_id})
 
-    assert review["tally"] == {"PASSED": 0, "WARNING": 0, "ERROR": 1}
+    assert review["tally"] == {"PASSED": 0, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 1}
     assert "dependabot" in review["results"][0]["detail"]
 
 
@@ -138,7 +138,7 @@ def test_invalid_yaml_mapping_is_error(tmp_path: Path, content: str) -> None:
     _write(tmp_path, content)
     review = report._run_checks(tmp_path, selected_families={"dependabot"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 0, "ERROR": 12}
+    assert review["tally"] == {"PASSED": 1, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 12}
     assert all(result["detail"] for result in review["results"] if result["id"] != "DB001")
 
 
@@ -353,7 +353,7 @@ def test_cli_metadata_and_filtering(
     monkeypatch.chdir(tmp_path)
     assert report.main(["--json", "--family", "dependabot", "--ignore", "DB007"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 12, "WARNING": 0, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 12, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
     assert report.main(["--json", "--check", "DB003"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [item["id"] for item in payload["results"]] == ["DB003"]
@@ -376,6 +376,6 @@ updates:
 
     assert report.main(["--json", "--family", "dependabot"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 7, "WARNING": 6, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 7, "RECOMMENDATION": 0, "WARNING": 6, "ERROR": 0}
     _write(tmp_path, "version: 2\nupdates: []\n")
     assert report.main(["--json", "--family", "dependabot"]) == 1
