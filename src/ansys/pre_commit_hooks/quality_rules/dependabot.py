@@ -326,9 +326,7 @@ class DB011(Dependabot):
             return updates
         for index, entry in enumerate(updates, start=1):
             if ("directory" in entry) == ("directories" in entry):
-                return (
-                    f"ERROR: Update entry {index} must set exactly one of directory or directories."
-                )
+                return f"ERROR: Entry {index} must define exactly one of directory or directories."
             paths = [entry["directory"]] if "directory" in entry else entry["directories"]
             if (
                 not isinstance(paths, list)
