@@ -9,6 +9,166 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.8.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.1>`_ - November 04, 2026
+============================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add readme focused PyAnsys quality report
+          - `#496 <https://github.com/ansys/pre-commit-hooks/pull/496>`_
+
+        * - Add project metadata checks
+          - `#501 <https://github.com/ansys/pre-commit-hooks/pull/501>`_
+
+        * - Add CI CD checks
+          - `#507 <https://github.com/ansys/pre-commit-hooks/pull/507>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update \`\`CONTRIBUTORS.md\`\` with the latest contributors
+          - `#480 <https://github.com/ansys/pre-commit-hooks/pull/480>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump actions/checkout from 6.0.3 to 7.0.0
+          - `#450 <https://github.com/ansys/pre-commit-hooks/pull/450>`_
+
+        * - Bump pytest from 9.0.3 to 9.1.0
+          - `#451 <https://github.com/ansys/pre-commit-hooks/pull/451>`_
+
+        * - Bump ansys-sphinx-theme from 1.8.2 to 1.9.0
+          - `#452 <https://github.com/ansys/pre-commit-hooks/pull/452>`_
+
+        * - Bump pytest from 9.1.0 to 9.1.1
+          - `#453 <https://github.com/ansys/pre-commit-hooks/pull/453>`_
+
+        * - Bump ansys/actions/doc-style from 10.3.2 to 10.3.3
+          - `#455 <https://github.com/ansys/pre-commit-hooks/pull/455>`_
+
+        * - Bump ansys/actions/doc-deploy-stable from 10.3.2 to 10.3.3
+          - `#456 <https://github.com/ansys/pre-commit-hooks/pull/456>`_
+
+        * - Bump ansys/actions/build-wheelhouse from 10.3.2 to 10.3.3
+          - `#457 <https://github.com/ansys/pre-commit-hooks/pull/457>`_
+
+        * - Bump ansys/actions/doc-deploy-changelog from 10.3.2 to 10.3.3
+          - `#458 <https://github.com/ansys/pre-commit-hooks/pull/458>`_
+
+        * - Bump ansys/actions/check-vulnerabilities from 10.3.2 to 10.3.3
+          - `#459 <https://github.com/ansys/pre-commit-hooks/pull/459>`_
+
+        * - Bump the actions group with 9 updates
+          - `#466 <https://github.com/ansys/pre-commit-hooks/pull/466>`_
+
+        * - Bump gitpython from 3.1.50 to 3.1.51 in the python-deps group
+          - `#468 <https://github.com/ansys/pre-commit-hooks/pull/468>`_
+
+        * - Bump the actions group with 13 updates
+          - `#469 <https://github.com/ansys/pre-commit-hooks/pull/469>`_, `#483 <https://github.com/ansys/pre-commit-hooks/pull/483>`_, `#484 <https://github.com/ansys/pre-commit-hooks/pull/484>`_, `#489 <https://github.com/ansys/pre-commit-hooks/pull/489>`_, `#491 <https://github.com/ansys/pre-commit-hooks/pull/491>`_
+
+        * - Bump gitpython from 3.1.51 to 3.1.52
+          - `#470 <https://github.com/ansys/pre-commit-hooks/pull/470>`_
+
+        * - Bump gitpython from 3.1.52 to 3.1.54 in the python-deps group
+          - `#471 <https://github.com/ansys/pre-commit-hooks/pull/471>`_
+
+        * - Bump the actions group with 16 updates
+          - `#472 <https://github.com/ansys/pre-commit-hooks/pull/472>`_
+
+        * - Bump gitpython from 3.1.54 to 3.1.57 in the python-deps group
+          - `#476 <https://github.com/ansys/pre-commit-hooks/pull/476>`_
+
+        * - Bump pypa/gh-action-pypi-publish from 1.14.1 to 1.14.2 in the actions group
+          - `#477 <https://github.com/ansys/pre-commit-hooks/pull/477>`_
+
+        * - Bump gitpython from 3.1.57 to 3.1.58 in the python-deps group
+          - `#479 <https://github.com/ansys/pre-commit-hooks/pull/479>`_
+
+        * - Bump gitpython from 3.1.58 to 3.1.59 in the python-deps group
+          - `#482 <https://github.com/ansys/pre-commit-hooks/pull/482>`_
+
+        * - Bump gitpython from 3.1.59 to 3.1.60 in the python-deps group
+          - `#487 <https://github.com/ansys/pre-commit-hooks/pull/487>`_
+
+        * - Bump the python-deps group with 2 updates
+          - `#488 <https://github.com/ansys/pre-commit-hooks/pull/488>`_
+
+        * - Bump gitpython from 3.1.61 to 3.1.62 in the python-deps group
+          - `#490 <https://github.com/ansys/pre-commit-hooks/pull/490>`_
+
+        * - Bump semver from 3.0.4 to 3.1.0 in the python-deps group
+          - `#492 <https://github.com/ansys/pre-commit-hooks/pull/492>`_
+
+        * - Bump numpydoc from 1.10.0 to 1.11.0 in the python-deps group
+          - `#494 <https://github.com/ansys/pre-commit-hooks/pull/494>`_
+
+        * - Bump actions/download-artifact from 8.0.1 to 8.0.2 in the actions group
+          - `#499 <https://github.com/ansys/pre-commit-hooks/pull/499>`_
+
+        * - Bump gitpython from 3.1.62 to 3.2.0 in the python-deps group
+          - `#500 <https://github.com/ansys/pre-commit-hooks/pull/500>`_
+
+        * - Bump click from 8.3.1 to 8.5.0 in the python-deps group
+          - `#503 <https://github.com/ansys/pre-commit-hooks/pull/503>`_
+
+        * - Bump gitpython from 3.2.0 to 3.2.1 in the python-deps group across 1 directory
+          - `#505 <https://github.com/ansys/pre-commit-hooks/pull/505>`_
+
+        * - Bump pypa/gh-action-pypi-publish from 1.14.2 to 1.14.3 in the actions group
+          - `#506 <https://github.com/ansys/pre-commit-hooks/pull/506>`_
+
+        * - Bump the actions group across 1 directory with 13 updates
+          - `#511 <https://github.com/ansys/pre-commit-hooks/pull/511>`_
+
+        * - Replace Black, isort, Flake8, and pydocstyle with Ruff
+          - `#512 <https://github.com/ansys/pre-commit-hooks/pull/512>`_
+
+        * - Bump reuse to 6.3.0 in PyProject.toml
+          - `#514 <https://github.com/ansys/pre-commit-hooks/pull/514>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Revert hook usage now that version is released
+          - `#448 <https://github.com/ansys/pre-commit-hooks/pull/448>`_
+
+        * - Update missing or outdated files
+          - `#449 <https://github.com/ansys/pre-commit-hooks/pull/449>`_, `#473 <https://github.com/ansys/pre-commit-hooks/pull/473>`_
+
+        * - Pre-commit automatic update
+          - `#454 <https://github.com/ansys/pre-commit-hooks/pull/454>`_, `#460 <https://github.com/ansys/pre-commit-hooks/pull/460>`_, `#467 <https://github.com/ansys/pre-commit-hooks/pull/467>`_, `#478 <https://github.com/ansys/pre-commit-hooks/pull/478>`_, `#481 <https://github.com/ansys/pre-commit-hooks/pull/481>`_, `#485 <https://github.com/ansys/pre-commit-hooks/pull/485>`_, `#493 <https://github.com/ansys/pre-commit-hooks/pull/493>`_, `#495 <https://github.com/ansys/pre-commit-hooks/pull/495>`_, `#498 <https://github.com/ansys/pre-commit-hooks/pull/498>`_, `#502 <https://github.com/ansys/pre-commit-hooks/pull/502>`_, `#504 <https://github.com/ansys/pre-commit-hooks/pull/504>`_, `#509 <https://github.com/ansys/pre-commit-hooks/pull/509>`_
+
+        * - Bump ansys/actions to v10.3.6
+          - `#474 <https://github.com/ansys/pre-commit-hooks/pull/474>`_
+
+        * - Remove hacktoberfest labels from labels.yml
+          - `#508 <https://github.com/ansys/pre-commit-hooks/pull/508>`_
+
+        * - Add dependabot pre-commit configuration
+          - `#510 <https://github.com/ansys/pre-commit-hooks/pull/510>`_
+
+
 `0.8.0 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.0>`_ - June 17, 2026
 ========================================================================================
 
