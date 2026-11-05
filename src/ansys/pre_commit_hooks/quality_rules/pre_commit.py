@@ -127,11 +127,18 @@ def _check_hook(repository_root: Path, hook_ids: frozenset[str]) -> RuleCheckRes
     return False
 
 
-def _check_recommended_hook(repository_root: Path, hook_id: str) -> RuleCheckResult:
-    """Warn when a recommended hook is absent, preserving configuration errors."""
-    result = _check_hook(repository_root, frozenset({hook_id}))
+def _recommend(action: str, benefit: str) -> str:
+    """Format a recommendation that explains why the suggested change helps."""
+    return f"RECOMMENDATION: {action} {benefit}"
+
+
+def _check_recommended_hook(
+    repository_root: Path, hook_ids: frozenset[str], action: str, benefit: str
+) -> RuleCheckResult:
+    """Recommend an absent hook, preserving configuration errors."""
+    result = _check_hook(repository_root, hook_ids)
     if result is False:
-        return f"WARNING: No {hook_id} hook is configured."
+        return _recommend(action, benefit)
     return result
 
 
@@ -202,8 +209,14 @@ class PC003(PreCommit):
             ):
                 return True
         if has_zizmor:
-            return "WARNING: zizmor found but neither --pedantic nor --persona=pedantic is set."
-        return "WARNING: No zizmor hook is configured."
+            return _recommend(
+                "Enable --pedantic (or --persona=pedantic) for the zizmor hook;",
+                "it reports additional GitHub Actions security findings during commits.",
+            )
+        return _recommend(
+            "Add a zizmor hook;",
+            "it catches insecure GitHub Actions workflows locally before CI runs.",
+        )
 
 
 class PC004(PreCommit):
@@ -212,7 +225,12 @@ class PC004(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a codespell hook is configured."""
-        return _check_hook(repository_root, frozenset({"codespell"}))
+        return _check_recommended_hook(
+            repository_root,
+            frozenset({"codespell"}),
+            "Add a codespell hook;",
+            "it catches spelling mistakes in code and documentation before they are merged.",
+        )
 
 
 class PC005(PreCommit):
@@ -230,10 +248,12 @@ class PC006(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a supported type-checking hook is configured."""
-        result = _check_hook(repository_root, _TYPE_CHECKER_IDS)
-        if result is False:
-            return "WARNING: No pyright, mypy, or ty type-checking hook is configured."
-        return result
+        return _check_recommended_hook(
+            repository_root,
+            _TYPE_CHECKER_IDS,
+            "Add a pyright, mypy, or ty hook;",
+            "static type checking finds type errors before code is committed.",
+        )
 
 
 class PC007(PreCommit):
@@ -242,7 +262,12 @@ class PC007(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a check-merge-conflict hook is configured."""
-        return _check_recommended_hook(repository_root, "check-merge-conflict")
+        return _check_recommended_hook(
+            repository_root,
+            frozenset({"check-merge-conflict"}),
+            "Add the check-merge-conflict hook;",
+            "it blocks commits that still contain merge conflict markers.",
+        )
 
 
 class PC008(PreCommit):
@@ -251,7 +276,12 @@ class PC008(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a debug-statements hook is configured."""
-        return _check_recommended_hook(repository_root, "debug-statements")
+        return _check_recommended_hook(
+            repository_root,
+            frozenset({"debug-statements"}),
+            "Add the debug-statements hook;",
+            "it prevents leftover breakpoints and debugger imports from being committed.",
+        )
 
 
 class PC009(PreCommit):
@@ -260,7 +290,12 @@ class PC009(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a check-yaml hook is configured."""
-        return _check_recommended_hook(repository_root, "check-yaml")
+        return _check_recommended_hook(
+            repository_root,
+            frozenset({"check-yaml"}),
+            "Add the check-yaml hook;",
+            "it rejects invalid YAML before it breaks CI or tooling configuration.",
+        )
 
 
 class PC010(PreCommit):
@@ -269,4 +304,9 @@ class PC010(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a trailing-whitespace hook is configured."""
-        return _check_recommended_hook(repository_root, "trailing-whitespace")
+        return _check_recommended_hook(
+            repository_root,
+            frozenset({"trailing-whitespace"}),
+            "Add the trailing-whitespace hook;",
+            "it removes stray whitespace so diffs stay clean and focused.",
+        )
