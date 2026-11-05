@@ -212,7 +212,10 @@ class PC004(PreCommit):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether a codespell hook is configured."""
-        return _check_hook(repository_root, frozenset({"codespell"}))
+        result = _check_hook(repository_root, frozenset({"codespell"}))
+        if result is False:
+            return "WARNING: No codespell hook is configured."
+        return result
 
 
 class PC005(PreCommit):

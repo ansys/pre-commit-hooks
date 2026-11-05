@@ -278,7 +278,7 @@ def test_comments_and_unrelated_values_do_not_satisfy_checks(tmp_path: Path) -> 
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 6, "ERROR": 3}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 7, "ERROR": 2}
 
 
 @pytest.mark.parametrize(
@@ -311,7 +311,7 @@ def test_malformed_repository_entries_do_not_crash_rules(tmp_path: Path) -> None
 
     review = report._run_checks(tmp_path, selected_families={"pre_commit"})
 
-    assert review["tally"] == {"PASSED": 1, "WARNING": 6, "ERROR": 3}
+    assert review["tally"] == {"PASSED": 1, "WARNING": 7, "ERROR": 2}
 
 
 def test_cli_lists_pre_commit_metadata(capsys: pytest.CaptureFixture[str]) -> None:
@@ -344,7 +344,7 @@ def test_cli_supports_pre_commit_family_and_rule_filtering(
 @pytest.mark.parametrize(
     ("content", "expected_exit_code", "expected_tally"),
     [
-        ("repos: []\n", 1, {"PASSED": 1, "WARNING": 6, "ERROR": 3}),
+        ("repos: []\n", 1, {"PASSED": 1, "WARNING": 7, "ERROR": 2}),
         (
             _VALID_CONFIGURATION.replace("args: [--pedantic]", "args: []"),
             0,
