@@ -47,7 +47,20 @@ RuleCheckResult: TypeAlias = bool | str
 
 
 class RuleStatus(str, Enum):
-    """Public status of a quality rule."""
+    """Public status of a quality rule.
+
+    Attributes
+    ----------
+    PASSED
+        The rule is satisfied.
+    RECOMMENDATION
+        An optional improvement is suggested. It never fails the report and is
+        excluded from the score.
+    WARNING
+        The rule found an issue that does not fail the report.
+    ERROR
+        The rule failed. Any error produces a non-zero exit code.
+    """
 
     PASSED = "PASSED"
     RECOMMENDATION = "RECOMMENDATION"
@@ -246,15 +259,18 @@ def normalize_check_result(raw_result: object, rule: _QualityRule) -> tuple[Rule
     Parameters
     ----------
     raw_result : object
-        Value returned by a rule check.
+        Value returned by a rule check. ``True`` is ``PASSED`` and ``False`` is
+        ``ERROR`` described by the first line of the rule docstring. A string
+        must start with ``"ERROR: "``, ``"RECOMMENDATION: "``, or
+        ``"WARNING: "``, which select the matching status.
     rule : _QualityRule
         Rule that produced ``raw_result``.
 
     Returns
     -------
     tuple[RuleStatus, str]
-        Public status and its display detail. Invalid return values are
-        converted to ``ERROR``.
+        Public status and its display detail with any prefix removed. Invalid
+        return values are converted to ``ERROR``.
     """
     if raw_result is True:
         return PASSED, ""
