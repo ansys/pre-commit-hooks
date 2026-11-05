@@ -328,9 +328,9 @@ def test_invalid_schedule_structure_is_error(tmp_path: Path, schedule: str) -> N
     assert str(_check(tmp_path, "DB012")).startswith("ERROR:")
 
 
-def test_cron_schedule_requires_nonempty_expression(tmp_path: Path) -> None:
+def test_monthly_schedule_is_accepted(tmp_path: Path) -> None:
     configuration = yaml.safe_load(_SAMPLE)
-    configuration["updates"][0]["schedule"] = {"interval": "cron", "cronjob": "0 9 * * 1"}
+    configuration["updates"][0]["schedule"] = {"interval": "monthly"}
     _write(tmp_path, yaml.safe_dump(configuration))
 
     assert _check(tmp_path, "DB012") is True
