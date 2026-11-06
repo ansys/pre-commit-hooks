@@ -87,7 +87,19 @@ class _RuleResult(TypedDict):
 
 
 class _StatusTally(TypedDict):
-    """Counts for each public quality-report status."""
+    """Counts for each public quality-report status.
+
+    Attributes
+    ----------
+    PASSED : int
+        Number of passed rules.
+    RECOMMENDATION : int
+        Number of rules that suggest an optional improvement.
+    WARNING : int
+        Number of rules that reported a warning.
+    ERROR : int
+        Number of rules that failed.
+    """
 
     PASSED: int
     RECOMMENDATION: int
@@ -199,7 +211,8 @@ def _overall_status(quality_report: _QualityReport) -> RuleStatus:
     -------
     RuleStatus
         ``ERROR`` when errors are present, otherwise ``WARNING`` when warnings
-        are present, and ``PASSED`` otherwise.
+        are present, and ``PASSED`` otherwise. Recommendations do not change
+        the overall status.
     """
     status_tally = quality_report["tally"]
     if status_tally[ERROR]:
@@ -313,7 +326,9 @@ def _run_checks(
     Returns
     -------
     _QualityReport
-        Rule results, status counts, and the resulting score.
+        Rule results, status counts, and the resulting score. The score is the
+        percentage of passed rules among passed and failed rules; recommendations
+        and warnings are excluded.
     """
     registered_rules = repo_review_checks(_families_to_run(selected_families))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}

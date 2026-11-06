@@ -22,11 +22,21 @@
 
 """Pre-commit configuration checks.
 
-Validate the presence of ``.pre-commit-config.yaml``, required hook repositories,
-spelling and type-checking hooks, zizmor pedantic mode, and standard repository
-hygiene hooks. Missing merge-conflict, debug-statement, YAML, and trailing-whitespace
-hooks produce warnings.
-Configuration is parsed as YAML so comments do not satisfy the checks.
+This rule set validates the repository pre-commit configuration.
+
+The checks cover:
+
+* The ``.pre-commit-config.yaml`` file exists
+* The ``ruff-pre-commit`` and ``ansys/pre-commit-hooks`` repositories are
+  configured
+* Optional hooks are configured: ``zizmor`` (with pedantic mode), ``codespell``,
+  a type checker (``pyright``, ``mypy`` or ``ty``), and the
+  ``check-merge-conflict``, ``debug-statements``, ``check-yaml`` and
+  ``trailing-whitespace`` hooks
+
+A missing required item is reported as an ``ERROR``. A missing optional hook is
+reported as a ``RECOMMENDATION`` that explains the benefit of adding it. A
+recommendation never fails the report.
 """
 
 from __future__ import annotations
@@ -59,7 +69,20 @@ _TYPE_CHECKER_IDS: Final[frozenset[str]] = frozenset({"pyright", "mypy", "ty"})
 
 
 def _load_configuration(repository_root: Path) -> Mapping[str, object] | str:
-    """Load a pre-commit configuration or return an explicit error message."""
+    """Load and validate the pre-commit configuration.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+
+    Returns
+    -------
+    collections.abc.Mapping[str, object] or str
+        The parsed configuration, or an ``"ERROR: ..."`` message when the file
+        cannot be read, is not valid YAML, is not a mapping with string keys,
+        or has no ``repos`` list.
+    """
     content = file_content(repository_root, _PRE_COMMIT_CONFIG)
     if content is None:
         return f"ERROR: Cannot read {_PRE_COMMIT_CONFIG} as UTF-8 within the repository."
@@ -79,7 +102,18 @@ def _load_configuration(repository_root: Path) -> Mapping[str, object] | str:
 def _configured_repositories(
     configuration: Mapping[str, object],
 ) -> Iterator[Mapping[str, object]]:
-    """Yield repository mappings that contain a hooks list."""
+    """Yield repository mappings that contain a hooks list.
+
+    Parameters
+    ----------
+    configuration : collections.abc.Mapping[str, object]
+        Parsed pre-commit configuration.
+
+    Yields
+    ------
+    collections.abc.Mapping[str, object]
+        Each repository entry whose ``hooks`` value is a list.
+    """
     repositories = configuration.get("repos")
     if isinstance(repositories, list):
         for repository in repositories:
@@ -88,7 +122,18 @@ def _configured_repositories(
 
 
 def _configured_hooks(configuration: Mapping[str, object]) -> Iterator[Mapping[str, object]]:
-    """Yield hook mappings from the configured repositories."""
+    """Yield hook mappings from the configured repositories.
+
+    Parameters
+    ----------
+    configuration : collections.abc.Mapping[str, object]
+        Parsed pre-commit configuration.
+
+    Yields
+    ------
+    collections.abc.Mapping[str, object]
+        Each hook entry that is a mapping.
+    """
     for repository in _configured_repositories(configuration):
         hooks = repository.get("hooks")
         if isinstance(hooks, list):
@@ -98,7 +143,22 @@ def _configured_hooks(configuration: Mapping[str, object]) -> Iterator[Mapping[s
 
 
 def _check_repository(repository_root: Path, repository_name: str) -> RuleCheckResult:
-    """Check whether a required repository has at least one configured hook."""
+    """Check whether a required repository has at least one configured hook.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+    repository_name : str
+        Repository path suffix to match, for example ``"ansys/pre-commit-hooks"``.
+
+    Returns
+    -------
+    bool or str
+        ``True`` when a matching repository defines a hook with an ID,
+        ``False`` when it does not, or an ``"ERROR: ..."`` message when the
+        configuration is invalid.
+    """
     configuration = _load_configuration(repository_root)
     if isinstance(configuration, str):
         return configuration
@@ -116,7 +176,21 @@ def _check_repository(repository_root: Path, repository_name: str) -> RuleCheckR
 
 
 def _check_hook(repository_root: Path, hook_ids: frozenset[str]) -> RuleCheckResult:
-    """Check whether any supported hook ID is configured."""
+    """Check whether any of the given hook IDs is configured.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+    hook_ids : frozenset[str]
+        Hook IDs to look for. IDs must match exactly.
+
+    Returns
+    -------
+    bool or str
+        ``True`` when one of the hook IDs is configured, ``False`` when none
+        is, or an ``"ERROR: ..."`` message when the configuration is invalid.
+    """
     configuration = _load_configuration(repository_root)
     if isinstance(configuration, str):
         return configuration
@@ -128,14 +202,46 @@ def _check_hook(repository_root: Path, hook_ids: frozenset[str]) -> RuleCheckRes
 
 
 def _recommend(action: str, benefit: str) -> str:
-    """Format a recommendation that explains why the suggested change helps."""
+    """Format a recommendation that explains why the suggested change helps.
+
+    Parameters
+    ----------
+    action : str
+        What to change, for example ``"Add a codespell hook;"``.
+    benefit : str
+        Why the change is worthwhile.
+
+    Returns
+    -------
+    str
+        A ``"RECOMMENDATION: ..."`` message.
+    """
     return f"RECOMMENDATION: {action} {benefit}"
 
 
 def _check_recommended_hook(
     repository_root: Path, hook_ids: frozenset[str], action: str, benefit: str
 ) -> RuleCheckResult:
-    """Recommend an absent hook, preserving configuration errors."""
+    """Recommend a hook when none of the given IDs is configured.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+    hook_ids : frozenset[str]
+        Hook IDs that satisfy the recommendation.
+    action : str
+        What to add, used when the hook is missing.
+    benefit : str
+        Why the hook is worthwhile, used when the hook is missing.
+
+    Returns
+    -------
+    bool or str
+        ``True`` when a hook is configured, a ``"RECOMMENDATION: ..."`` message
+        when it is missing, or an ``"ERROR: ..."`` message when the
+        configuration is invalid.
+    """
     result = _check_hook(repository_root, hook_ids)
     if result is False:
         return _recommend(action, benefit)
@@ -145,8 +251,11 @@ def _check_recommended_hook(
 class PreCommit(ABC):
     """Pre-commit rule family.
 
-    Each ``PC<nnn>`` rule evaluates the repository's pre-commit configuration
-    independently. Missing or unreadable configuration is reported, not skipped.
+    Base class of the pre-commit quality rules. Each rule is a subclass named
+    ``PC<nnn>`` with a static ``check`` method that evaluates the repository's
+    pre-commit configuration independently. Missing or unreadable configuration
+    is reported as an error rather than skipped. Rules for optional hooks report
+    a ``RECOMMENDATION`` instead of an error when the hook is absent.
     """
 
     family: ClassVar[str] = "pre_commit"
@@ -166,7 +275,8 @@ class PreCommit(ABC):
         Returns
         -------
         bool or str
-            Raw rule result consumed by the quality-report runner.
+            ``True`` when the rule passes, ``False`` for an error, or a string
+            prefixed with ``"RECOMMENDATION: "`` or ``"ERROR: "``.
         """
         raise NotImplementedError
 
@@ -194,7 +304,15 @@ class PC003(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a zizmor hook enables pedantic mode."""
+        """Recommend a zizmor hook with pedantic mode.
+
+        Returns
+        -------
+        bool or str
+            ``True`` when a zizmor hook sets ``--pedantic`` or
+            ``--persona=pedantic``, otherwise a recommendation to add the hook
+            or enable pedantic mode.
+        """
         configuration = _load_configuration(repository_root)
         if isinstance(configuration, str):
             return configuration
@@ -224,7 +342,7 @@ class PC004(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a codespell hook is configured."""
+        """Recommend a codespell hook when none is configured."""
         return _check_recommended_hook(
             repository_root,
             frozenset({"codespell"}),
@@ -247,7 +365,7 @@ class PC006(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a supported type-checking hook is configured."""
+        """Recommend a pyright, mypy, or ty hook when none is configured."""
         return _check_recommended_hook(
             repository_root,
             _TYPE_CHECKER_IDS,
@@ -261,7 +379,7 @@ class PC007(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a check-merge-conflict hook is configured."""
+        """Recommend the check-merge-conflict hook when it is not configured."""
         return _check_recommended_hook(
             repository_root,
             frozenset({"check-merge-conflict"}),
@@ -275,7 +393,7 @@ class PC008(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a debug-statements hook is configured."""
+        """Recommend the debug-statements hook when it is not configured."""
         return _check_recommended_hook(
             repository_root,
             frozenset({"debug-statements"}),
@@ -289,7 +407,7 @@ class PC009(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a check-yaml hook is configured."""
+        """Recommend the check-yaml hook when it is not configured."""
         return _check_recommended_hook(
             repository_root,
             frozenset({"check-yaml"}),
@@ -303,7 +421,7 @@ class PC010(PreCommit):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether a trailing-whitespace hook is configured."""
+        """Recommend the trailing-whitespace hook when it is not configured."""
         return _check_recommended_hook(
             repository_root,
             frozenset({"trailing-whitespace"}),
