@@ -1,0 +1,202 @@
+
+
+
+
+
+
+The ``cicd.py`` module
+======================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.cicd
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: cicd
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CICD`
+            - CI/CD rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI001`
+            - At least one workflow file exists under .github/workflows.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI002`
+            - A labeler action is used in the workflows.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI003`
+            - The check-vulnerabilities action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI004`
+            - The code-style action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI005`
+            - The doc-changelog action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI006`
+            - The doc-style action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI007`
+            - The doc-build action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI008`
+            - The build-wheelhouse action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI009`
+            - The tests-pytest action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI010`
+            - The release-github action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI011`
+            - The check-actions-security action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI012`
+            - The build-library action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI013`
+            - The doc-deploy-dev action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI014`
+            - The doc-deploy-stable action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI015`
+            - The doc-deploy-changelog action is used.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.cicd.CI016`
+            - Actions use immutable commit SHAs instead of mutable tags.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> CICD</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CICD>
+    <span class="nf nf-cod-symbol_class"></span> CI001</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI001>
+    <span class="nf nf-cod-symbol_class"></span> CI002</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI002>
+    <span class="nf nf-cod-symbol_class"></span> CI003</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI003>
+    <span class="nf nf-cod-symbol_class"></span> CI004</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI004>
+    <span class="nf nf-cod-symbol_class"></span> CI005</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI005>
+    <span class="nf nf-cod-symbol_class"></span> CI006</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI006>
+    <span class="nf nf-cod-symbol_class"></span> CI007</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI007>
+    <span class="nf nf-cod-symbol_class"></span> CI008</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI008>
+    <span class="nf nf-cod-symbol_class"></span> CI009</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI009>
+    <span class="nf nf-cod-symbol_class"></span> CI010</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI010>
+    <span class="nf nf-cod-symbol_class"></span> CI011</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI011>
+    <span class="nf nf-cod-symbol_class"></span> CI012</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI012>
+    <span class="nf nf-cod-symbol_class"></span> CI013</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI013>
+    <span class="nf nf-cod-symbol_class"></span> CI014</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI014>
+    <span class="nf nf-cod-symbol_class"></span> CI015</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI015>
+    <span class="nf nf-cod-symbol_class"></span> CI016</api/src/ansys/pre_commit_hooks/quality_rules/cicd/CI016>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+CI/CD content checks.
+
+This rule set validates the GitHub Actions workflow policy for repository
+automation. Every ``.yml`` and ``.yaml`` file directly under
+``.github/workflows`` is searched as text.
+
+The checks cover:
+
+* At least one workflow file exists
+* Required ``ansys/actions`` reusable actions are used
+* Action references are pinned to immutable commit SHAs
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

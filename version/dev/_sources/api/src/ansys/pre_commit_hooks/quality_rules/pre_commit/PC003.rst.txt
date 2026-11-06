@@ -1,0 +1,109 @@
+
+
+
+
+
+
+:class:`PC003`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC003
+
+   Bases: :py:obj:`PreCommit`
+
+
+   
+   Zizmor is configured with --pedantic or --persona=pedantic.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PC003
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Recommend a zizmor hook with pedantic mode.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.pre_commit import PC003
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Recommend a zizmor hook with pedantic mode.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when a zizmor hook sets ``--pedantic`` or
+           ``--persona=pedantic``, otherwise a recommendation to add the hook
+           or enable pedantic mode.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

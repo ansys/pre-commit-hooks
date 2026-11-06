@@ -1,0 +1,150 @@
+
+
+
+
+
+
+:class:`RuleStatus`
+===================
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.common.RuleStatus
+
+   Bases: :py:obj:`str`, :py:obj:`enum.Enum`
+
+
+   
+   Public status of a quality rule.
+
+
+
+   :Attributes:
+
+       **PASSED**
+           The rule is satisfied.
+
+       **RECOMMENDATION**
+           An optional improvement is suggested. It never fails the report and is
+           excluded from the score.
+
+       **WARNING**
+           The rule found an issue that does not fail the report.
+
+       **ERROR**
+           The rule failed. Any error produces a non-zero exit code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: RuleStatus
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~PASSED`
+            - 
+          * - :py:attr:`~RECOMMENDATION`
+            - 
+          * - :py:attr:`~WARNING`
+            - 
+          * - :py:attr:`~ERROR`
+            - 
+
+
+
+   .. tab-item:: Special methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~__str__`
+            - Return the string representation of the status.
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.common import RuleStatus
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: PASSED
+   :value: 'PASSED'
+
+
+.. py:attribute:: RECOMMENDATION
+   :value: 'RECOMMENDATION'
+
+
+.. py:attribute:: WARNING
+   :value: 'WARNING'
+
+
+.. py:attribute:: ERROR
+   :value: 'ERROR'
+
+
+
+
+Method detail
+-------------
+
+.. py:method:: __str__() -> str
+
+   
+   Return the string representation of the status.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,32 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.add_hook_changes`
+==========================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.add_hook_changes(before_hook: str, after_hook: str) -> None
+
+   
+   Add earlier hook changes to updated file with header.
+
+
+   :Parameters:
+
+       **before_hook: str**
+           Path to file before add-license-headers was run.
+
+       **after_hook: str**
+           Path to file after add-license-headers was run.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
