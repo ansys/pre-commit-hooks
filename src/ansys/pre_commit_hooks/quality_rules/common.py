@@ -37,6 +37,7 @@ __all__ = [
     "normalize_check_result",
     "PASSED",
     "readme_path",
+    "RECOMMENDATION",
     "RuleCheckResult",
     "RuleStatus",
     "WARNING",
@@ -46,9 +47,23 @@ RuleCheckResult: TypeAlias = bool | str
 
 
 class RuleStatus(str, Enum):
-    """Public status of a quality rule."""
+    """Public status of a quality rule.
+
+    Attributes
+    ----------
+    PASSED
+        The rule is satisfied.
+    RECOMMENDATION
+        An optional improvement is suggested. It never fails the report and is
+        excluded from the score.
+    WARNING
+        The rule found an issue that does not fail the report.
+    ERROR
+        The rule failed. Any error produces a non-zero exit code.
+    """
 
     PASSED = "PASSED"
+    RECOMMENDATION = "RECOMMENDATION"
     WARNING = "WARNING"
     ERROR = "ERROR"
 
@@ -59,6 +74,7 @@ class RuleStatus(str, Enum):
 
 
 PASSED: Final[RuleStatus] = RuleStatus.PASSED
+RECOMMENDATION: Final[RuleStatus] = RuleStatus.RECOMMENDATION
 WARNING: Final[RuleStatus] = RuleStatus.WARNING
 ERROR: Final[RuleStatus] = RuleStatus.ERROR
 
@@ -243,21 +259,26 @@ def normalize_check_result(raw_result: object, rule: _QualityRule) -> tuple[Rule
     Parameters
     ----------
     raw_result : object
-        Value returned by a rule check.
+        Value returned by a rule check. ``True`` is ``PASSED`` and ``False`` is
+        ``ERROR`` described by the first line of the rule docstring. A string
+        must start with ``"ERROR: "``, ``"RECOMMENDATION: "``, or
+        ``"WARNING: "``, which select the matching status.
     rule : _QualityRule
         Rule that produced ``raw_result``.
 
     Returns
     -------
     tuple[RuleStatus, str]
-        Public status and its display detail. Invalid return values are
-        converted to ``ERROR``.
+        Public status and its display detail with any prefix removed. Invalid
+        return values are converted to ``ERROR``.
     """
     if raw_result is True:
         return PASSED, ""
     if isinstance(raw_result, str):
         if raw_result.startswith("ERROR: "):
             return ERROR, raw_result.removeprefix("ERROR: ")
+        if raw_result.startswith("RECOMMENDATION: "):
+            return RECOMMENDATION, raw_result.removeprefix("RECOMMENDATION: ")
         if raw_result.startswith("WARNING: "):
             return WARNING, raw_result.removeprefix("WARNING: ")
         return ERROR, f"Invalid check result: {raw_result!r}"

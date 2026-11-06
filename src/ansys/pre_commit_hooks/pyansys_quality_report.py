@@ -47,6 +47,7 @@ from ansys.pre_commit_hooks.quality_rules import (
 from ansys.pre_commit_hooks.quality_rules.common import (
     ERROR,
     PASSED,
+    RECOMMENDATION,
     WARNING,
     RuleStatus,
     _first_doc_line,
@@ -63,6 +64,7 @@ _ANSI_BOLD: Final = "\033[1m"
 _STATUS_COLORS: Final[dict[RuleStatus, str]] = {
     PASSED: "\033[32m",
     WARNING: "\033[33m",
+    RECOMMENDATION: "\033[36m",
     ERROR: "\033[31m",
 }
 
@@ -85,9 +87,22 @@ class _RuleResult(TypedDict):
 
 
 class _StatusTally(TypedDict):
-    """Counts for each public quality-report status."""
+    """Counts for each public quality-report status.
+
+    Attributes
+    ----------
+    PASSED : int
+        Number of passed rules.
+    RECOMMENDATION : int
+        Number of rules that suggest an optional improvement.
+    WARNING : int
+        Number of rules that reported a warning.
+    ERROR : int
+        Number of rules that failed.
+    """
 
     PASSED: int
+    RECOMMENDATION: int
     WARNING: int
     ERROR: int
 
@@ -196,7 +211,8 @@ def _overall_status(quality_report: _QualityReport) -> RuleStatus:
     -------
     RuleStatus
         ``ERROR`` when errors are present, otherwise ``WARNING`` when warnings
-        are present, and ``PASSED`` otherwise.
+        are present, and ``PASSED`` otherwise. Recommendations do not change
+        the overall status.
     """
     status_tally = quality_report["tally"]
     if status_tally[ERROR]:
@@ -310,7 +326,9 @@ def _run_checks(
     Returns
     -------
     _QualityReport
-        Rule results, status counts, and the resulting score.
+        Rule results, status counts, and the resulting score. The score is the
+        percentage of passed rules among passed and failed rules; recommendations
+        and warnings are excluded.
     """
     registered_rules = repo_review_checks(_families_to_run(selected_families))
     normalized_selected_ids = {rule_id.upper() for rule_id in selected_rule_ids or set()}
@@ -330,6 +348,9 @@ def _run_checks(
 
     passed_count = sum(rule_result["status"] == PASSED for rule_result in rule_results)
     warning_count = sum(rule_result["status"] == WARNING for rule_result in rule_results)
+    recommendation_count = sum(
+        rule_result["status"] == RECOMMENDATION for rule_result in rule_results
+    )
     error_count = sum(rule_result["status"] == ERROR for rule_result in rule_results)
     scored_rule_count = passed_count + error_count
     return {
@@ -337,6 +358,7 @@ def _run_checks(
         "tally": {
             PASSED: passed_count,
             WARNING: warning_count,
+            RECOMMENDATION: recommendation_count,
             ERROR: error_count,
         },
         "score": (round(passed_count / scored_rule_count * 100) if scored_rule_count else 0),
@@ -407,7 +429,9 @@ def _print_report(
     status_tally = quality_report["tally"]
     autoflush_print()
     autoflush_print(_styled("Status summary", _ANSI_BOLD, colors_enabled=colors_enabled))
-    for status in (PASSED, WARNING, ERROR):
+    for status in (PASSED, RECOMMENDATION, WARNING, ERROR):
+        if status is RECOMMENDATION and not status_tally[status]:
+            continue
         autoflush_print(
             f"  {_status_text(status, colors_enabled=colors_enabled)} {status_tally[status]:>3}"
         )
@@ -427,7 +451,7 @@ def _print_report(
         result_detail = rule_result["detail"]
         display_headline = (
             result_detail
-            if rule_result["status"] in {WARNING, ERROR} and result_detail
+            if rule_result["status"] in {RECOMMENDATION, WARNING, ERROR} and result_detail
             else rule_result["label"]
         )
         autoflush_print(
@@ -436,7 +460,7 @@ def _print_report(
         )
         if (
             result_detail
-            and rule_result["status"] not in {WARNING, ERROR}
+            and rule_result["status"] not in {RECOMMENDATION, WARNING, ERROR}
             and result_detail != display_headline
         ):
             autoflush_print(f"  {result_detail}")
@@ -530,7 +554,7 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
 @click.option(
     "--family",
     multiple=True,
-    help="Select rule family (readme, project_metadata, cicd).",
+    help="Select rule family (readme, project_metadata, cicd, pre_commit).",
 )
 @click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")
 @click.option("--show-all", is_flag=True, help="Include passing checks.")

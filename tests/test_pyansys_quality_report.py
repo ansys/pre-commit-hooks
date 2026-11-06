@@ -50,9 +50,9 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 
 
 def test_registry_contains_every_rule_family():
-    """The registry exposes the README, project metadata, and CI/CD rule families."""
+    """The registry exposes all four quality rule families."""
     assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
-    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM", "CI"}
+    assert {rule_id[:2] for rule_id in repo_review_checks()} == {"RM", "PM", "CI", "PC"}
 
 
 @pytest.mark.parametrize(
@@ -203,7 +203,7 @@ def test_missing_readme_is_reported_by_every_rule(tmp_path, capsys):
         "RM006": "ERROR",
         "RM007": "ERROR",
     }
-    assert review["tally"] == {"PASSED": 0, "WARNING": 3, "ERROR": 5}
+    assert review["tally"] == {"PASSED": 0, "RECOMMENDATION": 0, "WARNING": 3, "ERROR": 5}
     report._print_report(review)
     output = capsys.readouterr().out
     assert "PyPI badge image not found because no README file exists." in output
@@ -218,10 +218,11 @@ def test_report_exposes_only_supported_statuses(tmp_path):
 
     assert {item["status"] for item in review["results"]} <= {
         "PASSED",
+        "RECOMMENDATION",
         "WARNING",
         "ERROR",
     }
-    assert set(review["tally"]) == {"PASSED", "WARNING", "ERROR"}
+    assert set(review["tally"]) == {"PASSED", "RECOMMENDATION", "WARNING", "ERROR"}
 
 
 @pytest.mark.parametrize(
@@ -229,6 +230,7 @@ def test_report_exposes_only_supported_statuses(tmp_path):
     [
         (True, "PASSED"),
         (False, "ERROR"),
+        ("RECOMMENDATION: consider this", "RECOMMENDATION"),
         ("WARNING: needs attention", "WARNING"),
         ("ERROR: invalid", "ERROR"),
         ("unsupported", "ERROR"),
