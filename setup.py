@@ -39,18 +39,20 @@ setup(
     url="https://github.com/ansys/pre-commit-hooks",
     python_requires=">=3.10,<4",
     install_requires=[
-        "GitPython==3.1.59",
-        "importlib-metadata==9.0.0",
+        "click==8.5.0",
+        "GitPython==3.2.1",
+        "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
+        "PyYAML==6.0.3",
         "reuse==6.2.0",
         "requests==2.34.2",
-        "semver==3.0.4",
+        "semver==3.1.0",
         "toml==0.10.2",
     ],
     extras_require={
         "doc": [
             "ansys-sphinx-theme[autoapi]==1.9.0",
-            "numpydoc==1.10.0",
+            "numpydoc==1.11.0",
             "sphinx==8.2.3",
             "sphinx-autodoc-typehints==3.1.0",
             "sphinx-copybutton==0.5.2",
@@ -75,6 +77,7 @@ setup(
             "add-license-headers=ansys.pre_commit_hooks.add_license_headers:main",
             "ghaction-pin=ansys.pre_commit_hooks.ghaction_pin:main",
             "tech-review=ansys.pre_commit_hooks.tech_review:main",
+            "pyansys-quality-report=ansys.pre_commit_hooks.pyansys_quality_report:main",
         ],
     },
 )

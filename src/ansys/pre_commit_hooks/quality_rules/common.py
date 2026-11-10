@@ -1,0 +1,288 @@
+# Copyright (C) 2023 - 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"""Shared helpers for quality check rules."""
+
+from __future__ import annotations
+
+from enum import Enum
+from pathlib import Path
+from typing import ClassVar, Final, Protocol, TypeAlias
+
+__all__ = [
+    "_first_doc_line",
+    "all_workflows_content",
+    "ERROR",
+    "file_content",
+    "file_exists",
+    "normalize_check_result",
+    "PASSED",
+    "readme_path",
+    "RECOMMENDATION",
+    "RuleCheckResult",
+    "RuleStatus",
+    "WARNING",
+]
+
+RuleCheckResult: TypeAlias = bool | str
+
+
+class RuleStatus(str, Enum):
+    """Public status of a quality rule.
+
+    Attributes
+    ----------
+    PASSED
+        The rule is satisfied.
+    RECOMMENDATION
+        An optional improvement is suggested. It never fails the report and is
+        excluded from the score.
+    WARNING
+        The rule found an issue that does not fail the report.
+    ERROR
+        The rule failed. Any error produces a non-zero exit code.
+    """
+
+    PASSED = "PASSED"
+    RECOMMENDATION = "RECOMMENDATION"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+    # Python 3.10 has no ``StrEnum``; keep ``str()`` and formatting returning the value.
+    def __str__(self) -> str:
+        """Return the string representation of the status."""
+        return self.value
+
+
+PASSED: Final[RuleStatus] = RuleStatus.PASSED
+RECOMMENDATION: Final[RuleStatus] = RuleStatus.RECOMMENDATION
+WARNING: Final[RuleStatus] = RuleStatus.WARNING
+ERROR: Final[RuleStatus] = RuleStatus.ERROR
+
+
+class _QualityRule(Protocol):
+    """Interface implemented by every quality-report rule."""
+
+    family: ClassVar[str]
+
+    def check(self, repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Evaluate the rule for a repository.
+
+        Parameters
+        ----------
+        repository_root : pathlib.Path
+            Repository root directory.
+        readme_file : str or None
+            Detected README path, or ``None`` when no supported README exists.
+
+        Returns
+        -------
+        bool or str
+            Raw rule result consumed by ``normalize_check_result``.
+        """
+        ...
+
+
+def _repository_file(repository_root: Path, relative_path: str) -> Path | None:
+    """Resolve a file path that remains within a repository.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains the file.
+    relative_path : str
+        File path relative to ``repository_root``.
+
+    Returns
+    -------
+    pathlib.Path or None
+        Resolved file path, or ``None`` if the path escapes the repository or
+        cannot be resolved.
+    """
+    try:
+        resolved_repository_root = repository_root.resolve()
+        resolved_file = resolved_repository_root.joinpath(relative_path).resolve()
+        resolved_file.relative_to(resolved_repository_root)
+    except (OSError, RuntimeError, ValueError):
+        return None
+    return resolved_file
+
+
+def file_exists(repository_root: Path, relative_path: str) -> bool:
+    """Return whether a repository file exists.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains the file.
+    relative_path : str
+        File path relative to ``repository_root``.
+
+    Returns
+    -------
+    bool
+        ``True`` when the path resolves to a regular file within the
+        repository, otherwise ``False``.
+    """
+    resolved_file = _repository_file(repository_root, relative_path)
+    if resolved_file is None:
+        return False
+    try:
+        return resolved_file.is_file()
+    except OSError:
+        return False
+
+
+def file_content(repository_root: Path, relative_path: str) -> str | None:
+    """Read a repository file (as UTF-8) without allowing path traversal.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains the file.
+    relative_path : str
+        File path relative to ``repository_root``.
+
+    Returns
+    -------
+    str or None
+        File content, or ``None`` when the path is unsafe or the file cannot
+        be read as UTF-8.
+    """
+    resolved_file = _repository_file(repository_root, relative_path)
+    if resolved_file is None:
+        return None
+    try:
+        return resolved_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeError, ValueError):
+        return None
+
+
+def all_workflows_content(repository_root: Path) -> str | None:
+    """Return the merged text of the GitHub Actions workflow files.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains ``.github/workflows``.
+
+    Returns
+    -------
+    str or None
+        Contents of every readable ``.yml`` and ``.yaml`` file under
+        ``.github/workflows``, joined by newlines, or ``None`` when no such
+        content exists.
+    """
+    workflows_directory = _repository_file(repository_root, ".github/workflows")
+    if workflows_directory is None:
+        return None
+    try:
+        workflow_files = sorted(
+            path
+            for path in workflows_directory.iterdir()
+            if path.suffix in {".yml", ".yaml"} and path.is_file()
+        )
+    except OSError:
+        return None
+
+    contents = []
+    for workflow_file in workflow_files:
+        text = file_content(repository_root, f".github/workflows/{workflow_file.name}")
+        if text is not None:
+            contents.append(text)
+    return "\n".join(contents) or None
+
+
+def readme_path(repository_root: Path) -> str | None:
+    """Return the preferred README path for a repository.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+
+    Returns
+    -------
+    str or None
+        ``"README.rst"`` when present, otherwise ``"README.md"`` when
+        present. ``None`` is returned when neither file exists.
+    """
+    if file_exists(repository_root, "README.rst"):
+        return "README.rst"
+    if file_exists(repository_root, "README.md"):
+        return "README.md"
+    return None
+
+
+def _first_doc_line(rule: _QualityRule) -> str:
+    """Return the first non-empty line of a rule check docstring.
+
+    Parameters
+    ----------
+    rule : _QualityRule
+        Rule whose ``check`` method provides the docstring.
+
+    Returns
+    -------
+    str
+        First non-empty docstring line, or an empty string when the method has
+        no docstring content.
+    """
+    docstring_lines = [
+        line.strip() for line in (rule.check.__doc__ or "").splitlines() if line.strip()
+    ]
+    return docstring_lines[0] if docstring_lines else ""
+
+
+def normalize_check_result(raw_result: object, rule: _QualityRule) -> tuple[RuleStatus, str]:
+    """Normalize a rule return value into a public status and detail.
+
+    Parameters
+    ----------
+    raw_result : object
+        Value returned by a rule check. ``True`` is ``PASSED`` and ``False`` is
+        ``ERROR`` described by the first line of the rule docstring. A string
+        must start with ``"ERROR: "``, ``"RECOMMENDATION: "``, or
+        ``"WARNING: "``, which select the matching status.
+    rule : _QualityRule
+        Rule that produced ``raw_result``.
+
+    Returns
+    -------
+    tuple[RuleStatus, str]
+        Public status and its display detail with any prefix removed. Invalid
+        return values are converted to ``ERROR``.
+    """
+    if raw_result is True:
+        return PASSED, ""
+    if isinstance(raw_result, str):
+        if raw_result.startswith("ERROR: "):
+            return ERROR, raw_result.removeprefix("ERROR: ")
+        if raw_result.startswith("RECOMMENDATION: "):
+            return RECOMMENDATION, raw_result.removeprefix("RECOMMENDATION: ")
+        if raw_result.startswith("WARNING: "):
+            return WARNING, raw_result.removeprefix("WARNING: ")
+        return ERROR, f"Invalid check result: {raw_result!r}"
+    if raw_result is False:
+        rule_description = (type(rule).__doc__ or "").strip().splitlines()
+        return ERROR, rule_description[0].strip() if rule_description else ""
+    return ERROR, f"Invalid check result type: {type(raw_result).__name__}"

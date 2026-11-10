@@ -36,6 +36,14 @@ Learn how to set up the available pre-commit hooks:
         to a full commit SHA for supply-chain security.
 
         :bdg-primary-line:`Set-up`
+    .. grid-item-card:: PyAnsys quality report :octicon:`report`
+        :padding: 2 2 2 2
+        :link: pyansys-quality-report/index
+        :link-type: doc
+
+        README-focused rule checks with CLI filtering and JSON output.
+
+        :bdg-primary-line:`Set-up` :bdg-primary-line:`CLI`
 
 .. toctree::
    :hidden:
@@ -44,3 +52,4 @@ Learn how to set up the available pre-commit hooks:
    add-license-headers/index
    technical-review/index
    ghaction-pin/index
+   pyansys-quality-report/index
