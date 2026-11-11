@@ -36,28 +36,47 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DB{number:03d}" for number in range(1, 15))
+_RULE_IDS = tuple(f"DB{number:03d}" for number in range(1, 25))
 _SAMPLE = """\
 version: 2
+registries:
+  private-index:
+    type: python-index
+    url: https://pypi.example.com/simple
+    username: x-access-token
+    password: ${{secrets.PRIVATE_PYPI_TOKEN}}
 updates:
 - package-ecosystem: uv
   directory: /
-  schedule: {interval: daily}
+  target-branch: main
+  schedule: {interval: daily, day: monday, time: "06:00", timezone: UTC}
+  open-pull-requests-limit: 5
+  pull-request-branch-name: {separator: "/"}
+  rebase-strategy: auto
   cooldown:
     default-days: 7
     semver-major-days: 30
     semver-minor-days: 7
     semver-patch-days: 3
     exclude: [ansys-api-discovery, ansys-sphinx-theme]
+  registries: [private-index]
+  ignore:
+    - dependency-name: ansys-api-discovery
+      update-types: [version-update:semver-major]
   labels: [maintenance, dependencies]
   assignees: [pyansys-ci-bot]
   commit-message: {prefix: 'build(deps)'}
   groups:
+    all-deps: {patterns: ['*']}
     grpc-deps: {patterns: ['grpc*', protobuf]}
     docs-deps: {patterns: ['ansys-sphinx-theme*', 'sphinx*']}
 - package-ecosystem: github-actions
   directory: /
-  schedule: {interval: daily}
+  target-branch: main
+  schedule: {interval: daily, day: tuesday, time: "06:00", timezone: UTC}
+  open-pull-requests-limit: 5
+  pull-request-branch-name: {separator: "/"}
+  rebase-strategy: auto
   cooldown: {default-days: 7, exclude: ['ansys/actions/*']}
   labels: [maintenance]
   assignees: [pyansys-ci-bot]
@@ -66,7 +85,11 @@ updates:
     actions: {patterns: ['*']}
 - package-ecosystem: pre-commit
   directory: /
-  schedule: {interval: daily}
+  target-branch: main
+  schedule: {interval: daily, day: wednesday, time: "06:00", timezone: UTC}
+  open-pull-requests-limit: 5
+  pull-request-branch-name: {separator: "/"}
+  rebase-strategy: auto
   cooldown: {default-days: 7, exclude: ['ansys/pre-commit-hooks/*']}
   labels: [maintenance]
   assignees: [pyansys-ci-bot]
@@ -91,7 +114,7 @@ def test_registry_and_default_execution(tmp_path: Path) -> None:
     rules = repo_review_checks(["dependabot"])
 
     assert tuple(rules) == _RULE_IDS
-    assert len(DEPENDABOT_QUALITY_RULES) == 14
+    assert len(DEPENDABOT_QUALITY_RULES) == 24
     assert all(issubclass(rule, Dependabot) for rule in DEPENDABOT_QUALITY_RULES)
     assert all(rule.family == "dependabot" for rule in rules.values())
     results = report._run_checks(tmp_path)["results"]
@@ -138,7 +161,7 @@ def test_invalid_yaml_mapping_is_error(tmp_path: Path, content: str) -> None:
     _write(tmp_path, content)
     review = report._run_checks(tmp_path, selected_families={"dependabot"})
 
-    assert review["tally"] == {"PASSED": 1, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 13}
+    assert review["tally"] == {"PASSED": 1, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 23}
     assert all(result["detail"] for result in review["results"] if result["id"] != "DB001")
 
 
@@ -241,7 +264,13 @@ def test_sample_specific_metadata_is_not_required(tmp_path: Path) -> None:
         entry["groups"] = {"custom-name": {"patterns": ["custom-dependency*"]}}
     _write(tmp_path, yaml.safe_dump(configuration))
 
-    assert all(_check(tmp_path, rule_id) is True for rule_id in _RULE_IDS)
+    assert str(_check(tmp_path, "DB021")).startswith("WARNING:")
+    assert str(_check(tmp_path, "DB024")).startswith("WARNING:")
+    assert all(
+        _check(tmp_path, rule_id) is True
+        for rule_id in _RULE_IDS
+        if rule_id not in {"DB021", "DB024"}
+    )
 
 
 @pytest.mark.parametrize(
@@ -260,6 +289,92 @@ def test_commit_message_prefix_policy(tmp_path: Path, ecosystem: str, prefix: st
     _write(tmp_path, yaml.safe_dump(configuration))
 
     assert str(_check(tmp_path, "DB014")).startswith("WARNING:")
+
+
+def test_target_branch_is_required(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    del configuration["updates"][0]["target-branch"]
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB015")).startswith("WARNING:")
+
+
+def test_schedule_day_time_timezone_are_required(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    del configuration["updates"][0]["schedule"]["timezone"]
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB016")).startswith("WARNING:")
+
+
+def test_open_pull_requests_limit_policy(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    configuration["updates"][0]["open-pull-requests-limit"] = 99
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB017")).startswith("WARNING:")
+
+
+def test_branch_name_separator_is_recommendation(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    del configuration["updates"][0]["pull-request-branch-name"]
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB018")).startswith("RECOMMENDATION:")
+
+
+def test_rebase_strategy_is_required(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    configuration["updates"][0]["rebase-strategy"] = "invalid"
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB019")).startswith("WARNING:")
+
+
+def test_duplicate_ecosystem_directory_is_error(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    duplicate = deepcopy(configuration["updates"][0])
+    configuration["updates"].append(duplicate)
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB020")).startswith("ERROR:")
+
+
+def test_labels_and_owners_are_required(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    del configuration["updates"][0]["assignees"]
+    configuration["updates"][0]["labels"] = []
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB021")).startswith("WARNING:")
+
+
+def test_registry_security_and_mapping(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    configuration["registries"]["private-index"]["url"] = "http://pypi.example.com/simple"
+    _write(tmp_path, yaml.safe_dump(configuration))
+    assert str(_check(tmp_path, "DB022")).startswith("ERROR:")
+
+    configuration = yaml.safe_load(_SAMPLE)
+    configuration["updates"][0]["registries"] = ["missing-registry"]
+    _write(tmp_path, yaml.safe_dump(configuration))
+    assert str(_check(tmp_path, "DB022")).startswith("WARNING:")
+
+
+def test_ignore_policy_is_recommendation(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    del configuration["updates"][0]["ignore"]
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB023")).startswith("RECOMMENDATION:")
+
+
+def test_full_group_coverage_requires_star_pattern(tmp_path: Path) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    configuration["updates"][0]["groups"] = {"docs": {"patterns": ["sphinx*"]}}
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB024")).startswith("WARNING:")
 
 
 @pytest.mark.parametrize("ecosystem", ["uv", "github-actions"])
@@ -371,7 +486,7 @@ def test_cli_metadata_and_filtering(
     monkeypatch.chdir(tmp_path)
     assert report.main(["--json", "--family", "dependabot", "--ignore", "DB007"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 13, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 23, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
     assert report.main(["--json", "--check", "DB003"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [item["id"] for item in payload["results"]] == ["DB003"]
@@ -394,6 +509,6 @@ updates:
 
     assert report.main(["--json", "--family", "dependabot"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 7, "RECOMMENDATION": 0, "WARNING": 7, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 9, "RECOMMENDATION": 2, "WARNING": 13, "ERROR": 0}
     _write(tmp_path, "version: 2\nupdates: []\n")
     assert report.main(["--json", "--family", "dependabot"]) == 1

@@ -54,6 +54,16 @@ __all__ = [
     "DB012",
     "DB013",
     "DB014",
+    "DB015",
+    "DB016",
+    "DB017",
+    "DB018",
+    "DB019",
+    "DB020",
+    "DB021",
+    "DB022",
+    "DB023",
+    "DB024",
     "Dependabot",
 ]
 
@@ -71,6 +81,8 @@ _COMMIT_PREFIX_POLICY: Final[dict[str, str]] = {
     "github-actions": "build(actions)",
     "pre-commit": "build(pre-commit)",
 }
+_MAX_OPEN_PULL_REQUESTS: Final[int] = 10
+_REBASE_STRATEGIES: Final[frozenset[str]] = frozenset({"auto", "disabled"})
 
 
 def _configuration_path(repository_root: Path) -> str | None:
@@ -188,7 +200,240 @@ def _check_commit_message_prefixes(repository_root: Path) -> RuleCheckResult:
             invalid.append(f"{ecosystem} (expected: {expected})")
     if invalid:
         details = ", ".join(invalid)
-        return f"WARNING: Dependabot commit-message prefix missing or invalid for: {details}."  # noqa: 501
+        return f"WARNING: Dependabot commit-message prefix missing or invalid for: {details}."
+    return True
+
+
+def _check_target_branch(repository_root: Path) -> RuleCheckResult:
+    """Validate that every update entry declares a target branch."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid = [
+        str(entry["package-ecosystem"])
+        for entry in updates
+        if not isinstance(entry.get("target-branch"), str) or not entry["target-branch"].strip()
+    ]
+    if invalid:
+        return f"WARNING: target-branch missing or invalid for: {', '.join(invalid)}."
+    return True
+
+
+def _check_schedule_details(repository_root: Path) -> RuleCheckResult:
+    """Validate day, time, and timezone on every update schedule."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid: list[str] = []
+    for entry in updates:
+        schedule = entry.get("schedule")
+        if not isinstance(schedule, dict):
+            invalid.append(str(entry["package-ecosystem"]))
+            continue
+        if not all(
+            isinstance(schedule.get(field), str) and schedule[field].strip()
+            for field in ("day", "time", "timezone")
+        ):
+            invalid.append(str(entry["package-ecosystem"]))
+    if invalid:
+        return (
+            "WARNING: schedule.day, schedule.time, or schedule.timezone missing or invalid for: "
+            f"{', '.join(invalid)}."
+        )
+    return True
+
+
+def _check_open_pull_requests_limit(repository_root: Path) -> RuleCheckResult:
+    """Validate open-pull-requests-limit presence and threshold."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid = [
+        str(entry["package-ecosystem"])
+        for entry in updates
+        if not isinstance(limit := entry.get("open-pull-requests-limit"), int)
+        or limit < 1
+        or limit > _MAX_OPEN_PULL_REQUESTS
+    ]
+    if invalid:
+        return (
+            "WARNING: open-pull-requests-limit missing or invalid for "
+            f"(must be 1-{_MAX_OPEN_PULL_REQUESTS}): {', '.join(invalid)}."
+        )
+    return True
+
+
+def _check_branch_name_separator(repository_root: Path) -> RuleCheckResult:
+    """Validate explicit pull-request branch-name separators."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid: list[str] = []
+    for entry in updates:
+        pull_request = entry.get("pull-request-branch-name")
+        separator = pull_request.get("separator") if isinstance(pull_request, dict) else None
+        if not isinstance(separator, str) or not separator.strip():
+            invalid.append(str(entry["package-ecosystem"]))
+    if invalid:
+        details = ", ".join(invalid)
+        return f"RECOMMENDATION: pull-request-branch-name.separator missing for: {details}."
+    return True
+
+
+def _check_rebase_strategy(repository_root: Path) -> RuleCheckResult:
+    """Validate explicit and supported rebase strategies."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid = [
+        str(entry["package-ecosystem"])
+        for entry in updates
+        if not isinstance(strategy := entry.get("rebase-strategy"), str)
+        or strategy not in _REBASE_STRATEGIES
+    ]
+    if invalid:
+        strategies = ", ".join(sorted(_REBASE_STRATEGIES))
+        return (
+            "WARNING: rebase-strategy missing or invalid for "
+            f"(supported: {strategies}): {', '.join(invalid)}."
+        )
+    return True
+
+
+def _check_duplicate_ecosystem_directories(repository_root: Path) -> RuleCheckResult:
+    """Detect duplicate package-ecosystem and directory combinations."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    seen: set[tuple[str, str]] = set()
+    duplicates: set[tuple[str, str]] = set()
+    for entry in updates:
+        ecosystem = str(entry["package-ecosystem"])
+        if isinstance(directory := entry.get("directory"), str):
+            paths = [directory]
+        elif isinstance(directories := entry.get("directories"), list):
+            paths = [path for path in directories if isinstance(path, str)]
+        else:
+            paths = []
+        for path in paths:
+            key = (ecosystem, path)
+            if key in seen:
+                duplicates.add(key)
+            seen.add(key)
+    if duplicates:
+        details = ", ".join(f"{ecosystem}:{path}" for ecosystem, path in sorted(duplicates))
+        return f"ERROR: Duplicate package-ecosystem and directory combinations found: {details}."
+    return True
+
+
+def _check_labels_and_owners(repository_root: Path) -> RuleCheckResult:
+    """Validate labels and ownership metadata for each entry."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid: list[str] = []
+    for entry in updates:
+        labels = entry.get("labels")
+        labels_ok = (
+            isinstance(labels, list)
+            and labels
+            and all(isinstance(label, str) and label.strip() for label in labels)
+        )
+        assignees = entry.get("assignees")
+        reviewers = entry.get("reviewers")
+        owners_ok = any(
+            isinstance(group, list)
+            and group
+            and all(isinstance(owner, str) and owner.strip() for owner in group)
+            for group in (assignees, reviewers)
+        )
+        if not labels_ok or not owners_ok:
+            invalid.append(str(entry["package-ecosystem"]))
+    if invalid:
+        details = ", ".join(invalid)
+        return f"WARNING: labels or owners (assignees/reviewers) missing or invalid for: {details}."
+    return True
+
+
+def _check_registries_security(repository_root: Path) -> RuleCheckResult:
+    """Validate registry mappings and reject insecure registry URLs."""
+    configuration = _load_configuration(repository_root)
+    if isinstance(configuration, str):
+        return configuration
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    registries = configuration.get("registries")
+    registry_map = registries if isinstance(registries, dict) else {}
+    insecure: list[str] = []
+    for name, registry in registry_map.items():
+        if not isinstance(name, str) or not isinstance(registry, dict):
+            continue
+        url = registry.get("url")
+        if isinstance(url, str) and url.startswith("http://"):
+            insecure.append(name)
+    if insecure:
+        return f"ERROR: Insecure registry URL(s) found (http://): {', '.join(sorted(insecure))}."
+    missing: set[str] = set()
+    for entry in updates:
+        configured = entry.get("registries")
+        if not isinstance(configured, list):
+            continue
+        for registry_name in configured:
+            if not isinstance(registry_name, str) or registry_name == "*":
+                continue
+            if registry_name not in registry_map:
+                missing.add(registry_name)
+    if missing:
+        return (
+            "WARNING: Dependabot update entries reference undefined registries: "
+            f"{', '.join(sorted(missing))}."
+        )
+    return True
+
+
+def _check_ignore_policy(repository_root: Path) -> RuleCheckResult:
+    """Recommend defining at least one explicit ignore policy."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    for entry in updates:
+        ignore = entry.get("ignore")
+        if not isinstance(ignore, list):
+            continue
+        for rule in ignore:
+            if not isinstance(rule, dict):
+                continue
+            dependency_name = rule.get("dependency-name")
+            if isinstance(dependency_name, str) and dependency_name.strip():
+                return True
+    return "RECOMMENDATION: Add at least one explicit ignore policy for noisy or major updates."
+
+
+def _check_full_group_coverage(repository_root: Path) -> RuleCheckResult:
+    """Validate groups that fully cover dependencies using '*' patterns."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid: list[str] = []
+    for entry in updates:
+        groups = entry.get("groups")
+        if not isinstance(groups, dict):
+            invalid.append(str(entry["package-ecosystem"]))
+            continue
+        covers_all = False
+        for group in groups.values():
+            if not isinstance(group, dict):
+                continue
+            patterns = group.get("patterns")
+            if isinstance(patterns, list) and any(pattern == "*" for pattern in patterns):
+                covers_all = True
+                break
+        if not covers_all:
+            invalid.append(str(entry["package-ecosystem"]))
+    if invalid:
+        details = ", ".join(invalid)
+        return f"WARNING: Full dependency group coverage ('*' pattern) missing for: {details}."
     return True
 
 
@@ -410,3 +655,93 @@ class DB014(Dependabot):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Warn when required ecosystem commit-message prefixes are missing or invalid."""
         return _check_commit_message_prefixes(repository_root)
+
+
+class DB015(Dependabot):
+    """Every update entry declares target-branch."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when target-branch is missing or invalid."""
+        return _check_target_branch(repository_root)
+
+
+class DB016(Dependabot):
+    """Every update entry schedule declares day, time, and timezone."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when schedule day/time/timezone are missing."""
+        return _check_schedule_details(repository_root)
+
+
+class DB017(Dependabot):
+    """Every update entry caps open pull requests."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when open-pull-requests-limit is missing or out of policy bounds."""
+        return _check_open_pull_requests_limit(repository_root)
+
+
+class DB018(Dependabot):
+    """Every update entry configures pull-request branch-name separators."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend setting pull-request-branch-name.separator."""
+        return _check_branch_name_separator(repository_root)
+
+
+class DB019(Dependabot):
+    """Every update entry sets a supported rebase strategy."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when rebase-strategy is missing or unsupported."""
+        return _check_rebase_strategy(repository_root)
+
+
+class DB020(Dependabot):
+    """No duplicate package-ecosystem and directory combinations exist."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Error when duplicate ecosystem+directory combinations are detected."""
+        return _check_duplicate_ecosystem_directories(repository_root)
+
+
+class DB021(Dependabot):
+    """Every update entry defines labels and at least one owner."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when labels or owners are missing."""
+        return _check_labels_and_owners(repository_root)
+
+
+class DB022(Dependabot):
+    """Referenced registries are defined and use secure URLs."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Error on insecure registry URLs and warn on missing registry mappings."""
+        return _check_registries_security(repository_root)
+
+
+class DB023(Dependabot):
+    """At least one ignore policy is configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend adding ignore policy coverage."""
+        return _check_ignore_policy(repository_root)
+
+
+class DB024(Dependabot):
+    """Every update entry has full dependency group coverage."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when no '*' group coverage is defined for an entry."""
+        return _check_full_group_coverage(repository_root)
