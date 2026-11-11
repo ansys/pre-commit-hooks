@@ -12,8 +12,29 @@ updates:
     labels:
       - "maintenance"
       - "dependencies"
+    commit-message:
+      prefix: "build(deps)"
     groups:
        python-deps:
+          patterns:
+            - "*"
+
+  - package-ecosystem: "uv"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 10
+      semver-patch-days: 7
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    commit-message:
+      prefix: "build(deps)"
+    groups:
+       uv-deps:
           patterns:
             - "*"
 
@@ -27,6 +48,8 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
+    commit-message:
+      prefix: "build(actions)"
     groups:
        actions:
           patterns:
@@ -43,7 +66,7 @@ updates:
     labels:
       - "maintenance"
     commit-message:
-      prefix: "chore"
+      prefix: "build(pre-commit)"
     groups:
       pre-commit-hooks:
         patterns:
