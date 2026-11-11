@@ -187,7 +187,8 @@ def _check_commit_message_prefixes(repository_root: Path) -> RuleCheckResult:
         if not isinstance(prefix, str) or prefix != expected:
             invalid.append(f"{ecosystem} (expected: {expected})")
     if invalid:
-        return f"WARNING: Dependabot commit-message prefix missing or invalid for: {', '.join(invalid)}."
+        details = ", ".join(invalid)
+        return f"WARNING: Dependabot commit-message prefix missing or invalid for: {details}."  # noqa: 501
     return True
 
 
