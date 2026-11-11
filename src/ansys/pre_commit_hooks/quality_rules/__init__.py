@@ -29,6 +29,7 @@ from ansys.pre_commit_hooks.quality_rules.common import _QualityRule
 from ansys.pre_commit_hooks.quality_rules.pre_commit import PreCommit
 from ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
 from ansys.pre_commit_hooks.quality_rules.readme import README
+from ansys.pre_commit_hooks.quality_rules.vale import Vale
 
 README_QUALITY_RULES: tuple[type[README], ...] = tuple(
     sorted(README.__subclasses__(), key=lambda rule_class: rule_class.__name__)
@@ -42,6 +43,9 @@ CICD_QUALITY_RULES: tuple[type[CICD], ...] = tuple(
 PRE_COMMIT_QUALITY_RULES: tuple[type[PreCommit], ...] = tuple(
     sorted(PreCommit.__subclasses__(), key=lambda rule_class: rule_class.__name__)
 )
+VALE_QUALITY_RULES: tuple[type[Vale], ...] = tuple(
+    sorted(Vale.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
 
 # Maps each rule family name to its rule classes.
 RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
@@ -49,6 +53,7 @@ RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
     ProjectMetadata.family: PROJECT_METADATA_QUALITY_RULES,
     CICD.family: CICD_QUALITY_RULES,
     PreCommit.family: PRE_COMMIT_QUALITY_RULES,
+    Vale.family: VALE_QUALITY_RULES,
 }
 # Families evaluated when no ``--family`` is requested.
 DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
@@ -73,6 +78,8 @@ __all__ = [
     "RULE_FAMILIES",
     "ProjectMetadata",
     "PreCommit",
+    "VALE_QUALITY_RULES",
+    "Vale",
     "repo_review_checks",
 ]
 __all__.extend(
