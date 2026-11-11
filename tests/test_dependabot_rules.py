@@ -36,7 +36,7 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DB{number:03d}" for number in range(1, 14))
+_RULE_IDS = tuple(f"DB{number:03d}" for number in range(1, 15))
 _SAMPLE = """\
 version: 2
 updates:
@@ -61,7 +61,7 @@ updates:
   cooldown: {default-days: 7, exclude: ['ansys/actions/*']}
   labels: [maintenance]
   assignees: [pyansys-ci-bot]
-  commit-message: {prefix: 'ci(actions)'}
+  commit-message: {prefix: 'build(actions)'}
   groups:
     actions: {patterns: ['*']}
 - package-ecosystem: pre-commit
@@ -70,7 +70,7 @@ updates:
   cooldown: {default-days: 7, exclude: ['ansys/pre-commit-hooks/*']}
   labels: [maintenance]
   assignees: [pyansys-ci-bot]
-  commit-message: {prefix: 'chore(pre-commit)'}
+  commit-message: {prefix: 'build(pre-commit)'}
   groups:
     pre-commit-hooks: {patterns: ['*']}
 """
@@ -91,7 +91,7 @@ def test_registry_and_default_execution(tmp_path: Path) -> None:
     rules = repo_review_checks(["dependabot"])
 
     assert tuple(rules) == _RULE_IDS
-    assert len(DEPENDABOT_QUALITY_RULES) == 13
+    assert len(DEPENDABOT_QUALITY_RULES) == 14
     assert all(issubclass(rule, Dependabot) for rule in DEPENDABOT_QUALITY_RULES)
     assert all(rule.family == "dependabot" for rule in rules.values())
     results = report._run_checks(tmp_path)["results"]
@@ -138,7 +138,7 @@ def test_invalid_yaml_mapping_is_error(tmp_path: Path, content: str) -> None:
     _write(tmp_path, content)
     review = report._run_checks(tmp_path, selected_families={"dependabot"})
 
-    assert review["tally"] == {"PASSED": 1, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 12}
+    assert review["tally"] == {"PASSED": 1, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 13}
     assert all(result["detail"] for result in review["results"] if result["id"] != "DB001")
 
 
@@ -235,13 +235,31 @@ def test_every_entry_requires_seven_day_cooldown(tmp_path: Path, cooldown: str) 
 def test_sample_specific_metadata_is_not_required(tmp_path: Path) -> None:
     configuration = yaml.safe_load(_SAMPLE)
     for entry in configuration["updates"]:
-        for key in ("labels", "assignees", "commit-message"):
+        for key in ("labels", "assignees"):
             del entry[key]
         entry["cooldown"] = {"default-days": 7}
         entry["groups"] = {"custom-name": {"patterns": ["custom-dependency*"]}}
     _write(tmp_path, yaml.safe_dump(configuration))
 
     assert all(_check(tmp_path, rule_id) is True for rule_id in _RULE_IDS)
+
+
+@pytest.mark.parametrize(
+    ("ecosystem", "prefix"),
+    [
+        ("uv", "chore"),
+        ("github-actions", "ci(actions)"),
+        ("pre-commit", "chore(pre-commit)"),
+    ],
+)
+def test_commit_message_prefix_policy(tmp_path: Path, ecosystem: str, prefix: str) -> None:
+    configuration = yaml.safe_load(_SAMPLE)
+    for entry in configuration["updates"]:
+        if entry["package-ecosystem"] == ecosystem:
+            entry["commit-message"]["prefix"] = prefix
+    _write(tmp_path, yaml.safe_dump(configuration))
+
+    assert str(_check(tmp_path, "DB014")).startswith("WARNING:")
 
 
 @pytest.mark.parametrize("ecosystem", ["uv", "github-actions"])
@@ -353,7 +371,7 @@ def test_cli_metadata_and_filtering(
     monkeypatch.chdir(tmp_path)
     assert report.main(["--json", "--family", "dependabot", "--ignore", "DB007"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 12, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 13, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
     assert report.main(["--json", "--check", "DB003"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [item["id"] for item in payload["results"]] == ["DB003"]
@@ -376,6 +394,6 @@ updates:
 
     assert report.main(["--json", "--family", "dependabot"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 7, "RECOMMENDATION": 0, "WARNING": 6, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 7, "RECOMMENDATION": 0, "WARNING": 7, "ERROR": 0}
     _write(tmp_path, "version: 2\nupdates: []\n")
     assert report.main(["--json", "--family", "dependabot"]) == 1

@@ -53,6 +53,7 @@ __all__ = [
     "DB011",
     "DB012",
     "DB013",
+    "DB014",
     "Dependabot",
 ]
 
@@ -64,6 +65,12 @@ _PYTHON_ECOSYSTEMS: Final[frozenset[str]] = frozenset({"pip", "uv"})
 _MIN_FREQUENT_ECOSYSTEMS: Final[int] = 2
 _COOLDOWN_DAYS: Final[int] = 7
 _SCHEDULE_INTERVALS: Final[frozenset[str]] = frozenset({"daily", "weekly", "monthly"})
+_COMMIT_PREFIX_POLICY: Final[dict[str, str]] = {
+    "pip": "build(deps)",
+    "uv": "build(deps)",
+    "github-actions": "build(actions)",
+    "pre-commit": "build(pre-commit)",
+}
 
 
 def _configuration_path(repository_root: Path) -> str | None:
@@ -161,6 +168,26 @@ def _check_grouping(repository_root: Path, ecosystems: frozenset[str]) -> RuleCh
     ]
     if ungrouped:
         return f"WARNING: Dependency groups missing or invalid for: {', '.join(ungrouped)}."
+    return True
+
+
+def _check_commit_message_prefixes(repository_root: Path) -> RuleCheckResult:
+    """Validate ecosystem-specific Dependabot commit-message prefixes."""
+    updates = _load_updates(repository_root)
+    if isinstance(updates, str):
+        return updates
+    invalid: list[str] = []
+    for entry in updates:
+        ecosystem = entry.get("package-ecosystem")
+        if not isinstance(ecosystem, str) or ecosystem not in _COMMIT_PREFIX_POLICY:
+            continue
+        commit_message = entry.get("commit-message")
+        prefix = commit_message.get("prefix") if isinstance(commit_message, dict) else None
+        expected = _COMMIT_PREFIX_POLICY[ecosystem]
+        if not isinstance(prefix, str) or prefix != expected:
+            invalid.append(f"{ecosystem} (expected: {expected})")
+    if invalid:
+        return f"WARNING: Dependabot commit-message prefix missing or invalid for: {', '.join(invalid)}."
     return True
 
 
@@ -373,3 +400,12 @@ class DB013(Dependabot):
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Warn when pre-commit ecosystem updates are absent."""
         return _check_ecosystem(repository_root, frozenset({"pre-commit"}))
+
+
+class DB014(Dependabot):
+    """Ecosystem-specific Dependabot commit-message prefixes are configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when required ecosystem commit-message prefixes are missing or invalid."""
+        return _check_commit_message_prefixes(repository_root)
