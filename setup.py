@@ -44,7 +44,7 @@ setup(
         "importlib-metadata==9.0.1",
         "Jinja2==3.1.6",
         "PyYAML==6.0.3",
-        "reuse==6.2.0",
+        "reuse==6.3.0",
         "requests==2.34.2",
         "semver==3.1.0",
         "toml==0.10.2",
@@ -59,7 +59,7 @@ setup(
             "sphinx_design==0.6.1",
         ],
         "tests": [
-            "pytest==9.1.1",
+            "pytest==9.2.0",
             "pytest-cov==7.1.0",
         ],
     },
