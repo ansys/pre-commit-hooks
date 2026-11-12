@@ -488,7 +488,8 @@ class LB010(Labels):
         if not undescribed:
             return True
         return (
-            f"RECOMMENDATION: Describe these labels in {_LABELS_CONFIG}: {', '.join(undescribed)}."
+            f"RECOMMENDATION: Add descriptions in {_LABELS_CONFIG} so contributors know what "
+            f"each label means: {', '.join(undescribed)}."
         )
 
 
@@ -525,7 +526,7 @@ class LB012(Labels):
             repository_root,
             _RECOMMENDED_LABELS,
             "RECOMMENDATION",
-            "These labels help route and filter CI, testing, maintenance, and release work.",
+            "These labels categorize CI, test, maintenance, and release work.",
         )
 
 
@@ -553,8 +554,7 @@ class LB013(Labels):
             repository_root,
             ("style:skip",),
             "RECOMMENDATION",
-            "Use it to mark pull requests that intentionally skip style checks, so reviewers "
-            "can distinguish approved exceptions from missed checks.",
+            "It marks intentional style-check skips for reviewers.",
         )
 
 
@@ -564,7 +564,12 @@ class LB014(Labels):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the label for newcomer issues is declared."""
-        return _check_labels(repository_root, ("good first issue",), "RECOMMENDATION")
+        return _check_labels(
+            repository_root,
+            ("good first issue",),
+            "RECOMMENDATION",
+            "This helps newcomers find approachable tasks.",
+        )
 
 
 class LB015(Labels):
@@ -627,7 +632,4 @@ class LB017(Labels):
         legacy = [path for path in _LEGACY_CONFIGS if file_exists(repository_root, path)]
         if not legacy:
             return True
-        return (
-            f"RECOMMENDATION: Remove {', '.join(legacy)}; the labeler workflows read "
-            f"{_LABELER_CONFIG} and {_LABELS_CONFIG}."
-        )
+        return f"RECOMMENDATION: Remove {', '.join(legacy)}; use the matching .yml file instead."

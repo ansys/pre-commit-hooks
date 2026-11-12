@@ -297,7 +297,11 @@ def test_label_colors_must_be_hexadecimal(tmp_path: Path, color: str) -> None:
 def test_label_descriptions_are_recommended(tmp_path: Path, description: str) -> None:
     _write_labels(tmp_path, f"{_VALID_LABELS}- name: extra\n  color: d42a34\n  {description}")
 
-    _assert_status(_check(tmp_path, "LB010"), "RECOMMENDATION", "extra")
+    _assert_status(
+        _check(tmp_path, "LB010"),
+        "RECOMMENDATION",
+        "contributors know what each label means: extra",
+    )
 
 
 @pytest.mark.parametrize(
@@ -308,23 +312,30 @@ def test_label_descriptions_are_recommended(tmp_path: Path, description: str) ->
             "LB012",
             ("ci",),
             "RECOMMENDATION",
-            "ci label to .github/labels.yml. These labels help route and filter CI, testing, "
-            "maintenance, and release work.",
+            "ci label to .github/labels.yml. These labels categorize CI, test, maintenance, "
+            "and release work.",
         ),
         (
             "LB012",
             ("tests", "release"),
             "RECOMMENDATION",
-            "tests, release labels to .github/labels.yml. These labels help route and filter",
+            "tests, release labels to .github/labels.yml. These labels categorize CI, test, "
+            "maintenance, and release work.",
         ),
         (
             "LB013",
             ("style:skip",),
             "RECOMMENDATION",
-            "style:skip label to .github/labels.yml. Use it to mark pull requests that "
-            "intentionally skip style checks",
+            "style:skip label to .github/labels.yml. It marks intentional style-check skips "
+            "for reviewers.",
         ),
-        ("LB014", ("good first issue",), "RECOMMENDATION", "good first issue label"),
+        (
+            "LB014",
+            ("good first issue",),
+            "RECOMMENDATION",
+            "good first issue label to .github/labels.yml. This helps newcomers find "
+            "approachable tasks.",
+        ),
     ],
 )
 def test_recommended_labels_are_checked(
@@ -392,7 +403,9 @@ def test_legacy_label_files_are_reported(tmp_path: Path, legacy: str) -> None:
     _write_repository(tmp_path)
     _write(tmp_path, legacy, "[]\n")
 
-    _assert_status(_check(tmp_path, "LB017"), "RECOMMENDATION", legacy)
+    _assert_status(
+        _check(tmp_path, "LB017"), "RECOMMENDATION", legacy, "use the matching .yml file instead"
+    )
 
 
 def test_cli_lists_label_metadata(capsys: pytest.CaptureFixture[str]) -> None:
