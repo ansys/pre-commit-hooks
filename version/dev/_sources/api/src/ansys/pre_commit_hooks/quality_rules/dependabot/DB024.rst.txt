@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DB024`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.dependabot.DB024
+
+   Bases: :py:obj:`Dependabot`
+
+
+   
+   Every update entry has full dependency group coverage.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DB024
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Warn when no '*' group coverage is defined for an entry.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.dependabot import DB024
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Warn when no '*' group coverage is defined for an entry.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

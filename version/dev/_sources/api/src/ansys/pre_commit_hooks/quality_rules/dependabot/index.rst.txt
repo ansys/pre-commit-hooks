@@ -1,0 +1,253 @@
+
+
+
+
+
+
+The ``dependabot.py`` module
+============================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.dependabot
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: dependabot
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.Dependabot`
+            - Dependabot rule family with independent, typed repository checks.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB001`
+            - A .github/dependabot.yml or .github/dependabot.yaml file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB002`
+            - Dependabot uses schema version 2.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB003`
+            - Pip or uv dependency updates are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB004`
+            - GitHub Actions dependency updates are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB005`
+            - At least two distinct ecosystems use daily or weekly update schedules.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB006`
+            - Every update entry configures a seven-day default cooldown.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB007`
+            - Every pip or uv entry defines dependency groups.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB008`
+            - Every GitHub Actions entry defines dependency groups.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB009`
+            - The Dependabot configuration is a valid YAML mapping.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB010`
+            - Dependabot has a non-empty list of update entries with package ecosystems.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB011`
+            - Every update entry specifies repository-root-relative directories.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB012`
+            - Every update entry has a supported schedule interval.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB013`
+            - Pre-commit dependency updates are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB014`
+            - Ecosystem-specific Dependabot commit-message prefixes are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB015`
+            - Every update entry declares target-branch.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB016`
+            - Every update entry schedule declares day, time, and timezone.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB017`
+            - Every update entry caps open pull requests.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB018`
+            - Every update entry configures pull-request branch-name separators.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB019`
+            - Every update entry sets a supported rebase strategy.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB020`
+            - No duplicate package-ecosystem and directory combinations exist.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB021`
+            - Every update entry defines labels and at least one owner.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB022`
+            - Referenced registries are defined and use secure URLs.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB023`
+            - At least one ignore policy is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.dependabot.DB024`
+            - Every update entry has full dependency group coverage.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> Dependabot</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/Dependabot>
+    <span class="nf nf-cod-symbol_class"></span> DB001</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB001>
+    <span class="nf nf-cod-symbol_class"></span> DB002</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB002>
+    <span class="nf nf-cod-symbol_class"></span> DB003</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB003>
+    <span class="nf nf-cod-symbol_class"></span> DB004</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB004>
+    <span class="nf nf-cod-symbol_class"></span> DB005</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB005>
+    <span class="nf nf-cod-symbol_class"></span> DB006</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB006>
+    <span class="nf nf-cod-symbol_class"></span> DB007</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB007>
+    <span class="nf nf-cod-symbol_class"></span> DB008</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB008>
+    <span class="nf nf-cod-symbol_class"></span> DB009</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB009>
+    <span class="nf nf-cod-symbol_class"></span> DB010</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB010>
+    <span class="nf nf-cod-symbol_class"></span> DB011</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB011>
+    <span class="nf nf-cod-symbol_class"></span> DB012</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB012>
+    <span class="nf nf-cod-symbol_class"></span> DB013</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB013>
+    <span class="nf nf-cod-symbol_class"></span> DB014</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB014>
+    <span class="nf nf-cod-symbol_class"></span> DB015</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB015>
+    <span class="nf nf-cod-symbol_class"></span> DB016</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB016>
+    <span class="nf nf-cod-symbol_class"></span> DB017</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB017>
+    <span class="nf nf-cod-symbol_class"></span> DB018</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB018>
+    <span class="nf nf-cod-symbol_class"></span> DB019</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB019>
+    <span class="nf nf-cod-symbol_class"></span> DB020</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB020>
+    <span class="nf nf-cod-symbol_class"></span> DB021</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB021>
+    <span class="nf nf-cod-symbol_class"></span> DB022</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB022>
+    <span class="nf nf-cod-symbol_class"></span> DB023</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB023>
+    <span class="nf nf-cod-symbol_class"></span> DB024</api/src/ansys/pre_commit_hooks/quality_rules/dependabot/DB024>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Dependabot configuration checks.
+
+Validate configuration structure and repository update policies without requiring
+specific group names, exclusions, labels, or assignees. Pip and uv are accepted
+equally, as are daily and weekly schedules. Policy deviations produce warnings;
+missing, unreadable, or structurally invalid configuration produces errors.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`CI002`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.cicd.CI002
+
+   Bases: :py:obj:`CICD`
+
+
+   
+   A labeler action is used in the workflows.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: CI002
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether a labeler action is used.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.cicd import CI002
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether a labeler action is used.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

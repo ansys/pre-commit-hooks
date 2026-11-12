@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`VL014`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.VL014
+
+   Bases: :py:obj:`Vale`
+
+
+   
+   Vale disables the Vale.Terms rule.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: VL014
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that a glob section sets ``Vale.Terms = NO``.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import VL014
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that a glob section sets ``Vale.Terms = NO``.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DB018`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.dependabot.DB018
+
+   Bases: :py:obj:`Dependabot`
+
+
+   
+   Every update entry configures pull-request branch-name separators.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DB018
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Recommend setting pull-request-branch-name.separator.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.dependabot import DB018
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Recommend setting pull-request-branch-name.separator.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

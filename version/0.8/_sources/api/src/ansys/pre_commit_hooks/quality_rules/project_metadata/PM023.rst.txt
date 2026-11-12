@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PM023`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM023
+
+   Bases: :py:obj:`ProjectMetadata`
+
+
+   
+   Python version classifiers are present and compatible with requires-python.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PM023
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that every declared Python minor series has a supported patch release.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.project_metadata import PM023
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that every declared Python minor series has a supported patch release.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

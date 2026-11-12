@@ -1,0 +1,166 @@
+
+
+
+
+
+
+The ``pre_commit.py`` module
+============================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.pre_commit
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: pre_commit
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PreCommit`
+            - Pre-commit rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC001`
+            - The .pre-commit-config.yaml file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC002`
+            - Ruff-pre-commit is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC003`
+            - Zizmor is configured with --pedantic or --persona=pedantic.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC004`
+            - Codespell is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC005`
+            - Ansys/pre-commit-hooks is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC006`
+            - A pyright, mypy, or ty type-checking hook is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC007`
+            - Check-merge-conflict is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC008`
+            - Debug-statements is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC009`
+            - Check-yaml is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC010`
+            - Trailing-whitespace is configured.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> PreCommit</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PreCommit>
+    <span class="nf nf-cod-symbol_class"></span> PC001</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC001>
+    <span class="nf nf-cod-symbol_class"></span> PC002</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC002>
+    <span class="nf nf-cod-symbol_class"></span> PC003</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC003>
+    <span class="nf nf-cod-symbol_class"></span> PC004</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC004>
+    <span class="nf nf-cod-symbol_class"></span> PC005</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC005>
+    <span class="nf nf-cod-symbol_class"></span> PC006</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC006>
+    <span class="nf nf-cod-symbol_class"></span> PC007</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC007>
+    <span class="nf nf-cod-symbol_class"></span> PC008</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC008>
+    <span class="nf nf-cod-symbol_class"></span> PC009</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC009>
+    <span class="nf nf-cod-symbol_class"></span> PC010</api/src/ansys/pre_commit_hooks/quality_rules/pre_commit/PC010>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Pre-commit configuration checks.
+
+This rule set validates the repository pre-commit configuration.
+
+The checks cover:
+
+* The ``.pre-commit-config.yaml`` file exists
+* The ``ruff-pre-commit`` and ``ansys/pre-commit-hooks`` repositories are
+  configured
+* Optional hooks are configured: ``zizmor`` (with pedantic mode), ``codespell``,
+  a type checker (``pyright``, ``mypy`` or ``ty``), and the
+  ``check-merge-conflict``, ``debug-statements``, ``check-yaml`` and
+  ``trailing-whitespace`` hooks
+
+A missing required item is reported as an ``ERROR``. A missing optional hook is
+reported as a ``RECOMMENDATION`` that explains the benefit of adding it. A
+recommendation never fails the report.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

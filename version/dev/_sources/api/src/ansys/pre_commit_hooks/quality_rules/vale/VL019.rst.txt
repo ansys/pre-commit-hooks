@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`VL019`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.VL019
+
+   Bases: :py:obj:`Vale`
+
+
+   
+   Legacy codespell word lists are migrated to Vale.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: VL019
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check for ``.codespell.exclude`` and ``.codespell.ignore`` files.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import VL019
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check for ``.codespell.exclude`` and ``.codespell.ignore`` files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

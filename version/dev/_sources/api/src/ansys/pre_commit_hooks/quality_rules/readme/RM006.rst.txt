@@ -1,0 +1,121 @@
+
+
+
+
+
+
+:class:`RM006`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.readme.RM006
+
+   Bases: :py:obj:`README`
+
+
+   
+   README has a documentation section.
+
+   Requires a heading that contains ``documentation``. Either a Markdown ``#``
+   heading or an underlined reStructuredText heading is accepted. The word in body
+   text or in a URL does not count.
+
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Notes
+
+   - A missing heading produces an error, including when there is no README file.
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: RM006
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the README has a documentation heading.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.readme import RM006
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the README has a documentation heading.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Name of the detected README file, or ``None`` if there is none.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` if the heading exists, ``False`` otherwise, or an
+           ``"ERROR: ..."`` message if the README cannot be read.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

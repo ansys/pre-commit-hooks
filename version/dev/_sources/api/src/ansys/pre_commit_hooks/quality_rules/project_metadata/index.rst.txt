@@ -1,0 +1,271 @@
+
+
+
+
+
+
+The ``project_metadata.py`` module
+==================================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.project_metadata
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: project_metadata
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.ProjectMetadata`
+            - Project metadata rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM001`
+            - The AUTHORS file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM002`
+            - CHANGELOG.md exists or doc/source/changelog.rst has a title and content.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM003`
+            - The CODE_OF_CONDUCT.md file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM004`
+            - The CONTRIBUTING.md file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM005`
+            - The CONTRIBUTORS.md file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM006`
+            - The LICENSE file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM007`
+            - The SECURITY.md file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM008`
+            - The .github/CODEOWNERS file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM009`
+            - Pyproject.toml declares README content and referenced files exist.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM010`
+            - Pyproject.toml references the LICENSE file.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM011`
+            - Project name follows the ansys-*-* convention.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM012`
+            - Project version follows an accepted versioning scheme.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM013`
+            - Project author and maintainer metadata matches PyAnsys defaults.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM014`
+            - The LICENSE file contains the standard MIT or Apache 2.0 license text.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM015`
+            - The .github/CODEOWNERS file contains at least one valid owner entry.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM016`
+            - Project declares a minimum supported Python version; an upper bound is optional.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM017`
+            - The project includes a docs directory.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM018`
+            - The project includes a tests directory.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM019`
+            - The project supports a task runner such as nox, tox, or pixi.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM020`
+            - Project contact and support links are provided in pyproject metadata.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM021`
+            - The AUTHORS file contains compliant contributor ownership information.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM022`
+            - The CONTRIBUTORS.md file includes lead and main contributors sections.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM023`
+            - Python version classifiers are present and compatible with requires-python.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> ProjectMetadata</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/ProjectMetadata>
+    <span class="nf nf-cod-symbol_class"></span> PM001</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM001>
+    <span class="nf nf-cod-symbol_class"></span> PM002</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM002>
+    <span class="nf nf-cod-symbol_class"></span> PM003</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM003>
+    <span class="nf nf-cod-symbol_class"></span> PM004</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM004>
+    <span class="nf nf-cod-symbol_class"></span> PM005</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM005>
+    <span class="nf nf-cod-symbol_class"></span> PM006</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM006>
+    <span class="nf nf-cod-symbol_class"></span> PM007</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM007>
+    <span class="nf nf-cod-symbol_class"></span> PM008</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM008>
+    <span class="nf nf-cod-symbol_class"></span> PM009</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM009>
+    <span class="nf nf-cod-symbol_class"></span> PM010</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM010>
+    <span class="nf nf-cod-symbol_class"></span> PM011</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM011>
+    <span class="nf nf-cod-symbol_class"></span> PM012</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM012>
+    <span class="nf nf-cod-symbol_class"></span> PM013</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM013>
+    <span class="nf nf-cod-symbol_class"></span> PM014</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM014>
+    <span class="nf nf-cod-symbol_class"></span> PM015</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM015>
+    <span class="nf nf-cod-symbol_class"></span> PM016</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM016>
+    <span class="nf nf-cod-symbol_class"></span> PM017</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM017>
+    <span class="nf nf-cod-symbol_class"></span> PM018</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM018>
+    <span class="nf nf-cod-symbol_class"></span> PM019</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM019>
+    <span class="nf nf-cod-symbol_class"></span> PM020</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM020>
+    <span class="nf nf-cod-symbol_class"></span> PM021</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM021>
+    <span class="nf nf-cod-symbol_class"></span> PM022</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM022>
+    <span class="nf nf-cod-symbol_class"></span> PM023</api/src/ansys/pre_commit_hooks/quality_rules/project_metadata/PM023>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Project metadata checks.
+
+This rule set validates repository metadata against PyAnsys standards.
+
+The checks cover:
+
+* Governance and repository files
+    - AUTHORS
+    - CHANGELOG.md or doc/source/changelog.rst
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - CONTRIBUTORS.md
+    - LICENSE
+    - SECURITY.md
+    - .github/CODEOWNERS
+
+* Packaging metadata
+    - pyproject.toml references the README and LICENSE files
+    - Project name follows the ``ansys-*-*`` convention
+    - Project version follows the accepted versioning schemes
+    - Author and maintainer metadata is configured
+    - Supported Python versions have an explicit minimum; an upper bound is optional
+    - Python version classifiers agree with requires-python
+    - Support URLs are declared
+
+* Licensing
+    - LICENSE file contains recognized MIT or Apache 2.0 wording
+
+* Repository layout
+    - Documentation and tests directories
+    - Task runner configuration
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

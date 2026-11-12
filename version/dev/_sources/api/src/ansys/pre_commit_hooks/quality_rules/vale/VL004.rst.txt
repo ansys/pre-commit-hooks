@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`VL004`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.VL004
+
+   Bases: :py:obj:`Vale`
+
+
+   
+   The ANSYS accept.txt vocabulary exists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: VL004
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the ANSYS accept.txt vocabulary file exists.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import VL004
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the ANSYS accept.txt vocabulary file exists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

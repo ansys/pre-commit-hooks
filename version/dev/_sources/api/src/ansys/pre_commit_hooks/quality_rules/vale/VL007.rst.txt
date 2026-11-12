@@ -1,0 +1,109 @@
+
+
+
+
+
+
+:class:`VL007`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.VL007
+
+   Bases: :py:obj:`Vale`
+
+
+   
+   Vale MinAlertLevel is warning or stricter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: VL007
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that ``MinAlertLevel`` hides suggestions only.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import VL007
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that ``MinAlertLevel`` hides suggestions only.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` for ``warning`` or ``error``, otherwise a
+           ``"WARNING: ..."`` message. An unset value counts as Vale's
+           ``suggestion`` default.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

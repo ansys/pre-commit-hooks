@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PC002`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC002
+
+   Bases: :py:obj:`PreCommit`
+
+
+   
+   Ruff-pre-commit is configured.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PC002
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the Ruff repository has configured hooks.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.pre_commit import PC002
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the Ruff repository has configured hooks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DB022`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.dependabot.DB022
+
+   Bases: :py:obj:`Dependabot`
+
+
+   
+   Referenced registries are defined and use secure URLs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DB022
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Error on insecure registry URLs and warn on missing registry mappings.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.dependabot import DB022
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Error on insecure registry URLs and warn on missing registry mappings.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

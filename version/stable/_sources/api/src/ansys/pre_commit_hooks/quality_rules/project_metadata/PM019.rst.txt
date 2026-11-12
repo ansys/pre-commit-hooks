@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PM019`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM019
+
+   Bases: :py:obj:`ProjectMetadata`
+
+
+   
+   The project supports a task runner such as nox, tox, or pixi.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PM019
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether a task runner is configured for the project.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.project_metadata import PM019
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether a task runner is configured for the project.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

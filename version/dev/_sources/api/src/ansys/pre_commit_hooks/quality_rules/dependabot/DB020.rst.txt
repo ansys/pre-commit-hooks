@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DB020`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.dependabot.DB020
+
+   Bases: :py:obj:`Dependabot`
+
+
+   
+   No duplicate package-ecosystem and directory combinations exist.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DB020
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Error when duplicate ecosystem+directory combinations are detected.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.dependabot import DB020
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Error when duplicate ecosystem+directory combinations are detected.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

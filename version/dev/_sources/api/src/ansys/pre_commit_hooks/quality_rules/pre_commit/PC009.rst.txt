@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PC009`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.pre_commit.PC009
+
+   Bases: :py:obj:`PreCommit`
+
+
+   
+   Check-yaml is configured.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PC009
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Recommend the check-yaml hook when it is not configured.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.pre_commit import PC009
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Recommend the check-yaml hook when it is not configured.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

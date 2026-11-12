@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`VL013`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.VL013
+
+   Bases: :py:obj:`Vale`
+
+
+   
+   Vale applies the built-in Vale style.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: VL013
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that ``BasedOnStyles`` includes the ``Vale`` style.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import VL013
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that ``BasedOnStyles`` includes the ``Vale`` style.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

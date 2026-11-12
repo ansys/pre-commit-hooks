@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DB011`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.dependabot.DB011
+
+   Bases: :py:obj:`Dependabot`
+
+
+   
+   Every update entry specifies repository-root-relative directories.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DB011
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Validate directory or directories without requiring paths to exist locally.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.dependabot import DB011
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Validate directory or directories without requiring paths to exist locally.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

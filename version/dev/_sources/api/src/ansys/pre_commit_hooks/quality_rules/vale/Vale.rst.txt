@@ -1,0 +1,140 @@
+
+
+
+
+
+
+:class:`Vale`
+=============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.vale.Vale
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   
+   Vale rule family.
+
+   Base class of the Vale quality rules. Each rule is a subclass named
+   ``VL<nnn>`` with a static ``check`` method that evaluates the documentation
+   Vale configuration independently. Missing or unreadable configuration is
+   reported as an error rather than skipped.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: Vale
+
+Overview
+--------
+
+.. tab-set::
+
+   .. tab-item:: Abstract methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Evaluate a Vale rule.
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~family`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.vale import Vale
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: family
+   :type:  ClassVar[str]
+   :value: 'vale'
+
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+   :abstractmethod:
+
+
+   
+   Evaluate a Vale rule.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Detected README path, unused by this rule family.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when the rule passes, ``False`` for an error, or a string
+           prefixed with ``"ERROR: "``, ``"WARNING: "``, or
+           ``"RECOMMENDATION: "``.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

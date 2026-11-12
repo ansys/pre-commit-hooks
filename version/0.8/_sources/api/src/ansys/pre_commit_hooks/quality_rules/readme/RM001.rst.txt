@@ -1,0 +1,121 @@
+
+
+
+
+
+
+:class:`RM001`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.readme.RM001
+
+   Bases: :py:obj:`README`
+
+
+   
+   README has a PyAnsys or Ansys badge.
+
+   Looks for a PyAnsys or Ansys badge image, such as an ``img.shields.io`` badge
+   named ``Py-Ansys`` or ``Ansys``, or any badge image URL that contains
+   ``pyansys``. The ``ansys`` organization name in a GitHub URL, for example in a
+   workflow badge, does not count.
+
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Notes
+
+   - A missing badge produces an error, including when there is no README file.
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: RM001
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the README contains a PyAnsys or Ansys badge.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.readme import RM001
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the README contains a PyAnsys or Ansys badge.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Name of the detected README file, or ``None`` if there is none.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` if the badge is found, otherwise an ``"ERROR: ..."`` message.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+
