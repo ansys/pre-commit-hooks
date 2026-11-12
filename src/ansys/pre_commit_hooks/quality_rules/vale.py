@@ -37,7 +37,8 @@ The checks cover:
 * Python, Markdown, and reStructuredText files are linted, Python files are
   parsed as Markdown, and ``Vale.Terms``, ``TokenIgnores``, and
   ``BlockIgnores`` are configured
-* The styles ``.gitignore`` ignores everything except the ANSYS vocabulary
+* The styles ``.gitignore`` ignores other files while preserving the configured
+    Vale vocabulary files
 * The ``accept.txt`` vocabulary is populated, without duplicate or blank lines
 * Legacy codespell word lists are migrated to the ANSYS vocabulary
 
@@ -105,6 +106,24 @@ _STYLES_GITIGNORE_PATTERNS: Final[tuple[str, ...]] = (
     f"!**/{_ANSYS_VOCABULARY}/accept.txt",
     f"!**/{_ANSYS_VOCABULARY}/reject.txt",
     "!.gitignore",
+)
+_STYLES_GITIGNORE_VOCABULARY_PATTERNS: Final[tuple[str, ...]] = (
+    "*",
+    "!vocabularies",
+    "!vocabularies/**",
+    "!.gitignore",
+)
+_STYLES_GITIGNORE_CONFIG_VOCABULARY_PATTERNS: Final[tuple[str, ...]] = (
+    "*",
+    "!config/vocabularies",
+    "!config/vocabularies/ANSYS",
+    "!config/vocabularies/ANSYS/**",
+    "!.gitignore",
+)
+_STYLES_GITIGNORE_PATTERN_SETS: Final[tuple[tuple[str, ...], ...]] = (
+    _STYLES_GITIGNORE_PATTERNS,
+    _STYLES_GITIGNORE_VOCABULARY_PATTERNS,
+    _STYLES_GITIGNORE_CONFIG_VOCABULARY_PATTERNS,
 )
 _CODESPELL_FILES: Final[tuple[str, ...]] = (".codespell.exclude", ".codespell.ignore")
 _BRACE_GROUP: Final[re.Pattern[str]] = re.compile(r"\{([^{}]*)\}")
@@ -698,7 +717,7 @@ class VL015(Vale):
 
 
 class VL016(Vale):
-    """The Vale styles .gitignore keeps only the ANSYS vocabulary."""
+    """The Vale styles .gitignore preserves configured vocabulary files."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
@@ -707,8 +726,8 @@ class VL016(Vale):
         Returns
         -------
         bool or str
-            ``True`` when the file contains every PyAnsys pattern, otherwise a
-            ``"WARNING: ..."`` message naming the file and missing patterns.
+            ``True`` when the file contains a complete supported pattern set,
+            otherwise a ``"WARNING: ..."`` message naming missing patterns.
         """
         parser = _load_configuration(repository_root)
         if isinstance(parser, str):
@@ -721,9 +740,13 @@ class VL016(Vale):
         if content is None:
             return f"WARNING: {gitignore} does not exist or cannot be read."
         patterns = {line.strip() for line in content.splitlines()}
-        missing = [pattern for pattern in _STYLES_GITIGNORE_PATTERNS if pattern not in patterns]
-        if not missing:
+        missing_by_set = [
+            [pattern for pattern in pattern_set if pattern not in patterns]
+            for pattern_set in _STYLES_GITIGNORE_PATTERN_SETS
+        ]
+        if any(not missing for missing in missing_by_set):
             return True
+        missing = min(missing_by_set, key=len)
         return f"WARNING: {gitignore} is missing the patterns: {', '.join(missing)}."
 
 

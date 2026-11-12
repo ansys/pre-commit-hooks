@@ -427,11 +427,22 @@ def test_vale_style_must_be_applied(tmp_path: Path) -> None:
     ("content", "expected"),
     [
         (None, "does not exist"),
-        ("*\n!vocabularies\n!vocabularies/**\n!.gitignore\n", "!**/ANSYS/accept.txt"),
+        ("*\n!**/ANSYS/accept.txt\n!**/ANSYS/reject.txt\n!.gitignore\n", None),
+        ("*\n!vocabularies\n!vocabularies/**\n!.gitignore\n", None),
+        (
+            "*\n!config/vocabularies\n!config/vocabularies/ANSYS\n"
+            "!config/vocabularies/ANSYS/**\n!.gitignore\n",
+            None,
+        ),
+        ("*\n!vocabularies\n!.gitignore\n", "!vocabularies/**"),
+        (
+            "*\n!config/vocabularies\n!config/vocabularies/ANSYS\n!.gitignore\n",
+            "!config/vocabularies/ANSYS/**",
+        ),
     ],
 )
 def test_styles_gitignore_keeps_only_the_vocabulary(
-    tmp_path: Path, content: str | None, expected: str
+    tmp_path: Path, content: str | None, expected: str | None
 ) -> None:
     _write_repository(tmp_path)
     gitignore = tmp_path / "doc" / "styles" / ".gitignore"
@@ -440,7 +451,11 @@ def test_styles_gitignore_keeps_only_the_vocabulary(
     else:
         gitignore.write_text(content, encoding="utf-8")
 
-    _assert_status(_check(tmp_path, "VL016"), "WARNING", "doc/styles/.gitignore", expected)
+    result = _check(tmp_path, "VL016")
+    if expected is None:
+        assert result is True
+    else:
+        _assert_status(result, "WARNING", "doc/styles/.gitignore", expected)
 
 
 @pytest.mark.parametrize(
