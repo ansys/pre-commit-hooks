@@ -304,9 +304,26 @@ def test_label_descriptions_are_recommended(tmp_path: Path, description: str) ->
     ("rule_id", "removed", "status", "expected"),
     [
         ("LB011", ("dependencies",), "WARNING", "dependencies label"),
-        ("LB012", ("ci",), "RECOMMENDATION", "ci label"),
-        ("LB012", ("tests", "release"), "RECOMMENDATION", "tests, release labels"),
-        ("LB013", ("style:skip",), "RECOMMENDATION", "style:skip label"),
+        (
+            "LB012",
+            ("ci",),
+            "RECOMMENDATION",
+            "ci label to .github/labels.yml. These labels help route and filter CI, testing, "
+            "maintenance, and release work.",
+        ),
+        (
+            "LB012",
+            ("tests", "release"),
+            "RECOMMENDATION",
+            "tests, release labels to .github/labels.yml. These labels help route and filter",
+        ),
+        (
+            "LB013",
+            ("style:skip",),
+            "RECOMMENDATION",
+            "style:skip label to .github/labels.yml. Use it to mark pull requests that "
+            "intentionally skip style checks",
+        ),
         ("LB014", ("good first issue",), "RECOMMENDATION", "good first issue label"),
     ],
 )

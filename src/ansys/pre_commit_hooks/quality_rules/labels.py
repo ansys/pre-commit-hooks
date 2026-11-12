@@ -216,7 +216,10 @@ def _load_labeler(repository_root: Path) -> dict[str, object] | str:
 
 
 def _check_labels(
-    repository_root: Path, label_names: tuple[str, ...], status: str
+    repository_root: Path,
+    label_names: tuple[str, ...],
+    status: str,
+    recommendation: str | None = None,
 ) -> RuleCheckResult:
     """Check whether ``.github/labels.yml`` declares the given labels.
 
@@ -229,6 +232,8 @@ def _check_labels(
     status : str
         ``"ERROR"``, ``"WARNING"``, or ``"RECOMMENDATION"``, used when a label
         is missing.
+    recommendation : str or None, default: None
+        Additional explanation appended to the message for a missing label.
 
     Returns
     -------
@@ -243,7 +248,10 @@ def _check_labels(
     if not missing:
         return True
     plural = "label" if len(missing) == 1 else "labels"
-    return f"{status}: Add the {', '.join(missing)} {plural} to {_LABELS_CONFIG}."
+    message = f"{status}: Add the {', '.join(missing)} {plural} to {_LABELS_CONFIG}."
+    if recommendation:
+        message = f"{message} {recommendation}"
+    return message
 
 
 def _file_globs(rules: object, key: str | None = None) -> Iterator[str]:
@@ -499,7 +507,12 @@ class LB012(Labels):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the recommended project labels are declared."""
-        return _check_labels(repository_root, _RECOMMENDED_LABELS, "RECOMMENDATION")
+        return _check_labels(
+            repository_root,
+            _RECOMMENDED_LABELS,
+            "RECOMMENDATION",
+            "These labels help route and filter CI, testing, maintenance, and release work.",
+        )
 
 
 class LB013(Labels):
@@ -508,7 +521,13 @@ class LB013(Labels):
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Return whether the label that skips style checks is declared."""
-        return _check_labels(repository_root, ("style:skip",), "RECOMMENDATION")
+        return _check_labels(
+            repository_root,
+            ("style:skip",),
+            "RECOMMENDATION",
+            "Use it to mark pull requests that intentionally skip style checks, so reviewers "
+            "can distinguish approved exceptions from missed checks.",
+        )
 
 
 class LB014(Labels):
