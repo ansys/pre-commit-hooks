@@ -506,7 +506,21 @@ class LB012(Labels):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the recommended project labels are declared."""
+        """Check whether the recommended project labels are declared.
+
+        Parameters
+        ----------
+        repository_root : pathlib.Path
+            Root directory of the repository being checked.
+        readme_file : str or None
+            Detected README path. This rule does not use the README.
+
+        Returns
+        -------
+        bool or str
+            ``True`` when all recommended labels are declared, otherwise a
+            recommendation naming the missing labels and explaining their use.
+        """
         return _check_labels(
             repository_root,
             _RECOMMENDED_LABELS,
@@ -520,7 +534,21 @@ class LB013(Labels):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the label that skips style checks is declared."""
+        """Check whether the style-skip label is declared.
+
+        Parameters
+        ----------
+        repository_root : pathlib.Path
+            Root directory of the repository being checked.
+        readme_file : str or None
+            Detected README path. This rule does not use the README.
+
+        Returns
+        -------
+        bool or str
+            ``True`` when the ``style:skip`` label is declared, otherwise a
+            recommendation explaining when to use the label.
+        """
         return _check_labels(
             repository_root,
             ("style:skip",),
