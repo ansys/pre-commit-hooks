@@ -26,6 +26,7 @@ from collections.abc import Iterable
 
 from ansys.pre_commit_hooks.quality_rules.cicd import CICD
 from ansys.pre_commit_hooks.quality_rules.common import _QualityRule
+from ansys.pre_commit_hooks.quality_rules.dependabot import Dependabot
 from ansys.pre_commit_hooks.quality_rules.pre_commit import PreCommit
 from ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
 from ansys.pre_commit_hooks.quality_rules.readme import README
@@ -46,6 +47,9 @@ PRE_COMMIT_QUALITY_RULES: tuple[type[PreCommit], ...] = tuple(
 VALE_QUALITY_RULES: tuple[type[Vale], ...] = tuple(
     sorted(Vale.__subclasses__(), key=lambda rule_class: rule_class.__name__)
 )
+DEPENDABOT_QUALITY_RULES: tuple[type[Dependabot], ...] = tuple(
+    sorted(Dependabot.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
 
 # Maps each rule family name to its rule classes.
 RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
@@ -54,6 +58,7 @@ RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
     CICD.family: CICD_QUALITY_RULES,
     PreCommit.family: PRE_COMMIT_QUALITY_RULES,
     Vale.family: VALE_QUALITY_RULES,
+    Dependabot.family: DEPENDABOT_QUALITY_RULES,
 }
 # Families evaluated when no ``--family`` is requested.
 DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
@@ -71,6 +76,8 @@ __all__ = [
     "CICD",
     "CICD_QUALITY_RULES",
     "DEFAULT_RULE_FAMILIES",
+    "DEPENDABOT_QUALITY_RULES",
+    "Dependabot",
     "PRE_COMMIT_QUALITY_RULES",
     "PROJECT_METADATA_QUALITY_RULES",
     "README",
