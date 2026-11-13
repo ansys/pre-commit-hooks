@@ -238,7 +238,8 @@ def _check_labels(
     Returns
     -------
     bool or str
-        ``True`` when every label is declared, otherwise a message with the
+        ``True`` when every label is declared, an ``"ERROR: ..."`` message when
+        ``.github/labels.yml`` cannot be loaded, or otherwise a message with the
         given status that names the missing labels.
     """
     names = _label_names(repository_root)
