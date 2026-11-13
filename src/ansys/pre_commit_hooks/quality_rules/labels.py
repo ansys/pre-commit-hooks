@@ -34,8 +34,8 @@ The checks cover:
   ``.github/labels.yml``
 * Declared labels are unique and have a valid color and a description
 * The ``bug``, ``enhancement``, ``documentation``, ``dependencies``, ``ci``,
-  ``tests``, ``maintenance``, ``release``, and ``good first issue`` labels are
-  declared
+  ``tests``, ``maintenance``, ``release``, ``style:skip``, and
+  ``good first issue`` labels are declared
 * ``.github/labeler.yml`` labels documentation and workflow changes
 * A workflow synchronizes the declared labels with GitHub
 * No legacy ``.yaml`` copies of the label files remain
@@ -80,6 +80,7 @@ __all__ = [
     "LB014",
     "LB015",
     "LB016",
+    "LB017",
     "Labels",
 ]
 
@@ -531,6 +532,34 @@ class LB012(Labels):
 
 
 class LB013(Labels):
+    """Labels.yml has a style:skip label."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check whether the style-skip label is declared.
+
+        Parameters
+        ----------
+        repository_root : pathlib.Path
+            Root directory of the repository being checked.
+        readme_file : str or None
+            Detected README path. This rule does not use the README.
+
+        Returns
+        -------
+        bool or str
+            ``True`` when the ``style:skip`` label is declared, otherwise a
+            recommendation explaining when to use the label.
+        """
+        return _check_labels(
+            repository_root,
+            ("style:skip",),
+            "RECOMMENDATION",
+            "It marks intentional style-check skips for reviewers.",
+        )
+
+
+class LB014(Labels):
     """Labels.yml has a good first issue label."""
 
     @staticmethod
@@ -544,7 +573,7 @@ class LB013(Labels):
         )
 
 
-class LB014(Labels):
+class LB015(Labels):
     """Labeler.yml labels documentation and workflow changes."""
 
     @staticmethod
@@ -580,7 +609,7 @@ class LB014(Labels):
         )
 
 
-class LB015(Labels):
+class LB016(Labels):
     """A workflow syncs labels.yml to GitHub."""
 
     @staticmethod
@@ -595,7 +624,7 @@ class LB015(Labels):
         )
 
 
-class LB016(Labels):
+class LB017(Labels):
     """No legacy .yaml label files remain."""
 
     @staticmethod
