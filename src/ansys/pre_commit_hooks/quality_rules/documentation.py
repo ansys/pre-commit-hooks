@@ -28,9 +28,11 @@ sections, and example configuration for supported gallery extensions.
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 import re
 from typing import ClassVar, Final
+from urllib.parse import urlsplit
 
 from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,
@@ -48,12 +50,17 @@ __all__ = [
     "DOC006",
     "DOC007",
     "DOC008",
+    "DOC009",
+    "DOC010",
+    "DOC011",
+    "DOC012",
     "DOCUMENTATION_QUALITY_RULES",
     "Documentation",
 ]
 
 _DOC_INDEX: Final[str] = "doc/source/index.rst"
 _SPHINX_CONFIG: Final[str] = "doc/source/conf.py"
+_NOT_LITERAL: Final[object] = object()
 
 
 def _contains(repository_root: Path, relative_path: str, pattern: str | re.Pattern[str]) -> bool:
@@ -64,6 +71,122 @@ def _contains(repository_root: Path, relative_path: str, pattern: str | re.Patte
     if isinstance(pattern, str):
         return pattern in content
     return pattern.search(content) is not None
+
+
+def _sphinx_assignments(repository_root: Path) -> dict[str, ast.expr] | None:
+    """Return top-level Sphinx config assignments without executing the file."""
+    content = file_content(repository_root, _SPHINX_CONFIG)
+    if content is None:
+        return None
+    try:
+        module = ast.parse(content)
+    except SyntaxError:
+        return None
+
+    assignments: dict[str, ast.expr] = {}
+    for statement in module.body:
+        if isinstance(statement, ast.Assign):
+            for target in statement.targets:
+                if isinstance(target, ast.Name):
+                    assignments[target.id] = statement.value
+        elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
+            if statement.value is not None:
+                assignments[statement.target.id] = statement.value
+    return assignments
+
+
+def _literal(node: ast.expr | None) -> object:
+    """Return a literal AST value or a sentinel when it is dynamic or invalid."""
+    if node is None:
+        return _NOT_LITERAL
+    try:
+        return ast.literal_eval(node)
+    except (TypeError, ValueError):
+        return _NOT_LITERAL
+
+
+def _dict_value(node: ast.expr | None, key: str) -> ast.expr | None:
+    """Return a value from a literal dictionary by its string key."""
+    if not isinstance(node, ast.Dict):
+        return None
+    for candidate, value in zip(node.keys, node.values, strict=True):
+        if _literal(candidate) == key:
+            return value
+    return None
+
+
+def _has_nonempty_setting(node: ast.expr | None) -> bool:
+    """Return whether a setting is non-empty or has a dynamic expression."""
+    value = _literal(node)
+    if value is not _NOT_LITERAL:
+        return isinstance(value, str) and bool(value.strip())
+    return node is not None and not (isinstance(node, ast.Constant) and node.value is None)
+
+
+def _valid_hostname(value: object) -> bool:
+    """Return whether a string is a dotted hostname with valid DNS labels."""
+    if not isinstance(value, str) or len(value) > 253 or "." not in value:
+        return False
+    return all(
+        re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+        for label in value.rstrip(".").split(".")
+    )
+
+
+def _valid_cname(node: ast.expr | None) -> bool:
+    """Return whether CNAME is a hostname or getenv call with a hostname fallback."""
+    value = _literal(node)
+    if value is not _NOT_LITERAL:
+        return _valid_hostname(value)
+    if not (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "os"
+        and node.func.attr == "getenv"
+    ):
+        return False
+    fallback = (
+        node.args[1]
+        if len(node.args) > 1
+        else next((keyword.value for keyword in node.keywords if keyword.arg == "default"), None)
+    )
+    return _valid_hostname(_literal(fallback))
+
+
+def _valid_copyright(node: ast.expr | None) -> bool:
+    """Return whether copyright is a non-empty literal or formatted string."""
+    value = _literal(node)
+    if value is not _NOT_LITERAL:
+        return isinstance(value, str) and bool(value.strip())
+    return (
+        isinstance(node, ast.JoinedStr)
+        and any(
+            isinstance(value, ast.Constant) and isinstance(value.value, str) and value.value.strip()
+            for value in node.values
+        )
+        and any(isinstance(value, ast.FormattedValue) for value in node.values)
+    )
+
+
+def _valid_switcher_url(node: ast.expr | None) -> bool:
+    """Return whether a switcher URL is HTTPS or a matching HTTPS f-string."""
+    value = _literal(node)
+    if isinstance(value, str):
+        parsed = urlsplit(value)
+        return (
+            parsed.scheme == "https"
+            and bool(parsed.netloc)
+            and parsed.path.endswith("/versions.json")
+        )
+    if isinstance(node, ast.JoinedStr):
+        static_parts = "".join(
+            part.value
+            for part in node.values
+            if isinstance(part, ast.Constant) and isinstance(part.value, str)
+        )
+        return static_parts.startswith("https://") and "/versions.json" in static_parts
+    return isinstance(node, (ast.Call, ast.Name, ast.Attribute))
 
 
 class Documentation:
@@ -233,6 +356,100 @@ class DOC008(Documentation):
         """
         candidates = (f"doc/source/{configured_path}", configured_path)
         return any(DOC008._dir_has_files(repository_root, path) for path in candidates)
+
+
+class DOC009(Documentation):
+    """The Ansys Sphinx theme and PyAnsys branding are configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check required Sphinx theme and brand settings."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return False
+        return (
+            _literal(assignments.get("html_theme")) == "ansys_sphinx_theme"
+            and _literal(_dict_value(assignments.get("html_theme_options"), "logo")) == "pyansys"
+            and isinstance(assignments.get("html_favicon"), ast.Name)
+            and assignments["html_favicon"].id == "ansys_favicon"
+        )
+
+
+class DOC010(Documentation):
+    """Project and page titles are configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check that project and page titles are non-empty."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return False
+        return all(
+            _has_nonempty_setting(assignments.get(name))
+            for name in ("project", "html_title", "html_short_title")
+        )
+
+
+class DOC011(Documentation):
+    """Site author, copyright, and CNAME metadata are configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend complete author, copyright, and CNAME metadata."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return True
+
+        missing = []
+        if not _has_nonempty_setting(assignments.get("author")):
+            missing.append("author")
+        if not _valid_copyright(assignments.get("copyright")):
+            missing.append("copyright")
+        if not _valid_cname(assignments.get("cname")):
+            missing.append("cname")
+        if not missing:
+            return True
+        return (
+            "RECOMMENDATION: Review "
+            f"{', '.join(missing)} in {_SPHINX_CONFIG}; provide non-empty metadata and a valid "
+            "CNAME hostname."
+        )
+
+
+class DOC012(Documentation):
+    """The Ansys theme version switcher is configured."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend a complete switcher configuration when it is statically inspectable."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return True
+
+        theme_options = assignments.get("html_theme_options")
+        if theme_options is None:
+            missing = ["json_url", "version_match"]
+        elif not isinstance(theme_options, ast.Dict):
+            return True
+        else:
+            switcher = _dict_value(theme_options, "switcher")
+            if switcher is None:
+                missing = ["json_url", "version_match"]
+            elif not isinstance(switcher, ast.Dict):
+                return True
+            else:
+                missing = []
+                if not _valid_switcher_url(_dict_value(switcher, "json_url")):
+                    missing.append("json_url")
+                if not _has_nonempty_setting(_dict_value(switcher, "version_match")):
+                    missing.append("version_match")
+
+        if not missing:
+            return True
+        return (
+            "RECOMMENDATION: Configure "
+            f"{', '.join(missing)} in html_theme_options['switcher'] in {_SPHINX_CONFIG}."
+        )
 
 
 DOCUMENTATION_QUALITY_RULES: tuple[type[Documentation], ...] = tuple(

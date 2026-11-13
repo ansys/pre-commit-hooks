@@ -33,7 +33,7 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 9))
+_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 13))
 _VALID_INDEX = """\
 Getting Started
 ===============
@@ -42,6 +42,20 @@ API Reference
 =============
 """
 _VALID_CONF = """\
+project = "test-project"
+author = "Test Organization"
+copyright = f"(c) {datetime.now().year} Test Organization"
+cname = os.getenv("DOCS_CNAME", "docs.example.com")
+html_theme = "ansys_sphinx_theme"
+html_title = html_short_title = "Test project"
+html_favicon = ansys_favicon
+html_theme_options = {
+    "logo": "pyansys",
+    "switcher": {
+        "json_url": f"https://{cname}/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+}
 extensions = ["numpydoc", "sphinx_design", "sphinx.ext.intersphinx"]
 """
 
@@ -67,7 +81,7 @@ def test_registry_contains_all_documentation_rules() -> None:
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "documentation" for rule in rules.values())
-    assert len(DOCUMENTATION_QUALITY_RULES) == 8
+    assert len(DOCUMENTATION_QUALITY_RULES) == 12
     assert all(issubclass(rule, Documentation) for rule in DOCUMENTATION_QUALITY_RULES)
 
 
@@ -186,3 +200,88 @@ def test_nbsphinx_recommends_example_files(tmp_path: Path) -> None:
     (examples / "example.ipynb").write_text("{}\n", encoding="utf-8")
 
     assert _rule("DOC008").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    ("old", "new"),
+    [
+        ('html_theme = "ansys_sphinx_theme"', 'html_theme = "sphinx_rtd_theme"'),
+        ('"logo": "pyansys"', '"logo": "other"'),
+        ("html_favicon = ansys_favicon", 'html_favicon = "favicon.ico"'),
+        ('html_theme = "ansys_sphinx_theme"', "# html_theme = 'ansys_sphinx_theme'"),
+    ],
+)
+def test_required_theme_and_brand_settings_are_checked(tmp_path: Path, old: str, new: str) -> None:
+    _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
+
+    assert _rule("DOC009").check(tmp_path, None) is False
+
+
+def test_project_and_page_titles_must_be_nonempty(tmp_path: Path) -> None:
+    _write_documentation(
+        tmp_path, conf=_VALID_CONF.replace('project = "test-project"', 'project = ""')
+    )
+
+    assert _rule("DOC010").check(tmp_path, None) is False
+
+    _write_documentation(
+        tmp_path,
+        conf=_VALID_CONF.replace(
+            'html_title = html_short_title = "Test project"', 'html_title = html_short_title = ""'
+        ),
+    )
+
+    assert _rule("DOC010").check(tmp_path, None) is False
+
+
+def test_site_metadata_accepts_dynamic_year_and_cname_fallback(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+
+    assert _rule("DOC011").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    ("old", "new"),
+    [
+        ('author = "Test Organization"', 'author = ""'),
+        (
+            'copyright = f"(c) {datetime.now().year} Test Organization"',
+            'copyright = ""',
+        ),
+        (
+            'cname = os.getenv("DOCS_CNAME", "docs.example.com")',
+            'cname = "not a hostname"',
+        ),
+    ],
+)
+def test_site_metadata_recommends_missing_or_invalid_values(
+    tmp_path: Path, old: str, new: str
+) -> None:
+    _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC011"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+
+
+def test_theme_switcher_accepts_dynamic_config_values(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+
+    assert _rule("DOC012").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    ("old", "new"),
+    [
+        ('"json_url": f"https://{cname}/versions.json",\n', ""),
+        ('"version_match": get_version_match(__version__),\n', ""),
+    ],
+)
+def test_theme_switcher_recommends_missing_settings(tmp_path: Path, old: str, new: str) -> None:
+    _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC012"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
