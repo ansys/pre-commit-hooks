@@ -52,11 +52,15 @@ from ansys.pre_commit_hooks.quality_rules.readme import (
 def test_registry_contains_every_rule_family():
     """The registry exposes all quality rule families."""
     assert list(repo_review_checks(["readme"])) == [f"RM{number:03d}" for number in range(8)]
-    assert {rule_id[:2] for rule_id in repo_review_checks()} == {
+    assert {
+        rule_id[:3] if rule_id.startswith("DOC") else rule_id[:2]
+        for rule_id in repo_review_checks()
+    } == {
         "RM",
         "PM",
         "CI",
         "PC",
+        "DOC",
         "LB",
         "VL",
         "DB",
