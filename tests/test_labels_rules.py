@@ -31,10 +31,10 @@ from ansys.pre_commit_hooks import pyansys_quality_report as report
 from ansys.pre_commit_hooks.quality_rules import LABELS_QUALITY_RULES, Labels, repo_review_checks
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult
 
-_RULE_IDS = tuple(f"LB{number:03d}" for number in range(1, 18))
+_RULE_IDS = tuple(f"LB{number:03d}" for number in range(1, 17))
 _LABEL_RULE_IDS = {"LB003": "bug", "LB004": "enhancement", "LB005": "documentation"}
 _LABELS_RULE_IDS = ("LB003", "LB004", "LB005", "LB007", "LB008", "LB009", "LB010", "LB011")
-_LABELER_RULE_IDS = ("LB006", "LB007", "LB015")
+_LABELER_RULE_IDS = ("LB006", "LB007", "LB014")
 _VALID_LABELS = """\
 - name: bug
   description: Something isn't working
@@ -137,7 +137,7 @@ def test_registry_contains_all_label_rules() -> None:
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "labels" for rule in rules.values())
-    assert len(LABELS_QUALITY_RULES) == 17
+    assert len(LABELS_QUALITY_RULES) == 16
     assert all(issubclass(rule, Labels) for rule in LABELS_QUALITY_RULES)
 
 
@@ -153,8 +153,8 @@ def test_missing_configuration_is_an_error(tmp_path: Path) -> None:
     details = {result["id"]: result["detail"] for result in results}
     statuses = {result["id"]: result["status"] for result in results}
 
-    assert statuses.pop("LB016") == "WARNING"
-    assert statuses.pop("LB017") == "PASSED"
+    assert statuses.pop("LB015") == "WARNING"
+    assert statuses.pop("LB016") == "PASSED"
     assert set(statuses.values()) == {"ERROR"}
     for rule_id in _LABEL_RULE_IDS:
         assert ".github/labels.yml" in details[rule_id]
@@ -166,7 +166,7 @@ def test_missing_configuration_is_an_error(tmp_path: Path) -> None:
     ("file_name", "failing"),
     [
         ("labeler.yml", {"LB001", *_LABELER_RULE_IDS}),
-        ("labels.yml", {"LB002", *_LABELS_RULE_IDS, "LB012", "LB013", "LB014"}),
+        ("labels.yml", {"LB002", *_LABELS_RULE_IDS, "LB012", "LB013"}),
     ],
 )
 def test_configuration_files_are_checked_independently(
@@ -187,7 +187,7 @@ def test_configuration_must_be_a_file(tmp_path: Path) -> None:
 
     statuses = _statuses(tmp_path)
 
-    assert {statuses[rule_id] for rule_id in _RULE_IDS[:15]} == {"ERROR"}
+    assert {statuses[rule_id] for rule_id in _RULE_IDS[:14]} == {"ERROR"}
 
 
 def test_configuration_symlink_outside_repository_is_an_error(tmp_path: Path) -> None:
@@ -324,13 +324,6 @@ def test_label_descriptions_are_recommended(tmp_path: Path, description: str) ->
         ),
         (
             "LB013",
-            ("style:skip",),
-            "RECOMMENDATION",
-            "style:skip label to .github/labels.yml. It marks intentional style-check skips "
-            "for reviewers.",
-        ),
-        (
-            "LB014",
             ("good first issue",),
             "RECOMMENDATION",
             "good first issue label to .github/labels.yml. This helps newcomers find "
@@ -369,7 +362,7 @@ def test_labeler_covers_documentation_and_workflow_changes(
 ) -> None:
     _write_labeler(tmp_path, labeler)
 
-    result = _check(tmp_path, "LB015")
+    result = _check(tmp_path, "LB014")
 
     if uncovered is None:
         assert result is True
@@ -390,7 +383,7 @@ def test_labeler_covers_documentation_and_workflow_changes(
 def test_workflow_must_sync_labels(tmp_path: Path, step: str, passes: bool) -> None:
     _write(tmp_path, ".github/workflows/label.yml", f"jobs:\n  label:\n    steps:\n      {step}\n")
 
-    result = _check(tmp_path, "LB016")
+    result = _check(tmp_path, "LB015")
 
     if passes:
         assert result is True
@@ -404,7 +397,7 @@ def test_legacy_label_files_are_reported(tmp_path: Path, legacy: str) -> None:
     _write(tmp_path, legacy, "[]\n")
 
     _assert_status(
-        _check(tmp_path, "LB017"), "RECOMMENDATION", legacy, "use the matching .yml file instead"
+        _check(tmp_path, "LB016"), "RECOMMENDATION", legacy, "use the matching .yml file instead"
     )
 
 
@@ -426,9 +419,9 @@ def test_cli_reports_label_family(
     assert report.main(["--json", "--family", "labels"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [result["id"] for result in payload["results"]] == list(_RULE_IDS)
-    assert payload["tally"] == {"PASSED": 17, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
+    assert payload["tally"] == {"PASSED": 16, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
 
     _write_labels(tmp_path, "- name: bug\n")
     assert report.main(["--json", "--family", "labels"]) == 1
     payload = json.loads(capsys.readouterr().out)
-    assert payload["tally"] == {"PASSED": 8, "RECOMMENDATION": 4, "WARNING": 2, "ERROR": 3}
+    assert payload["tally"] == {"PASSED": 8, "RECOMMENDATION": 3, "WARNING": 2, "ERROR": 3}
