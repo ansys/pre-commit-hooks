@@ -100,12 +100,17 @@ class DOC003(Documentation):
 
 
 class DOC004(Documentation):
-    """The Sphinx config includes sphinx_design."""
+    """Sphinx Design is configured when its components are used."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether sphinx_design is enabled in the Sphinx configuration."""
-        return _contains(repository_root, _SPHINX_CONFIG, "sphinx_design")
+        """Recommend sphinx_design when it is not configured."""
+        if _contains(repository_root, _SPHINX_CONFIG, "sphinx_design"):
+            return True
+        return (
+            "RECOMMENDATION: Enable sphinx_design in doc/source/conf.py when using "
+            "Sphinx Design components."
+        )
 
 
 class DOC005(Documentation):
@@ -140,14 +145,14 @@ class DOC007(Documentation):
 
 
 class DOC008(Documentation):
-    """Gallery examples are configured when a gallery extension is enabled."""
+    """Gallery examples are recommended when a gallery extension is enabled."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
         """Check that enabled gallery extensions have example files configured."""
         conf = file_content(repository_root, _SPHINX_CONFIG)
         if conf is None:
-            return False
+            return True
 
         has_sphinx_gallery = bool(
             re.search(r"sphinx_gallery(?:\.gen_gallery)?", conf, re.IGNORECASE)
@@ -159,16 +164,28 @@ class DOC008(Documentation):
 
         if has_sphinx_gallery:
             if not (re.search(r"\bexamples_dirs\b", conf) and re.search(r"\bgallery_dirs\b", conf)):
-                return False
+                return DOC008._examples_recommendation()
             examples_dirs = DOC008._extract_examples_dirs(conf)
-            return bool(examples_dirs) and all(
+            if examples_dirs and all(
                 DOC008._configured_examples_dir_has_files(repository_root, path)
                 for path in examples_dirs
-            )
+            ):
+                return True
+            return DOC008._examples_recommendation()
 
-        return any(
+        if any(
             DOC008._dir_has_files(repository_root, candidate)
             for candidate in ("examples", "doc/examples", "doc/source/examples")
+        ):
+            return True
+        return DOC008._examples_recommendation()
+
+    @staticmethod
+    def _examples_recommendation() -> str:
+        """Return guidance for adding examples to an enabled gallery extension."""
+        return (
+            "RECOMMENDATION: Configure an examples directory with example files for the enabled "
+            "gallery extension."
         )
 
     @staticmethod

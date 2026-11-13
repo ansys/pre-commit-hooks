@@ -99,7 +99,6 @@ def test_required_documentation_files_are_checked(
     ("rule_id", "setting"),
     [
         ("DOC003", "numpydoc"),
-        ("DOC004", "sphinx_design"),
         ("DOC005", "intersphinx"),
     ],
 )
@@ -111,6 +110,20 @@ def test_sphinx_extensions_are_checked(tmp_path: Path, rule_id: str, setting: st
     _write_documentation(tmp_path, conf=f"extensions = ['{setting}']\n")
 
     assert _rule(rule_id).check(tmp_path, None) is True
+
+
+def test_sphinx_design_is_recommended_but_optional(tmp_path: Path) -> None:
+    _write_documentation(tmp_path, conf="extensions = []\n")
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC004"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert "Sphinx Design components" in result["detail"]
+
+    _write_documentation(tmp_path, conf="extensions = ['sphinx_design']\n")
+
+    assert _rule("DOC004").check(tmp_path, None) is True
 
 
 @pytest.mark.parametrize(
@@ -136,7 +149,7 @@ def test_gallery_check_is_not_applicable_without_gallery_extension(tmp_path: Pat
     assert _rule("DOC008").check(tmp_path, None) is True
 
 
-def test_sphinx_gallery_requires_configured_example_files(tmp_path: Path) -> None:
+def test_sphinx_gallery_recommends_configured_example_files(tmp_path: Path) -> None:
     _write_documentation(
         tmp_path,
         conf=(
@@ -146,7 +159,11 @@ def test_sphinx_gallery_requires_configured_example_files(tmp_path: Path) -> Non
         ),
     )
 
-    assert _rule("DOC008").check(tmp_path, None) is False
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC008"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert "example files" in result["detail"]
 
     examples = tmp_path / "doc" / "source" / "examples" / "basic"
     examples.mkdir(parents=True)
@@ -155,10 +172,14 @@ def test_sphinx_gallery_requires_configured_example_files(tmp_path: Path) -> Non
     assert _rule("DOC008").check(tmp_path, None) is True
 
 
-def test_nbsphinx_requires_example_files(tmp_path: Path) -> None:
+def test_nbsphinx_recommends_example_files(tmp_path: Path) -> None:
     _write_documentation(tmp_path, conf="extensions = ['nbsphinx']\n")
 
-    assert _rule("DOC008").check(tmp_path, None) is False
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC008"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert "example files" in result["detail"]
 
     examples = tmp_path / "examples" / "basic"
     examples.mkdir(parents=True)
