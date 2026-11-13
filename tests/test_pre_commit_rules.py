@@ -104,6 +104,7 @@ def test_pre_commit_runs_by_default_without_removing_existing_families(tmp_path:
         "labels",
         "vale",
         "dependabot",
+        "security",
     }
     assert tuple(result["id"] for result in pre_commit_results) == _RULE_IDS
     assert all(result["status"] == "PASSED" for result in pre_commit_results)
