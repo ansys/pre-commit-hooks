@@ -57,6 +57,7 @@ def test_registry_contains_every_rule_family():
         "PM",
         "CI",
         "PC",
+        "LB",
         "VL",
         "DB",
     }
