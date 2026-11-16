@@ -33,7 +33,7 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 13))
+_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 12))
 _VALID_INDEX = """\
 Getting Started
 ===============
@@ -81,7 +81,7 @@ def test_registry_contains_all_documentation_rules() -> None:
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "documentation" for rule in rules.values())
-    assert len(DOCUMENTATION_QUALITY_RULES) == 12
+    assert len(DOCUMENTATION_QUALITY_RULES) == 11
     assert all(issubclass(rule, Documentation) for rule in DOCUMENTATION_QUALITY_RULES)
 
 
@@ -113,7 +113,7 @@ def test_required_documentation_files_are_checked(
     ("rule_id", "setting"),
     [
         ("DOC003", "numpydoc"),
-        ("DOC005", "intersphinx"),
+        ("DOC004", "intersphinx"),
     ],
 )
 def test_sphinx_extensions_are_checked(tmp_path: Path, rule_id: str, setting: str) -> None:
@@ -126,25 +126,11 @@ def test_sphinx_extensions_are_checked(tmp_path: Path, rule_id: str, setting: st
     assert _rule(rule_id).check(tmp_path, None) is True
 
 
-def test_sphinx_design_is_recommended_but_optional(tmp_path: Path) -> None:
-    _write_documentation(tmp_path, conf="extensions = []\n")
-
-    result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC004"}, selected_families={"documentation"}
-    )["results"][0]
-    assert result["status"] == "RECOMMENDATION"
-    assert "Sphinx Design components" in result["detail"]
-
-    _write_documentation(tmp_path, conf="extensions = ['sphinx_design']\n")
-
-    assert _rule("DOC004").check(tmp_path, None) is True
-
-
 @pytest.mark.parametrize(
     ("rule_id", "index"),
     [
-        ("DOC006", "Getting Started\n===============\n"),
-        ("DOC007", "API Reference\n==============\n"),
+        ("DOC005", "Getting Started\n===============\n"),
+        ("DOC006", "API Reference\n==============\n"),
     ],
 )
 def test_documentation_index_sections_are_checked(tmp_path: Path, rule_id: str, index: str) -> None:
@@ -160,7 +146,7 @@ def test_documentation_index_sections_are_checked(tmp_path: Path, rule_id: str, 
 def test_gallery_check_is_not_applicable_without_gallery_extension(tmp_path: Path) -> None:
     _write_documentation(tmp_path, conf="extensions = []\n")
 
-    assert _rule("DOC008").check(tmp_path, None) is True
+    assert _rule("DOC007").check(tmp_path, None) is True
 
 
 def test_sphinx_gallery_recommends_configured_example_files(tmp_path: Path) -> None:
@@ -174,7 +160,7 @@ def test_sphinx_gallery_recommends_configured_example_files(tmp_path: Path) -> N
     )
 
     result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC008"}, selected_families={"documentation"}
+        tmp_path, selected_rule_ids={"DOC007"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "RECOMMENDATION"
     assert "example files" in result["detail"]
@@ -183,14 +169,14 @@ def test_sphinx_gallery_recommends_configured_example_files(tmp_path: Path) -> N
     examples.mkdir(parents=True)
     (examples / "example.py").write_text("print('example')\n", encoding="utf-8")
 
-    assert _rule("DOC008").check(tmp_path, None) is True
+    assert _rule("DOC007").check(tmp_path, None) is True
 
 
 def test_nbsphinx_recommends_example_files(tmp_path: Path) -> None:
     _write_documentation(tmp_path, conf="extensions = ['nbsphinx']\n")
 
     result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC008"}, selected_families={"documentation"}
+        tmp_path, selected_rule_ids={"DOC007"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "RECOMMENDATION"
     assert "example files" in result["detail"]
@@ -199,7 +185,7 @@ def test_nbsphinx_recommends_example_files(tmp_path: Path) -> None:
     examples.mkdir(parents=True)
     (examples / "example.ipynb").write_text("{}\n", encoding="utf-8")
 
-    assert _rule("DOC008").check(tmp_path, None) is True
+    assert _rule("DOC007").check(tmp_path, None) is True
 
 
 @pytest.mark.parametrize(
@@ -215,7 +201,7 @@ def test_required_theme_and_brand_settings_are_checked(tmp_path: Path, old: str,
     _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
 
     result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC009"}, selected_families={"documentation"}
+        tmp_path, selected_rule_ids={"DOC008"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "WARNING"
     assert "pyansys logo" in result["detail"]
@@ -226,7 +212,7 @@ def test_project_and_page_titles_must_be_nonempty(tmp_path: Path) -> None:
         tmp_path, conf=_VALID_CONF.replace('project = "test-project"', 'project = ""')
     )
 
-    assert _rule("DOC010").check(tmp_path, None) is False
+    assert _rule("DOC009").check(tmp_path, None) is False
 
     _write_documentation(
         tmp_path,
@@ -235,13 +221,13 @@ def test_project_and_page_titles_must_be_nonempty(tmp_path: Path) -> None:
         ),
     )
 
-    assert _rule("DOC010").check(tmp_path, None) is False
+    assert _rule("DOC009").check(tmp_path, None) is False
 
 
 def test_site_metadata_accepts_dynamic_year_and_cname_fallback(tmp_path: Path) -> None:
     _write_documentation(tmp_path)
 
-    assert _rule("DOC011").check(tmp_path, None) is True
+    assert _rule("DOC010").check(tmp_path, None) is True
 
 
 @pytest.mark.parametrize(
@@ -264,7 +250,7 @@ def test_site_metadata_recommends_missing_or_invalid_values(
     _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
 
     result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC011"}, selected_families={"documentation"}
+        tmp_path, selected_rule_ids={"DOC010"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "RECOMMENDATION"
 
@@ -272,7 +258,7 @@ def test_site_metadata_recommends_missing_or_invalid_values(
 def test_theme_switcher_accepts_dynamic_config_values(tmp_path: Path) -> None:
     _write_documentation(tmp_path)
 
-    assert _rule("DOC012").check(tmp_path, None) is True
+    assert _rule("DOC011").check(tmp_path, None) is True
 
 
 @pytest.mark.parametrize(
@@ -286,6 +272,6 @@ def test_theme_switcher_recommends_missing_settings(tmp_path: Path, old: str, ne
     _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
 
     result = report._run_checks(
-        tmp_path, selected_rule_ids={"DOC012"}, selected_families={"documentation"}
+        tmp_path, selected_rule_ids={"DOC011"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "RECOMMENDATION"

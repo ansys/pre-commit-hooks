@@ -53,7 +53,6 @@ __all__ = [
     "DOC009",
     "DOC010",
     "DOC011",
-    "DOC012",
     "DOCUMENTATION_QUALITY_RULES",
     "Documentation",
 ]
@@ -223,20 +222,6 @@ class DOC003(Documentation):
 
 
 class DOC004(Documentation):
-    """Sphinx Design is configured when its components are used."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Recommend sphinx_design when it is not configured."""
-        if _contains(repository_root, _SPHINX_CONFIG, "sphinx_design"):
-            return True
-        return (
-            "RECOMMENDATION: Enable sphinx_design in doc/source/conf.py when using "
-            "Sphinx Design components."
-        )
-
-
-class DOC005(Documentation):
     """The Sphinx config includes intersphinx."""
 
     @staticmethod
@@ -245,7 +230,7 @@ class DOC005(Documentation):
         return _contains(repository_root, _SPHINX_CONFIG, "intersphinx")
 
 
-class DOC006(Documentation):
+class DOC005(Documentation):
     """The index page has a getting started section."""
 
     @staticmethod
@@ -254,7 +239,7 @@ class DOC006(Documentation):
         return _contains(repository_root, _DOC_INDEX, re.compile(r"getting.started", re.IGNORECASE))
 
 
-class DOC007(Documentation):
+class DOC006(Documentation):
     """The index page has an API reference section."""
 
     @staticmethod
@@ -267,7 +252,7 @@ class DOC007(Documentation):
         )
 
 
-class DOC008(Documentation):
+class DOC007(Documentation):
     """Gallery examples are recommended when a gallery extension is enabled."""
 
     @staticmethod
@@ -287,21 +272,21 @@ class DOC008(Documentation):
 
         if has_sphinx_gallery:
             if not (re.search(r"\bexamples_dirs\b", conf) and re.search(r"\bgallery_dirs\b", conf)):
-                return DOC008._examples_recommendation()
-            examples_dirs = DOC008._extract_examples_dirs(conf)
+                return DOC007._examples_recommendation()
+            examples_dirs = DOC007._extract_examples_dirs(conf)
             if examples_dirs and all(
-                DOC008._configured_examples_dir_has_files(repository_root, path)
+                DOC007._configured_examples_dir_has_files(repository_root, path)
                 for path in examples_dirs
             ):
                 return True
-            return DOC008._examples_recommendation()
+            return DOC007._examples_recommendation()
 
         if any(
-            DOC008._dir_has_files(repository_root, candidate)
+            DOC007._dir_has_files(repository_root, candidate)
             for candidate in ("examples", "doc/examples", "doc/source/examples")
         ):
             return True
-        return DOC008._examples_recommendation()
+        return DOC007._examples_recommendation()
 
     @staticmethod
     def _examples_recommendation() -> str:
@@ -330,7 +315,7 @@ class DOC008(Documentation):
         if directory is None:
             return False
         try:
-            return directory.is_dir() and DOC008._dir_tree_has_files(directory)
+            return directory.is_dir() and DOC007._dir_tree_has_files(directory)
         except OSError:
             return False
 
@@ -341,7 +326,7 @@ class DOC008(Documentation):
             for entry in directory.iterdir():
                 if entry.is_file():
                     return True
-                if entry.is_dir() and not entry.is_symlink() and DOC008._dir_tree_has_files(entry):
+                if entry.is_dir() and not entry.is_symlink() and DOC007._dir_tree_has_files(entry):
                     return True
         except OSError:
             return False
@@ -355,10 +340,10 @@ class DOC008(Documentation):
         repository-root-relative paths are also supported.
         """
         candidates = (f"doc/source/{configured_path}", configured_path)
-        return any(DOC008._dir_has_files(repository_root, path) for path in candidates)
+        return any(DOC007._dir_has_files(repository_root, path) for path in candidates)
 
 
-class DOC009(Documentation):
+class DOC008(Documentation):
     """The Ansys Sphinx theme and PyAnsys branding are configured."""
 
     @staticmethod
@@ -381,7 +366,7 @@ class DOC009(Documentation):
         return True
 
 
-class DOC010(Documentation):
+class DOC009(Documentation):
     """Project and page titles are configured."""
 
     @staticmethod
@@ -396,7 +381,7 @@ class DOC010(Documentation):
         )
 
 
-class DOC011(Documentation):
+class DOC010(Documentation):
     """Site author, copyright, and CNAME metadata are configured."""
 
     @staticmethod
@@ -422,7 +407,7 @@ class DOC011(Documentation):
         )
 
 
-class DOC012(Documentation):
+class DOC011(Documentation):
     """The Ansys theme version switcher is configured."""
 
     @staticmethod
