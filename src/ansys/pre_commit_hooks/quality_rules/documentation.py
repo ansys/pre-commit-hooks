@@ -363,16 +363,22 @@ class DOC009(Documentation):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Check required Sphinx theme and brand settings."""
+        """Warn when the Ansys Sphinx theme or branding settings are missing."""
         assignments = _sphinx_assignments(repository_root)
         if assignments is None:
-            return False
-        return (
+            return f"WARNING: Cannot verify theme and branding settings in {_SPHINX_CONFIG}."
+        configured = (
             _literal(assignments.get("html_theme")) == "ansys_sphinx_theme"
             and _literal(_dict_value(assignments.get("html_theme_options"), "logo")) == "pyansys"
             and isinstance(assignments.get("html_favicon"), ast.Name)
             and assignments["html_favicon"].id == "ansys_favicon"
         )
+        if not configured:
+            return (
+                f"WARNING: Configure html_theme='ansys_sphinx_theme', the pyansys logo, and "
+                f"ansys_favicon in {_SPHINX_CONFIG}."
+            )
+        return True
 
 
 class DOC010(Documentation):

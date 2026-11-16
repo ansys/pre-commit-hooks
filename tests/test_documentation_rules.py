@@ -214,7 +214,11 @@ def test_nbsphinx_recommends_example_files(tmp_path: Path) -> None:
 def test_required_theme_and_brand_settings_are_checked(tmp_path: Path, old: str, new: str) -> None:
     _write_documentation(tmp_path, conf=_VALID_CONF.replace(old, new))
 
-    assert _rule("DOC009").check(tmp_path, None) is False
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC009"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "WARNING"
+    assert "pyansys logo" in result["detail"]
 
 
 def test_project_and_page_titles_must_be_nonempty(tmp_path: Path) -> None:
