@@ -447,10 +447,13 @@ def test_sphinx_autoapi_extension_is_detected(tmp_path: Path, extension: str) ->
     assert _rule("DOC029").check(tmp_path, None) is True
 
 
-def test_sphinx_autoapi_marker_is_detected_anywhere_in_config(tmp_path: Path) -> None:
+def test_unrelated_sphinx_autoapi_name_does_not_count(tmp_path: Path) -> None:
     _write_documentation(tmp_path, conf='SPHINX_AUTOAPI = "sphinx_autoapi"\n')
 
-    assert _rule("DOC029").check(tmp_path, None) is True
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC029"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "WARNING"
 
 
 @pytest.mark.parametrize("api_page", ["api.rst", "api/index.rst"])

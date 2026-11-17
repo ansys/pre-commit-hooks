@@ -784,7 +784,6 @@ class DOC029(Documentation):
         if config is None:
             return f"WARNING: Cannot inspect {_SPHINX_CONFIG}; enable AutoAPI or add an API page."
         autoapi_markers = (
-            "sphinx_autoapi",
             "ansys_sphinx_theme.extension.autoapi",
             "autoapi.extension",
         )
