@@ -33,7 +33,7 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 30))
+_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 31))
 _VALID_INDEX = """\
 Getting Started
 ===============
@@ -87,7 +87,7 @@ def test_registry_contains_all_documentation_rules() -> None:
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "documentation" for rule in rules.values())
-    assert len(DOCUMENTATION_QUALITY_RULES) == 29
+    assert len(DOCUMENTATION_QUALITY_RULES) == 30
     assert all(issubclass(rule, Documentation) for rule in DOCUMENTATION_QUALITY_RULES)
 
 
@@ -439,3 +439,37 @@ def test_sphinx_autoapi_extension_is_required(tmp_path: Path, extension: str) ->
 
     _write_documentation(tmp_path, conf=f"extensions = ['{extension}']\n")
     assert _rule("DOC029").check(tmp_path, None) is True
+
+
+def test_cheatsheet_configuration_is_recommended_and_recognized(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC030"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert result["detail"] == "Add a cheatsheet to the documentation."
+
+    conf = _VALID_CONF.replace(
+        '    "logo": "pyansys",',
+        '    "logo": "pyansys",\n'
+        '    "cheatsheet": {"file": "cheat_sheet/cheat_sheet.qmd", '
+        '"title": "Project cheat sheet", "version": f"{version}", '
+        '"pages": ["index"]},',
+    )
+    _write_documentation(tmp_path, conf=conf)
+
+    assert _rule("DOC030").check(tmp_path, None) is True
+
+
+def test_cheatsheet_recommends_missing_required_fields(tmp_path: Path) -> None:
+    conf = _VALID_CONF.replace(
+        '    "logo": "pyansys",',
+        '    "logo": "pyansys",\n    "cheatsheet": {"file": "", "pages": []},',
+    )
+    _write_documentation(tmp_path, conf=conf)
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC030"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert result["detail"] == "Add a cheatsheet to the documentation."

@@ -74,6 +74,7 @@ __all__ = [
     "DOC027",
     "DOC028",
     "DOC029",
+    "DOC030",
     "DOCUMENTATION_QUALITY_RULES",
     "Documentation",
 ]
@@ -787,6 +788,44 @@ class DOC029(Documentation):
             "autoapi.extension",
         }
         return any(extension in supported_extensions for extension in extensions)
+
+
+class DOC030(Documentation):
+    """A cheatsheet is added to the documentation."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend adding a cheatsheet to the documentation."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return True
+        theme_options = assignments.get("html_theme_options")
+        if theme_options is None:
+            missing = ["cheatsheet"]
+        elif not isinstance(theme_options, ast.Dict):
+            return True
+        else:
+            cheatsheet = _dict_value(theme_options, "cheatsheet")
+            if cheatsheet is None:
+                missing = ["cheatsheet"]
+            elif not isinstance(cheatsheet, ast.Dict):
+                missing = ["file", "title", "version", "pages"]
+            else:
+                missing = []
+                for key in ("file", "title", "version"):
+                    if not _has_nonempty_setting(_dict_value(cheatsheet, key)):
+                        missing.append(key)
+                pages = _literal(_dict_value(cheatsheet, "pages"))
+                if (
+                    not isinstance(pages, (list, tuple))
+                    or not pages
+                    or not all(isinstance(page, str) and page.strip() for page in pages)
+                ):
+                    missing.append("pages")
+
+        if not missing:
+            return True
+        return "RECOMMENDATION: Add a cheatsheet to the documentation."
 
 
 DOCUMENTATION_QUALITY_RULES: tuple[type[Documentation], ...] = tuple(
