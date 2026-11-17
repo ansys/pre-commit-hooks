@@ -213,21 +213,31 @@ class DOC002(Documentation):
 
 
 class DOC003(Documentation):
-    """The Sphinx config includes numpydoc."""
+    """Numpydoc is enabled for NumPy-style API documentation."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether numpydoc is enabled in the Sphinx configuration."""
-        return _contains(repository_root, _SPHINX_CONFIG, "numpydoc")
+        """Recommend numpydoc for rendering NumPy-style API documentation."""
+        if _contains(repository_root, _SPHINX_CONFIG, "numpydoc"):
+            return True
+        return (
+            f"RECOMMENDATION: Enable numpydoc in {_SPHINX_CONFIG} to render NumPy-style "
+            "API documentation."
+        )
 
 
 class DOC004(Documentation):
-    """The Sphinx config includes intersphinx."""
+    """Intersphinx is enabled for cross-project documentation references."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether intersphinx is enabled in the Sphinx configuration."""
-        return _contains(repository_root, _SPHINX_CONFIG, "intersphinx")
+        """Recommend intersphinx for linking to external project documentation."""
+        if _contains(repository_root, _SPHINX_CONFIG, "intersphinx"):
+            return True
+        return (
+            f"RECOMMENDATION: Enable intersphinx in {_SPHINX_CONFIG} to link references "
+            "to external documentation."
+        )
 
 
 class DOC005(Documentation):

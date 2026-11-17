@@ -110,16 +110,22 @@ def test_required_documentation_files_are_checked(
 
 
 @pytest.mark.parametrize(
-    ("rule_id", "setting"),
+    ("rule_id", "setting", "reason"),
     [
-        ("DOC003", "numpydoc"),
-        ("DOC004", "intersphinx"),
+        ("DOC003", "numpydoc", "NumPy-style API documentation"),
+        ("DOC004", "intersphinx", "external documentation"),
     ],
 )
-def test_sphinx_extensions_are_checked(tmp_path: Path, rule_id: str, setting: str) -> None:
+def test_sphinx_extensions_are_recommended(
+    tmp_path: Path, rule_id: str, setting: str, reason: str
+) -> None:
     _write_documentation(tmp_path, conf="extensions = []\n")
 
-    assert _rule(rule_id).check(tmp_path, None) is False
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={rule_id}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "RECOMMENDATION"
+    assert reason in result["detail"]
 
     _write_documentation(tmp_path, conf=f"extensions = ['{setting}']\n")
 
