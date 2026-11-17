@@ -48,7 +48,7 @@ DEFAULT_LICENSE = "MIT"
 """Default license for headers."""
 DEFAULT_START_YEAR = dt.today().year
 """Fallback start year used when git history is unavailable."""
-YEAR_REGEX = r"(\d{4}) - (\d{4})|\d{4}"
+COPYRIGHT_YEAR_REGEX = r"(Copyright(?:\s+\([cC]\))?\s+)(\d{4})(?:\s*-\s*(\d{4}))?"
 """Year regex to match year or year range in files."""
 HEADER_PEEK_BYTES = 1024
 """Number of bytes read from the top of a file to check for an existing license header.
@@ -271,8 +271,7 @@ def update_license_file(
         # Searching for the first year in the file is incorrect for licenses like
         # Apache-2.0 whose boilerplate contains "January 2004" before the copyright
         # notice, which would otherwise be overwritten with the current year.
-        copyright_year_regex = r"(Copyright(?:\s+\(c\))?\s+)((?:\d{4}\s+-\s+)?\d{4})"
-        year_range_match = re.search(copyright_year_regex, content)
+        year_range_match = re.search(COPYRIGHT_YEAR_REGEX, content)
 
         if year_range_match:
             # Get the group from the year_range_match
@@ -281,7 +280,7 @@ def update_license_file(
             # Replace the current year span with the updated year span
             if year_range != year_span:
                 # Update the year span in the LICENSE file. "1" is the max number of replacements
-                content = re.sub(copyright_year_regex, rf"\g<1>{year_span}", content, 1)
+                content = re.sub(COPYRIGHT_YEAR_REGEX, rf"\g<1>{year_span}", content, 1)
 
                 with repo_license_path.open(encoding="utf-8", newline="", mode="w") as file:
                     file.write(content)
@@ -452,7 +451,20 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     except OSError:
         return False
 
-    # Check both the copyright holder and year range are present in the header
+    # Get year span from file header
+    year_range_match = re.search(COPYRIGHT_YEAR_REGEX, head)
+    if year_range_match:
+        print(f"year_range_match: {year_range_match}")
+        start_year = year_range_match.group(2)
+        end_year = year_range_match.group(3)
+        file_years = f"{start_year} - {end_year}" if end_year else start_year
+
+        print(f"file years: {file_years}")
+        print(f"new years: {years}")
+
+        # Check both the copyright holder and year range are present in the header
+        return copyright[0] in head and years == file_years
+
     return copyright[0] in head and years in head
 
 
@@ -586,6 +598,7 @@ def non_recursive_file_check(
                 _head = ""
             copyright_holder_changed = copyright[0] not in _head
             if not existing_license_matches or copyright_holder_changed:
+                print("not existing license matches or copyright holder changed")
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
@@ -595,6 +608,7 @@ def non_recursive_file_check(
                     print(f"Successfully changed header of {file}")
                 Path(before_hook).unlink()
             else:
+                print("non recursive else")
                 changed_headers = update_header(
                     changed_headers, file, copyright, license, years, template, commented
                 )
@@ -633,6 +647,7 @@ def set_variables(obj: "common.ClickObj", values: dict, args: argparse.Namespace
         if values["start_year"] != values["current_year"]
         else f"{values['current_year']}"
     )
+    print(f"set var years: {years}")
 
     return project, template, commented, license, files, copyright, years
 
@@ -682,9 +697,8 @@ def update_header(
     # When force_license is True, keep the license list populated so that
     # add_header replaces the existing (wrong) SPDX-License-Identifier.
     # Otherwise, clear the list to avoid adding the identifier a second time.
-    effective_license = (
-        license if force_license else []
-    )  # If the license type is changing, strip the old header first so REUSE
+    effective_license = license if force_license else []
+    # If the license type is changing, strip the old header first so REUSE
     # doesn't merge the old SPDX-License-Identifier with the new one.
     if force_license:
         _strip_reuse_header(file)
@@ -703,18 +717,19 @@ def update_header(
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
     # from other hooks before add-license-headers was run to the file
-    if check_same_content(before_hook, file) is False:
-        apply_hook_changes(before_hook, file)
+    # if check_same_content(before_hook, file) is False:
+    #     apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
     years_list = years.split(" - ")
+    print(f"years_list: {years_list}")
     if len(years_list) == 1:
         if int(years_list[0]) != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
         else:
             years_list.append(years_list[0])
     changed_headers = update_year_range(
-        changed_headers, file, YEAR_REGEX, years_list[0], years_list[1]
+        changed_headers, file, COPYRIGHT_YEAR_REGEX, years_list[0], years_list[1]
     )
 
     # Check if the file content before add-license-headers was run has been changed
@@ -764,6 +779,7 @@ def add_header(
 
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
+    print(f"add_header_years: {year_range}")
 
     # Get the REUSE information from the file.
     reuse_info = get_reuse_info(
@@ -793,7 +809,13 @@ def add_header(
     # Add a space before and after the year range if there is not already one
     with Path(file).open(encoding="utf-8", newline="", mode="r") as read_file:
         content = read_file.read()
-    content = re.sub(r"(\d{4})-(\d{4})", r"\1 - \2", content)
+
+        # Get the copyright and year(s) from the file and add spacing if multiple years
+        copyright_line = re.search(COPYRIGHT_YEAR_REGEX, content)
+        end_year = copyright_line.group(3)
+        if end_year:
+            # \1 is Copyright (c), \2 is start year and \3 is end year
+            content = re.sub(COPYRIGHT_YEAR_REGEX, r"\1\2 - \3", content)
 
     # Write the updated content back to the file
     with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -921,7 +943,7 @@ def update_year_range(
         content = "".join(lines)
 
     # Get the existing start and end years from the copyright line in the file
-    match_start_year, match_end_year = get_years_from_file(content, year_regex)
+    cp_statement, match_start_year, match_end_year = get_years_from_file(content, year_regex)
 
     # Set the year spans for the user input and the years found in the file (match year span)
     user_year_span = (
@@ -940,7 +962,7 @@ def update_year_range(
     if (user_year_span != match_year_span) and (match_year_span != current_year):
         changed_headers = 1
         # Update the year span in the header. "1" is the max number of replacements
-        content = re.sub(year_regex, user_year_span, content, 1)
+        content = re.sub(year_regex, f"{cp_statement}{user_year_span}", content, 1)
 
         # Update the file with the new year span
         with Path(file).open(encoding="utf-8", newline="", mode="w") as write_file:
@@ -964,16 +986,22 @@ def get_years_from_file(content: str, year_regex: str) -> tuple:
     # Get the group from the year_range_match
     year_range = year_range_match.group()
 
+    # Copyright (c) statement
+    cp_statement = year_range_match.group(1)
+
     # Set the match start & end years depending on if the year range is a
     # single year or a range of years
     if "-" in year_range:
-        match_start_year = year_range_match.group(1)
-        match_end_year = year_range_match.group(2)
+        match_start_year = year_range_match.group(2)
+        match_end_year = year_range_match.group(3)
     else:
-        match_start_year = year_range
-        match_end_year = year_range
+        match_start_year = year_range_match.group(2)
+        match_end_year = year_range_match.group(2)
 
-    return match_start_year, match_end_year
+    print(match_start_year)
+    print(match_end_year)
+
+    return cp_statement, match_start_year, match_end_year
 
 
 def cleanup(assets: dict, os_git_root: str) -> None:

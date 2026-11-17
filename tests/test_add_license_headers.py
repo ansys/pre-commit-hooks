@@ -1224,3 +1224,60 @@ def test_copyright_holder_change_replaces_not_duplicates(tmp_path: pytest.TempPa
     )
 
     os.chdir(REPO_PATH)
+
+
+@pytest.mark.add_license_headers
+def test_date_change_only_in_header(tmp_path: pytest.TempPathFactory):
+    """Test the date in the header is the only content changed."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    license_name = "MIT.txt"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_path = Path(REPO_PATH) / "LICENSES" / license_name
+
+    # Move to temporary directory
+    os.chdir(tmp_path)
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Add content to the tmp_file
+    with open(tmp_file, "a") as file:
+        file.write("""def my_function():
+        uuid = "{A666C3AB-D6ED-4164-8454-9D4A4C49AC52}"
+        ports = "20000-20010"
+        """)
+
+    custom_args = [tmp_file, f"--start_year={START_YEAR}"]
+
+    # Years to update the LICENSE file
+    years = ["2022", "2023", str(dt.today().year)]
+
+    # Check the copyright line has "2023 - {current_year}", "2022 - {current_year}"
+    # and "{current_year}" (contained within the preserved range)
+    for year in years:
+        custom_args = [tmp_file, f"--start_year={year}"]
+        # Git add tmp_file and run hook with custom arguments
+        result = add_argv_run(repo, tmp_file, custom_args)
+        # When the start year differs from the current year the hook must update the
+        # header (return code 1).  When start_year equals the current year and files
+        # already have the current year as their end year (set during earlier
+        # iterations), the hook preserves the existing range and returns 0.
+        if str(year) != str(dt.today().year):
+            assert result == 1
+        # Check the license year is correctly updated
+        check_license_year(tmp_file, DEFAULT_COPYRIGHT, year, str(dt.today().year))
+
+        # Check the function content wasn't changed
+        with open(tmp_file, "r") as file:
+            for line in file:
+                print(line)
+                if "uuid =" in line:
+                    assert 'uuid = "{A666C3AB-D6ED-4164-8454-9D4A4C49AC52}"' in line
+                elif "ports =" in line:
+                    assert 'ports = "20000-20010"' in line
+
+        # Add file with updated header
+        repo.index.add([tmp_file])
+
+    os.chdir(REPO_PATH)
