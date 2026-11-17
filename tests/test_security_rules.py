@@ -203,20 +203,13 @@ def test_pinned_actions_need_a_version_comment(tmp_path: Path, comment: str) -> 
     assert _check(tmp_path, "SEC004") is True
 
 
-@pytest.mark.parametrize(
-    ("path", "content"),
-    [
-        (".github/SECURITY.md", _SECURITY_POLICY),
-        (
-            "docs/SECURITY.md",
-            "Please don't report security vulnerabilities through public GitHub issues.",
-        ),
-    ],
-)
-def test_security_policy_locations_and_wording(tmp_path: Path, path: str, content: str) -> None:
-    _write(tmp_path, path, content)
+@pytest.mark.parametrize("path", [".github/SECURITY.md", "docs/SECURITY.md"])
+def test_security_policy_must_be_at_the_root_only(tmp_path: Path, path: str) -> None:
+    _write(tmp_path, path, _SECURITY_POLICY)
+    _assert_status(_check(tmp_path, "SEC005"), "ERROR", "only at the repository root", path)
 
-    assert _check(tmp_path, "SEC005") is True
+    _write(tmp_path, "SECURITY.md", _SECURITY_POLICY)
+    _assert_status(_check(tmp_path, "SEC005"), "ERROR", path)
 
 
 def test_security_policy_must_discourage_public_issues(tmp_path: Path) -> None:

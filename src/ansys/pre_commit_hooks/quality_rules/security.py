@@ -83,9 +83,8 @@ _SECRETS_OUTSIDE_ENV: Final[str] = "secrets-outside-env"
 _GITLEAKS_HOOK_IDS: Final[frozenset[str]] = frozenset(
     {"gitleaks", "gitleaks-docker", "gitleaks-system"}
 )
-# Locations where GitHub looks for a security policy, in lookup order.
-_SECURITY_POLICIES: Final[tuple[str, ...]] = (
-    "SECURITY.md",
+_SECURITY_POLICY: Final[str] = "SECURITY.md"
+_MISPLACED_SECURITY_POLICIES: Final[tuple[str, ...]] = (
     ".github/SECURITY.md",
     "docs/SECURITY.md",
 )
@@ -461,16 +460,22 @@ class SEC005(Security):
         Returns
         -------
         bool or str
-            ``True`` when the first ``SECURITY.md`` that GitHub would use tells
+            ``True`` when the root ``SECURITY.md`` is the only policy file and tells
             reporters not to use (public) issues, otherwise an error.
         """
-        policy = next(
-            (path for path in _SECURITY_POLICIES if file_exists(repository_root, path)), None
-        )
-        if policy is None:
+        policy = _SECURITY_POLICY
+        misplaced = [
+            path for path in _MISPLACED_SECURITY_POLICIES if file_exists(repository_root, path)
+        ]
+        if misplaced:
             return (
-                "ERROR: Add a SECURITY.md file that explains how to report vulnerabilities "
-                "privately instead of in public issues."
+                f"ERROR: Keep the security policy only at the repository root as {policy}; "
+                f"remove {', '.join(misplaced)}."
+            )
+        if not file_exists(repository_root, policy):
+            return (
+                "ERROR: Add a SECURITY.md file at the repository root that explains how to "
+                "report vulnerabilities privately instead of in public issues."
             )
         content = file_content(repository_root, policy)
         if content is None:
