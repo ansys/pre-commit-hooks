@@ -22,8 +22,9 @@
 
 """Documentation structure and Sphinx configuration checks.
 
-The checks cover the documentation source tree, Sphinx extensions and index
-sections, and example configuration for supported gallery extensions.
+The checks cover the documentation source tree and layout, Sphinx configuration,
+index card links, authored RST filenames, gallery examples, and API docstring
+coverage tooling.
 """
 
 from __future__ import annotations
@@ -33,6 +34,8 @@ from pathlib import Path
 import re
 from typing import ClassVar, Final
 from urllib.parse import urlsplit
+
+import yaml
 
 from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,
@@ -53,13 +56,40 @@ __all__ = [
     "DOC009",
     "DOC010",
     "DOC011",
+    "DOC012",
+    "DOC013",
+    "DOC014",
+    "DOC015",
+    "DOC016",
+    "DOC017",
+    "DOC018",
+    "DOC019",
+    "DOC020",
+    "DOC021",
+    "DOC022",
+    "DOC023",
+    "DOC024",
+    "DOC025",
+    "DOC026",
+    "DOC027",
+    "DOC028",
+    "DOC029",
     "DOCUMENTATION_QUALITY_RULES",
     "Documentation",
 ]
 
 _DOC_INDEX: Final[str] = "doc/source/index.rst"
 _SPHINX_CONFIG: Final[str] = "doc/source/conf.py"
+_PRE_COMMIT_CONFIG: Final[str] = ".pre-commit-config.yaml"
 _NOT_LITERAL: Final[object] = object()
+_INDEX_CARD_TARGETS: Final[tuple[str, ...]] = (
+    "getting-started",
+    "user-guide",
+    "api",
+    "examples",
+    "contribute",
+    "changelog",
+)
 
 
 def _contains(repository_root: Path, relative_path: str, pattern: str | re.Pattern[str]) -> bool:
@@ -186,6 +216,82 @@ def _valid_switcher_url(node: ast.expr | None) -> bool:
         )
         return static_parts.startswith("https://") and "/versions.json" in static_parts
     return isinstance(node, (ast.Call, ast.Name, ast.Attribute))
+
+
+def _index_card_doc_targets(content: str) -> set[str]:
+    """Return document targets linked from Sphinx Design card directives."""
+    lines = content.splitlines()
+    targets: set[str] = set()
+    directive = re.compile(r"^(?P<indent>[ \t]*)\.\.\s+(?:grid-item-card|card)::")
+    for index, line in enumerate(lines):
+        match = directive.match(line)
+        if match is None:
+            continue
+        indent = len(match.group("indent"))
+        block: list[str] = []
+        for block_line in lines[index + 1 :]:
+            if block_line.strip() and len(block_line) - len(block_line.lstrip(" \t")) <= indent:
+                break
+            block.append(block_line)
+        block_text = "\n".join(block)
+        link_type = re.search(r"(?m)^\s*:link-type:\s*(\S+)", block_text)
+        link = re.search(r"(?m)^\s*:link:\s*(\S+)", block_text)
+        if link_type is not None and link_type.group(1).lower() == "doc" and link is not None:
+            target = link.group(1).strip().removesuffix(".rst").strip("/")
+            if target.endswith("/index"):
+                target = target.removesuffix("/index")
+            targets.add(target)
+    return targets
+
+
+def _authored_rst_paths(repository_root: Path) -> list[Path] | None:
+    """Return authored RST files, excluding generated AutoAPI source pages."""
+    source_directory = _repository_file(repository_root, "doc/source")
+    if source_directory is None:
+        return None
+    try:
+        return [
+            path
+            for path in source_directory.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() == ".rst"
+            and path.relative_to(source_directory).parts[:2] != ("api", "src")
+        ]
+    except OSError:
+        return None
+
+
+def _directory_has_files(repository_root: Path, relative_path: str) -> bool:
+    """Return whether a documentation section contains at least one file."""
+    directory = _repository_file(repository_root, f"doc/source/{relative_path}")
+    if directory is None:
+        return False
+    try:
+        return directory.is_dir() and any(entry.is_file() for entry in directory.rglob("*"))
+    except OSError:
+        return False
+
+
+def _has_interrogate_hook(repository_root: Path) -> bool:
+    """Return whether the pre-commit configuration declares an interrogate hook."""
+    content = file_content(repository_root, _PRE_COMMIT_CONFIG)
+    if content is None:
+        return False
+    try:
+        configuration: object = yaml.safe_load(content)
+    except yaml.YAMLError:
+        return False
+    if not isinstance(configuration, dict):
+        return False
+    repositories = configuration.get("repos")
+    if not isinstance(repositories, list):
+        return False
+    return any(
+        isinstance(repository, dict)
+        and isinstance(hooks := repository.get("hooks"), list)
+        and any(isinstance(hook, dict) and hook.get("id") == "interrogate" for hook in hooks)
+        for repository in repositories
+    )
 
 
 class Documentation:
@@ -451,6 +557,236 @@ class DOC011(Documentation):
             "RECOMMENDATION: Configure "
             f"{', '.join(missing)} in html_theme_options['switcher'] in {_SPHINX_CONFIG}."
         )
+
+
+class DOC012(Documentation):
+    """The index links required documentation pages with cards."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Require Sphinx Design cards linking to every top-level docs page."""
+        index = file_content(repository_root, _DOC_INDEX)
+        if index is None:
+            return f"WARNING: Cannot check documentation cards because {_DOC_INDEX} cannot be read."
+        linked_targets = _index_card_doc_targets(index)
+        missing = [target for target in _INDEX_CARD_TARGETS if target not in linked_targets]
+        if missing:
+            return (
+                f"WARNING: Add documentation cards in {_DOC_INDEX} linking to: "
+                f"{', '.join(missing)}."
+            )
+        return True
+
+
+class DOC013(Documentation):
+    """Authored RST filenames use lowercase letters and hyphens."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Reject authored RST filenames with uppercase letters or underscores."""
+        paths = _authored_rst_paths(repository_root)
+        if paths is None:
+            return "WARNING: Cannot inspect RST files under doc/source."
+        invalid = [
+            path.relative_to(repository_root).as_posix()
+            for path in paths
+            if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*\.rst", path.name) is None
+        ]
+        if invalid:
+            return (
+                "WARNING: Rename RST files to lowercase words separated by hyphens: "
+                f"{', '.join(sorted(invalid))}."
+            )
+        return True
+
+
+def _layout_page_result(
+    repository_root: Path, page: str, *, alternatives: tuple[str, ...] = ()
+) -> RuleCheckResult:
+    """Recommend a missing page, accepting any supported repository-relative path."""
+    paths = (page, *alternatives)
+    if any(file_exists(repository_root, f"doc/source/{path}") for path in paths):
+        return True
+    locations = " or ".join(f"doc/source/{path}" for path in paths)
+    return f"RECOMMENDATION: Add a documentation page at {locations}."
+
+
+def _layout_section_result(repository_root: Path, section: str) -> RuleCheckResult:
+    """Recommend content when a documentation section has no files."""
+    if _directory_has_files(repository_root, section):
+        return True
+    return f"RECOMMENDATION: Add content under doc/source/{section}/."
+
+
+class DOC014(Documentation):
+    """The getting-started page is provided as a root page or section index."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend either supported getting-started page path."""
+        return _layout_page_result(
+            repository_root,
+            "getting-started.rst",
+            alternatives=("getting-started/index.rst",),
+        )
+
+
+class DOC015(Documentation):
+    """The user-guide page is provided as a root page or section index."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend either supported user-guide page path."""
+        return _layout_page_result(
+            repository_root, "user-guide.rst", alternatives=("user-guide/index.rst",)
+        )
+
+
+class DOC016(Documentation):
+    """The API page is provided as a root page or section index."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend either supported API page path."""
+        return _layout_page_result(repository_root, "api.rst", alternatives=("api/index.rst",))
+
+
+class DOC017(Documentation):
+    """The examples page is provided as a root page or section index."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend either supported examples page path."""
+        return _layout_page_result(
+            repository_root, "examples.rst", alternatives=("examples/index.rst",)
+        )
+
+
+class DOC018(Documentation):
+    """The contribute page is provided as a root page or section index."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend either supported contribute page path."""
+        return _layout_page_result(
+            repository_root, "contribute.rst", alternatives=("contribute/index.rst",)
+        )
+
+
+class DOC019(Documentation):
+    """The changelog root page exists."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend the changelog root page when it is missing."""
+        return _layout_page_result(repository_root, "changelog.rst")
+
+
+class DOC020(Documentation):
+    """The getting-started section contains documentation files."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend content when the getting-started section is empty or absent."""
+        return _layout_section_result(repository_root, "getting-started")
+
+
+class DOC021(Documentation):
+    """The user-guide section contains documentation files."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend content when the user-guide section is empty or absent."""
+        return _layout_section_result(repository_root, "user-guide")
+
+
+class DOC022(Documentation):
+    """The API section contains documentation files."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend content when the API section is empty or absent."""
+        return _layout_section_result(repository_root, "api")
+
+
+class DOC023(Documentation):
+    """The examples section contains files."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend content when the examples section is empty or absent."""
+        return _layout_section_result(repository_root, "examples")
+
+
+class DOC024(Documentation):
+    """The contribute section contains documentation files."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend content when the contribute section is empty or absent."""
+        return _layout_section_result(repository_root, "contribute")
+
+
+class DOC025(Documentation):
+    """The user contributor guide is recommended."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend adding the user contributor guide when it is missing."""
+        return _layout_page_result(repository_root, "contribute/user.rst")
+
+
+class DOC026(Documentation):
+    """The documentarian contributor guide is recommended."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend adding the documentarian contributor guide when it is missing."""
+        return _layout_page_result(repository_root, "contribute/documentarian.rst")
+
+
+class DOC027(Documentation):
+    """The developer contributor guide is recommended."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Recommend adding the developer contributor guide when it is missing."""
+        return _layout_page_result(repository_root, "contribute/developer.rst")
+
+
+class DOC028(Documentation):
+    """The interrogate hook checks docstring coverage."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when the interrogate pre-commit hook is not configured."""
+        if _has_interrogate_hook(repository_root):
+            return True
+        return (
+            "WARNING: Add the interrogate pre-commit hook to monitor docstring coverage; "
+            "coverage gaps are advisory."
+        )
+
+
+class DOC029(Documentation):
+    """Sphinx AutoAPI is enabled."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Return whether an AutoAPI extension is enabled in the Sphinx config."""
+        assignments = _sphinx_assignments(repository_root)
+        if assignments is None:
+            return False
+        extensions = _literal(assignments.get("extensions"))
+        if not isinstance(extensions, (list, tuple)) or not all(
+            isinstance(extension, str) for extension in extensions
+        ):
+            return False
+        supported_extensions = {
+            "ansys_sphinx_theme.extension.autoapi",
+            "autoapi.extension",
+        }
+        return any(extension in supported_extensions for extension in extensions)
 
 
 DOCUMENTATION_QUALITY_RULES: tuple[type[Documentation], ...] = tuple(

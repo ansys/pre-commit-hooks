@@ -33,7 +33,7 @@ from ansys.pre_commit_hooks.quality_rules import (
     repo_review_checks,
 )
 
-_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 12))
+_RULE_IDS = tuple(f"DOC{number:03d}" for number in range(1, 30))
 _VALID_INDEX = """\
 Getting Started
 ===============
@@ -76,12 +76,18 @@ def _rule(rule_id: str):
     return repo_review_checks(["documentation"])[rule_id]
 
 
+def _assert_warning(result: object, detail: str) -> None:
+    assert isinstance(result, str)
+    assert result.startswith("WARNING: ")
+    assert detail in result
+
+
 def test_registry_contains_all_documentation_rules() -> None:
     rules = repo_review_checks(["documentation"])
 
     assert tuple(rules) == _RULE_IDS
     assert all(rule.family == "documentation" for rule in rules.values())
-    assert len(DOCUMENTATION_QUALITY_RULES) == 11
+    assert len(DOCUMENTATION_QUALITY_RULES) == 29
     assert all(issubclass(rule, Documentation) for rule in DOCUMENTATION_QUALITY_RULES)
 
 
@@ -281,3 +287,155 @@ def test_theme_switcher_recommends_missing_settings(tmp_path: Path, old: str, ne
         tmp_path, selected_rule_ids={"DOC011"}, selected_families={"documentation"}
     )["results"][0]
     assert result["status"] == "RECOMMENDATION"
+
+
+def _index_with_cards(targets: tuple[str, ...]) -> str:
+    """Return an index containing document-link cards for the given targets."""
+    cards = "\n".join(
+        f"   .. grid-item-card:: {target}\n      :link: {target}\n      :link-type: doc"
+        for target in targets
+    )
+    return f"Index\n=====\n\n.. grid::\n\n{cards}\n"
+
+
+def test_index_requires_cards_for_each_top_level_document(tmp_path: Path) -> None:
+    targets = (
+        "getting-started",
+        "user-guide",
+        "api",
+        "examples",
+        "contribute",
+        "changelog",
+    )
+    _write_documentation(tmp_path, index=_index_with_cards(targets))
+
+    assert _rule("DOC012").check(tmp_path, None) is True
+
+    _write_documentation(tmp_path, index=_index_with_cards(targets[:-1]))
+    _assert_warning(_rule("DOC012").check(tmp_path, None), "changelog")
+
+
+def test_index_cards_accept_section_index_targets(tmp_path: Path) -> None:
+    targets = (
+        "getting-started/index",
+        "user-guide",
+        "api/index",
+        "examples",
+        "contribute/index",
+        "changelog",
+    )
+    _write_documentation(tmp_path, index=_index_with_cards(targets))
+
+    assert _rule("DOC012").check(tmp_path, None) is True
+
+
+def test_authored_rst_filenames_use_lowercase_hyphens(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+    (tmp_path / "doc/source/good-page.rst").write_text("Page\n====\n", encoding="utf-8")
+
+    assert _rule("DOC013").check(tmp_path, None) is True
+
+    (tmp_path / "doc/source/bad_page.rst").write_text("Page\n====\n", encoding="utf-8")
+    result = _rule("DOC013").check(tmp_path, None)
+    _assert_warning(result, "bad_page.rst")
+
+
+def test_rst_filename_rule_ignores_generated_autoapi_files(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+    generated = tmp_path / "doc/source/api/src/pkg"
+    generated.mkdir(parents=True)
+    (generated / "Generated_API.rst").write_text("API\n===\n", encoding="utf-8")
+
+    assert _rule("DOC013").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    ("rule_id", "relative_path", "is_section", "status"),
+    [
+        ("DOC014", "getting-started.rst", False, "RECOMMENDATION"),
+        ("DOC015", "user-guide.rst", False, "RECOMMENDATION"),
+        ("DOC016", "api.rst", False, "RECOMMENDATION"),
+        ("DOC017", "examples.rst", False, "RECOMMENDATION"),
+        ("DOC018", "contribute.rst", False, "RECOMMENDATION"),
+        ("DOC019", "changelog.rst", False, "RECOMMENDATION"),
+        ("DOC020", "getting-started", True, "RECOMMENDATION"),
+        ("DOC021", "user-guide", True, "RECOMMENDATION"),
+        ("DOC022", "api", True, "RECOMMENDATION"),
+        ("DOC023", "examples", True, "RECOMMENDATION"),
+        ("DOC024", "contribute", True, "RECOMMENDATION"),
+        ("DOC025", "contribute/user.rst", False, "RECOMMENDATION"),
+        ("DOC026", "contribute/documentarian.rst", False, "RECOMMENDATION"),
+        ("DOC027", "contribute/developer.rst", False, "RECOMMENDATION"),
+    ],
+)
+def test_each_documentation_layout_item_reports_missing_severity(
+    tmp_path: Path, rule_id: str, relative_path: str, is_section: bool, status: str
+) -> None:
+    _write_documentation(tmp_path)
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={rule_id}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == status
+
+    path = tmp_path / "doc/source" / relative_path
+    if is_section:
+        path.mkdir(parents=True)
+        (path / "index.rst").write_text("Section\n=======\n", encoding="utf-8")
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("Page\n====\n", encoding="utf-8")
+
+    assert _rule(rule_id).check(tmp_path, None) is True
+
+
+def test_getting_started_section_index_satisfies_root_page_rule(tmp_path: Path) -> None:
+    _write_documentation(tmp_path)
+    section_index = tmp_path / "doc/source/getting-started/index.rst"
+    section_index.parent.mkdir(parents=True)
+    section_index.write_text("Getting started\n===============\n", encoding="utf-8")
+
+    assert _rule("DOC014").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize(
+    ("rule_id", "section"),
+    [
+        ("DOC015", "user-guide"),
+        ("DOC016", "api"),
+        ("DOC017", "examples"),
+        ("DOC018", "contribute"),
+    ],
+)
+def test_nested_section_indexes_satisfy_root_page_rules(
+    tmp_path: Path, rule_id: str, section: str
+) -> None:
+    _write_documentation(tmp_path)
+    section_index = tmp_path / "doc/source" / section / "index.rst"
+    section_index.parent.mkdir(parents=True)
+    section_index.write_text("Section\n=======\n", encoding="utf-8")
+
+    assert _rule(rule_id).check(tmp_path, None) is True
+
+
+def test_interrogate_hook_is_recommended_and_detected(tmp_path: Path) -> None:
+    (tmp_path / ".pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC028"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "WARNING"
+    assert "docstring coverage" in result["detail"]
+
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        "repos:\n- repo: local\n  hooks:\n  - id: interrogate\n", encoding="utf-8"
+    )
+    assert _rule("DOC028").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize("extension", ["ansys_sphinx_theme.extension.autoapi", "autoapi.extension"])
+def test_sphinx_autoapi_extension_is_required(tmp_path: Path, extension: str) -> None:
+    _write_documentation(tmp_path, conf="extensions = []\n")
+    assert _rule("DOC029").check(tmp_path, None) is False
+
+    _write_documentation(tmp_path, conf=f"extensions = ['{extension}']\n")
+    assert _rule("DOC029").check(tmp_path, None) is True
