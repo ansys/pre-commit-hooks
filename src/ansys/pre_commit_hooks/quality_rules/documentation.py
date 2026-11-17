@@ -770,24 +770,30 @@ class DOC028(Documentation):
 
 
 class DOC029(Documentation):
-    """Sphinx AutoAPI is enabled."""
+    """Sphinx AutoAPI or an API reference page is available."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether an AutoAPI extension is enabled in the Sphinx config."""
-        assignments = _sphinx_assignments(repository_root)
-        if assignments is None:
-            return False
-        extensions = _literal(assignments.get("extensions"))
-        if not isinstance(extensions, (list, tuple)) or not all(
-            isinstance(extension, str) for extension in extensions
+        """Find AutoAPI references in the config or accept a manually maintained API page."""
+        if file_exists(repository_root, "doc/source/api.rst") or file_exists(
+            repository_root, "doc/source/api/index.rst"
         ):
-            return False
-        supported_extensions = {
+            return True
+
+        config = file_content(repository_root, _SPHINX_CONFIG)
+        if config is None:
+            return f"WARNING: Cannot inspect {_SPHINX_CONFIG}; enable AutoAPI or add an API page."
+        autoapi_markers = (
+            "sphinx_autoapi",
             "ansys_sphinx_theme.extension.autoapi",
             "autoapi.extension",
-        }
-        return any(extension in supported_extensions for extension in extensions)
+        )
+        if any(marker in config for marker in autoapi_markers):
+            return True
+        return (
+            f"WARNING: Sphinx AutoAPI was not found in {_SPHINX_CONFIG}; enable AutoAPI "
+            "or add an API page."
+        )
 
 
 class DOC030(Documentation):

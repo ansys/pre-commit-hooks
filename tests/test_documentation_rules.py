@@ -433,12 +433,44 @@ def test_interrogate_hook_is_recommended_and_detected(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("extension", ["ansys_sphinx_theme.extension.autoapi", "autoapi.extension"])
-def test_sphinx_autoapi_extension_is_required(tmp_path: Path, extension: str) -> None:
+def test_sphinx_autoapi_extension_is_detected(tmp_path: Path, extension: str) -> None:
     _write_documentation(tmp_path, conf="extensions = []\n")
-    assert _rule("DOC029").check(tmp_path, None) is False
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC029"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "WARNING"
+    assert "API page" in result["detail"]
 
-    _write_documentation(tmp_path, conf=f"extensions = ['{extension}']\n")
+    _write_documentation(
+        tmp_path, conf=f"extensions = get_extensions()\nextensions.append('{extension}')\n"
+    )
     assert _rule("DOC029").check(tmp_path, None) is True
+
+
+def test_sphinx_autoapi_marker_is_detected_anywhere_in_config(tmp_path: Path) -> None:
+    _write_documentation(tmp_path, conf='SPHINX_AUTOAPI = "sphinx_autoapi"\n')
+
+    assert _rule("DOC029").check(tmp_path, None) is True
+
+
+@pytest.mark.parametrize("api_page", ["api.rst", "api/index.rst"])
+def test_api_page_satisfies_autoapi_rule(tmp_path: Path, api_page: str) -> None:
+    _write_documentation(tmp_path, conf="extensions = get_extensions()\n")
+    path = tmp_path / "doc/source" / api_page
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("API Reference\n=============\n", encoding="utf-8")
+
+    assert _rule("DOC029").check(tmp_path, None) is True
+
+
+def test_dynamic_extensions_without_api_page_warn(tmp_path: Path) -> None:
+    _write_documentation(tmp_path, conf="extensions = get_extensions()\n")
+
+    result = report._run_checks(
+        tmp_path, selected_rule_ids={"DOC029"}, selected_families={"documentation"}
+    )["results"][0]
+    assert result["status"] == "WARNING"
+    assert "Sphinx AutoAPI was not found" in result["detail"]
 
 
 def test_cheatsheet_configuration_is_recommended_and_recognized(tmp_path: Path) -> None:
