@@ -133,7 +133,7 @@ _BUILD_BACKENDS: Final[dict[str, tuple[str, str]]] = {
     "flit_core.buildapi": ("Flit", "flit_core"),
     "poetry.core.masonry.api": ("Poetry", "poetry_core"),
     "hatchling.build": ("Hatch", "hatchling"),
-    "pdm.backend": ("PDM", "pdm"),
+    "pdm.backend": ("PDM", "pdm-backend"),
     "uv_build": ("uv_build", "uv_build"),
     "maturin": ("Maturin", "maturin"),
     "setuptools.build_meta": ("Setuptools", "setuptools"),
