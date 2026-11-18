@@ -41,6 +41,7 @@ __all__ = [
     "RuleCheckResult",
     "RuleStatus",
     "WARNING",
+    "workflow_contents",
 ]
 
 RuleCheckResult: TypeAlias = bool | str
@@ -177,6 +178,42 @@ def file_content(repository_root: Path, relative_path: str) -> str | None:
         return None
 
 
+def workflow_contents(repository_root: Path) -> dict[str, str]:
+    """Return the text of each GitHub Actions workflow file.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Root directory that contains ``.github/workflows``.
+
+    Returns
+    -------
+    dict[str, str]
+        Contents of every readable ``.yml`` and ``.yaml`` file directly under
+        ``.github/workflows``, keyed by repository-relative path and sorted by
+        file name. The mapping is empty when no such file can be read.
+    """
+    workflows_directory = _repository_file(repository_root, ".github/workflows")
+    if workflows_directory is None:
+        return {}
+    try:
+        workflow_files = sorted(
+            path
+            for path in workflows_directory.iterdir()
+            if path.suffix in {".yml", ".yaml"} and path.is_file()
+        )
+    except OSError:
+        return {}
+
+    contents = {}
+    for workflow_file in workflow_files:
+        relative_path = f".github/workflows/{workflow_file.name}"
+        text = file_content(repository_root, relative_path)
+        if text is not None:
+            contents[relative_path] = text
+    return contents
+
+
 def all_workflows_content(repository_root: Path) -> str | None:
     """Return the merged text of the GitHub Actions workflow files.
 
@@ -192,24 +229,7 @@ def all_workflows_content(repository_root: Path) -> str | None:
         ``.github/workflows``, joined by newlines, or ``None`` when no such
         content exists.
     """
-    workflows_directory = _repository_file(repository_root, ".github/workflows")
-    if workflows_directory is None:
-        return None
-    try:
-        workflow_files = sorted(
-            path
-            for path in workflows_directory.iterdir()
-            if path.suffix in {".yml", ".yaml"} and path.is_file()
-        )
-    except OSError:
-        return None
-
-    contents = []
-    for workflow_file in workflow_files:
-        text = file_content(repository_root, f".github/workflows/{workflow_file.name}")
-        if text is not None:
-            contents.append(text)
-    return "\n".join(contents) or None
+    return "\n".join(workflow_contents(repository_root).values()) or None
 
 
 def readme_path(repository_root: Path) -> str | None:

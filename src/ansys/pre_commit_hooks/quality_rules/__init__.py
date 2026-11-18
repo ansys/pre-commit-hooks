@@ -31,6 +31,7 @@ from ansys.pre_commit_hooks.quality_rules.labels import Labels
 from ansys.pre_commit_hooks.quality_rules.pre_commit import PreCommit
 from ansys.pre_commit_hooks.quality_rules.project_metadata import ProjectMetadata
 from ansys.pre_commit_hooks.quality_rules.readme import README
+from ansys.pre_commit_hooks.quality_rules.security import Security
 from ansys.pre_commit_hooks.quality_rules.vale import Vale
 
 README_QUALITY_RULES: tuple[type[README], ...] = tuple(
@@ -54,6 +55,9 @@ VALE_QUALITY_RULES: tuple[type[Vale], ...] = tuple(
 DEPENDABOT_QUALITY_RULES: tuple[type[Dependabot], ...] = tuple(
     sorted(Dependabot.__subclasses__(), key=lambda rule_class: rule_class.__name__)
 )
+SECURITY_QUALITY_RULES: tuple[type[Security], ...] = tuple(
+    sorted(Security.__subclasses__(), key=lambda rule_class: rule_class.__name__)
+)
 
 # Maps each rule family name to its rule classes.
 RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
@@ -64,6 +68,7 @@ RULE_FAMILIES: dict[str, tuple[type[_QualityRule], ...]] = {
     Labels.family: LABELS_QUALITY_RULES,
     Vale.family: VALE_QUALITY_RULES,
     Dependabot.family: DEPENDABOT_QUALITY_RULES,
+    Security.family: SECURITY_QUALITY_RULES,
 }
 # Families evaluated when no ``--family`` is requested.
 DEFAULT_RULE_FAMILIES: tuple[str, ...] = tuple(RULE_FAMILIES)
@@ -89,6 +94,8 @@ __all__ = [
     "README",
     "README_QUALITY_RULES",
     "RULE_FAMILIES",
+    "SECURITY_QUALITY_RULES",
+    "Security",
     "Labels",
     "ProjectMetadata",
     "PreCommit",
