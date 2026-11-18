@@ -5,7 +5,7 @@ requires = [
     "Jinja2==3.1.6",
     "reuse==6.3.0",
     "requests==2.34.2",
-    "semver==3.1.0",
+    "semver==3.1.1",
     "toml==0.10.2",
     "wheel",
 ]
@@ -20,7 +20,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
 maintainers = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
 dependencies = [
-    "click==8.5.0",
+    "click==8.5.1",
     "GitPython==3.2.1",
     "importlib-metadata==9.0.1",
     "Jinja2==3.1.6",
@@ -28,7 +28,7 @@ dependencies = [
     "PyYAML==6.0.3",
     "reuse==6.3.0",
     "requests==2.34.2",
-    "semver==3.1.0",
+    "semver==3.1.1",
     "toml==0.10.2",
 ]
 
