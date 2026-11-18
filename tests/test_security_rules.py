@@ -35,7 +35,7 @@ from ansys.pre_commit_hooks.quality_rules import (
 )
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult
 
-_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 11))
+_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 12))
 _SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
 _DIGEST = "sha256:" + "a" * 64
 _ZIZMOR = """\
@@ -96,6 +96,7 @@ def _write_repository(root: Path) -> None:
     _write(root, ".github/zizmor.yml", _ZIZMOR)
     _write(root, ".pre-commit-config.yaml", _PRE_COMMIT)
     _write(root, "SECURITY.md", _SECURITY_POLICY)
+    _write(root, "uv.lock", "version = 1\n")
     _write_workflow(root, _WORKFLOW)
 
 
@@ -140,6 +141,7 @@ def test_missing_configuration(tmp_path: Path) -> None:
         "SEC008": "WARNING",
         "SEC009": "WARNING",
         "SEC010": "ERROR",
+        "SEC011": "ERROR",
     }
 
 
@@ -290,3 +292,11 @@ def test_pre_commit_repositories_must_be_pinned(tmp_path: Path) -> None:
     _assert_status(
         _check(tmp_path, "SEC010"), "RECOMMENDATION", "--freeze", ": https://github.com/a/b."
     )
+
+
+@pytest.mark.parametrize("lockfile", ["uv.lock", "poetry.lock"])
+def test_lockfile_is_required(tmp_path: Path, lockfile: str) -> None:
+    _assert_status(_check(tmp_path, "SEC011"), "ERROR", "uv.lock or poetry.lock")
+
+    _write(tmp_path, lockfile, "")
+    assert _check(tmp_path, "SEC011") is True

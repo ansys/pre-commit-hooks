@@ -35,6 +35,7 @@ The checks cover:
 * Workflows declare their permissions, ``actions/checkout`` does not persist
   credentials, and no workflow is triggered by ``pull_request_target``
 * Pre-commit repositories are pinned to commit SHAs
+* A ``uv.lock`` or ``poetry.lock`` lockfile pins the dependencies
 
 Workflows are parsed with :class:`yaml.BaseLoader`, so every scalar is read as
 a string and the ``on`` key is not converted to a boolean. Missing, unreadable,
@@ -75,6 +76,7 @@ __all__ = [
     "SEC008",
     "SEC009",
     "SEC010",
+    "SEC011",
     "Security",
 ]
 
@@ -90,6 +92,7 @@ _MISPLACED_SECURITY_POLICIES: Final[tuple[str, ...]] = (
 )
 _NO_WORKFLOWS: Final[str] = "WARNING: No workflow files found under .github/workflows."
 _PRE_COMMIT_CONFIG: Final[str] = ".pre-commit-config.yaml"
+_LOCKFILES: Final[tuple[str, ...]] = ("uv.lock", "poetry.lock")
 _LOCAL_PRE_COMMIT_REPOSITORIES: Final[frozenset[str]] = frozenset({"local", "meta"})
 
 _USES_LINE: Final[re.Pattern[str]] = re.compile(
@@ -595,4 +598,26 @@ class SEC010(Security):
         return (
             "RECOMMENDATION: Pin these pre-commit repositories to a commit SHA with "
             f"pre-commit autoupdate --freeze, because tags can be moved: {', '.join(unpinned)}."
+        )
+
+
+class SEC011(Security):
+    """A dependency lockfile exists."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Report an error when neither uv.lock nor poetry.lock exists at the root.
+
+        Returns
+        -------
+        bool or str
+            ``True`` when a lockfile exists, otherwise an error. A lockfile
+            keeps development and CI environments reproducible and prevents
+            unreviewed dependencies from being installed.
+        """
+        if any(file_exists(repository_root, lockfile) for lockfile in _LOCKFILES):
+            return True
+        return (
+            "ERROR: Commit a uv.lock or poetry.lock file at the repository root so "
+            "development and CI use a controlled, reviewed set of dependencies."
         )
