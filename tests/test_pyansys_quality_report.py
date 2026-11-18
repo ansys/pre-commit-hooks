@@ -64,6 +64,7 @@ def test_registry_contains_every_rule_family():
         "LB",
         "VL",
         "DB",
+        "SEC",
     }
 
 
