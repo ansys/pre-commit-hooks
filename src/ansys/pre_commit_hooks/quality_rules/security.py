@@ -23,31 +23,27 @@
 """Security configuration checks.
 
 This rule set validates the security configuration of a repository: the
-zizmor and gitleaks tooling, the ``SECURITY.md`` policy, and the hardening of
-the GitHub Actions workflows directly under ``.github/workflows``.
+zizmor and gitleaks tooling, the ``SECURITY.md`` policy, the pinning of the
+pre-commit repositories, and the dependency lockfile.
 
 The checks cover:
 
 * ``.github/zizmor.yml`` exists and disables the ``secrets-outside-env`` audit
 * The ``gitleaks`` pre-commit hook is configured
-* Remote actions are pinned to commit SHAs that carry a version comment
-* ``SECURITY.md`` tells reporters not to open public issues
-* Workflows declare their permissions, ``actions/checkout`` does not persist
-  credentials, and no workflow is triggered by ``pull_request_target``
+* ``SECURITY.md`` exists only at the root and tells reporters not to open
+  public issues
 * Pre-commit repositories are pinned to commit SHAs
 * A ``uv.lock`` or ``poetry.lock`` lockfile pins the dependencies
 
-Workflows are parsed with :class:`yaml.BaseLoader`, so every scalar is read as
-a string and the ``on`` key is not converted to a boolean. The action checks
-compose the YAML nodes to read the comment that follows each ``uses`` value. Missing, unreadable,
-or invalid configuration is reported as an ``ERROR``, except a missing
-workflow directory, which is a ``WARNING`` as in the CI/CD rules.
+GitHub Actions workflow hardening, such as pinning actions to commit SHAs,
+version comments, token permissions, credential persistence, and dangerous
+triggers, is left to the zizmor audits. Missing, unreadable, or invalid
+configuration is reported as an ``ERROR``.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 import re
 from typing import ClassVar, Final
@@ -58,7 +54,6 @@ from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,
     file_content,
     file_exists,
-    workflow_contents,
 )
 from ansys.pre_commit_hooks.quality_rules.pre_commit import (
     _configured_hooks,
@@ -73,11 +68,6 @@ __all__ = [
     "SEC004",
     "SEC005",
     "SEC006",
-    "SEC007",
-    "SEC008",
-    "SEC009",
-    "SEC010",
-    "SEC011",
     "Security",
 ]
 
@@ -91,306 +81,15 @@ _MISPLACED_SECURITY_POLICIES: Final[tuple[str, ...]] = (
     ".github/SECURITY.md",
     "docs/SECURITY.md",
 )
-_NO_WORKFLOWS: Final[str] = "WARNING: No workflow files found under .github/workflows."
 _PRE_COMMIT_CONFIG: Final[str] = ".pre-commit-config.yaml"
 _LOCKFILES: Final[tuple[str, ...]] = ("uv.lock", "poetry.lock")
 _LOCAL_PRE_COMMIT_REPOSITORIES: Final[frozenset[str]] = frozenset({"local", "meta"})
 
-_TRAILING_COMMENT: Final[re.Pattern[str]] = re.compile(r"\s*#(?P<comment>.*)$")
 _COMMIT_SHA: Final[re.Pattern[str]] = re.compile(r"[0-9a-f]{40}", re.IGNORECASE)
-_DOCKER_DIGEST: Final[re.Pattern[str]] = re.compile(
-    r"docker://[^@\s]+@sha256:[0-9a-f]{64}", re.IGNORECASE
-)
-_VERSION_COMMENT: Final[re.Pattern[str]] = re.compile(r"\S*\d")
 _PUBLIC_ISSUE_WARNING: Final[re.Pattern[str]] = re.compile(
     r"\b(?:do\s+not|don['\u2019]t|never|must\s+not|should\s+not|avoid)\b[^.\n]{0,100}?\bissues?\b",
     re.IGNORECASE,
 )
-
-
-def _mapping_value(node: yaml.Node | None, key: str) -> yaml.Node | None:
-    """Return the value node stored under a key of a mapping node.
-
-    Parameters
-    ----------
-    node : yaml.Node or None
-        Node expected to be a mapping.
-    key : str
-        Scalar key to look up.
-
-    Returns
-    -------
-    yaml.Node or None
-        Value node, or ``None`` when ``node`` is not a mapping or lacks the key.
-    """
-    if not isinstance(node, yaml.MappingNode):
-        return None
-    for key_node, value_node in node.value:
-        if isinstance(key_node, yaml.ScalarNode) and key_node.value == key:
-            return value_node
-    return None
-
-
-def _uses_nodes(root: yaml.Node) -> Iterator[yaml.ScalarNode]:
-    """Yield the ``uses`` value nodes of the jobs and steps of a workflow.
-
-    Parameters
-    ----------
-    root : yaml.Node
-        Root node of a workflow.
-
-    Yields
-    ------
-    yaml.ScalarNode
-        Value of each ``uses`` key set on a job (reusable workflow) or a step.
-    """
-    jobs = _mapping_value(root, "jobs")
-    if not isinstance(jobs, yaml.MappingNode):
-        return
-    for _, job in jobs.value:
-        candidates = [job]
-        steps = _mapping_value(job, "steps")
-        if isinstance(steps, yaml.SequenceNode):
-            candidates.extend(steps.value)
-        for candidate in candidates:
-            uses = _mapping_value(candidate, "uses")
-            if isinstance(uses, yaml.ScalarNode):
-                yield uses
-
-
-def _action_references(repository_root: Path) -> list[tuple[str, str | None]] | str:
-    """Collect the remote action references used by the workflows.
-
-    The workflows are composed into YAML nodes, which keep the position of each
-    value, so the comment that follows a ``uses`` value can be read from its
-    source line.
-
-    Parameters
-    ----------
-    repository_root : pathlib.Path
-        Repository root directory.
-
-    Returns
-    -------
-    list[tuple[str, str or None]] or str
-        Unique ``(reference, comment)`` pairs in file order, excluding local
-        ``./`` actions, a ``"WARNING: ..."`` message when no workflow exists, or
-        an ``"ERROR: ..."`` message naming the first invalid workflow.
-    """
-    contents = workflow_contents(repository_root)
-    if not contents:
-        return _NO_WORKFLOWS
-    references: dict[tuple[str, str | None], None] = {}
-    for path, content in contents.items():
-        try:
-            root = yaml.compose(content, Loader=yaml.BaseLoader)  # nosec B506
-        except yaml.YAMLError:
-            return f"ERROR: Invalid YAML in {path}."
-        if not isinstance(root, yaml.MappingNode):
-            return f"ERROR: {path} must contain a YAML mapping."
-        lines = content.splitlines()
-        for node in _uses_nodes(root):
-            reference = node.value.strip()
-            if not reference or reference.startswith("./"):
-                continue
-            end = node.end_mark
-            trailing = _TRAILING_COMMENT.match(lines[end.line][end.column :])
-            comment = trailing["comment"].strip() if trailing else None
-            references[(reference, comment)] = None
-    return list(references)
-
-
-def _is_pinned(reference: str) -> bool:
-    """Return whether an action reference is immutable.
-
-    Parameters
-    ----------
-    reference : str
-        Value of a ``uses`` key, for example ``"actions/checkout@<sha>"``.
-
-    Returns
-    -------
-    bool
-        ``True`` for a Docker image pinned to a ``sha256`` digest or an action
-        pinned to a full 40-character commit SHA.
-    """
-    if reference.casefold().startswith("docker://"):
-        return _DOCKER_DIGEST.fullmatch(reference) is not None
-    _, separator, version = reference.rpartition("@")
-    return bool(separator) and _COMMIT_SHA.fullmatch(version) is not None
-
-
-def _load_workflows(repository_root: Path) -> dict[str, Mapping[str, object]] | str:
-    """Parse every workflow file.
-
-    Parameters
-    ----------
-    repository_root : pathlib.Path
-        Repository root directory.
-
-    Returns
-    -------
-    dict[str, collections.abc.Mapping[str, object]] or str
-        Parsed workflows keyed by repository-relative path, a ``"WARNING: ..."``
-        message when no workflow exists, or an ``"ERROR: ..."`` message naming
-        the first workflow that is not a valid YAML mapping.
-    """
-    contents = workflow_contents(repository_root)
-    if not contents:
-        return _NO_WORKFLOWS
-    workflows: dict[str, Mapping[str, object]] = {}
-    for path, content in contents.items():
-        try:
-            # BaseLoader keeps every scalar as a string and builds no objects.
-            workflow: object = yaml.load(content, Loader=yaml.BaseLoader)  # nosec B506
-        except yaml.YAMLError:
-            return f"ERROR: Invalid YAML in {path}."
-        if not isinstance(workflow, dict):
-            return f"ERROR: {path} must contain a YAML mapping."
-        workflows[path] = workflow
-    return workflows
-
-
-def _jobs(workflow: Mapping[str, object]) -> Iterator[Mapping[str, object]]:
-    """Yield the job mappings of a workflow.
-
-    Parameters
-    ----------
-    workflow : collections.abc.Mapping[str, object]
-        Parsed workflow.
-
-    Yields
-    ------
-    collections.abc.Mapping[str, object]
-        Each job definition that is a mapping.
-    """
-    jobs = workflow.get("jobs")
-    if isinstance(jobs, dict):
-        for job in jobs.values():
-            if isinstance(job, dict):
-                yield job
-
-
-def _steps(workflow: Mapping[str, object]) -> Iterator[Mapping[str, object]]:
-    """Yield the step mappings of every job in a workflow.
-
-    Parameters
-    ----------
-    workflow : collections.abc.Mapping[str, object]
-        Parsed workflow.
-
-    Yields
-    ------
-    collections.abc.Mapping[str, object]
-        Each step definition that is a mapping.
-    """
-    for job in _jobs(workflow):
-        steps = job.get("steps")
-        if isinstance(steps, list):
-            for step in steps:
-                if isinstance(step, dict):
-                    yield step
-
-
-def _triggers(workflow: Mapping[str, object]) -> set[str]:
-    """Return the event names that trigger a workflow.
-
-    Parameters
-    ----------
-    workflow : collections.abc.Mapping[str, object]
-        Parsed workflow.
-
-    Returns
-    -------
-    set[str]
-        Event names from the ``on`` key, which may be a string, a list, or a
-        mapping.
-    """
-    events = workflow.get("on")
-    if isinstance(events, str):
-        return {events}
-    if isinstance(events, list):
-        return {event for event in events if isinstance(event, str)}
-    if isinstance(events, dict):
-        return set(events)
-    return set()
-
-
-def _check_workflows(
-    repository_root: Path,
-    is_compliant: Callable[[Mapping[str, object]], bool],
-    message: str,
-) -> RuleCheckResult:
-    """Report the workflows that fail a per-workflow condition.
-
-    Parameters
-    ----------
-    repository_root : pathlib.Path
-        Repository root directory.
-    is_compliant : collections.abc.Callable[[Mapping[str, object]], bool]
-        Predicate that receives a parsed workflow and returns whether it
-        complies.
-    message : str
-        Message prefix, including the status, followed by the failing paths.
-
-    Returns
-    -------
-    bool or str
-        ``True`` when every workflow complies, otherwise the message followed
-        by the failing workflow paths, or the workflow loading message.
-    """
-    workflows = _load_workflows(repository_root)
-    if isinstance(workflows, str):
-        return workflows
-    failing = [path for path, workflow in workflows.items() if not is_compliant(workflow)]
-    if not failing:
-        return True
-    return f"{message} {', '.join(failing)}."
-
-
-def _declares_permissions(workflow: Mapping[str, object]) -> bool:
-    """Return whether a workflow sets permissions at the top or in every job.
-
-    Parameters
-    ----------
-    workflow : collections.abc.Mapping[str, object]
-        Parsed workflow.
-
-    Returns
-    -------
-    bool
-        ``True`` when the workflow has a top-level ``permissions`` key, or when
-        it has jobs and each of them sets ``permissions``.
-    """
-    if "permissions" in workflow:
-        return True
-    jobs = list(_jobs(workflow))
-    return bool(jobs) and all("permissions" in job for job in jobs)
-
-
-def _checkout_drops_credentials(workflow: Mapping[str, object]) -> bool:
-    """Return whether every checkout step disables credential persistence.
-
-    Parameters
-    ----------
-    workflow : collections.abc.Mapping[str, object]
-        Parsed workflow.
-
-    Returns
-    -------
-    bool
-        ``True`` when every ``actions/checkout`` step sets
-        ``persist-credentials: false``.
-    """
-    for step in _steps(workflow):
-        uses = step.get("uses")
-        if not isinstance(uses, str) or not uses.casefold().startswith("actions/checkout@"):
-            continue
-        options = step.get("with")
-        persist = options.get("persist-credentials") if isinstance(options, dict) else None
-        if not isinstance(persist, str) or persist.strip().casefold() != "false":
-            return False
-    return True
 
 
 class Security(ABC):
@@ -490,31 +189,6 @@ class SEC003(Security):
 
 
 class SEC004(Security):
-    """Workflows pin action SHAs."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Check that every remote action is pinned to an immutable version.
-
-        Returns
-        -------
-        bool or str
-            ``True`` when every remote action uses a full commit SHA and every
-            Docker action uses a ``sha256`` digest, otherwise an error naming
-            the mutable references.
-        """
-        references = _action_references(repository_root)
-        if isinstance(references, str):
-            return references
-        unpinned = list(
-            dict.fromkeys(reference for reference, _ in references if not _is_pinned(reference))
-        )
-        if not unpinned:
-            return True
-        return f"ERROR: Pin these actions to a full commit SHA: {', '.join(unpinned)}."
-
-
-class SEC005(Security):
     """SECURITY.md discourages public issue reporting."""
 
     @staticmethod
@@ -552,82 +226,7 @@ class SEC005(Security):
         )
 
 
-class SEC006(Security):
-    """Pinned action SHAs have a version comment."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Recommend a version comment after each SHA-pinned action.
-
-        Returns
-        -------
-        bool or str
-            ``True`` when every SHA-pinned action is followed by a comment that
-            contains a version number, such as ``# v4.2.2``, otherwise a
-            recommendation naming the uncommented references.
-        """
-        references = _action_references(repository_root)
-        if isinstance(references, str):
-            return references
-        uncommented = list(
-            dict.fromkeys(
-                reference
-                for reference, comment in references
-                if _is_pinned(reference)
-                and not reference.casefold().startswith("docker://")
-                and not (comment and _VERSION_COMMENT.match(comment))
-            )
-        )
-        if not uncommented:
-            return True
-        return (
-            "RECOMMENDATION: Add a version comment, such as # v1.2.3, after these pinned "
-            f"actions so reviewers and Dependabot can track them: {', '.join(uncommented)}."
-        )
-
-
-class SEC007(Security):
-    """Workflows declare their GITHUB_TOKEN permissions."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Check that every workflow limits the GITHUB_TOKEN permissions."""
-        return _check_workflows(
-            repository_root,
-            _declares_permissions,
-            "WARNING: Declare permissions at the top level (for example, permissions: {}) "
-            "or in every job of:",
-        )
-
-
-class SEC008(Security):
-    """Checkout steps set persist-credentials to false."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Check that actions/checkout does not leave the token in .git/config."""
-        return _check_workflows(
-            repository_root,
-            _checkout_drops_credentials,
-            "WARNING: Set persist-credentials: false on every actions/checkout step in:",
-        )
-
-
-class SEC009(Security):
-    """Workflows are not triggered by pull_request_target."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Warn about workflows that run fork code with repository secrets."""
-        return _check_workflows(
-            repository_root,
-            lambda workflow: "pull_request_target" not in _triggers(workflow),
-            "WARNING: Replace the pull_request_target trigger, which runs with repository "
-            "secrets and write access on pull requests from forks, in:",
-        )
-
-
-class SEC010(Security):
+class SEC005(Security):
     """Pre-commit repositories pin revisions to commit SHAs."""
 
     @staticmethod
@@ -662,7 +261,7 @@ class SEC010(Security):
         )
 
 
-class SEC011(Security):
+class SEC006(Security):
     """A dependency lockfile exists."""
 
     @staticmethod

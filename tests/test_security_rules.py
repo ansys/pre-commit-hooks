@@ -35,9 +35,8 @@ from ansys.pre_commit_hooks.quality_rules import (
 )
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult
 
-_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 12))
+_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 7))
 _SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
-_DIGEST = "sha256:" + "a" * 64
 _ZIZMOR = """\
 rules:
   unpinned-uses:
@@ -58,22 +57,6 @@ repos:
     entry: custom
     language: system
 """
-_WORKFLOW = f"""\
-name: CI
-on:
-  pull_request:
-permissions: {{}}
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@{_SHA} # v4.2.2
-        with:
-          persist-credentials: false
-      - uses: "actions/setup-python@{_SHA}" # v5.6.0
-      - uses: ./.github/actions/local
-      - uses: docker://alpine@{_DIGEST}
-"""
 _SECURITY_POLICY = """\
 # Security Policy
 
@@ -88,16 +71,11 @@ def _write(root: Path, relative_path: str, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def _write_workflow(root: Path, content: str, name: str = "ci.yml") -> None:
-    _write(root, f".github/workflows/{name}", content)
-
-
 def _write_repository(root: Path) -> None:
     _write(root, ".github/zizmor.yml", _ZIZMOR)
     _write(root, ".pre-commit-config.yaml", _PRE_COMMIT)
     _write(root, "SECURITY.md", _SECURITY_POLICY)
     _write(root, "uv.lock", "version = 1\n")
-    _write_workflow(root, _WORKFLOW)
 
 
 def _check(root: Path, rule_id: str) -> RuleCheckResult:
@@ -134,14 +112,9 @@ def test_missing_configuration(tmp_path: Path) -> None:
         "SEC001": "RECOMMENDATION",
         "SEC002": "PASSED",
         "SEC003": "ERROR",
-        "SEC004": "WARNING",
+        "SEC004": "ERROR",
         "SEC005": "ERROR",
-        "SEC006": "WARNING",
-        "SEC007": "WARNING",
-        "SEC008": "WARNING",
-        "SEC009": "WARNING",
-        "SEC010": "ERROR",
-        "SEC011": "ERROR",
+        "SEC006": "ERROR",
     }
 
 
@@ -180,106 +153,19 @@ def test_gitleaks_hook_is_required(tmp_path: Path, hook_id: str, passes: bool) -
         _assert_status(result, "ERROR", "gitleaks hook")
 
 
-@pytest.mark.parametrize(
-    "reference",
-    [
-        "actions/checkout@v4",
-        f"actions/checkout@{_SHA[:7]}",
-        "actions/checkout",
-        "docker://alpine:3.20",
-        "ansys/actions/.github/workflows/build.yml@main",
-    ],
-)
-def test_actions_must_be_pinned_to_a_sha(tmp_path: Path, reference: str) -> None:
-    _write_workflow(tmp_path, _WORKFLOW)
-    _write_workflow(tmp_path, f"jobs:\n  a:\n    steps:\n      - uses: {reference}\n", "other.yml")
-
-    _assert_status(_check(tmp_path, "SEC004"), "ERROR", f"commit SHA: {reference}.")
-
-
-@pytest.mark.parametrize("comment", ["", "  # pinned", "  #"])
-def test_pinned_actions_need_a_version_comment(tmp_path: Path, comment: str) -> None:
-    _write_workflow(tmp_path, f"jobs:\n  a:\n    steps:\n      - uses: a/b@{_SHA}{comment}\n")
-
-    _assert_status(_check(tmp_path, "SEC006"), "RECOMMENDATION", f"a/b@{_SHA}.")
-    assert _check(tmp_path, "SEC004") is True
-
-
 @pytest.mark.parametrize("path", [".github/SECURITY.md", "docs/SECURITY.md"])
 def test_security_policy_must_be_at_the_root_only(tmp_path: Path, path: str) -> None:
     _write(tmp_path, path, _SECURITY_POLICY)
-    _assert_status(_check(tmp_path, "SEC005"), "ERROR", "only at the repository root", path)
+    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "only at the repository root", path)
 
     _write(tmp_path, "SECURITY.md", _SECURITY_POLICY)
-    _assert_status(_check(tmp_path, "SEC005"), "ERROR", path)
+    _assert_status(_check(tmp_path, "SEC004"), "ERROR", path)
 
 
 def test_security_policy_must_discourage_public_issues(tmp_path: Path) -> None:
     _write(tmp_path, "SECURITY.md", "Open an issue if you find a vulnerability.\n")
 
-    _assert_status(_check(tmp_path, "SEC005"), "ERROR", "SECURITY.md", "public GitHub issues")
-
-
-@pytest.mark.parametrize(
-    ("workflow", "passes"),
-    [
-        ("jobs:\n  a:\n    runs-on: x\n", False),
-        ("jobs:\n  a:\n    permissions: {}\n  b:\n    runs-on: x\n", False),
-        ("jobs:\n  a:\n    permissions: {}\n  b:\n    permissions:\n      contents: read\n", True),
-        ("permissions: read-all\njobs: {}\n", True),
-    ],
-)
-def test_workflows_must_declare_permissions(tmp_path: Path, workflow: str, passes: bool) -> None:
-    _write_workflow(tmp_path, workflow)
-
-    result = _check(tmp_path, "SEC007")
-
-    if passes:
-        assert result is True
-    else:
-        _assert_status(result, "WARNING", ".github/workflows/ci.yml")
-
-
-@pytest.mark.parametrize(
-    ("options", "passes"),
-    [
-        ("", False),
-        ("\n        with:\n          persist-credentials: true", False),
-        ("\n        with:\n          fetch-depth: 0", False),
-        ("\n        with:\n          persist-credentials: False", True),
-    ],
-)
-def test_checkout_must_not_persist_credentials(tmp_path: Path, options: str, passes: bool) -> None:
-    _write_workflow(
-        tmp_path, f"jobs:\n  a:\n    steps:\n      - uses: actions/checkout@{_SHA}{options}\n"
-    )
-
-    result = _check(tmp_path, "SEC008")
-
-    if passes:
-        assert result is True
-    else:
-        _assert_status(result, "WARNING", "persist-credentials: false", ".github/workflows/ci.yml")
-
-
-@pytest.mark.parametrize(
-    "trigger",
-    [
-        "on: pull_request_target\n",
-        "on: [push, pull_request_target]\n",
-        "on:\n  pull_request_target:\n    types: [opened]\n",
-    ],
-)
-def test_pull_request_target_is_reported(tmp_path: Path, trigger: str) -> None:
-    _write_workflow(tmp_path, f"{trigger}jobs: {{}}\n")
-
-    _assert_status(_check(tmp_path, "SEC009"), "WARNING", "pull_request_target", "ci.yml")
-
-
-def test_invalid_workflow_is_an_error(tmp_path: Path) -> None:
-    _write_workflow(tmp_path, "jobs: [\n")
-
-    _assert_status(_check(tmp_path, "SEC007"), "ERROR", "Invalid YAML in .github/workflows/ci.yml")
+    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "SECURITY.md", "public GitHub issues")
 
 
 def test_pre_commit_repositories_must_be_pinned(tmp_path: Path) -> None:
@@ -290,39 +176,13 @@ def test_pre_commit_repositories_must_be_pinned(tmp_path: Path) -> None:
     )
 
     _assert_status(
-        _check(tmp_path, "SEC010"), "RECOMMENDATION", "--freeze", ": https://github.com/a/b."
+        _check(tmp_path, "SEC005"), "RECOMMENDATION", "--freeze", ": https://github.com/a/b."
     )
 
 
 @pytest.mark.parametrize("lockfile", ["uv.lock", "poetry.lock"])
 def test_lockfile_is_required(tmp_path: Path, lockfile: str) -> None:
-    _assert_status(_check(tmp_path, "SEC011"), "ERROR", "uv.lock or poetry.lock")
+    _assert_status(_check(tmp_path, "SEC006"), "ERROR", "uv.lock or poetry.lock")
 
     _write(tmp_path, lockfile, "")
-    assert _check(tmp_path, "SEC011") is True
-
-
-def test_action_references_are_read_from_yaml_structure(tmp_path: Path) -> None:
-    _write_workflow(
-        tmp_path,
-        "jobs:\n"
-        "  a:\n"
-        "    uses: x/y/.github/workflows/z.yml@main\n"
-        "  b:\n"
-        "    steps:\n"
-        "      # - uses: commented/out@v1\n"
-        "      - run: |\n"
-        "          echo 'uses: in/script@v1'\n"
-        f"      - name: n\n        uses: 'a/b@{_SHA}' # v1.0.0\n",
-    )
-
-    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "x/y/.github/workflows/z.yml@main.")
-    assert "script" not in _check(tmp_path, "SEC004")
-    assert "commented" not in _check(tmp_path, "SEC004")
     assert _check(tmp_path, "SEC006") is True
-
-
-def test_invalid_workflow_is_an_error_for_action_rules(tmp_path: Path) -> None:
-    _write_workflow(tmp_path, "jobs: [\n")
-
-    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "Invalid YAML in .github/workflows/ci.yml")
