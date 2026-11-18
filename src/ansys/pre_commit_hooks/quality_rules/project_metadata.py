@@ -41,6 +41,10 @@ The checks cover:
     - Project name follows the ``ansys-*-*`` convention
     - Project version follows the accepted versioning schemes
     - Author and maintainer metadata is configured
+    - Project and optional dependencies have version pins
+    - Project license metadata is declared
+    - Build backends and requirements follow packaging conventions
+    - Legacy setup.py and setup.cfg files are flagged
     - Supported Python versions have an explicit minimum; an upper bound is optional
     - Python version classifiers agree with requires-python
     - Support URLs are declared
@@ -100,6 +104,14 @@ __all__ = [
     "PM021",
     "PM022",
     "PM023",
+    "PM024",
+    "PM025",
+    "PM026",
+    "PM027",
+    "PM028",
+    "PM029",
+    "PM030",
+    "PM031",
     "ProjectMetadata",
 ]
 
@@ -117,6 +129,16 @@ _SECURITY: Final = "SECURITY.md"
 
 _DEFAULT_AUTHOR: Final = "Synopsys, Inc. and ANSYS, Inc."
 _DEFAULT_EMAIL: Final = "pyansys-core@synopsys.com"
+_BUILD_BACKENDS: Final[dict[str, tuple[str, str]]] = {
+    "flit_core.buildapi": ("Flit", "flit_core"),
+    "poetry.core.masonry.api": ("Poetry", "poetry_core"),
+    "hatchling.build": ("Hatch", "hatchling"),
+    "pdm.backend": ("PDM", "pdm-backend"),
+    "uv_build": ("uv_build", "uv_build"),
+    "maturin": ("Maturin", "maturin"),
+    "setuptools.build_meta": ("Setuptools", "setuptools"),
+    "setuptools.build_meta:__legacy__": ("Setuptools", "setuptools"),
+}
 
 _DOCS_DIRECTORIES: Final = ("docs", "doc")
 _TESTS_DIRECTORIES: Final = ("tests", "test")
@@ -206,6 +228,34 @@ def _project_table(data: dict[str, object]) -> dict[str, object] | str:
     if not isinstance(dynamic, list) or not all(isinstance(key, str) for key in dynamic):
         return "WARNING: project.dynamic must be a list of strings."
     return project
+
+
+def _build_system_table(data: dict[str, object]) -> dict[str, object] | str:
+    """Return the build-system table or a warning for an invalid table shape."""
+    build_system = data.get("build-system")
+    if build_system is None:
+        return {}
+    if not isinstance(build_system, dict):
+        return "WARNING: pyproject.toml must contain a [build-system] table."
+    return build_system
+
+
+def _build_backend_info(build_system: dict[str, object]) -> tuple[str, str, str]:
+    """Return the backend display name, policy key, and normalized requirement name."""
+    backend = build_system.get("build-backend")
+    if not isinstance(backend, str) or not backend.strip():
+        return "Unknown", "unknown", ""
+    known_backends = {
+        backend_name: (name, name.casefold(), requirement)
+        for backend_name, (name, requirement) in _BUILD_BACKENDS.items()
+    }
+    return known_backends.get(backend, ("Other", "other", ""))
+
+
+def _requirement_package_name(requirement: str) -> str:
+    """Return a normalized package name from a build requirement."""
+    name = re.split(r"[<>=!~;\s\[]", requirement, maxsplit=1)[0]
+    return name.lower().replace("-", "_").replace(".", "_")
 
 
 def _python_specifiers(spec: object) -> SpecifierSet | str:
@@ -748,3 +798,202 @@ class PM023(ProjectMetadata):
                 incompatible
             )
         return True
+
+
+def _is_pinned_dependency(requirement: str) -> bool:
+    """Return whether a dependency requirement includes a version operator."""
+    return bool(re.search(r"(?:===|==|~=|!=|>=|<=|>|<)", requirement))
+
+
+class PM024(ProjectMetadata):
+    """Project and optional dependencies include version pins."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when a declared project or optional dependency lacks a version operator."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        project = _project_table(data)
+        if isinstance(project, str):
+            return project
+
+        dynamic = project.get("dynamic", [])
+        if (
+            isinstance(dynamic, list)
+            and "dependencies" in dynamic
+            and "dependencies" not in project
+        ):
+            return "WARNING: Dynamic dependencies cannot be verified statically."
+
+        dependencies = project.get("dependencies", [])
+        optional_dependencies = project.get("optional-dependencies", {})
+        if not isinstance(dependencies, list) or not all(
+            isinstance(requirement, str) for requirement in dependencies
+        ):
+            return "WARNING: project.dependencies must be a list of requirement strings."
+        if not isinstance(optional_dependencies, dict):
+            return "WARNING: project.optional-dependencies must map groups to requirement lists."
+
+        all_dependencies = list(dependencies)
+        for group in optional_dependencies.values():
+            if not isinstance(group, list) or not all(isinstance(item, str) for item in group):
+                return (
+                    "WARNING: project.optional-dependencies must map groups to requirement lists."
+                )
+            all_dependencies.extend(group)
+
+        unpinned = [
+            requirement
+            for requirement in all_dependencies
+            if not _is_pinned_dependency(requirement)
+        ]
+        if unpinned:
+            return f"WARNING: Unpinned project dependencies: {', '.join(unpinned)}."
+        return True
+
+
+class PM025(ProjectMetadata):
+    """The [build-system] table has a non-empty requires list."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Return whether build-system exists and declares at least one requirement."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        build_system = _build_system_table(data)
+        if isinstance(build_system, str):
+            return build_system
+        requires = build_system.get("requires")
+        return bool(build_system) and isinstance(requires, list) and bool(requires)
+
+
+class PM026(ProjectMetadata):
+    """The project uses a supported modern build backend."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check backend support and recommend alternatives to setuptools."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        build_system = _build_system_table(data)
+        if isinstance(build_system, str):
+            return build_system
+        name, backend_key, _ = _build_backend_info(build_system)
+        if backend_key in {"unknown", "other"}:
+            return False
+        if backend_key == "setuptools":
+            return (
+                f"WARNING: Uses {name}; consider Flit, Hatch, Poetry, or uv-build "
+                "for simpler configuration."
+            )
+        return True
+
+
+class PM027(ProjectMetadata):
+    """No legacy setup.py or setup.cfg files are present."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when legacy packaging files are present."""
+        legacy_files = [
+            filename
+            for filename in ("setup.py", "setup.cfg")
+            if file_exists(repository_root, filename)
+        ]
+        if not legacy_files:
+            return True
+        return (
+            f"WARNING: Legacy packaging file(s) found: {', '.join(legacy_files)}. "
+            "Remove them in favor of pyproject.toml."
+        )
+
+
+class PM028(ProjectMetadata):
+    """Build backend requirements are pinned."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Warn when build-system.requires contains unpinned requirements."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        build_system = _build_system_table(data)
+        if isinstance(build_system, str):
+            return build_system
+        requirements = build_system.get("requires")
+        if (
+            not isinstance(requirements, list)
+            or not requirements
+            or not all(isinstance(requirement, str) for requirement in requirements)
+        ):
+            return False
+        unpinned = [
+            requirement for requirement in requirements if not _is_pinned_dependency(requirement)
+        ]
+        if unpinned:
+            return f"WARNING: Unpinned build requirements: {', '.join(unpinned)}."
+        return True
+
+
+class PM029(ProjectMetadata):
+    """The build backend is explicitly defined."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Return whether build-backend is configured in pyproject.toml."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        build_system = _build_system_table(data)
+        if isinstance(build_system, str):
+            return build_system
+        backend = build_system.get("build-backend")
+        return isinstance(backend, str) and bool(backend.strip())
+
+
+class PM030(ProjectMetadata):
+    """The configured backend is represented in build-system.requires."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Return whether the selected backend package appears in build requirements."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        build_system = _build_system_table(data)
+        if isinstance(build_system, str):
+            return build_system
+        _, backend_key, package_name = _build_backend_info(build_system)
+        if backend_key == "unknown":
+            return False
+        if backend_key == "other":
+            return True
+        requirements = build_system.get("requires")
+        if not isinstance(requirements, list) or not all(
+            isinstance(requirement, str) for requirement in requirements
+        ):
+            return False
+        return any(
+            _requirement_package_name(requirement) == package_name for requirement in requirements
+        )
+
+
+class PM031(ProjectMetadata):
+    """The project description is defined."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Return whether project.description is present or declared dynamic."""
+        data = _pyproject_data(repository_root)
+        if isinstance(data, str):
+            return data
+        project = _project_table(data)
+        if isinstance(project, str):
+            return project
+        dynamic = project.get("dynamic", [])
+        return bool(project.get("description")) or (
+            isinstance(dynamic, list) and "description" in dynamic
+        )

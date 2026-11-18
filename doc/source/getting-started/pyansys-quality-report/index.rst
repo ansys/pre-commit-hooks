@@ -55,6 +55,15 @@ or ignore checks with comma-separated or repeated IDs:
    pyansys-quality-report --json
    pyansys-quality-report --metadata
 
+Ignore rules persistently by listing their IDs in ``pyproject.toml``:
+
+.. code:: toml
+
+   [tool.pyansys-quality-report]
+   ignore = ["PM023", "PM027"]
+
+Rule IDs in this setting are combined with IDs passed through ``--ignore``.
+
 Every rule reports one of four statuses: ``PASSED``, ``RECOMMENDATION``,
 ``WARNING``, or ``ERROR``.
 The text report colors these statuses green, cyan, yellow, and red by default,
