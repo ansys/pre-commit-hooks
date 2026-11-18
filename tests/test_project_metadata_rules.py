@@ -39,7 +39,6 @@ from ansys.pre_commit_hooks.quality_rules.project_metadata import (
     PM029,
     PM030,
     PM031,
-    PM032,
 )
 
 
@@ -329,56 +328,31 @@ def test_dynamic_dependencies_are_reported_as_unverifiable(tmp_path):
     _assert_warning(PM024.check(tmp_path, None), "Dynamic dependencies")
 
 
-@pytest.mark.parametrize(
-    "license_metadata",
-    ['license = "MIT"', 'license-files = ["LICENSE"]'],
-)
-def test_project_license_metadata_is_declared(tmp_path, license_metadata):
-    """Accept license identifiers and explicit license file declarations."""
-    _write_pyproject(tmp_path, f"[project]\n{license_metadata}\n")
-
-    assert PM025.check(tmp_path, None) is True
-
-
-def test_dynamic_project_license_metadata_is_declared(tmp_path):
-    """Accept license metadata supplied dynamically by the build backend."""
-    _write_pyproject(tmp_path, '[project]\ndynamic = ["license"]\n')
-
-    assert PM025.check(tmp_path, None) is True
-
-
-def test_missing_project_license_metadata_fails(tmp_path):
-    """Require a project license, dynamic declaration, or license-files list."""
-    _write_pyproject(tmp_path, '[project]\nname = "example"\n')
-
-    assert PM025.check(tmp_path, None) is False
-
-
 def test_new_build_metadata_rules_are_registered(tmp_path):
     """Expose the migrated packaging checks through the Project Metadata family."""
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
 
     results = report._run_checks(
         tmp_path,
-        selected_rule_ids={f"PM{number:03d}" for number in range(26, 33)},
+        selected_rule_ids={f"PM{number:03d}" for number in range(25, 32)},
         selected_families={"project_metadata"},
     )["results"]
 
-    assert {result["id"] for result in results} == {f"PM{number:03d}" for number in range(26, 33)}
+    assert {result["id"] for result in results} == {f"PM{number:03d}" for number in range(25, 32)}
     assert all(result["family"] == "project_metadata" for result in results)
 
 
 def test_build_system_and_requires_are_both_required(tmp_path):
     """Combine the table and non-empty requirements checks in one rule."""
     _write_pyproject(tmp_path, '[project]\nname = "example"\n')
-    assert PM026.check(tmp_path, None) is False
+    assert PM025.check(tmp_path, None) is False
 
     _write_pyproject(tmp_path, "[build-system]\nrequires = []\n")
-    assert PM026.check(tmp_path, None) is False
+    assert PM025.check(tmp_path, None) is False
 
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
+    assert PM025.check(tmp_path, None) is True
     assert PM026.check(tmp_path, None) is True
-    assert PM027.check(tmp_path, None) is True
 
     _write_pyproject(
         tmp_path,
@@ -386,7 +360,7 @@ def test_build_system_and_requires_are_both_required(tmp_path):
             "hatchling==1.0", "setuptools==80.0"
         ),
     )
-    _assert_warning(PM027.check(tmp_path, None), "consider Flit, Hatch, or Poetry")
+    _assert_warning(PM026.check(tmp_path, None), "consider Flit, Hatch, Poetry, or uv-build")
 
 
 @pytest.mark.parametrize("legacy_file", ["setup.py", "setup.cfg"])
@@ -394,42 +368,42 @@ def test_legacy_packaging_files_are_reported(tmp_path, legacy_file):
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
     (tmp_path / legacy_file).write_text("# legacy\n", encoding="utf-8")
 
-    _assert_warning(PM028.check(tmp_path, None), legacy_file)
+    _assert_warning(PM027.check(tmp_path, None), legacy_file)
 
 
 def test_backend_requirement_pins_and_nonempty_list_are_checked(tmp_path):
     """Warn when backend requirements are unpinned."""
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
-    assert PM029.check(tmp_path, None) is True
+    assert PM028.check(tmp_path, None) is True
 
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA.replace("hatchling==1.0", "hatchling"))
-    _assert_warning(PM029.check(tmp_path, None), "hatchling")
+    _assert_warning(PM028.check(tmp_path, None), "hatchling")
 
 
 def test_backend_declaration_and_requirement_consistency_are_checked(tmp_path):
     """Check build-backend presence and matching backend package requirements."""
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
+    assert PM029.check(tmp_path, None) is True
     assert PM030.check(tmp_path, None) is True
-    assert PM031.check(tmp_path, None) is True
 
     _write_pyproject(
         tmp_path, _VALID_BUILD_METADATA.replace('build-backend = "hatchling.build"\n', "")
     )
-    assert PM030.check(tmp_path, None) is False
+    assert PM029.check(tmp_path, None) is False
 
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA.replace("hatchling==1.0", "setuptools==80.0"))
-    assert PM031.check(tmp_path, None) is False
+    assert PM030.check(tmp_path, None) is False
 
 
 def test_project_description_is_declared_or_dynamic(tmp_path):
     """Require a description while accepting backend-generated metadata."""
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
-    assert PM032.check(tmp_path, None) is True
+    assert PM031.check(tmp_path, None) is True
 
     content = _VALID_BUILD_METADATA.replace('description = "Test package"\n', "")
     content = content.replace("[project]\n", '[project]\ndynamic = ["description"]\n')
     _write_pyproject(tmp_path, content)
-    assert PM032.check(tmp_path, None) is True
+    assert PM031.check(tmp_path, None) is True
 
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA.replace('description = "Test package"\n', ""))
-    assert PM032.check(tmp_path, None) is False
+    assert PM031.check(tmp_path, None) is False

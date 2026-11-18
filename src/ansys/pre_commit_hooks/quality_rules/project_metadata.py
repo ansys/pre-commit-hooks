@@ -112,7 +112,6 @@ __all__ = [
     "PM029",
     "PM030",
     "PM031",
-    "PM032",
     "ProjectMetadata",
 ]
 
@@ -855,26 +854,6 @@ class PM024(ProjectMetadata):
 
 
 class PM025(ProjectMetadata):
-    """Project license metadata is declared."""
-
-    @staticmethod
-    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether project.license or project.license-files is declared."""
-        data = _pyproject_data(repository_root)
-        if isinstance(data, str):
-            return data
-        project = _project_table(data)
-        if isinstance(project, str):
-            return project
-        license_files = project.get("license-files")
-        dynamic = project.get("dynamic", [])
-        license_declared = bool(project.get("license")) or (
-            isinstance(dynamic, list) and "license" in dynamic
-        )
-        return bool(license_declared or isinstance(license_files, list) and license_files)
-
-
-class PM026(ProjectMetadata):
     """The [build-system] table has a non-empty requires list."""
 
     @staticmethod
@@ -890,7 +869,7 @@ class PM026(ProjectMetadata):
         return bool(build_system) and isinstance(requires, list) and bool(requires)
 
 
-class PM027(ProjectMetadata):
+class PM026(ProjectMetadata):
     """The project uses a supported modern build backend."""
 
     @staticmethod
@@ -907,12 +886,13 @@ class PM027(ProjectMetadata):
             return False
         if backend_key == "setuptools":
             return (
-                f"WARNING: Uses {name}; consider Flit, Hatch, or Poetry for simpler configuration."
+                f"WARNING: Uses {name}; consider Flit, Hatch, Poetry, or uv-build "
+                "for simpler configuration."
             )
         return True
 
 
-class PM028(ProjectMetadata):
+class PM027(ProjectMetadata):
     """No legacy setup.py or setup.cfg files are present."""
 
     @staticmethod
@@ -931,7 +911,7 @@ class PM028(ProjectMetadata):
         )
 
 
-class PM029(ProjectMetadata):
+class PM028(ProjectMetadata):
     """Build backend requirements are pinned."""
 
     @staticmethod
@@ -958,7 +938,7 @@ class PM029(ProjectMetadata):
         return True
 
 
-class PM030(ProjectMetadata):
+class PM029(ProjectMetadata):
     """The build backend is explicitly defined."""
 
     @staticmethod
@@ -974,7 +954,7 @@ class PM030(ProjectMetadata):
         return isinstance(backend, str) and bool(backend.strip())
 
 
-class PM031(ProjectMetadata):
+class PM030(ProjectMetadata):
     """The configured backend is represented in build-system.requires."""
 
     @staticmethod
@@ -1001,7 +981,7 @@ class PM031(ProjectMetadata):
         )
 
 
-class PM032(ProjectMetadata):
+class PM031(ProjectMetadata):
     """The project description is defined."""
 
     @staticmethod
