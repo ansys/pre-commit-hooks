@@ -38,7 +38,8 @@ The checks cover:
 * A ``uv.lock`` or ``poetry.lock`` lockfile pins the dependencies
 
 Workflows are parsed with :class:`yaml.BaseLoader`, so every scalar is read as
-a string and the ``on`` key is not converted to a boolean. Missing, unreadable,
+a string and the ``on`` key is not converted to a boolean. The action checks
+compose the YAML nodes to read the comment that follows each ``uses`` value. Missing, unreadable,
 or invalid configuration is reported as an ``ERROR``, except a missing
 workflow directory, which is a ``WARNING`` as in the CI/CD rules.
 """
@@ -95,10 +96,7 @@ _PRE_COMMIT_CONFIG: Final[str] = ".pre-commit-config.yaml"
 _LOCKFILES: Final[tuple[str, ...]] = ("uv.lock", "poetry.lock")
 _LOCAL_PRE_COMMIT_REPOSITORIES: Final[frozenset[str]] = frozenset({"local", "meta"})
 
-_USES_LINE: Final[re.Pattern[str]] = re.compile(
-    r"""^\s*(?:-\s*)?uses:\s*["']?(?P<reference>[^\s#"']+)["']?\s*(?:\#(?P<comment>.*))?$""",
-    re.MULTILINE,
-)
+_TRAILING_COMMENT: Final[re.Pattern[str]] = re.compile(r"\s*#(?P<comment>.*)$")
 _COMMIT_SHA: Final[re.Pattern[str]] = re.compile(r"[0-9a-f]{40}", re.IGNORECASE)
 _DOCKER_DIGEST: Final[re.Pattern[str]] = re.compile(
     r"docker://[^@\s]+@sha256:[0-9a-f]{64}", re.IGNORECASE
@@ -110,8 +108,62 @@ _PUBLIC_ISSUE_WARNING: Final[re.Pattern[str]] = re.compile(
 )
 
 
+def _mapping_value(node: yaml.Node | None, key: str) -> yaml.Node | None:
+    """Return the value node stored under a key of a mapping node.
+
+    Parameters
+    ----------
+    node : yaml.Node or None
+        Node expected to be a mapping.
+    key : str
+        Scalar key to look up.
+
+    Returns
+    -------
+    yaml.Node or None
+        Value node, or ``None`` when ``node`` is not a mapping or lacks the key.
+    """
+    if not isinstance(node, yaml.MappingNode):
+        return None
+    for key_node, value_node in node.value:
+        if isinstance(key_node, yaml.ScalarNode) and key_node.value == key:
+            return value_node
+    return None
+
+
+def _uses_nodes(root: yaml.Node) -> Iterator[yaml.ScalarNode]:
+    """Yield the ``uses`` value nodes of the jobs and steps of a workflow.
+
+    Parameters
+    ----------
+    root : yaml.Node
+        Root node of a workflow.
+
+    Yields
+    ------
+    yaml.ScalarNode
+        Value of each ``uses`` key set on a job (reusable workflow) or a step.
+    """
+    jobs = _mapping_value(root, "jobs")
+    if not isinstance(jobs, yaml.MappingNode):
+        return
+    for _, job in jobs.value:
+        candidates = [job]
+        steps = _mapping_value(job, "steps")
+        if isinstance(steps, yaml.SequenceNode):
+            candidates.extend(steps.value)
+        for candidate in candidates:
+            uses = _mapping_value(candidate, "uses")
+            if isinstance(uses, yaml.ScalarNode):
+                yield uses
+
+
 def _action_references(repository_root: Path) -> list[tuple[str, str | None]] | str:
     """Collect the remote action references used by the workflows.
+
+    The workflows are composed into YAML nodes, which keep the position of each
+    value, so the comment that follows a ``uses`` value can be read from its
+    source line.
 
     Parameters
     ----------
@@ -122,19 +174,28 @@ def _action_references(repository_root: Path) -> list[tuple[str, str | None]] | 
     -------
     list[tuple[str, str or None]] or str
         Unique ``(reference, comment)`` pairs in file order, excluding local
-        ``./`` actions, or a ``"WARNING: ..."`` message when no workflow
-        exists.
+        ``./`` actions, a ``"WARNING: ..."`` message when no workflow exists, or
+        an ``"ERROR: ..."`` message naming the first invalid workflow.
     """
     contents = workflow_contents(repository_root)
     if not contents:
         return _NO_WORKFLOWS
     references: dict[tuple[str, str | None], None] = {}
-    for content in contents.values():
-        for match in _USES_LINE.finditer(content):
-            reference = match["reference"]
-            if reference.startswith("./"):
+    for path, content in contents.items():
+        try:
+            root = yaml.compose(content, Loader=yaml.BaseLoader)  # nosec B506
+        except yaml.YAMLError:
+            return f"ERROR: Invalid YAML in {path}."
+        if not isinstance(root, yaml.MappingNode):
+            return f"ERROR: {path} must contain a YAML mapping."
+        lines = content.splitlines()
+        for node in _uses_nodes(root):
+            reference = node.value.strip()
+            if not reference or reference.startswith("./"):
                 continue
-            comment = match["comment"].strip() if match["comment"] else None
+            end = node.end_mark
+            trailing = _TRAILING_COMMENT.match(lines[end.line][end.column :])
+            comment = trailing["comment"].strip() if trailing else None
             references[(reference, comment)] = None
     return list(references)
 

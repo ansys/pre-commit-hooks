@@ -300,3 +300,29 @@ def test_lockfile_is_required(tmp_path: Path, lockfile: str) -> None:
 
     _write(tmp_path, lockfile, "")
     assert _check(tmp_path, "SEC011") is True
+
+
+def test_action_references_are_read_from_yaml_structure(tmp_path: Path) -> None:
+    _write_workflow(
+        tmp_path,
+        "jobs:\n"
+        "  a:\n"
+        "    uses: x/y/.github/workflows/z.yml@main\n"
+        "  b:\n"
+        "    steps:\n"
+        "      # - uses: commented/out@v1\n"
+        "      - run: |\n"
+        "          echo 'uses: in/script@v1'\n"
+        f"      - name: n\n        uses: 'a/b@{_SHA}' # v1.0.0\n",
+    )
+
+    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "x/y/.github/workflows/z.yml@main.")
+    assert "script" not in _check(tmp_path, "SEC004")
+    assert "commented" not in _check(tmp_path, "SEC004")
+    assert _check(tmp_path, "SEC006") is True
+
+
+def test_invalid_workflow_is_an_error_for_action_rules(tmp_path: Path) -> None:
+    _write_workflow(tmp_path, "jobs: [\n")
+
+    _assert_status(_check(tmp_path, "SEC004"), "ERROR", "Invalid YAML in .github/workflows/ci.yml")
