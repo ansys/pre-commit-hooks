@@ -1250,6 +1250,6 @@ def test_custom_license_not_deleted(tmp_path: pytest.TempPathFactory):
 
     # Assert the custom license still exists in the LICENSES folder
     custom_license_loc = Path(tmp_path) / "LICENSES" / "ECL-1.0.txt"
-    assert custom_license_loc
+    assert custom_license_loc.is_file()
 
-    os.chdir(REPO_PATH)    
+    os.chdir(REPO_PATH)
