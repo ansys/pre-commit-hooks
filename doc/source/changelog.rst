@@ -9,6 +9,83 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.8.2 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.2>`_ - November 19, 2026
+============================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add pre-commit configuration quality rules
+          - `#513 <https://github.com/ansys/pre-commit-hooks/pull/513>`_
+
+        * - Declare dependabot rules
+          - `#515 <https://github.com/ansys/pre-commit-hooks/pull/515>`_
+
+        * - Declare vale rules
+          - `#520 <https://github.com/ansys/pre-commit-hooks/pull/520>`_
+
+        * - Declare label rules
+          - `#521 <https://github.com/ansys/pre-commit-hooks/pull/521>`_
+
+        * - Declare documentation rules
+          - `#522 <https://github.com/ansys/pre-commit-hooks/pull/522>`_
+
+        * - Declare security rules
+          - `#523 <https://github.com/ansys/pre-commit-hooks/pull/523>`_
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Add additional project metadata rules
+          - `#527 <https://github.com/ansys/pre-commit-hooks/pull/527>`_
+
+        * - Custom license file deletion bug
+          - `#529 <https://github.com/ansys/pre-commit-hooks/pull/529>`_
+
+
+  .. tab-item:: Documentation
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Update CONTRIBUTORS.md with the latest contributors
+          - `#516 <https://github.com/ansys/pre-commit-hooks/pull/516>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Bump the python-deps group with 2 updates
+          - `#519 <https://github.com/ansys/pre-commit-hooks/pull/519>`_, `#525 <https://github.com/ansys/pre-commit-hooks/pull/525>`_
+
+        * - Bump the uv-deps group with 2 updates
+          - `#526 <https://github.com/ansys/pre-commit-hooks/pull/526>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - Pre-commit autoupdate
+          - `#517 <https://github.com/ansys/pre-commit-hooks/pull/517>`_
+
+
 `0.8.1 <https://github.com/ansys/pre-commit-hooks/releases/tag/v0.8.1>`_ - November 04, 2026
 ============================================================================================
 

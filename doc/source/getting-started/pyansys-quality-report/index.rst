@@ -11,7 +11,7 @@ Add the hook to ``.pre-commit-config.yaml``:
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.8.1
+     rev: v0.8.2
      hooks:
      - id: pyansys-quality-report
        args: [--show-all]
@@ -54,6 +54,15 @@ or ignore checks with comma-separated or repeated IDs:
    pyansys-quality-report --color always
    pyansys-quality-report --json
    pyansys-quality-report --metadata
+
+Ignore rules persistently by listing their IDs in ``pyproject.toml``:
+
+.. code:: toml
+
+   [tool.pyansys-quality-report]
+   ignore = ["PM023", "PM027"]
+
+Rule IDs in this setting are combined with IDs passed through ``--ignore``.
 
 Every rule reports one of four statuses: ``PASSED``, ``RECOMMENDATION``,
 ``WARNING``, or ``ERROR``.

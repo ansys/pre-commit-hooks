@@ -23,6 +23,11 @@ repos:
     exclude: templates/dependabot.yml
   - id: trailing-whitespace
 
+- repo: https://github.com/gitleaks/gitleaks
+  rev: 6eaad039603a4de39fddd1cf5f727391efe9974e # v8.30.0
+  hooks:
+  - id: gitleaks
+
 - repo: https://github.com/python-jsonschema/check-jsonschema
   rev: 0.39.0
   hooks:

@@ -1238,9 +1238,6 @@ def test_date_change_only_in_header(tmp_path: pytest.TempPathFactory):
     # Move to temporary directory
     os.chdir(tmp_path)
 
-    # Set up git repository in tmp_path with temporary file
-    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
-
     # Add content to the tmp_file
     with open(tmp_file, "a") as file:
         file.write("""def my_function():
@@ -1279,5 +1276,34 @@ def test_date_change_only_in_header(tmp_path: pytest.TempPathFactory):
 
         # Add file with updated header
         repo.index.add([tmp_file])
+
+    os.chdir(REPO_PATH)
+
+
+def test_custom_license_not_deleted(tmp_path: pytest.TempPathFactory):
+    """Test the custom license is not deleted."""
+    # Set template and license names
+    template_name = "ansys.jinja2"
+    template_path = Path(REPO_PATH) / ".reuse" / "templates" / template_name
+    license_name = "ECL-1.0.txt"
+    license_path = (
+        Path(REPO_PATH) / "tests" / "test_add_license_headers_files" / "LICENSES" / license_name
+    )
+
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
+    # Add custom arguments for sys.argv[1:]
+    custom_args = [
+        tmp_file,
+        "--custom_license=ECL-1.0",
+    ]
+
+    # Git add tmp_file and run hook with custom arguments
+    add_argv_run(repo, tmp_file, custom_args)
+
+    # Assert the custom license still exists in the LICENSES folder
+    custom_license_loc = Path(tmp_path) / "LICENSES" / "ECL-1.0.txt"
+    assert custom_license_loc.is_file()
 
     os.chdir(REPO_PATH)

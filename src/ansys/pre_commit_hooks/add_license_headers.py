@@ -1017,8 +1017,13 @@ def cleanup(assets: dict, os_git_root: str) -> None:
     """
     # Remove default assets (.reuse/templates/ansys.jinja2 and LICENSES/MIT.txt)
     for key, value in assets.items():
-        dest = Path(os_git_root) / value["path"] / value["default_file"]
+        # Do not delete custom license files, only MIT or Apache-2.0
+        if value["path"] == "LICENSES" and (
+            Path(value["default_file"]).stem not in ["MIT", "Apache-2.0"]
+        ):
+            continue
         # If the default asset files exist, unlink and remove directory
+        dest = Path(os_git_root) / value["path"] / value["default_file"]
         if dest.exists():
             dest.unlink()
             if not Path(value["path"]).iterdir():
