@@ -555,8 +555,8 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
     "--family",
     multiple=True,
     help=(
-        "Select rule family (readme, project_metadata, cicd, pre_commit, labels, vale, "
-        "dependabot, security)."
+        "Select rule family (readme, project_metadata, cicd, pre_commit, documentation, "
+        "security, labels, vale, dependabot)."
     ),
 )
 @click.option("--ignore", multiple=True, help="Ignore rule IDs (also read from pyproject.toml).")

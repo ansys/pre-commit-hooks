@@ -101,6 +101,7 @@ def test_pre_commit_runs_by_default_without_removing_existing_families(tmp_path:
         "project_metadata",
         "cicd",
         "pre_commit",
+        "documentation",
         "labels",
         "vale",
         "dependabot",
