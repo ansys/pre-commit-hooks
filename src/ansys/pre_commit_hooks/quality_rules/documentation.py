@@ -760,7 +760,7 @@ class DOC028(Documentation):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Warn when the interrogate pre-commit hook is not configured."""
+        """Recommend the interrogate pre-commit hook when it is not configured."""
         if _has_interrogate_hook(repository_root):
             return True
         return (

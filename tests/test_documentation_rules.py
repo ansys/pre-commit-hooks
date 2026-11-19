@@ -423,7 +423,7 @@ def test_interrogate_hook_is_recommended_and_detected(tmp_path: Path) -> None:
     result = report._run_checks(
         tmp_path, selected_rule_ids={"DOC028"}, selected_families={"documentation"}
     )["results"][0]
-    assert result["status"] == "WARNING"
+    assert result["status"] == "RECOMMENDATION"
     assert "docstring coverage" in result["detail"]
 
     (tmp_path / ".pre-commit-config.yaml").write_text(
