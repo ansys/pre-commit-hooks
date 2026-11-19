@@ -1238,6 +1238,9 @@ def test_date_change_only_in_header(tmp_path: pytest.TempPathFactory):
     # Move to temporary directory
     os.chdir(tmp_path)
 
+    # Set up git repository in tmp_path with temporary file
+    repo, tmp_file = set_up_repo(tmp_path, template_path, template_name, license_path, license_name)
+
     # Add content to the tmp_file
     with open(tmp_file, "a") as file:
         file.write("""def my_function():
