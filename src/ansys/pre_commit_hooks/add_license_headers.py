@@ -454,13 +454,9 @@ def _has_current_header(file_path: str, copyright: list, years: str) -> bool:
     # Get year span from file header
     year_range_match = re.search(COPYRIGHT_YEAR_REGEX, head)
     if year_range_match:
-        print(f"year_range_match: {year_range_match}")
         start_year = year_range_match.group(2)
         end_year = year_range_match.group(3)
         file_years = f"{start_year} - {end_year}" if end_year else start_year
-
-        print(f"file years: {file_years}")
-        print(f"new years: {years}")
 
         # Check both the copyright holder and year range are present in the header
         return copyright[0] in head and years == file_years
@@ -598,7 +594,6 @@ def non_recursive_file_check(
                 _head = ""
             copyright_holder_changed = copyright[0] not in _head
             if not existing_license_matches or copyright_holder_changed:
-                print("not existing license matches or copyright holder changed")
                 before_hook = NamedTemporaryFile(mode="w", delete=False).name
                 shutil.copyfile(file, before_hook)
                 _strip_reuse_header(file)
@@ -608,7 +603,6 @@ def non_recursive_file_check(
                     print(f"Successfully changed header of {file}")
                 Path(before_hook).unlink()
             else:
-                print("non recursive else")
                 changed_headers = update_header(
                     changed_headers, file, copyright, license, years, template, commented
                 )
@@ -647,7 +641,6 @@ def set_variables(obj: "common.ClickObj", values: dict, args: argparse.Namespace
         if values["start_year"] != values["current_year"]
         else f"{values['current_year']}"
     )
-    print(f"set var years: {years}")
 
     return project, template, commented, license, files, copyright, years
 
@@ -717,12 +710,11 @@ def update_header(
     # Check if the file before add-license-headers was run is the same as the one
     # after add-license-headers was run. If not, apply the syntax changes
     # from other hooks before add-license-headers was run to the file
-    # if check_same_content(before_hook, file) is False:
-    #     apply_hook_changes(before_hook, file)
+    if check_same_content(before_hook, file) is False:
+        apply_hook_changes(before_hook, file)
 
     # Update the year span in the header if necessary
     years_list = years.split(" - ")
-    print(f"years_list: {years_list}")
     if len(years_list) == 1:
         if int(years_list[0]) != DEFAULT_START_YEAR:
             years_list.append(DEFAULT_START_YEAR)
@@ -779,7 +771,6 @@ def add_header(
 
     # Create a YearRange object from the years string to pass into the get_reuse_info function
     year_range = YearRange.tuple_from_string(years)
-    print(f"add_header_years: {year_range}")
 
     # Get the REUSE information from the file.
     reuse_info = get_reuse_info(
@@ -997,9 +988,6 @@ def get_years_from_file(content: str, year_regex: str) -> tuple:
     else:
         match_start_year = year_range_match.group(2)
         match_end_year = year_range_match.group(2)
-
-    print(match_start_year)
-    print(match_end_year)
 
     return cp_statement, match_start_year, match_end_year
 
