@@ -764,7 +764,7 @@ class DOC028(Documentation):
         if _has_interrogate_hook(repository_root):
             return True
         return (
-            "WARNING: Add the interrogate pre-commit hook to monitor docstring coverage; "
+            "RECOMMENDATION: Add the interrogate pre-commit hook to monitor docstring coverage; "
             "coverage gaps are advisory."
         )
 
