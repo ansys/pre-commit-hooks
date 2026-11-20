@@ -11,7 +11,7 @@ Add the hook to ``.pre-commit-config.yaml``:
 .. code:: yaml
 
    - repo: https://github.com/ansys/pre-commit-hooks
-     rev: v0.8.2
+     rev: v0.8.3
      hooks:
      - id: pyansys-quality-report
        args: [--show-all]
