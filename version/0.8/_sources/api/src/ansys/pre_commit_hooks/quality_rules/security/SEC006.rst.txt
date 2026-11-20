@@ -1,0 +1,109 @@
+
+
+
+
+
+
+:class:`SEC006`
+===============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.security.SEC006
+
+   Bases: :py:obj:`Security`
+
+
+   
+   A dependency lockfile exists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: SEC006
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Report an error when neither uv.lock nor poetry.lock exists at the root.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.security import SEC006
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Report an error when neither uv.lock nor poetry.lock exists at the root.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when a lockfile exists, otherwise an error. A lockfile
+           keeps development and CI environments reproducible and prevents
+           unreviewed dependencies from being installed.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PM024`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM024
+
+   Bases: :py:obj:`ProjectMetadata`
+
+
+   
+   Project and optional dependencies include version pins.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PM024
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Warn when a declared project or optional dependency lacks a version operator.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.project_metadata import PM024
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Warn when a declared project or optional dependency lacks a version operator.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

@@ -1,0 +1,215 @@
+
+
+
+
+
+
+The ``labels.py`` module
+========================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.labels
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: labels
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.Labels`
+            - GitHub label rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB001`
+            - The .github/labeler.yml file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB002`
+            - The .github/labels.yml file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB003`
+            - Labels.yml has a bug label.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB004`
+            - Labels.yml has an enhancement label.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB005`
+            - Labels.yml has a documentation label.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB006`
+            - Labeler.yml maps labels to match rules.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB007`
+            - Labeler.yml only assigns labels declared in labels.yml.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB008`
+            - Labels.yml has no duplicate labels.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB009`
+            - Labels.yml labels have a valid color.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB010`
+            - Labels.yml labels have a description.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB011`
+            - Labels.yml has a dependencies label.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB012`
+            - Labels.yml has ci, tests, maintenance, and release labels.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB013`
+            - Labels.yml has a good first issue label.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB014`
+            - Labeler.yml labels documentation and workflow changes.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB015`
+            - A workflow syncs labels.yml to GitHub.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.labels.LB016`
+            - No legacy .yaml label files remain.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> Labels</api/src/ansys/pre_commit_hooks/quality_rules/labels/Labels>
+    <span class="nf nf-cod-symbol_class"></span> LB001</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB001>
+    <span class="nf nf-cod-symbol_class"></span> LB002</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB002>
+    <span class="nf nf-cod-symbol_class"></span> LB003</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB003>
+    <span class="nf nf-cod-symbol_class"></span> LB004</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB004>
+    <span class="nf nf-cod-symbol_class"></span> LB005</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB005>
+    <span class="nf nf-cod-symbol_class"></span> LB006</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB006>
+    <span class="nf nf-cod-symbol_class"></span> LB007</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB007>
+    <span class="nf nf-cod-symbol_class"></span> LB008</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB008>
+    <span class="nf nf-cod-symbol_class"></span> LB009</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB009>
+    <span class="nf nf-cod-symbol_class"></span> LB010</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB010>
+    <span class="nf nf-cod-symbol_class"></span> LB011</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB011>
+    <span class="nf nf-cod-symbol_class"></span> LB012</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB012>
+    <span class="nf nf-cod-symbol_class"></span> LB013</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB013>
+    <span class="nf nf-cod-symbol_class"></span> LB014</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB014>
+    <span class="nf nf-cod-symbol_class"></span> LB015</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB015>
+    <span class="nf nf-cod-symbol_class"></span> LB016</api/src/ansys/pre_commit_hooks/quality_rules/labels/LB016>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+GitHub label configuration checks.
+
+This rule set validates the label files used by the PyAnsys labeler
+workflows: ``.github/labels.yml`` declares the repository labels and
+``.github/labeler.yml`` assigns them to pull requests.
+
+The checks cover:
+
+* Both files exist, and ``.github/labeler.yml`` is a mapping of labels to
+  match rules
+* Every label assigned by ``.github/labeler.yml`` is declared in
+  ``.github/labels.yml``
+* Declared labels are unique and have a valid color and a description
+* The ``bug``, ``enhancement``, ``documentation``, ``dependencies``, ``ci``,
+  ``tests``, ``maintenance``, ``release``, and ``good first issue`` labels are
+  declared
+* ``.github/labeler.yml`` labels documentation and workflow changes
+* A workflow synchronizes the declared labels with GitHub
+* No legacy ``.yaml`` copies of the label files remain
+
+Label names are compared case-insensitively, as GitHub does. Both files are
+parsed with :class:`yaml.BaseLoader`, so every scalar, including colors such
+as ``000000``, is read as a string. Missing, unreadable, or invalid
+configuration is reported as an ``ERROR``.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

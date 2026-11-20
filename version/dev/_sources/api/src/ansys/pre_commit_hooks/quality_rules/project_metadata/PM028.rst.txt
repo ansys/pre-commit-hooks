@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`PM028`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.project_metadata.PM028
+
+   Bases: :py:obj:`ProjectMetadata`
+
+
+   
+   Build backend requirements are pinned.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PM028
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Warn when build-system.requires contains unpinned requirements.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.project_metadata import PM028
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Warn when build-system.requires contains unpinned requirements.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

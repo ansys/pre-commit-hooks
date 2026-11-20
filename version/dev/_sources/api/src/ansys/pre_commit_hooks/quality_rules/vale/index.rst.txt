@@ -1,0 +1,239 @@
+
+
+
+
+
+
+The ``vale.py`` module
+======================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.vale
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: vale
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.Vale`
+            - Vale rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL001`
+            - The doc/.vale.ini file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL002`
+            - Vale uses the Google style package.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL003`
+            - Vale uses the ANSYS vocabulary.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL004`
+            - The ANSYS accept.txt vocabulary exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL005`
+            - The ANSYS reject.txt vocabulary exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL006`
+            - Vale StylesPath is styles.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL007`
+            - Vale MinAlertLevel is warning or stricter.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL008`
+            - Vale IgnoredScopes includes code and tt.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL009`
+            - Vale SkippedScopes includes script, style, pre, and figure.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL010`
+            - Vale WordTemplate matches whole words.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL011`
+            - Vale lints Python, Markdown, and reStructuredText files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL012`
+            - Vale parses Python files as Markdown.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL013`
+            - Vale applies the built-in Vale style.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL014`
+            - Vale disables the Vale.Terms rule.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL015`
+            - Vale configures TokenIgnores and BlockIgnores.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL016`
+            - The Vale styles .gitignore preserves configured vocabulary files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL017`
+            - The ANSYS accept.txt vocabulary is not empty.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL018`
+            - The ANSYS accept.txt vocabulary has no duplicate or blank lines.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.vale.VL019`
+            - Legacy codespell word lists are migrated to Vale.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> Vale</api/src/ansys/pre_commit_hooks/quality_rules/vale/Vale>
+    <span class="nf nf-cod-symbol_class"></span> VL001</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL001>
+    <span class="nf nf-cod-symbol_class"></span> VL002</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL002>
+    <span class="nf nf-cod-symbol_class"></span> VL003</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL003>
+    <span class="nf nf-cod-symbol_class"></span> VL004</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL004>
+    <span class="nf nf-cod-symbol_class"></span> VL005</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL005>
+    <span class="nf nf-cod-symbol_class"></span> VL006</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL006>
+    <span class="nf nf-cod-symbol_class"></span> VL007</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL007>
+    <span class="nf nf-cod-symbol_class"></span> VL008</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL008>
+    <span class="nf nf-cod-symbol_class"></span> VL009</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL009>
+    <span class="nf nf-cod-symbol_class"></span> VL010</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL010>
+    <span class="nf nf-cod-symbol_class"></span> VL011</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL011>
+    <span class="nf nf-cod-symbol_class"></span> VL012</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL012>
+    <span class="nf nf-cod-symbol_class"></span> VL013</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL013>
+    <span class="nf nf-cod-symbol_class"></span> VL014</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL014>
+    <span class="nf nf-cod-symbol_class"></span> VL015</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL015>
+    <span class="nf nf-cod-symbol_class"></span> VL016</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL016>
+    <span class="nf nf-cod-symbol_class"></span> VL017</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL017>
+    <span class="nf nf-cod-symbol_class"></span> VL018</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL018>
+    <span class="nf nf-cod-symbol_class"></span> VL019</api/src/ansys/pre_commit_hooks/quality_rules/vale/VL019>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Vale configuration checks.
+
+This rule set validates the documentation Vale configuration in
+``doc/.vale.ini`` and the files it depends on.
+
+The checks cover:
+
+* The ``doc/.vale.ini`` file exists
+* The ``Google`` package is listed in ``Packages`` and applied through
+  ``BasedOnStyles`` together with the built-in ``Vale`` style
+* The ``ANSYS`` vocabulary is enabled through ``Vocab`` and provides
+  ``accept.txt`` and ``reject.txt`` files
+* The core settings (``StylesPath``, ``MinAlertLevel``, ``IgnoredScopes``,
+  ``SkippedScopes``, and ``WordTemplate``) follow the PyAnsys template
+* Python, Markdown, and reStructuredText files are linted, Python files are
+  parsed as Markdown, and ``Vale.Terms``, ``TokenIgnores``, and
+  ``BlockIgnores`` are configured
+* The styles ``.gitignore`` ignores other files while preserving the configured
+    Vale vocabulary files
+* The ``accept.txt`` vocabulary is populated, without duplicate or blank lines
+* Legacy codespell word lists are migrated to the ANSYS vocabulary
+
+Paths such as the vocabulary and the styles ``.gitignore`` are resolved under
+``StylesPath``, relative to the ``doc`` directory. Vocabulary files are looked
+up in the Vale 3 layout (``config/vocabularies/ANSYS``) or the legacy layout
+(``Vocab/ANSYS``). Missing, unreadable, or invalid configuration is reported
+as an ``ERROR``.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

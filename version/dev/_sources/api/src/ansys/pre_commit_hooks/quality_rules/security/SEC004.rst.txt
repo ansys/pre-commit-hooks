@@ -1,0 +1,108 @@
+
+
+
+
+
+
+:class:`SEC004`
+===============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.security.SEC004
+
+   Bases: :py:obj:`Security`
+
+
+   
+   SECURITY.md discourages public issue reporting.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: SEC004
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that the security policy steers reporters away from issues.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.security import SEC004
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that the security policy steers reporters away from issues.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when the root ``SECURITY.md`` is the only policy file and tells
+           reporters not to use (public) issues, otherwise an error.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

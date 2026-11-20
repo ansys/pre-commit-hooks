@@ -1,0 +1,140 @@
+
+
+
+
+
+
+:class:`PreCommit`
+==================
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.pre_commit.PreCommit
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   
+   Pre-commit rule family.
+
+   Base class of the pre-commit quality rules. Each rule is a subclass named
+   ``PC<nnn>`` with a static ``check`` method that evaluates the repository's
+   pre-commit configuration independently. Missing or unreadable configuration
+   is reported as an error rather than skipped. Rules for optional hooks report
+   a ``RECOMMENDATION`` instead of an error when the hook is absent.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: PreCommit
+
+Overview
+--------
+
+.. tab-set::
+
+   .. tab-item:: Abstract methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Evaluate a pre-commit rule.
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~family`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.pre_commit import PreCommit
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: family
+   :type:  ClassVar[str]
+   :value: 'pre_commit'
+
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+   :abstractmethod:
+
+
+   
+   Evaluate a pre-commit rule.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Detected README path, unused by this rule family.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when the rule passes, ``False`` for an error, or a string
+           prefixed with ``"RECOMMENDATION: "`` or ``"ERROR: "``.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

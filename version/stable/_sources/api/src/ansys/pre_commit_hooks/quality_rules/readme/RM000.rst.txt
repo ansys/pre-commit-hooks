@@ -1,0 +1,121 @@
+
+
+
+
+
+
+:class:`RM000`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.readme.RM000
+
+   Bases: :py:obj:`README`
+
+
+   
+   README file exists.
+
+   Requires a ``README.rst`` or ``README.md`` file in the repository root.
+
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Notes
+
+   - ``README.rst`` passes.
+   - ``README.md`` is accepted with a warning, because ``README.rst`` is preferred.
+   - A missing README produces an error.
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: RM000
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the repository has a supported README file.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.readme import RM000
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the repository has a supported README file.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Name of the detected README file, or ``None`` if there is none.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` for ``README.rst``, a ``"WARNING: ..."`` message for
+           ``README.md``, and ``False`` if no README exists.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

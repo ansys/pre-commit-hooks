@@ -1,0 +1,140 @@
+
+
+
+
+
+
+The ``security.py`` module
+==========================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.security
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: security
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.Security`
+            - Security rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC001`
+            - The .github/zizmor.yml file exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC002`
+            - The zizmor config includes the secrets-outside-env rule.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC003`
+            - The gitleaks hook is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC004`
+            - SECURITY.md discourages public issue reporting.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC005`
+            - Pre-commit repositories pin revisions to commit SHAs.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.security.SEC006`
+            - A dependency lockfile exists.
+
+
+
+
+
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> Security</api/src/ansys/pre_commit_hooks/quality_rules/security/Security>
+    <span class="nf nf-cod-symbol_class"></span> SEC001</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC001>
+    <span class="nf nf-cod-symbol_class"></span> SEC002</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC002>
+    <span class="nf nf-cod-symbol_class"></span> SEC003</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC003>
+    <span class="nf nf-cod-symbol_class"></span> SEC004</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC004>
+    <span class="nf nf-cod-symbol_class"></span> SEC005</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC005>
+    <span class="nf nf-cod-symbol_class"></span> SEC006</api/src/ansys/pre_commit_hooks/quality_rules/security/SEC006>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Security configuration checks.
+
+This rule set validates the security configuration of a repository: the
+zizmor and gitleaks tooling, the ``SECURITY.md`` policy, the pinning of the
+pre-commit repositories, and the dependency lockfile.
+
+The checks cover:
+
+* ``.github/zizmor.yml`` exists and disables the ``secrets-outside-env`` audit
+* The ``gitleaks`` pre-commit hook is configured
+* ``SECURITY.md`` exists only at the root and tells reporters not to open
+  public issues
+* Pre-commit repositories are pinned to commit SHAs
+* A ``uv.lock`` or ``poetry.lock`` lockfile pins the dependencies
+
+GitHub Actions workflow hardening, such as pinning actions to commit SHAs,
+version comments, token permissions, credential persistence, and dangerous
+triggers, is left to the zizmor audits. Missing, unreadable, or invalid
+configuration is reported as an ``ERROR``.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+

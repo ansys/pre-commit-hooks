@@ -1,0 +1,30 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.update_license_file`
+=============================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.update_license_file(arg_dict)
+
+   
+   Update the LICENSE file to match MIT.txt, adjusting the year span to each repository.
+
+
+   :Parameters:
+
+       **arg_dict: dict**
+           Dictionary containing the committed files, custom copyright, template, license,
+           changed_headers, start & end year, and git_repo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

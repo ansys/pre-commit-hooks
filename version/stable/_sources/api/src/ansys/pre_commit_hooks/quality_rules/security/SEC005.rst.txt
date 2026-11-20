@@ -1,0 +1,110 @@
+
+
+
+
+
+
+:class:`SEC005`
+===============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.security.SEC005
+
+   Bases: :py:obj:`Security`
+
+
+   
+   Pre-commit repositories pin revisions to commit SHAs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: SEC005
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Recommend pinning each remote pre-commit repository to a commit SHA.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.security import SEC005
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Recommend pinning each remote pre-commit repository to a commit SHA.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when every remote repository ``rev`` is a full commit SHA,
+           a recommendation naming the repositories pinned to tags or
+           branches, or an ``"ERROR: ..."`` message when the configuration is
+           invalid.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+
