@@ -334,14 +334,14 @@ def test_cli_supports_pre_commit_family_and_rule_filtering(
     _write_configuration(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "pre_commit", "--ignore", "PC006"]) == 0
+    assert report.main(["--format", "json", "--family", "pre_commit", "--ignore", "PC006"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [result["id"] for result in payload["results"]] == [
         rule_id for rule_id in _RULE_IDS if rule_id != "PC006"
     ]
     assert payload["tally"] == {"PASSED": 9, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
 
-    assert report.main(["--json", "--check", "PC006"]) == 0
+    assert report.main(["--format", "json", "--check", "PC006"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [result["id"] for result in payload["results"]] == ["PC006"]
 
@@ -368,7 +368,7 @@ def test_cli_exit_code_distinguishes_errors_from_warnings(
     _write_configuration(tmp_path, content)
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "pre_commit"]) == expected_exit_code
+    assert report.main(["--format", "json", "--family", "pre_commit"]) == expected_exit_code
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == expected_tally
@@ -383,7 +383,7 @@ def test_missing_optional_hooks_only_warn(
     )
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "pre_commit"]) == 0
+    assert report.main(["--format", "json", "--family", "pre_commit"]) == 0
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 8, "RECOMMENDATION": 2, "WARNING": 0, "ERROR": 0}
@@ -446,7 +446,7 @@ def test_missing_recommended_hooks_do_not_fail_cli(
     _write_configuration(tmp_path, content)
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "pre_commit"]) == 0
+    assert report.main(["--format", "json", "--family", "pre_commit"]) == 0
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 6, "RECOMMENDATION": 4, "WARNING": 0, "ERROR": 0}

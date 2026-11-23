@@ -58,8 +58,8 @@ from ansys.pre_commit_hooks.quality_rules.common import (
 )
 
 ColorMode: TypeAlias = Literal["auto", "always", "never"]
+ReportFormat: TypeAlias = Literal["text", "json"]
 
-_DEFAULT_JSON_REPORT: Final[str] = "pyansys_quality_report.json"
 _ANSI_RESET: Final = "\033[0m"
 _ANSI_BOLD: Final = "\033[1m"
 _STATUS_COLORS: Final[dict[RuleStatus, str]] = {
@@ -549,13 +549,18 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
 
 
 @click.command(help="Run PyAnsys repository quality checks.")
-@click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
 @click.option(
-    "--json-file",
-    type=click.Path(path_type=Path, dir_okay=False),
-    default=_DEFAULT_JSON_REPORT,
+    "--format",
+    "report_format",
+    type=click.Choice(["text", "json"]),
+    default="text",
     show_default=True,
-    help="Write the JSON report to this file (used with --json).",
+    help="Report format.",
+)
+@click.option(
+    "--output-file",
+    type=click.Path(path_type=Path, dir_okay=False),
+    help="Write the JSON report to this file (requires --format json).",
 )
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
@@ -581,8 +586,8 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
     help="Control ANSI colors (default: always).",
 )
 def _cli(
-    json_output: bool,
-    json_file: Path,
+    report_format: ReportFormat,
+    output_file: Path | None,
     metadata: bool,
     check: tuple[str, ...],
     family: tuple[str, ...],
@@ -594,6 +599,10 @@ def _cli(
     """Run repository quality checks and return the process exit code."""
     if show_all and fails_only:
         raise click.UsageError("Use only one of --show-all or --fails-only")
+    if output_file is not None and report_format != "json":
+        raise click.UsageError("--output-file can only be used with --format json")
+    if output_file is not None and metadata:
+        raise click.UsageError("--output-file cannot be used with --metadata")
 
     selected_rule_ids = _normalize_rule_ids(list(check))
     ignored_rule_ids = _normalize_rule_ids(list(ignore))
@@ -627,22 +636,16 @@ def _cli(
         ignored_rule_ids=ignored_rule_ids | configured_ignored_rule_ids,
         selected_families=selected_rule_families,
     )
-    if json_output:
+    if report_format == "json":
         json_output_text = json.dumps(quality_report, indent=2)
-        json_file.write_text(f"{json_output_text}\n", encoding="utf-8")
-        autoflush_print(json_output_text)
+        if output_file is not None:
+            output_file.write_text(f"{json_output_text}\n", encoding="utf-8")
+        else:
+            autoflush_print(json_output_text)
         return 1 if quality_report["tally"][ERROR] else 0
 
-    colors_enabled = _colors_enabled(
-        color,
-        sys.stdout,
-        os.environ,
-    )
-    _print_report(
-        quality_report,
-        show_all=show_all,
-        colors_enabled=colors_enabled,
-    )
+    colors_enabled = _colors_enabled(color, sys.stdout, os.environ)
+    _print_report(quality_report, show_all=show_all, colors_enabled=colors_enabled)
     return 1 if quality_report["tally"][ERROR] else 0
 
 

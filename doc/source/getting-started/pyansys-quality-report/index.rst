@@ -51,14 +51,15 @@ or ignore checks with comma-separated or repeated IDs:
    pyansys-quality-report --show-all
    pyansys-quality-report --check RM003
    pyansys-quality-report --ignore RM004,RM005
+   pyansys-quality-report --format text
    pyansys-quality-report --color always
-   pyansys-quality-report --json
-   pyansys-quality-report --json --json-file quality-report.json
+   pyansys-quality-report --format json
+   pyansys-quality-report --format json --output-file quality-report.json
    pyansys-quality-report --metadata
 
-Using ``--json`` writes the report to ``pyansys_quality_report.json`` in the
-current directory and also prints it to standard output. Set ``--json-file`` to
-choose a different output filename.
+The report format defaults to text; use ``--format json`` for JSON output.
+Reports are printed to standard output unless ``--output-file`` is used with
+``--format json`` to write a JSON report to a file.
 
 Ignore rules persistently by listing their IDs in ``pyproject.toml``:
 

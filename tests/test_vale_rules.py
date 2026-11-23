@@ -290,13 +290,13 @@ def test_cli_reports_vale_family(
     _write_repository(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "vale"]) == 0
+    assert report.main(["--format", "json", "--family", "vale"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [result["id"] for result in payload["results"]] == list(_RULE_IDS)
     assert payload["tally"] == {"PASSED": 19, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
 
     (tmp_path / _VOCABULARY_DIRECTORY / "reject.txt").unlink()
-    assert report.main(["--json", "--family", "vale"]) == 1
+    assert report.main(["--format", "json", "--family", "vale"]) == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 18, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 1}
 
