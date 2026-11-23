@@ -312,10 +312,7 @@ def test_report_uses_actionable_failure_once(tmp_path, capsys):
 def test_report_colors_each_status(tmp_path, capsys):
     """The colored report should assign a distinct color to every status."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
-    review = report._run_checks(
-        tmp_path,
-        selected_rule_ids={"RM000", "RM001", "RM002"},
-    )
+    review = report._run_checks(tmp_path, selected_rule_ids={"RM000", "RM001", "RM002"})
 
     report._print_report(review, show_all=True, colors_enabled=True)
 
@@ -486,7 +483,7 @@ def test_cli_reads_ignored_rules_from_pyproject(tmp_path, monkeypatch, capsys):
     )
     monkeypatch.chdir(tmp_path)
 
-    report.main(["--ignore", "RM006", "--json"])
+    report.main(["--ignore", "RM006", "--format", "json"])
 
     ids = {item["id"] for item in json.loads(capsys.readouterr().out)["results"]}
     assert "RM005" not in ids
@@ -576,7 +573,7 @@ def test_cli_accepts_lowercase_rule_ids(tmp_path, monkeypatch, capsys):
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
-    result = report.main(["--check", "rm000", "--json"])
+    result = report.main(["--check", "rm000", "--format", "json"])
 
     assert result == 0
     assert [item["id"] for item in json.loads(capsys.readouterr().out)["results"]] == ["RM000"]
@@ -608,19 +605,19 @@ def test_cli_finds_project_root_from_subdirectory(tmp_path, monkeypatch, capsys)
     nested.mkdir(parents=True)
     monkeypatch.chdir(nested)
 
-    result = report.main(["--check", "RM000", "--json"])
+    result = report.main(["--check", "RM000", "--format", "json"])
 
     assert result == 0
     assert json.loads(capsys.readouterr().out)["results"][0]["status"] == "PASSED"
 
 
 def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
-    """The CLI should support selected checks and JSON output."""
+    """The CLI should print JSON when requested."""
     (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
-    result = report.main(["--check", "RM000", "--json"])
+    result = report.main(["--check", "RM000", "--format", "json"])
     payload = json.loads(capsys.readouterr().out)
 
     assert result == 0
@@ -628,16 +625,47 @@ def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
     assert payload["results"][0]["status"] == "PASSED"
 
 
-def test_cli_colors_captured_output_by_default(tmp_path, monkeypatch, capsys):
-    """The CLI should color pre-commit and CI output by default."""
+def test_cli_writes_json_to_requested_file(tmp_path, monkeypatch, capsys):
+    """The CLI should write JSON to a requested file instead of stdout."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    output_file = tmp_path / "custom-report.json"
+
+    result = report.main(
+        ["--check", "RM000", "--format", "json", "--output-file", str(output_file)]
+    )
+
+    assert result == 0
+    assert capsys.readouterr().out == ""
+    payload = json.loads(output_file.read_text(encoding="utf-8"))
+    assert [item["id"] for item in payload["results"]] == ["RM000"]
+
+
+def test_cli_rejects_output_file_for_text(tmp_path, monkeypatch, capsys):
+    """The output file option requires JSON format."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--output-file", "report.json"])
+
+    assert exit_info.value.code == 2
+    assert "--output-file can only be used with --format json" in capsys.readouterr().err
+
+
+def test_cli_outputs_text_by_default(tmp_path, monkeypatch, capsys):
+    """The default report uses the colored text format."""
     (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
     result = report.main(["--check", "RM000", "--show-all"])
-
     output = capsys.readouterr().out
+
     assert result == 0
+    assert "PyAnsys quality report" in output
+    assert "Status summary" in output
     assert "\033[32mPASSED " in output
     assert "RM000" in output
 
@@ -648,7 +676,7 @@ def test_cli_can_disable_color(tmp_path, monkeypatch, capsys):
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
-    result = report.main(["--check", "RM000", "--show-all", "--color", "never"])
+    result = report.main(["--check", "RM000", "--show-all", "--format", "text", "--color", "never"])
 
     output = capsys.readouterr().out
     assert result == 0
@@ -656,14 +684,23 @@ def test_cli_can_disable_color(tmp_path, monkeypatch, capsys):
     assert "PASSED" in output
 
 
+def test_cli_rejects_unsupported_report_format(capsys):
+    """Only text and JSON report formats are accepted."""
+    with pytest.raises(SystemExit) as exit_info:
+        report.main(["--format", "markdown"])
+
+    assert exit_info.value.code == 2
+    assert "not one of 'text', 'json'." in capsys.readouterr().err
+
+
 def test_cli_exit_code_distinguishes_warnings_from_errors(tmp_path, monkeypatch, capsys):
     """Warnings should exit successfully, while errors should exit with one."""
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
-    warning_exit = report.main(["--check", "RM002", "--json"])
+    warning_exit = report.main(["--check", "RM002", "--format", "json"])
     warning_payload = json.loads(capsys.readouterr().out)
-    error_exit = report.main(["--check", "RM001", "--json"])
+    error_exit = report.main(["--check", "RM001", "--format", "json"])
     error_payload = json.loads(capsys.readouterr().out)
 
     assert warning_exit == 0

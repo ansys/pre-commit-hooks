@@ -416,12 +416,12 @@ def test_cli_reports_label_family(
     _write_repository(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "labels"]) == 0
+    assert report.main(["--format", "json", "--family", "labels"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [result["id"] for result in payload["results"]] == list(_RULE_IDS)
     assert payload["tally"] == {"PASSED": 16, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
 
     _write_labels(tmp_path, "- name: bug\n")
-    assert report.main(["--json", "--family", "labels"]) == 1
+    assert report.main(["--format", "json", "--family", "labels"]) == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 8, "RECOMMENDATION": 3, "WARNING": 2, "ERROR": 3}

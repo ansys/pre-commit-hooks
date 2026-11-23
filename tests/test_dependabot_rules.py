@@ -484,10 +484,10 @@ def test_cli_metadata_and_filtering(
     assert [item["id"] for item in metadata] == list(_RULE_IDS)
     _write(tmp_path)
     monkeypatch.chdir(tmp_path)
-    assert report.main(["--json", "--family", "dependabot", "--ignore", "DB007"]) == 0
+    assert report.main(["--format", "json", "--family", "dependabot", "--ignore", "DB007"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 23, "RECOMMENDATION": 0, "WARNING": 0, "ERROR": 0}
-    assert report.main(["--json", "--check", "DB003"]) == 0
+    assert report.main(["--format", "json", "--check", "DB003"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert [item["id"] for item in payload["results"]] == ["DB003"]
 
@@ -507,8 +507,8 @@ updates:
     )
     monkeypatch.chdir(tmp_path)
 
-    assert report.main(["--json", "--family", "dependabot"]) == 0
+    assert report.main(["--format", "json", "--family", "dependabot"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["tally"] == {"PASSED": 9, "RECOMMENDATION": 2, "WARNING": 13, "ERROR": 0}
     _write(tmp_path, "version: 2\nupdates: []\n")
-    assert report.main(["--json", "--family", "dependabot"]) == 1
+    assert report.main(["--format", "json", "--family", "dependabot"]) == 1
