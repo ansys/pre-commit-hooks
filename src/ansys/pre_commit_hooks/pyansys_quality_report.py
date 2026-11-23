@@ -59,6 +59,7 @@ from ansys.pre_commit_hooks.quality_rules.common import (
 
 ColorMode: TypeAlias = Literal["auto", "always", "never"]
 
+_DEFAULT_JSON_REPORT: Final[str] = "pyansys_quality_report.json"
 _ANSI_RESET: Final = "\033[0m"
 _ANSI_BOLD: Final = "\033[1m"
 _STATUS_COLORS: Final[dict[RuleStatus, str]] = {
@@ -549,6 +550,13 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
 
 @click.command(help="Run PyAnsys repository quality checks.")
 @click.option("--json", "json_output", is_flag=True, help="Emit a JSON report.")
+@click.option(
+    "--json-file",
+    type=click.Path(path_type=Path, dir_okay=False),
+    default=_DEFAULT_JSON_REPORT,
+    show_default=True,
+    help="Write the JSON report to this file (used with --json).",
+)
 @click.option("--metadata", is_flag=True, help="List available rule metadata.")
 @click.option("--check", "check", multiple=True, help="Select rule IDs.")
 @click.option(
@@ -574,6 +582,7 @@ def _pyproject_ignored_rule_ids(repository_root: Path) -> set[str]:
 )
 def _cli(
     json_output: bool,
+    json_file: Path,
     metadata: bool,
     check: tuple[str, ...],
     family: tuple[str, ...],
@@ -619,7 +628,9 @@ def _cli(
         selected_families=selected_rule_families,
     )
     if json_output:
-        autoflush_print(json.dumps(quality_report, indent=2))
+        json_output_text = json.dumps(quality_report, indent=2)
+        json_file.write_text(f"{json_output_text}\n", encoding="utf-8")
+        autoflush_print(json_output_text)
         return 1 if quality_report["tally"][ERROR] else 0
 
     colors_enabled = _colors_enabled(

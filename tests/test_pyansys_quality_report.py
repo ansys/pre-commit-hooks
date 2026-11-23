@@ -615,7 +615,7 @@ def test_cli_finds_project_root_from_subdirectory(tmp_path, monkeypatch, capsys)
 
 
 def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
-    """The CLI should support selected checks and JSON output."""
+    """The CLI should print JSON and write the default report file."""
     (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
@@ -626,6 +626,25 @@ def test_cli_emits_json_for_selected_rule(tmp_path, monkeypatch, capsys):
     assert result == 0
     assert [item["id"] for item in payload["results"]] == ["RM000"]
     assert payload["results"][0]["status"] == "PASSED"
+    assert (
+        json.loads((tmp_path / "pyansys_quality_report.json").read_text(encoding="utf-8"))
+        == payload
+    )
+
+
+def test_cli_writes_json_to_requested_file(tmp_path, monkeypatch, capsys):
+    """The CLI should support choosing a JSON report filename."""
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "README.rst").write_text("Project\n=======\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    output_file = tmp_path / "custom-report.json"
+
+    result = report.main(["--check", "RM000", "--json", "--json-file", str(output_file)])
+    stdout_payload = json.loads(capsys.readouterr().out)
+
+    assert result == 0
+    assert json.loads(output_file.read_text(encoding="utf-8")) == stdout_payload
+    assert [item["id"] for item in stdout_payload["results"]] == ["RM000"]
 
 
 def test_cli_colors_captured_output_by_default(tmp_path, monkeypatch, capsys):
