@@ -93,6 +93,9 @@ numpydoc_validation_checks = {
 # docstrings that do not follow numpydoc conventions.
 numpydoc_validation_exclude = {r"__new__$"}
 
+# Font Awesome icons are skipped in LaTeX output; rendering them would need texlive-fonts-extra.
+suppress_warnings = ["design.fa-build"]
+
 
 # static path
 html_static_path = ["_static"]
