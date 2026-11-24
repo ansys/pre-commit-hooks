@@ -33,7 +33,6 @@ import sys
 from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
-
 import tomllib
 
 from ansys.pre_commit_hooks.quality_rules import (

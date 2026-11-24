@@ -24,10 +24,9 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import ClassVar, Final, Protocol, TypeAlias
-from enum import StrEnum
 
 __all__ = [
     "_first_doc_line",
