@@ -30,10 +30,10 @@ import json
 import os
 from pathlib import Path
 import sys
+import tomllib
 from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
-import tomllib
 
 from ansys.pre_commit_hooks.quality_rules import (
     DEFAULT_RULE_FAMILIES,

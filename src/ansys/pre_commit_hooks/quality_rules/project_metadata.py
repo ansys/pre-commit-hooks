@@ -63,11 +63,11 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from pathlib import Path
 import re
+import tomllib
 from typing import ClassVar, Final
 
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
-import tomllib
 
 from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,
