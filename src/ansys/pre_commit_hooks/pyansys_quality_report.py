@@ -34,10 +34,7 @@ from typing import Any, Final, Literal, TextIO, TypeAlias, TypedDict
 
 import click
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
-    import toml as tomllib
+import tomllib
 
 from ansys.pre_commit_hooks.quality_rules import (
     DEFAULT_RULE_FAMILIES,

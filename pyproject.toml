@@ -14,7 +14,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ansys-pre-commit-hooks"
 dynamic = ["version", "classifiers", "description", "readme", "scripts"]
-requires-python = ">=3.10,<4"
+requires-python = ">=3.12,<4"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Synopsys, Inc. and ANSYS, Inc.", email = "pyansys-core@synopsys.com" }]
@@ -41,8 +41,6 @@ classifiers = {file = """
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",

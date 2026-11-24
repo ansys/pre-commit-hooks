@@ -75,10 +75,7 @@ from ansys.pre_commit_hooks.quality_rules.common import (
     file_exists,
 )
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
-    import toml as tomllib
+import tomllib
 
 __all__ = [
     "PM001",
@@ -270,7 +267,7 @@ def _python_specifiers(spec: object) -> SpecifierSet | str:
     if not operators.intersection({">", ">="}):
         return (
             f"WARNING: requires-python '{spec}' must declare an explicit lower bound, "
-            "for example >=3.10 or >=3.10,<4."
+            "for example >=3.12 or >=3.12,<4."
         )
     return specifiers
 

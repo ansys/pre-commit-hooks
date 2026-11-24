@@ -56,7 +56,7 @@ build-backend = "hatchling.build"
 name = "ansys-test-package"
 version = "1.0.0"
 description = "Test package"
-requires-python = ">=3.10,<4"
+requires-python = ">=3.12,<4"
 license = "MIT"
 dependencies = ["requests>=2"]
 """
@@ -102,18 +102,18 @@ def test_support_urls_reject_wrong_tables_and_invalid_values(tmp_path, content):
 @pytest.mark.parametrize(
     ("spec", "valid"),
     [
-        (">=3.10,<4", True),
-        (">=3.10", True),
+        (">=3.12,<4", True),
+        (">=3.12", True),
         (">3.9", True),
         (">3.9,<=3.14", True),
-        (" <4 , >=3.10 ", True),
-        (">=3.10,!=3.11.*", True),
+        (" <4 , >=3.12 ", True),
+        (">=3.12,!=3.11.*", True),
         ("<4", False),
-        (">-3.10", False),
-        (">=3.10,3.14", False),
-        (">=3.10,<garbage", False),
-        ("~=3.10", False),
-        ("==3.10.*", False),
+        (">-3.12", False),
+        (">=3.12,3.14", False),
+        (">=3.12,<garbage", False),
+        ("~=3.12", False),
+        ("==3.12.*", False),
         ("", False),
     ],
 )
@@ -130,11 +130,11 @@ def test_requires_python_parses_strict_specifiers(tmp_path, spec, valid):
 
 def test_requires_python_ignores_other_tables(tmp_path):
     """Do not accept unrelated requires-python keys."""
-    _write_pyproject(tmp_path, '[project]\n[tool.other]\nrequires-python = ">=3.10,<4"\n')
+    _write_pyproject(tmp_path, '[project]\n[tool.other]\nrequires-python = ">=3.12,<4"\n')
     _assert_warning(PM016.check(tmp_path, None), "not declared")
 
 
-@pytest.mark.parametrize("spec", [">=3.10", ">=3.10,<4"])
+@pytest.mark.parametrize("spec", [">=3.12", ">=3.12,<4"])
 def test_requires_python_preserves_setup_fallback(tmp_path, spec):
     """Retain validation of legacy setup.py declarations."""
     (tmp_path / "setup.py").write_text(f'setup(python_requires="{spec}")', encoding="utf-8")
@@ -210,16 +210,16 @@ def test_readme_rejects_invalid_declarations(tmp_path, declaration, message):
 @pytest.mark.parametrize(
     ("spec", "versions", "valid"),
     [
-        (">=3.10,<3.13", ["3.10", "3.11", "3.12"], True),
+        (">=3.12,<3.13", ["3.12", "3.11", "3.12"], True),
         (">=3.12", ["3.12", "3.13", "3.14"], True),
         (">=3.12", ["3.11"], False),
-        (">=3.10,<3.13", ["3.9", "3.13"], False),
-        (">=3.10,<4,!=3.11.*", ["3.11"], False),
-        (">=3.10.2,<3.11", ["3.10"], True),
-        (">=3.10,<3.11,!=3.10.0", ["3.10"], True),
-        (">=3.10.2,<3.10.2", ["3.10"], False),
-        (">=3.10,<4,===not-a-version", ["3.10"], False),
-        (">=3.10,<4", [], False),
+        (">=3.12,<3.13", ["3.9", "3.13"], False),
+        (">=3.12,<4,!=3.11.*", ["3.11"], False),
+        (">=3.12.2,<3.11", ["3.12"], True),
+        (">=3.12,<3.11,!=3.12.0", ["3.12"], True),
+        (">=3.12.2,<3.12.2", ["3.12"], False),
+        (">=3.12,<4,===not-a-version", ["3.12"], False),
+        (">=3.12,<4", [], False),
     ],
 )
 def test_python_classifiers_match_supported_minor_series(tmp_path, spec, versions, valid):
@@ -237,7 +237,7 @@ def test_python_classifiers_match_supported_minor_series(tmp_path, spec, version
 
 def test_dynamic_classifiers_warn_instead_of_passing(tmp_path):
     """Do not claim to validate build-backend-generated classifiers."""
-    _write_pyproject(tmp_path, '[project]\nrequires-python = ">=3.10,<4"\ndynamic=["classifiers"]')
+    _write_pyproject(tmp_path, '[project]\nrequires-python = ">=3.12,<4"\ndynamic=["classifiers"]')
     _assert_warning(PM023.check(tmp_path, None), "cannot be verified statically")
 
 
