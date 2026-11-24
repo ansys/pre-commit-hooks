@@ -30,6 +30,7 @@ import json
 import pathlib
 import re
 from tempfile import NamedTemporaryFile
+import tomllib
 
 HOOK_PATH = pathlib.Path(__file__).parent.resolve()
 """Location of the pre-commit hook on your system."""
@@ -206,10 +207,8 @@ def check_pyproject_toml(
     """
     name = ""
     # Load pyproject.toml
-    import toml
-
-    with open(repo_path / "pyproject.toml", "r") as project_file:
-        config = toml.load(project_file)
+    with open(repo_path / "pyproject.toml", "rb") as project_file:
+        config = tomllib.load(project_file)
         project = config.get("project")
 
         # Check the project name follows naming conventions: ansys-{product}-{library}

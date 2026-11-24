@@ -24,7 +24,7 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import ClassVar, Final, Protocol, TypeAlias
 
@@ -47,7 +47,7 @@ __all__ = [
 RuleCheckResult: TypeAlias = bool | str
 
 
-class RuleStatus(str, Enum):
+class RuleStatus(StrEnum):
     """Public status of a quality rule.
 
     Attributes
@@ -67,11 +67,6 @@ class RuleStatus(str, Enum):
     RECOMMENDATION = "RECOMMENDATION"
     WARNING = "WARNING"
     ERROR = "ERROR"
-
-    # Python 3.10 has no ``StrEnum``; keep ``str()`` and formatting returning the value.
-    def __str__(self) -> str:
-        """Return the string representation of the status."""
-        return self.value
 
 
 PASSED: Final[RuleStatus] = RuleStatus.PASSED

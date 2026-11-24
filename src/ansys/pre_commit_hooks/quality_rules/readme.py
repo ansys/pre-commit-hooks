@@ -53,13 +53,9 @@ from collections.abc import Callable
 from html import unescape
 from pathlib import Path
 import re
+import tomllib
 from typing import ClassVar, Literal
 from urllib.parse import unquote, urlsplit
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 relies on ``toml``.
-    import toml as tomllib
 
 from ansys.pre_commit_hooks.quality_rules.common import (
     RuleCheckResult,

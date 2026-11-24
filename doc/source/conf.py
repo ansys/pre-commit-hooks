@@ -89,6 +89,12 @@ numpydoc_validation_checks = {
     "RT02",  # The first line of the Returns section should contain only the
     # type, unless multiple values are being returned"
 }
+# Inherited stdlib constructors (for example, ``StrEnum.__new__``) carry
+# docstrings that do not follow numpydoc conventions.
+numpydoc_validation_exclude = {r"__new__$"}
+
+# Font Awesome icons are skipped in LaTeX output; rendering them would need texlive-fonts-extra.
+suppress_warnings = ["design.fa-build"]
 
 
 # static path
