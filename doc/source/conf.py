@@ -89,6 +89,9 @@ numpydoc_validation_checks = {
     "RT02",  # The first line of the Returns section should contain only the
     # type, unless multiple values are being returned"
 }
+# Inherited stdlib constructors (for example, ``StrEnum.__new__``) carry
+# docstrings that do not follow numpydoc conventions.
+numpydoc_validation_exclude = {r"__new__$"}
 
 
 # static path
