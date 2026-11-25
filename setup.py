@@ -40,22 +40,22 @@ setup(
     install_requires=[
         "click==8.5.1",
         "GitPython==3.2.1",
-        "importlib-metadata==9.0.1",
+        "importlib-metadata==10.2.0",
         "Jinja2==3.1.6",
         "PyYAML==6.0.3",
         "reuse==6.3.0",
         "requests==2.34.2",
-        "semver==3.1.1",
+        "semver==3.1.2",
         "toml==0.10.2",
     ],
     extras_require={
         "doc": [
-            "ansys-sphinx-theme[autoapi]==1.9.0",
+            "ansys-sphinx-theme[autoapi]==1.12.1",
             "numpydoc==1.11.0",
-            "sphinx==8.2.3",
-            "sphinx-autodoc-typehints==3.1.0",
+            "sphinx==9.1.1",
+            "sphinx-autodoc-typehints==3.17.6",
             "sphinx-copybutton==0.5.2",
-            "sphinx_design==0.6.1",
+            "sphinx_design==0.8.0",
         ],
         "tests": [
             "pytest==9.2.0",
