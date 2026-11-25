@@ -171,11 +171,13 @@ def test_all_workflows_content_is_none_for_empty_workflow_directory(tmp_path):
     assert all_workflows_content(tmp_path) is None
 
 
-def test_ci016_accepts_sha_pinned_and_local_actions(tmp_path):
+@pytest.mark.parametrize("prefix", ["./", "$/"])
+@pytest.mark.parametrize("path", [".github/actions/local", ".github/workflows/tests.yml"])
+def test_ci016_accepts_sha_pinned_and_local_actions(tmp_path, prefix, path):
     """CI016 passes when remote actions are SHA-pinned and local actions are used."""
     _write_workflow(
         tmp_path,
-        _uses_line("actions/checkout", _SHA) + "      - uses: ./.github/actions/local\n",
+        _uses_line("actions/checkout", _SHA) + f"      - uses: {prefix}{path}\n",
     )
 
     assert _rule("CI016").check(tmp_path, None) is True
@@ -187,7 +189,8 @@ def test_ci016_reports_unpinned_actions(tmp_path):
         tmp_path,
         _uses_line("actions/checkout", "v4")
         + _uses_line("actions/checkout", "v4")
-        + _uses_line("ansys/actions/tests", _SHA),
+        + _uses_line("ansys/actions/tests", _SHA)
+        + "      - uses: $/.github/actions/local\n",
     )
 
     result = _rule("CI016").check(tmp_path, None)
