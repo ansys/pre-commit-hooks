@@ -955,7 +955,7 @@ class PM030(ProjectMetadata):
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
-        """Return whether the selected backend package appears in build requirements."""
+        """Match the backend to build requirements using normalized package names."""
         data = _pyproject_data(repository_root)
         if isinstance(data, str):
             return data
@@ -972,6 +972,7 @@ class PM030(ProjectMetadata):
             isinstance(requirement, str) for requirement in requirements
         ):
             return False
+        package_name = _requirement_package_name(package_name)
         return any(
             _requirement_package_name(requirement) == package_name for requirement in requirements
         )

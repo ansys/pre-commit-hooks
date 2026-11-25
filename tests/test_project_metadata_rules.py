@@ -395,6 +395,17 @@ def test_backend_declaration_and_requirement_consistency_are_checked(tmp_path):
     assert PM030.check(tmp_path, None) is False
 
 
+@pytest.mark.parametrize("requirement", ["pdm-backend", "pdm_backend>=2", "PDM.Backend==2.4.0"])
+def test_backend_requirement_matching_normalizes_package_names(tmp_path, requirement):
+    """PM030 accepts equivalent distribution-name spellings for the PDM backend."""
+    _write_pyproject(
+        tmp_path,
+        f'[build-system]\nrequires = ["{requirement}"]\nbuild-backend = "pdm.backend"\n',
+    )
+
+    assert PM030.check(tmp_path, None) is True
+
+
 def test_project_description_is_declared_or_dynamic(tmp_path):
     """Require a description while accepting backend-generated metadata."""
     _write_pyproject(tmp_path, _VALID_BUILD_METADATA)
