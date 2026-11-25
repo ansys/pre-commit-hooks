@@ -1,0 +1,103 @@
+
+
+
+
+
+
+:class:`DOC008`
+===============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.documentation.DOC008
+
+   Bases: :py:obj:`Documentation`
+
+
+   
+   The Ansys Sphinx theme and PyAnsys branding are configured.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: DOC008
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Warn when the Ansys Sphinx theme or branding settings are missing.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.documentation import DOC008
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Warn when the Ansys Sphinx theme or branding settings are missing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

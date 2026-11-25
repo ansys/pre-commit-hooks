@@ -1,0 +1,625 @@
+[
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#directories",
+        "title": "Directories",
+        "section": "Directories",
+        "text": "Bases: enum.Enum\nEnum of directories to check.\nDirectories\nDirectories\nenum.Enum"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#src.ansys.pre_commit_hooks.tech_review.Directories",
+        "title": "Directories > Directories > Directories",
+        "section": "Directories > Directories",
+        "text": "class src.ansys.pre_commit_hooks.tech_review.Directories\n\nBases: enum.Enum\n\nEnum of directories to check.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#overview",
+        "title": "Directories > Overview",
+        "section": "Overview",
+        "text": "GITHUB\nDOC\nSRC\nTESTS\nOverview\nGITHUB\nDOC\nSRC\nTESTS"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#import-detail",
+        "title": "Directories > Import detail",
+        "section": "Import detail",
+        "text": "Import detail"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#attribute-detail",
+        "title": "Directories > Attribute detail",
+        "section": "Attribute detail",
+        "text": "Attribute detail"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#Directories.GITHUB",
+        "title": "Directories > Attribute detail > GITHUB",
+        "section": "Attribute detail > GITHUB",
+        "text": "Directories.GITHUB = '.github'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#Directories.DOC",
+        "title": "Directories > Attribute detail > DOC",
+        "section": "Attribute detail > DOC",
+        "text": "Directories.DOC = 'doc'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#Directories.SRC",
+        "title": "Directories > Attribute detail > SRC",
+        "section": "Attribute detail > SRC",
+        "text": "Directories.SRC = 'src'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Directories",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Directories.html#Directories.TESTS",
+        "title": "Directories > Attribute detail > TESTS",
+        "section": "Attribute detail > TESTS",
+        "text": "Directories.TESTS = 'tests'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#filenames",
+        "title": "Filenames",
+        "section": "Filenames",
+        "text": "Bases: enum.Enum\nEnum of files to check.\nFilenames\nFilenames\nenum.Enum"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#src.ansys.pre_commit_hooks.tech_review.Filenames",
+        "title": "Filenames > Filenames > Filenames",
+        "section": "Filenames > Filenames",
+        "text": "class src.ansys.pre_commit_hooks.tech_review.Filenames\n\nBases: enum.Enum\n\nEnum of files to check.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#overview",
+        "title": "Filenames > Overview",
+        "section": "Overview",
+        "text": "AUTHORS\nCODE_OF_CONDUCT\nCONTRIBUTING\nCONTRIBUTORS\nLICENSE\nREADME\nDEPENDABOT\nOverview\nAUTHORS\nCODE_OF_CONDUCT\nCONTRIBUTING\nCONTRIBUTORS\nLICENSE\nREADME\nDEPENDABOT"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#import-detail",
+        "title": "Filenames > Import detail",
+        "section": "Import detail",
+        "text": "Import detail"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#attribute-detail",
+        "title": "Filenames > Attribute detail",
+        "section": "Attribute detail",
+        "text": "Attribute detail"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.AUTHORS",
+        "title": "Filenames > Attribute detail > AUTHORS",
+        "section": "Attribute detail > AUTHORS",
+        "text": "Filenames.AUTHORS = 'AUTHORS'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.CODE_OF_CONDUCT",
+        "title": "Filenames > Attribute detail > CODE_OF_CONDUCT",
+        "section": "Attribute detail > CODE_OF_CONDUCT",
+        "text": "Filenames.CODE_OF_CONDUCT = 'CODE_OF_CONDUCT.md'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.CONTRIBUTING",
+        "title": "Filenames > Attribute detail > CONTRIBUTING",
+        "section": "Attribute detail > CONTRIBUTING",
+        "text": "Filenames.CONTRIBUTING = 'CONTRIBUTING.md'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.CONTRIBUTORS",
+        "title": "Filenames > Attribute detail > CONTRIBUTORS",
+        "section": "Attribute detail > CONTRIBUTORS",
+        "text": "Filenames.CONTRIBUTORS = 'CONTRIBUTORS.md'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.LICENSE",
+        "title": "Filenames > Attribute detail > LICENSE",
+        "section": "Attribute detail > LICENSE",
+        "text": "Filenames.LICENSE = 'LICENSE'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.README",
+        "title": "Filenames > Attribute detail > README",
+        "section": "Attribute detail > README",
+        "text": "Filenames.README = 'README'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/Filenames",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/Filenames.html#Filenames.DEPENDABOT",
+        "title": "Filenames > Attribute detail > DEPENDABOT",
+        "section": "Attribute detail > DEPENDABOT",
+        "text": "Filenames.DEPENDABOT = 'dependabot.yml'\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/index",
+        "href": "api/src/ansys/pre_commit_hooks/index.html#the-srcansyspre_commit_hooks-library",
+        "title": "The src.ansys.pre_commit_hooks library",
+        "section": "The src.ansys.pre_commit_hooks library",
+        "text": "The src.ansys.pre_commit_hooks library\nsrc.ansys.pre_commit_hooks"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/index",
+        "href": "api/src/ansys/pre_commit_hooks/index.html#summary",
+        "title": "The src.ansys.pre_commit_hooks library > Summary",
+        "section": "Summary",
+        "text": "add_license_headers\nModule for running REUSE to add missing license headers to files.\ntech_review\nModule for checking if a repository is compliant with required files in the technical review.\n__version__\nSummary\nadd_license_headers\ntech_review\n__version__"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/index",
+        "href": "api/src/ansys/pre_commit_hooks/index.html#description",
+        "title": "The src.ansys.pre_commit_hooks library > Description",
+        "section": "Description",
+        "text": "Module for initializing package-level imports for Ansys pre-commit hooks.\nDescription"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/index",
+        "href": "api/src/ansys/pre_commit_hooks/index.html#module-detail",
+        "title": "The src.ansys.pre_commit_hooks library > Module detail",
+        "section": "Module detail",
+        "text": "Module detail"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/index",
+        "href": "api/src/ansys/pre_commit_hooks/index.html#pre_commit_hooks.__version__",
+        "title": "The src.ansys.pre_commit_hooks library > Module detail > __version__",
+        "section": "Module detail > __version__",
+        "text": "pre_commit_hooks.__version__\n\n"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#the-tech_reviewpy-module",
+        "title": "The tech_review.py module",
+        "section": "The tech_review.py module",
+        "text": "The tech_review.py module\ntech_review.py"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#summary",
+        "title": "The tech_review.py module > Summary",
+        "section": "Summary",
+        "text": "Filenames\nEnum of files to check.\nDirectories\nEnum of directories to check.\ncheck_dirs_exist\nCheck folders exist in the root of the git repository.\ncheck_config_file\nCheck naming convention, version, author, and maintainer information.\ncheck_pyproject_toml\nCheck pyproject.toml file for correct naming convention, version, author, and maintainer.\ncheck_auth_maint\nCheck if the author and maintainer names and emails are the same.\ncheck_setup_py\nCheck setup.py file for correct naming convention, version, author, and maintainer.\ndownload_license_json\nDownload the licenses.json file and restructure it to only include the license ID and name.\nrestructure_json\nRemove extra information from licenses.json file.\ncheck_file_exists\nCheck files exist. If they do not exist, create them using jinja templates.\ngenerate_file_from_jinja\nGenerate file using jinja templates.\nwrite_content\nWrite generated content from jinja template to a file.\ncheck_file_content\nCheck the file content of the LICENSE and CONTRIBUTORS.md files.\nmain\nCheck files for technical review.\nHOOK_PATH\nLocation of the pre-commit hook on your system.\nLICENSES_JSON\nJSON file containing licenses information.\nDEFAULT_AUTHOR_MAINT_NAME\nDefault name of project authors and maintainers.\nDEFAULT_AUTHOR_MAINT_EMAIL\nDefault email of project authors and maintainers.\nDEFAULT_START_YEAR\nDefault start year of the repository.\nDEFAULT_LICENSE\nDefault license of the repository\nJSON_URL\nURL to retrieve list of license IDs and names.\nSummary\nFilenames\nDirectories\ncheck_dirs_exist\ncheck_config_file\ncheck_pyproject_toml\ncheck_auth_maint\ncheck_setup_py\ndownload_license_json\nrestructure_json\ncheck_file_exists\ngenerate_file_from_jinja\nwrite_content\ncheck_file_content\nmain\nHOOK_PATH\nLICENSES_JSON\nDEFAULT_AUTHOR_MAINT_NAME\nDEFAULT_AUTHOR_MAINT_EMAIL\nDEFAULT_START_YEAR\nDEFAULT_LICENSE\nJSON_URL"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#description",
+        "title": "The tech_review.py module > Description",
+        "section": "Description",
+        "text": "Module for checking if a repository is compliant with required files in the technical review.\nDescription"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#module-detail",
+        "title": "The tech_review.py module > Module detail",
+        "section": "Module detail",
+        "text": "Check folders exist in the root of the git repository.\nPath of the repository being checked.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nList of directories to check if they exist in the repository.\nTrue if all directories exist.\nFalse if a directory did not exist and was created.\nCheck naming convention, version, author, and maintainer information.\nPath of the repository being checked.\nProject author and maintainer’s name.\nProject author and maintainer’s email.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nTrue if the repository’s name is not in the form ansys-- and it is permitted.\nFalse if the repository’s name is in the form ansys--.\nTrue if all files exist and contain the correct content.\nFalse if a file was created or did not contain the correct content.\nCheck pyproject.toml file for correct naming convention, version, author, and maintainer.\nPath of the repository being checked.\nProject author and maintainer’s name.\nProject author and maintainer’s email.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nTrue if the repository’s name is not in the form ansys-- and it is permitted.\nFalse if the repository’s name is in the form ansys--.\nTrue if the pyproject.toml file’s information was correct.\nFalse if the pyproject.toml file had missing or incorrect information.\nName of the project from the pyproject.toml file.\nCheck if the author and maintainer names and emails are the same.\nThe author or maintainer’s name or email retrieved from the pyproject.toml file.\nThe author or maintainer’s name or email retrieved from the argument passed into the hook.\nThe message that is printed when an author or maintainer’s name or email is incorrect.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nTrue if the author and maintainer’s name and email are correct.\nFalse if the author or maintainer’s name or email is incorrect.\nCheck setup.py file for correct naming convention, version, author, and maintainer.\nProject author and maintainer’s name.\nProject author and maintainer’s email.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nAn empty string since the setup.py check is not implemented.\nDownload the licenses.json file and restructure it to only include the license ID and name.\nThe URL to the licenses.json file that is downloaded.\nThe path of the json_file to be written to and updated.\nTrue if the license file was downloaded and updated.\nFalse if there was an issue downloading the license file.\nRemove extra information from licenses.json file.\nThe path of the json_file to be updated.\nCheck files exist. If they do not exist, create them using jinja templates.\nPath of the repository being checked.\nList of files to check if they exist and their content.\nThe name of the project.\nThe start year of the repository.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nThe license the repository uses.\nThe URL of the repository.\nThe Ansys product the repository is based on.\nIf the project’s config file is “setuptools” or “pyproject”.\nThe name of the repository to use in documentation.\nTrue if the files exist and content was correct.\nFalse if a file was created and/or its content was incorrect.\nGenerate file using jinja templates.\nThe file that the template is being created for.\nThe name of the project.\nThe start year of the repository.\nThe URL of the repository.\nThe Ansys product the repository is based on.\nIf the project’s config file is “setuptools” or “pyproject”.\nThe name of the repository to use in documentation.\nContent of the template that was generated.\nWrite generated content from jinja template to a file.\nThe message that details which file is being created.\nThe path of the file to write the content to.\nThe file content that was generated from the jinja templates.\nCheck the file content of the LICENSE and CONTRIBUTORS.md files.\nThe file that the template is being created for.\nContent of the template that was generated.\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\nThe license the repository uses.\nTrue if LICENSE and CONTRIBUTORS.md files had the correct content.\nFalse if LICENSE and CONTRIBUTORS.md files had the incorrect content.\nCheck files for technical review.\nLocation of the pre-commit hook on your system.\nJSON file containing licenses information.\nDefault name of project authors and maintainers.\nDefault email of project authors and maintainers.\nDefault start year of the repository.\nDefault license of the repository\nURL to retrieve list of license IDs and names.\nModule detail\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\npython:str\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\npython:str\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\npython:str\nTrue\nFalse\nTrue\nFalse"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_dirs_exist",
+        "title": "The tech_review.py module > Module detail > check_dirs_exist",
+        "section": "Module detail > check_dirs_exist",
+        "text": "tech_review.check_dirs_exist(repo_path: str, is_compliant: bool, directories: list) -> bool\n\nCheck folders exist in the root of the git repository.\n\nParameters\n\nrepo_path: str\n\nPath of the repository being checked.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\ndirectories: list\n\nList of directories to check if they exist in the repository.\n\nReturns\n\nbool\n\nTrue if all directories exist.\nFalse if a directory did not exist and was created.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_config_file",
+        "title": "The tech_review.py module > Module detail > check_config_file",
+        "section": "Module detail > check_config_file",
+        "text": "tech_review.check_config_file(repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool, non_compliant_name: bool) -> bool\n\nCheck naming convention, version, author, and maintainer information.\n\nParameters\n\nrepo_path: str\n\nPath of the repository being checked.\n\nauthor_maint_name: str\n\nProject author and maintainer’s name.\n\nauthor_maint_email: str\n\nProject author and maintainer’s email.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nnon_compliant_name: bool\n\nTrue if the repository’s name is not in the form ansys-- and it is permitted.\nFalse if the repository’s name is in the form ansys--.\n\nReturns\n\nbool\n\nTrue if all files exist and contain the correct content.\nFalse if a file was created or did not contain the correct content.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_pyproject_toml",
+        "title": "The tech_review.py module > Module detail > check_pyproject_toml",
+        "section": "Module detail > check_pyproject_toml",
+        "text": "tech_review.check_pyproject_toml(repo_path: str, author_maint_name: str, author_maint_email: str, is_compliant: bool, non_compliant_name: bool) -> tuple\n\nCheck pyproject.toml file for correct naming convention, version, author, and maintainer.\n\nParameters\n\nrepo_path: str\n\nPath of the repository being checked.\n\nauthor_maint_name: str\n\nProject author and maintainer’s name.\n\nauthor_maint_email: str\n\nProject author and maintainer’s email.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nnon_compliant_name: bool\n\nTrue if the repository’s name is not in the form ansys-- and it is permitted.\nFalse if the repository’s name is in the form ansys--.\n\nReturns\n\nbool\n\nTrue if the pyproject.toml file’s information was correct.\nFalse if the pyproject.toml file had missing or incorrect information.\n\npython:str\n\nName of the project from the pyproject.toml file.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_auth_maint",
+        "title": "The tech_review.py module > Module detail > check_auth_maint",
+        "section": "Module detail > check_auth_maint",
+        "text": "tech_review.check_auth_maint(project_value: str, arg_value: str, err_string: str, is_compliant: bool)\n\nCheck if the author and maintainer names and emails are the same.\n\nParameters\n\nproject_value: str\n\nThe author or maintainer’s name or email retrieved from the pyproject.toml file.\n\narg_value: str\n\nThe author or maintainer’s name or email retrieved from the argument passed into the hook.\n\nerr_str: str\n\nThe message that is printed when an author or maintainer’s name or email is incorrect.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nReturns\n\nbool\n\nTrue if the author and maintainer’s name and email are correct.\nFalse if the author or maintainer’s name or email is incorrect.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_setup_py",
+        "title": "The tech_review.py module > Module detail > check_setup_py",
+        "section": "Module detail > check_setup_py",
+        "text": "tech_review.check_setup_py(author_maint_name: str, author_maint_email: str, is_compliant: bool) -> tuple\n\nCheck setup.py file for correct naming convention, version, author, and maintainer.\n\nParameters\n\nauthor_maint_name: str\n\nProject author and maintainer’s name.\n\nauthor_maint_email: str\n\nProject author and maintainer’s email.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nReturns\n\nbool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\npython:str\n\nAn empty string since the setup.py check is not implemented.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.download_license_json",
+        "title": "The tech_review.py module > Module detail > download_license_json",
+        "section": "Module detail > download_license_json",
+        "text": "tech_review.download_license_json(url: str, json_file: str) -> bool\n\nDownload the licenses.json file and restructure it to only include the license ID and name.\n\nParameters\n\nurl: str\n\nThe URL to the licenses.json file that is downloaded.\n\njson_file: str\n\nThe path of the json_file to be written to and updated.\n\nReturns\n\nbool\n\nTrue if the license file was downloaded and updated.\nFalse if there was an issue downloading the license file.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.restructure_json",
+        "title": "The tech_review.py module > Module detail > restructure_json",
+        "section": "Module detail > restructure_json",
+        "text": "tech_review.restructure_json(file: str)\n\nRemove extra information from licenses.json file.\n\nParameters\n\nfile: str\n\nThe path of the json_file to be updated.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_file_exists",
+        "title": "The tech_review.py module > Module detail > check_file_exists",
+        "section": "Module detail > check_file_exists",
+        "text": "tech_review.check_file_exists(repo_path: str, files: list, project_name: str, start_year: str, is_compliant: bool, license: str, repository_url: str, product: str, config_file: str, doc_repo_name: str) -> bool\n\nCheck files exist. If they do not exist, create them using jinja templates.\n\nParameters\n\nrepo_path: str\n\nPath of the repository being checked.\n\nfiles: list\n\nList of files to check if they exist and their content.\n\nproject_name: str\n\nThe name of the project.\n\nstart_year: str\n\nThe start year of the repository.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nlicense: str\n\nThe license the repository uses.\n\nrepository_url: str\n\nThe URL of the repository.\n\nproduct: str\n\nThe Ansys product the repository is based on.\n\nconfig_file: str\n\nIf the project’s config file is “setuptools” or “pyproject”.\n\ndoc_repo_name: str\n\nThe name of the repository to use in documentation.\n\nReturns\n\nbool\n\nTrue if the files exist and content was correct.\nFalse if a file was created and/or its content was incorrect.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.generate_file_from_jinja",
+        "title": "The tech_review.py module > Module detail > generate_file_from_jinja",
+        "section": "Module detail > generate_file_from_jinja",
+        "text": "tech_review.generate_file_from_jinja(file: str, project_name: str, year_str: str, repo_url: str, product: str, config_file: str, doc_repo_name: str) -> str\n\nGenerate file using jinja templates.\n\nParameters\n\nfile: str\n\nThe file that the template is being created for.\n\nproject_name: str\n\nThe name of the project.\n\nyear_str: str\n\nThe start year of the repository.\n\nrepo_url: str\n\nThe URL of the repository.\n\nproduct: str\n\nThe Ansys product the repository is based on.\n\nconfig_file: str\n\nIf the project’s config file is “setuptools” or “pyproject”.\n\ndoc_repo_name: str\n\nThe name of the repository to use in documentation.\n\nReturns\n\npython:str\n\nContent of the template that was generated.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.write_content",
+        "title": "The tech_review.py module > Module detail > write_content",
+        "section": "Module detail > write_content",
+        "text": "tech_review.write_content(message: str, file_path: str, file_content: str)\n\nWrite generated content from jinja template to a file.\n\nParameters\n\nmessage: str\n\nThe message that details which file is being created.\n\nfile_path: str\n\nThe path of the file to write the content to.\n\nfile_content: str\n\nThe file content that was generated from the jinja templates.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.check_file_content",
+        "title": "The tech_review.py module > Module detail > check_file_content",
+        "section": "Module detail > check_file_content",
+        "text": "tech_review.check_file_content(file: str, generated_content: str, is_compliant: bool, license: str) -> bool\n\nCheck the file content of the LICENSE and CONTRIBUTORS.md files.\n\nParameters\n\nfile: str\n\nThe file that the template is being created for.\n\ngenerated_content: str\n\nContent of the template that was generated.\n\nis_compliant: bool\n\nTrue if the repository is compliant.\nFalse if the repository is not compliant.\n\nlicense: str\n\nThe license the repository uses.\n\nReturns\n\nbool\n\nTrue if LICENSE and CONTRIBUTORS.md files had the correct content.\nFalse if LICENSE and CONTRIBUTORS.md files had the incorrect content.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.main",
+        "title": "The tech_review.py module > Module detail > main",
+        "section": "Module detail > main",
+        "text": "tech_review.main()\n\nCheck files for technical review.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.HOOK_PATH",
+        "title": "The tech_review.py module > Module detail > HOOK_PATH",
+        "section": "Module detail > HOOK_PATH",
+        "text": "tech_review.HOOK_PATH\n\nLocation of the pre-commit hook on your system.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.LICENSES_JSON",
+        "title": "The tech_review.py module > Module detail > LICENSES_JSON",
+        "section": "Module detail > LICENSES_JSON",
+        "text": "tech_review.LICENSES_JSON\n\nJSON file containing licenses information.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.DEFAULT_AUTHOR_MAINT_NAME",
+        "title": "The tech_review.py module > Module detail > DEFAULT_AUTHOR_MAINT_NAME",
+        "section": "Module detail > DEFAULT_AUTHOR_MAINT_NAME",
+        "text": "tech_review.DEFAULT_AUTHOR_MAINT_NAME = 'ANSYS, Inc.'\n\nDefault name of project authors and maintainers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.DEFAULT_AUTHOR_MAINT_EMAIL",
+        "title": "The tech_review.py module > Module detail > DEFAULT_AUTHOR_MAINT_EMAIL",
+        "section": "Module detail > DEFAULT_AUTHOR_MAINT_EMAIL",
+        "text": "tech_review.DEFAULT_AUTHOR_MAINT_EMAIL = 'pyansys.core@ansys.com'\n\nDefault email of project authors and maintainers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.DEFAULT_START_YEAR",
+        "title": "The tech_review.py module > Module detail > DEFAULT_START_YEAR",
+        "section": "Module detail > DEFAULT_START_YEAR",
+        "text": "tech_review.DEFAULT_START_YEAR\n\nDefault start year of the repository.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.DEFAULT_LICENSE",
+        "title": "The tech_review.py module > Module detail > DEFAULT_LICENSE",
+        "section": "Module detail > DEFAULT_LICENSE",
+        "text": "tech_review.DEFAULT_LICENSE = 'MIT'\n\nDefault license of the repository\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/tech_review/index",
+        "href": "api/src/ansys/pre_commit_hooks/tech_review/index.html#tech_review.JSON_URL",
+        "title": "The tech_review.py module > Module detail > JSON_URL",
+        "section": "Module detail > JSON_URL",
+        "text": "tech_review.JSON_URL = 'https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json'\n\nURL to retrieve list of license IDs and names.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#ansys-pre-commit-hooks",
+        "title": "Ansys pre-commit hooks",
+        "section": "Ansys pre-commit hooks",
+        "text": "PyAnsys Python PyPI GH-CI MIT Black pre-commit.ci status\nThis Ansys repository contains pre-commit hooks for different purposes.\nCurrently, these hooks are available:\nadd-license-headers: Add missing license headers to files by using\nREUSE . To use this hook, you must\nhave REUSE implemented in your repository.\ntech-review: Do a technical review of your repository according to\nAnsys repository requirements\nAnsys pre-commit hooks\nadd-license-headers\nREUSE\ntech-review"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#add-license-headers-setup",
+        "title": "Ansys pre-commit hooks > add-license-headers setup",
+        "section": "add-license-headers setup",
+        "text": "add-license-headers setup\nadd-license-headers"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#add-required-directories",
+        "title": "Ansys pre-commit hooks > Add required directories",
+        "section": "Add required directories",
+        "text": "If you are using the ansys.jinja2 template and MIT.txt license, skip this step. By default, the hook will make symbolic links\nfrom its “assets” directory containing LICENSES/MIT.txt and .reuse/templates/ansys.jinja2\nto your repository when the hook runs. The .reuse and LICENSES directories will be deleted once the hook is\ndone running.\nIf you are using a custom template, create a directory named .reuse, and if you are using a custom license, create a directory\nnamed LICENSES in the root of your repository. The custom template cannot be named ansys.jinja2, otherwise it will be removed\nafter the hook is done running. The custom license cannot be named MIT.txt for the same reason. The .reuse and/or LICENSES\ndirectories will have to be committed to your repository and will not be removed once the hook is done running as long as there\nare custom templates or licenses in those directories. Your project should have the following layout:\nWhere license_name is the name of the license that is being used, for example, MIT.txt, and\ntemplate_name is the name of the custom template being used. The jinja2 file contains the\ntemplate for the license headers that are added to the files.\nLicenses that are supported by REUSE can be found in the\nspdx/license-list-data repository.\nPlease select a license text file from that repository, and copy it to the LICENSES directory.\nAdd required directories\n.reuse\nLICENSES\nansys.jinja2\nMIT.txt\n.reuse\nLICENSES\nlicense_name\ntemplate_name\nREUSE"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#set-custom-arguments",
+        "title": "Ansys pre-commit hooks > Set custom arguments",
+        "section": "Set custom arguments",
+        "text": "args can also be formatted as follows:\ncustom copyright phrase is the copyright line you want to include in the license\nheader. By default, it uses \"ANSYS, Inc. and/or its affiliates.\".\ntemplate_name is the name of the .jinja2 file located in .reuse/templates/.\nBy default, it uses ansys.\nlicense_name is the name of the license being used. For example, MIT, ECL-1.0, etc.\nTo view a list of licenses that are supported by REUSE, see\nhttps://github.com/spdx/license-list-data/tree/main/text. By default it uses MIT.\nignore_license_check is whether or not to check for the license in the header. By default,\nit is False, meaning the files are checked for both the copyright and licensing information\nin the header. Add --ignore_license_check to ignore checking for licensing information\nin the files.\nstart_year is the start year of the copyright statement. By default, the start_year is\nthe current year, making the copyright statement\n“Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.” If you are adding license headers\nto packages released before the current year, add the start_year argument with the year your\npackage was released. For example, if start_year is 2023, the copyright statement would be\n“Copyright (C) 2023 - 2024 ANSYS, Inc. and/or its affiliates.” assuming the current year is 2024.\nSet custom arguments\nargs\ncustom copyright phrase\n\"ANSYS, Inc. and/or its affiliates.\"\ntemplate_name\n.reuse/templates/\nansys\nlicense_name\nREUSE\nMIT\nignore_license_check\nFalse\n--ignore_license_check\nstart_year\nstart_year\nstart_year\nstart_year"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#specify-directories-to-run-the-hook-on",
+        "title": "Ansys pre-commit hooks > Specify directories to run the hook on",
+        "section": "Specify directories to run the hook on",
+        "text": "By default, the hook will run on proto files in any directory, as well as python files within\ndirectories named src, examples, and tests. To specify additional files and/or directories\nthe hook should run on, add the necessary regex to the files line in your\n.pre-commit-config.yaml file:\nSpecify directories to run the hook on\nsrc\nexamples\ntests\nfiles"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#ignore-specific-files-or-file-types",
+        "title": "Ansys pre-commit hooks > Ignore specific files or file types",
+        "section": "Ignore specific files or file types",
+        "text": "In .pre-commit-config.yaml:\npath/to/file1.py excludes the stated file.\npath/to/.*\\.(ts|cpp) excludes all .ts and .cpp files within the path/to directory.\n(.folder1|folder2)/.* excludes directories named .folder1 and folder2.\n.*\\.js excludes all .js files in all directories.\n\\..* excludes all hidden files.\nIgnore specific files or file types\npath/to/file1.py\npath/to/.*\\.(ts|cpp)\npath/to\n(.folder1|folder2)/.*\n.*\\.js\n\\..*"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#tech-review-setup",
+        "title": "Ansys pre-commit hooks > tech-review setup",
+        "section": "tech-review setup",
+        "text": "These are the default values for the arguments of the tech-review hook:\n--author_maint_name=ANSYS, Inc.\n--author_maint_email=pyansys.core@ansys.com\n--license=MIT\n--url=https://github.com/ansys/{repo-name}, replacing repo-name with the name of the repository\nThe --author_maint_name is the name of the author and maintainer in the pyproject.toml file.\nBy default, it is “Ansys, Inc.”.\nThe --author_maint_email is the email of the author and maintainer in the pyproject.toml file.\nBy default, it is “pyansys.core@ansys.com”.\nThe --license argument is the license that is being used by your repository. By default, it is\nMIT.\nThe --url argument is automatically rendered based on the repository name. If your repository\nis not in the Ansys organization, please add this argument to your configuration in\n.pre-commit-config.yaml.\nThe --product argument is required if a README.rst or README.md file does not\nexist in your repository and you want the template to render correctly. The product\nfor PyMechanical would be mechanical, for example.\nThe --non_compliant_name flag can be used if your repository does not follow the typical\nnaming convention of ansys-*-*.\nTechnical review hook in ansys/pre-commit-hooks’ .pre-commit-config.yaml file:\nTechnical review hook in PyMechanical’s .pre-commit-config.yaml file:\ntech-review setup\ntech-review\n--author_maint_name=ANSYS, Inc.\n--author_maint_email=pyansys.core@ansys.com\n--license=MIT\n--url=https://github.com/ansys/{repo-name}\nrepo-name\n--author_maint_name\npyproject.toml\n--author_maint_email\npyproject.toml\n--license\n--url\n--product\nREADME.rst\nREADME.md\nPyMechanical\nmechanical\n--non_compliant_name\nansys-*-*\nansys/pre-commit-hooks\nPyMechanical"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#how-to-install",
+        "title": "Ansys pre-commit hooks > How to install",
+        "section": "How to install",
+        "text": "The following sections provide instructions for installing the ansys-pre-commit-hooks\npackage in two installation modes: user and developer.\nHow to install\nansys-pre-commit-hooks"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#for-users",
+        "title": "Ansys pre-commit hooks > For users",
+        "section": "For users",
+        "text": "Before installing the package, to ensure that you\nhave the latest version of pip, run this command:\nThen, to install the package, run this command:\nFor users"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#for-developers",
+        "title": "Ansys pre-commit hooks > For developers",
+        "section": "For developers",
+        "text": "Installing the package in developer mode allows you to modify and\nenhance the source code.\nBefore contributing to the project, ensure that you are familiar with\nthe PyAnsys Developer’s Guide.\nFor a developer installation, you must follow these steps:\nClone the repository with this command:\nCreate a fresh-clean Python environment and activate it with these commands:\nEnsure that you have the latest required build system tools by\nrunning this command:\nInstall the project in editable mode by running one of these commands:\nVerify your development installation by running this command:\nFor developers"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#how-to-test-it",
+        "title": "Ansys pre-commit hooks > How to test it",
+        "section": "How to test it",
+        "text": "This project takes advantage of tox. This tool automates common\ndevelopment tasks (similar to Makefile), but it is oriented towards\nPython development.\nHow to test it"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#using-tox",
+        "title": "Ansys pre-commit hooks > Using tox",
+        "section": "Using tox",
+        "text": "While Makefile has rules, tox has environments. In fact, tox creates its\nown virtual environment so that anything being tested is isolated from the project\nto guarantee the project’s integrity.\nThese environment commands are provided:\ntox -e style: Checks for coding style quality.\ntox -e py: Checks for unit tests.\ntox -e py-coverage: Checks for unit testing and code coverage.\ntox -e doc: Checks for successfully building the documentation.\nUsing tox\ntox\ntox\ntox"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#raw-testing",
+        "title": "Ansys pre-commit hooks > Raw testing",
+        "section": "Raw testing",
+        "text": "If required, you can always call style commands, such as black, isort,\nand flake8, or unit testing commands, such as pytest, from the command line.\nHowever, calling these commands does not guarantee that your project is\nbeing tested in an isolated environment, which is the reason why tools like\ntox exist.\nRaw testing\ntox"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#a-note-on-pre-commit",
+        "title": "Ansys pre-commit hooks > A note on pre-commit",
+        "section": "A note on pre-commit",
+        "text": "The style checks take advantage of pre-commit. Developers are not forced but\nencouraged to install this tool by running this command:\nA note on pre-commit\npre-commit"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#documentation",
+        "title": "Ansys pre-commit hooks > Documentation",
+        "section": "Documentation",
+        "text": "For building documentation, you can run the usual rules provided in the\nSphinx Makefile with a command that is formatted like this:\nHowever, the recommended way of checking documentation integrity is by\nrunning tox with a command that is formatted like this:\nDocumentation\ntox"
+    },
+    {
+        "objectID": "index",
+        "href": "index.html#distributing",
+        "title": "Ansys pre-commit hooks > Distributing",
+        "section": "Distributing",
+        "text": "If you would like to create either source or wheel files, install\nthe building requirements and then execute the build module with these commands:\nDistributing"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#the-add_license_headerspy-module",
+        "title": "The add_license_headers.py module",
+        "section": "The add_license_headers.py module",
+        "text": "The add_license_headers.py module\nadd_license_headers.py"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#summary",
+        "title": "The add_license_headers.py module > Summary",
+        "section": "Summary",
+        "text": "set_lint_args\nAdd lint arguments to the parser for REUSE.\nlink_assets\nLink the default template and/or license from the assets folder to your git repo.\nmkdirs_and_link\nMake .reuse or LICENSES directory and create symbolic link to file.\nlist_noncompliant_files\nGet a list of the files that are missing license headers.\nset_header_args\nSet arguments for REUSE.\nnon_recursive_file_check\nCheck if the committed file is missing its header.\nrecursive_file_check\nCheck if the committed file is missing its header.\ncheck_same_content\nCheck if file before the hook ran is the same as after the hook ran.\nadd_hook_changes\nAdd earlier hook changes to updated file with header.\nget_full_paths\nUpdate file paths to be absolute paths with system separators.\nupdate_year_range\nUpdate the year or year range in the LICENSE file.\nupdate_license_file\nUpdate the LICENSE file to match MIT.txt, adjusting the year span to each repository.\ncleanup\nUnlink the default asset files, and remove directories if empty.\nfind_files_missing_header\nFind files that are missing license headers and run REUSE on them.\nmain\nFind files missing license headers and run REUSE on them.\nDEFAULT_TEMPLATE\nDefault template to use for license headers.\nDEFAULT_COPYRIGHT\nDefault copyright line for license headers.\nDEFAULT_LICENSE\nDefault license for headers.\nDEFAULT_START_YEAR\nSummary\nset_lint_args\nlink_assets\nmkdirs_and_link\nlist_noncompliant_files\nset_header_args\nnon_recursive_file_check\nrecursive_file_check\ncheck_same_content\nadd_hook_changes\nget_full_paths\nupdate_year_range\nupdate_license_file\ncleanup\nfind_files_missing_header\nmain\nDEFAULT_TEMPLATE\nDEFAULT_COPYRIGHT\nDEFAULT_LICENSE\nDEFAULT_START_YEAR"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#description",
+        "title": "The add_license_headers.py module > Description",
+        "section": "Description",
+        "text": "Module for running REUSE to add missing license headers to files.\nA license header consists of the Ansys copyright statement and licensing information.\nDescription"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#module-detail",
+        "title": "The add_license_headers.py module > Module detail",
+        "section": "Module detail",
+        "text": "Add lint arguments to the parser for REUSE.\nParser without any lint arguments.\nParser namespace containing lint arguments.\nLink the default template and/or license from the assets folder to your git repo.\nDictionary containing the asset folder information.\nFull path of the repository’s root directory.\nNamespace of arguments with their values.\nMake .reuse or LICENSES directory and create symbolic link to file.\nPath of the asset directory required for REUSE (.reuse/templates or LICENSES).\nFull path of the hook’s asset directory.\nFull path of the git repository’s asset directory.\nName of the file to be linked from the hook_asset_dir to the repo_asset_dir.\nGet a list of the files that are missing license headers.\nNamespace of arguments with their values.\nProject to run REUSE on.\nList of the files that are missing license headers.\nSet arguments for REUSE.\nParser containing default license header arguments.\nCurrent year retrieved by datetime.\nSpecific file path to create license headers.\nCopyright line for license headers.\nName of the template for license headers (name.jinja2).\nNamespace of arguments with their values.\nCheck if the committed file is missing its header.\n0 if no headers were added or updated.\n1 if headers were added or updated.\nParser containing default license header arguments.\nDictionary containing the values of files, copyright,\ntemplate, license, changed_headers, year, and git_repo.\nProject to run REUSE on.\nCommitted files that are missing copyright and/or\nlicense information in their headers.\n0 if all files contain headers and are up to date.\n1 if REUSE changed all noncompliant files.\nCheck if the committed file is missing its header.\n0 if no headers were added or updated.\n1 if headers were added or updated.\nParser containing default license header arguments.\nDictionary containing the values of files, copyright,\ntemplate, license, changed_headers, year, and git_repo.\nProject to run REUSE on.\nCommitted files that are missing copyright and/or\nlicense information in their headers.\nInteger of the location in the files array.\n0 if all files contain headers and are up to date.\n1 if REUSE changed all noncompliant files.\nCheck if file before the hook ran is the same as after the hook ran.\nPath to file before add-license-headers was run.\nPath to file after add-license-headers was run.\nTrue if the files have the same content.\nFalse if the files have different content.\nAdd earlier hook changes to updated file with header.\nPath to file before add-license-headers was run.\nPath to file after add-license-headers was run.\nUpdate file paths to be absolute paths with system separators.\nList containing committed files.\nList containing the full paths of committed files.\nUpdate the year or year range in the LICENSE file.\nThe start year supplied by the user in the pre-commit hook configuration.\nThe start year of the year range in the LICENSE file. For example, the LICENSE file\ncontains the range “2023 - 2024”, so match_start_year is 2023.\nThe current year based on the datetime module.\nThe end year of the year range in the LICENSE file. For example, the LICENSE file\ncontains the range “2023 - 2024”, so match_end_year is 2024.\nUpdate the LICENSE file to match MIT.txt, adjusting the year span to each repository.\nDictionary containing the committed files, custom copyright, template, license,\nchanged_headers, start & end year, and git_repo\nUnlink the default asset files, and remove directories if empty.\nDictionary containing assets information\nFull path of the repository’s root directory.\nFind files that are missing license headers and run REUSE on them.\n1 if REUSE changed all noncompliant files.\n2 if the .reuse or location directory does not exist in the root path\nof the GitHub repository.\nFind files missing license headers and run REUSE on them.\nDefault template to use for license headers.\nDefault copyright line for license headers.\nDefault license for headers.\nModule detail\nargparse.Namespace\npython:list\nargparse.Namespace\n0\n1\npython:int\n0\n1\nREUSE\n0\n1\npython:int\n0\n1\nREUSE\nTrue\nFalse\npython:list\npython:int\n1\nREUSE\n2\n.reuse"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.set_lint_args",
+        "title": "The add_license_headers.py module > Module detail > set_lint_args",
+        "section": "Module detail > set_lint_args",
+        "text": "add_license_headers.set_lint_args(parser: argparse.ArgumentParser) -> argparse.Namespace\n\nAdd lint arguments to the parser for REUSE.\n\nParameters\n\nparser: argparse.ArgumentParser\n\nParser without any lint arguments.\n\nReturns\n\nargparse.Namespace\n\nParser namespace containing lint arguments.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.link_assets",
+        "title": "The add_license_headers.py module > Module detail > link_assets",
+        "section": "Module detail > link_assets",
+        "text": "add_license_headers.link_assets(assets: dict, git_root: str, args: argparse.Namespace) -> None\n\nLink the default template and/or license from the assets folder to your git repo.\n\nParameters\n\nassets: dict\n\nDictionary containing the asset folder information.\n\ngit_root: str\n\nFull path of the repository’s root directory.\n\nargs: argparse.Namespace\n\nNamespace of arguments with their values.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.mkdirs_and_link",
+        "title": "The add_license_headers.py module > Module detail > mkdirs_and_link",
+        "section": "Module detail > mkdirs_and_link",
+        "text": "add_license_headers.mkdirs_and_link(asset_dir: str, hook_asset_dir: str, repo_asset_dir: str, filename: str) -> None\n\nMake .reuse or LICENSES directory and create symbolic link to file.\n\nParameters\n\nasset_dir: str\n\nPath of the asset directory required for REUSE (.reuse/templates or LICENSES).\n\nhook_asset_dir: str\n\nFull path of the hook’s asset directory.\n\nrepo_asset_dir: str\n\nFull path of the git repository’s asset directory.\n\nfilename: str\n\nName of the file to be linked from the hook_asset_dir to the repo_asset_dir.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.list_noncompliant_files",
+        "title": "The add_license_headers.py module > Module detail > list_noncompliant_files",
+        "section": "Module detail > list_noncompliant_files",
+        "text": "add_license_headers.list_noncompliant_files(args: argparse.Namespace, proj: reuse.project.Project) -> list\n\nGet a list of the files that are missing license headers.\n\nParameters\n\nargs: argparse.Namespace\n\nNamespace of arguments with their values.\n\nproj: project.Project\n\nProject to run REUSE on.\n\nReturns\n\npython:list\n\nList of the files that are missing license headers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.set_header_args",
+        "title": "The add_license_headers.py module > Module detail > set_header_args",
+        "section": "Module detail > set_header_args",
+        "text": "add_license_headers.set_header_args(parser: argparse.ArgumentParser, start_year: str, current_year: int, file_path: str, copyright: str, template: str) -> argparse.Namespace\n\nSet arguments for REUSE.\n\nParameters\n\nparser: argparse.ArgumentParser\n\nParser containing default license header arguments.\n\nyear: int\n\nCurrent year retrieved by datetime.\n\nfile_path: str\n\nSpecific file path to create license headers.\n\ncopyright: str\n\nCopyright line for license headers.\n\ntemplate: str\n\nName of the template for license headers (name.jinja2).\n\nReturns\n\nargparse.Namespace\n\nNamespace of arguments with their values.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.non_recursive_file_check",
+        "title": "The add_license_headers.py module > Module detail > non_recursive_file_check",
+        "section": "Module detail > non_recursive_file_check",
+        "text": "add_license_headers.non_recursive_file_check(changed_headers, parser, values, proj, missing_headers)\n\nCheck if the committed file is missing its header.\n\nParameters\n\nchanged_headers: int\n\n0 if no headers were added or updated.\n1 if headers were added or updated.\n\nparser: argparse.ArgumentParser\n\nParser containing default license header arguments.\n\nvalues: dict\n\nDictionary containing the values of files, copyright,\ntemplate, license, changed_headers, year, and git_repo.\n\nproj: project.Project\n\nProject to run REUSE on.\n\nmissing_headers: list\n\nCommitted files that are missing copyright and/or\nlicense information in their headers.\n\nReturns\n\npython:int\n\n0 if all files contain headers and are up to date.\n1 if REUSE changed all noncompliant files.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.recursive_file_check",
+        "title": "The add_license_headers.py module > Module detail > recursive_file_check",
+        "section": "Module detail > recursive_file_check",
+        "text": "add_license_headers.recursive_file_check(changed_headers, parser, values, proj, missing_headers, count)\n\nCheck if the committed file is missing its header.\n\nParameters\n\nchanged_headers: int\n\n0 if no headers were added or updated.\n1 if headers were added or updated.\n\nparser: argparse.ArgumentParser\n\nParser containing default license header arguments.\n\nvalues: dict\n\nDictionary containing the values of files, copyright,\ntemplate, license, changed_headers, year, and git_repo.\n\nproj: project.Project\n\nProject to run REUSE on.\n\nmissing_headers: list\n\nCommitted files that are missing copyright and/or\nlicense information in their headers.\n\ncount: int\n\nInteger of the location in the files array.\n\nReturns\n\npython:int\n\n0 if all files contain headers and are up to date.\n1 if REUSE changed all noncompliant files.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.check_same_content",
+        "title": "The add_license_headers.py module > Module detail > check_same_content",
+        "section": "Module detail > check_same_content",
+        "text": "add_license_headers.check_same_content(before_hook, after_hook)\n\nCheck if file before the hook ran is the same as after the hook ran.\n\nParameters\n\nbefore_hook: str\n\nPath to file before add-license-headers was run.\n\nafter_hook: str\n\nPath to file after add-license-headers was run.\n\nReturns\n\nbool\n\nTrue if the files have the same content.\nFalse if the files have different content.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.add_hook_changes",
+        "title": "The add_license_headers.py module > Module detail > add_hook_changes",
+        "section": "Module detail > add_hook_changes",
+        "text": "add_license_headers.add_hook_changes(before_hook: str, after_hook: str) -> None\n\nAdd earlier hook changes to updated file with header.\n\nParameters\n\nbefore_hook: str\n\nPath to file before add-license-headers was run.\n\nafter_hook: str\n\nPath to file after add-license-headers was run.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.get_full_paths",
+        "title": "The add_license_headers.py module > Module detail > get_full_paths",
+        "section": "Module detail > get_full_paths",
+        "text": "add_license_headers.get_full_paths(file_list: list) -> list\n\nUpdate file paths to be absolute paths with system separators.\n\nParameters\n\nfile_list: list\n\nList containing committed files.\n\nReturns\n\npython:list\n\nList containing the full paths of committed files.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.update_year_range",
+        "title": "The add_license_headers.py module > Module detail > update_year_range",
+        "section": "Module detail > update_year_range",
+        "text": "add_license_headers.update_year_range(user_start_year, match_start_year, current_year, match_end_year)\n\nUpdate the year or year range in the LICENSE file.\n\nParameters\n\nuser_start_year: str\n\nThe start year supplied by the user in the pre-commit hook configuration.\n\nmatch_start_year: str\n\nThe start year of the year range in the LICENSE file. For example, the LICENSE file\ncontains the range “2023 - 2024”, so match_start_year is 2023.\n\ncurrent_year: str\n\nThe current year based on the datetime module.\n\nmatch_end_year: str\n\nThe end year of the year range in the LICENSE file. For example, the LICENSE file\ncontains the range “2023 - 2024”, so match_end_year is 2024.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.update_license_file",
+        "title": "The add_license_headers.py module > Module detail > update_license_file",
+        "section": "Module detail > update_license_file",
+        "text": "add_license_headers.update_license_file(arg_dict: dict) -> int\n\nUpdate the LICENSE file to match MIT.txt, adjusting the year span to each repository.\n\nParameters\n\narg_dict: dict\n\nDictionary containing the committed files, custom copyright, template, license,\nchanged_headers, start & end year, and git_repo\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.cleanup",
+        "title": "The add_license_headers.py module > Module detail > cleanup",
+        "section": "Module detail > cleanup",
+        "text": "add_license_headers.cleanup(assets: dict, os_git_root: str) -> None\n\nUnlink the default asset files, and remove directories if empty.\n\nParameters\n\nassets: dict\n\nDictionary containing assets information\n\nos_git_root: str\n\nFull path of the repository’s root directory.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.find_files_missing_header",
+        "title": "The add_license_headers.py module > Module detail > find_files_missing_header",
+        "section": "Module detail > find_files_missing_header",
+        "text": "add_license_headers.find_files_missing_header() -> int\n\nFind files that are missing license headers and run REUSE on them.\n\nReturns\n\npython:int\n\n1 if REUSE changed all noncompliant files.\n\n2 if the .reuse or location directory does not exist in the root path\nof the GitHub repository.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.main",
+        "title": "The add_license_headers.py module > Module detail > main",
+        "section": "Module detail > main",
+        "text": "add_license_headers.main()\n\nFind files missing license headers and run REUSE on them.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.DEFAULT_TEMPLATE",
+        "title": "The add_license_headers.py module > Module detail > DEFAULT_TEMPLATE",
+        "section": "Module detail > DEFAULT_TEMPLATE",
+        "text": "add_license_headers.DEFAULT_TEMPLATE = 'ansys'\n\nDefault template to use for license headers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.DEFAULT_COPYRIGHT",
+        "title": "The add_license_headers.py module > Module detail > DEFAULT_COPYRIGHT",
+        "section": "Module detail > DEFAULT_COPYRIGHT",
+        "text": "add_license_headers.DEFAULT_COPYRIGHT = 'ANSYS, Inc. and/or its affiliates.'\n\nDefault copyright line for license headers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.DEFAULT_LICENSE",
+        "title": "The add_license_headers.py module > Module detail > DEFAULT_LICENSE",
+        "section": "Module detail > DEFAULT_LICENSE",
+        "text": "add_license_headers.DEFAULT_LICENSE = 'MIT'\n\nDefault license for headers.\n\n!! processed by numpydoc !!"
+    },
+    {
+        "objectID": "api/src/ansys/pre_commit_hooks/add_license_headers/index",
+        "href": "api/src/ansys/pre_commit_hooks/add_license_headers/index.html#add_license_headers.DEFAULT_START_YEAR",
+        "title": "The add_license_headers.py module > Module detail > DEFAULT_START_YEAR",
+        "section": "Module detail > DEFAULT_START_YEAR",
+        "text": "add_license_headers.DEFAULT_START_YEAR\n\n"
+    },
+    {
+        "objectID": "api/index",
+        "href": "api/index.html#api-reference",
+        "title": "API reference",
+        "section": "API reference",
+        "text": "This section describes ansys-pre-commit-hooks endpoints, their capabilities, and how\nto interact with them programmatically.\nAPI reference"
+    }
+]

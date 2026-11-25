@@ -1,0 +1,33 @@
+:py:func:`src.ansys.pre_commit_hooks.add_license_headers.get_full_paths`
+========================================================================
+
+.. py:function:: src.ansys.pre_commit_hooks.add_license_headers.get_full_paths(file_list: list) -> list
+
+   
+   Update file paths to be absolute paths with system separators.
+
+
+   :Parameters:
+
+       **file_list: list**
+           List containing committed files.
+
+   :Returns:
+
+       :class:`python:list`
+           List containing the full paths of committed files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!

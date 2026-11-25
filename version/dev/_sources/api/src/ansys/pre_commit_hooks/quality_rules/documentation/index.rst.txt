@@ -1,0 +1,312 @@
+
+
+
+
+
+
+The ``documentation.py`` module
+===============================
+
+.. py:module:: src.ansys.pre_commit_hooks.quality_rules.documentation
+
+
+Summary
+-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. py:currentmodule:: documentation
+.. tab-set::
+
+
+
+
+    .. tab-item:: Classes
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.Documentation`
+            - Documentation rule family.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC001`
+            - The doc/source structure exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC002`
+            - The Sphinx config exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC003`
+            - Numpydoc is enabled for NumPy-style API documentation.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC004`
+            - Intersphinx is enabled for cross-project documentation references.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC005`
+            - The index page has a getting started section.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC006`
+            - The index page has an API reference section.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC007`
+            - Gallery examples are recommended when a gallery extension is enabled.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC008`
+            - The Ansys Sphinx theme and PyAnsys branding are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC009`
+            - Project and page titles are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC010`
+            - Site author, copyright, and CNAME metadata are configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC011`
+            - The Ansys theme version switcher is configured.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC012`
+            - The index links required documentation pages with cards.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC013`
+            - Authored RST filenames use lowercase letters and hyphens.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC014`
+            - The getting-started page is provided as a root page or section index.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC015`
+            - The user-guide page is provided as a root page or section index.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC016`
+            - The API page is provided as a root page or section index.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC017`
+            - The examples page is provided as a root page or section index.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC018`
+            - The contribute page is provided as a root page or section index.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC019`
+            - The changelog root page exists.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC020`
+            - The getting-started section contains documentation files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC021`
+            - The user-guide section contains documentation files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC022`
+            - The API section contains documentation files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC023`
+            - The examples section contains files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC024`
+            - The contribute section contains documentation files.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC025`
+            - The user contributor guide is recommended.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC026`
+            - The documentarian contributor guide is recommended.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC027`
+            - The developer contributor guide is recommended.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC028`
+            - The interrogate hook checks docstring coverage.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC029`
+            - Sphinx AutoAPI or an API reference page is available.
+
+
+          * - :py:obj:`~src.ansys.pre_commit_hooks.quality_rules.documentation.DOC030`
+            - A cheatsheet is added to the documentation.
+
+
+
+
+
+
+
+    .. tab-item:: Constants
+
+        .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+
+          * - :py:obj:`~DOCUMENTATION_QUALITY_RULES`
+            - 
+
+
+
+
+
+
+
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+   :hidden:
+
+    <span class="nf nf-cod-symbol_class"></span> Documentation</api/src/ansys/pre_commit_hooks/quality_rules/documentation/Documentation>
+    <span class="nf nf-cod-symbol_class"></span> DOC001</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC001>
+    <span class="nf nf-cod-symbol_class"></span> DOC002</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC002>
+    <span class="nf nf-cod-symbol_class"></span> DOC003</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC003>
+    <span class="nf nf-cod-symbol_class"></span> DOC004</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC004>
+    <span class="nf nf-cod-symbol_class"></span> DOC005</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC005>
+    <span class="nf nf-cod-symbol_class"></span> DOC006</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC006>
+    <span class="nf nf-cod-symbol_class"></span> DOC007</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC007>
+    <span class="nf nf-cod-symbol_class"></span> DOC008</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC008>
+    <span class="nf nf-cod-symbol_class"></span> DOC009</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC009>
+    <span class="nf nf-cod-symbol_class"></span> DOC010</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC010>
+    <span class="nf nf-cod-symbol_class"></span> DOC011</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC011>
+    <span class="nf nf-cod-symbol_class"></span> DOC012</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC012>
+    <span class="nf nf-cod-symbol_class"></span> DOC013</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC013>
+    <span class="nf nf-cod-symbol_class"></span> DOC014</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC014>
+    <span class="nf nf-cod-symbol_class"></span> DOC015</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC015>
+    <span class="nf nf-cod-symbol_class"></span> DOC016</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC016>
+    <span class="nf nf-cod-symbol_class"></span> DOC017</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC017>
+    <span class="nf nf-cod-symbol_class"></span> DOC018</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC018>
+    <span class="nf nf-cod-symbol_class"></span> DOC019</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC019>
+    <span class="nf nf-cod-symbol_class"></span> DOC020</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC020>
+    <span class="nf nf-cod-symbol_class"></span> DOC021</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC021>
+    <span class="nf nf-cod-symbol_class"></span> DOC022</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC022>
+    <span class="nf nf-cod-symbol_class"></span> DOC023</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC023>
+    <span class="nf nf-cod-symbol_class"></span> DOC024</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC024>
+    <span class="nf nf-cod-symbol_class"></span> DOC025</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC025>
+    <span class="nf nf-cod-symbol_class"></span> DOC026</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC026>
+    <span class="nf nf-cod-symbol_class"></span> DOC027</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC027>
+    <span class="nf nf-cod-symbol_class"></span> DOC028</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC028>
+    <span class="nf nf-cod-symbol_class"></span> DOC029</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC029>
+    <span class="nf nf-cod-symbol_class"></span> DOC030</api/src/ansys/pre_commit_hooks/quality_rules/documentation/DOC030>
+
+
+
+
+
+
+
+
+
+Description
+-----------
+
+Documentation structure and Sphinx configuration checks.
+
+The checks cover the documentation source tree and layout, Sphinx configuration,
+index card links, authored RST filenames, gallery examples, and API docstring
+coverage tooling.
+
+..
+    !! processed by numpydoc !!
+
+
+
+
+
+
+Module detail
+-------------
+
+.. py:data:: DOCUMENTATION_QUALITY_RULES
+   :type:  tuple[type[Documentation], ...]
+
+
+

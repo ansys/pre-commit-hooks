@@ -1,0 +1,115 @@
+
+
+
+
+
+
+:class:`LB012`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.labels.LB012
+
+   Bases: :py:obj:`Labels`
+
+
+   
+   Labels.yml has ci, tests, maintenance, and release labels.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: LB012
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check whether the recommended project labels are declared.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.labels import LB012
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check whether the recommended project labels are declared.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Root directory of the repository being checked.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Detected README path. This rule does not use the README.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when all recommended labels are declared, otherwise a
+           recommendation naming the missing labels and explaining their use.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

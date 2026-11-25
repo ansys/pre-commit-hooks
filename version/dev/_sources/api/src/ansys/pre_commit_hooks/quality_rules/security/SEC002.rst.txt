@@ -1,0 +1,109 @@
+
+
+
+
+
+
+:class:`SEC002`
+===============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.security.SEC002
+
+   Bases: :py:obj:`Security`
+
+
+   
+   The zizmor config includes the secrets-outside-env rule.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: SEC002
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Check that the zizmor configuration disables secrets-outside-env.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.security import SEC002
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Check that the zizmor configuration disables secrets-outside-env.
+
+
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` when ``.github/zizmor.yml`` sets
+           ``rules.secrets-outside-env.disable`` to ``true`` or does not exist
+           (SEC001 reports a missing file), otherwise an error.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

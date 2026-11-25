@@ -1,0 +1,125 @@
+
+
+
+
+
+
+:class:`RM003`
+==============
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.readme.RM003
+
+   Bases: :py:obj:`README`
+
+
+   
+   README has a license badge matching project metadata.
+
+   Reads the license declared in ``[project].license`` of ``pyproject.toml`` and
+   looks for a license badge for the same license. The declaration can be a license
+   string, a ``license.text`` value, or a ``license.file`` path whose content is
+   read. MIT, Apache-2.0, BSD-2-Clause and BSD-3-Clause are recognized. Any other
+   license is matched by its declared text.
+
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Notes
+
+   - A missing badge, or a badge for a different license, produces a warning,
+     including when there is no README file.
+   - A warning is also produced when ``pyproject.toml`` is missing or invalid, or
+     declares no license, because the badge cannot be verified.
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+.. py:currentmodule:: RM003
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+
+   .. tab-item:: Static methods
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~check`
+            - Return whether the README license badge matches project metadata.
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.readme import RM003
+
+
+
+Method detail
+-------------
+
+.. py:method:: check(repository_root: pathlib.Path, readme_file: str | None) -> ansys.pre_commit_hooks.quality_rules.common.RuleCheckResult
+   :staticmethod:
+
+
+   
+   Return whether the README license badge matches project metadata.
+
+
+   :Parameters:
+
+       **repository_root** : :obj:`pathlib.Path`
+           Repository root directory.
+
+       **readme_file** : :class:`python:str` or :data:`python:None`
+           Name of the detected README file, or ``None`` if there is none.
+
+
+
+   :Returns:
+
+       :ref:`bool <python:bltin-boolean-values>` or :class:`python:str`
+           ``True`` if a matching badge is found, otherwise a ``"WARNING: ..."`` message.
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+
+

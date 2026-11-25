@@ -1,0 +1,79 @@
+
+
+
+
+
+
+:class:`Documentation`
+======================
+
+
+.. py:class:: src.ansys.pre_commit_hooks.quality_rules.documentation.Documentation
+
+   
+   Documentation rule family.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ..
+       !! processed by numpydoc !!
+
+
+.. py:currentmodule:: Documentation
+
+Overview
+--------
+
+.. tab-set::
+
+
+
+
+
+   .. tab-item:: Attributes
+
+      .. list-table::
+          :header-rows: 0
+          :widths: auto
+
+          * - :py:attr:`~family`
+            - 
+
+
+
+
+
+
+Import detail
+-------------
+
+.. code-block:: python
+
+    from src.ansys.pre_commit_hooks.quality_rules.documentation import Documentation
+
+
+Attribute detail
+----------------
+
+.. py:attribute:: family
+   :type:  ClassVar[str]
+   :value: 'documentation'
+
+
+
+
+
+
