@@ -362,7 +362,7 @@ class CI015(CICD):
 
 
 class CI016(CICD):
-    """Actions use immutable commit SHAs instead of mutable tags."""
+    """Remote actions use immutable commit SHAs; ``./`` and ``$/`` references are exempt."""
 
     @staticmethod
     def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
@@ -371,11 +371,11 @@ class CI016(CICD):
         if content is None:
             return _NO_WORKFLOWS
 
-        # Local actions (``./path``) are repository code and need no SHA pin.
+        # Treat both accepted repository-local prefixes as exempt from SHA pinning.
         references = [
             reference
             for reference in _ACTION_USE_PATTERN.findall(content)
-            if not reference.startswith("./")
+            if not reference.startswith(("./", "$/"))
         ]
         unpinned = list(dict.fromkeys(ref for ref in references if not _SHA_PATTERN.fullmatch(ref)))
         if not unpinned:
