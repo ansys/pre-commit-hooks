@@ -19,25 +19,6 @@ updates:
           patterns:
             - "*"
 
-  - package-ecosystem: "uv"
-    cooldown:
-      default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 10
-      semver-patch-days: 7
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "maintenance"
-      - "dependencies"
-    commit-message:
-      prefix: "build(deps)"
-    groups:
-       uv-deps:
-          patterns:
-            - "*"
-
   - package-ecosystem: "github-actions"
     cooldown:
       default-days: 7
