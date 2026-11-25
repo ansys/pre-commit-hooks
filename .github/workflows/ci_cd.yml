@@ -28,7 +28,7 @@ jobs:
       contents: write  # Needed to combine changelog fragments into changelog file
       pull-requests: write  # Needed to commit to the release branch/tag
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/doc-deploy-changelog@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           release-from-main: true
@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/check-vulnerabilities@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/check-vulnerabilities@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/check-actions-security@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/check-actions-security@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           generate-summary: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
       GH_ACTOR_EMAIL: ${{ github.actor }}@users.noreply.github.com
     steps:
       - name: PyAnsys code style checks
-        uses: ansys/actions/code-style@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+        uses: ansys/actions/code-style@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           commit-changes: true
@@ -86,7 +86,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/doc-style@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/doc-style@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -101,7 +101,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.12', '3.13', '3.14']
     steps:
-      - uses: ansys/actions/build-wheelhouse@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/build-wheelhouse@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           library-name: ${{ env.LIBRARY_NAME }}
           operating-system: ${{ matrix.os }}
@@ -123,7 +123,7 @@ jobs:
        python-version: ['3.12', '3.13', '3.14']
       fail-fast: false
     steps:
-      - uses: ansys/actions/tests-pytest@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/tests-pytest@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           pytest-extra-args: "--cov=ansys.pre_commit_hooks --cov-report=term --cov-report=html:.cov/html"
           python-version: ${{ matrix.python-version }}
@@ -135,7 +135,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/doc-build@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/doc-build@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -146,7 +146,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: ansys/actions/build-library@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/build-library@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           library-name: ${{ env.LIBRARY_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -159,7 +159,7 @@ jobs:
     permissions:
       contents: write  # Needed to write to documentation and push to gh-pages branch
     steps:
-      - uses: ansys/actions/doc-deploy-dev@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/doc-deploy-dev@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -191,7 +191,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+        uses: ansys/actions/release-github@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           library-name: ${{ env.LIBRARY_NAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -204,7 +204,7 @@ jobs:
       contents: write  # Needed to write to documentation and push to gh-pages branch
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     steps:
-      - uses: ansys/actions/doc-deploy-stable@5a91d7c2c4da2e86f2b3b62ba62daad189a6b77c # v11.2.0
+      - uses: ansys/actions/doc-deploy-stable@06390ed64756cfc992121a6d6626a811e352c0e9 # v11.2.1
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
