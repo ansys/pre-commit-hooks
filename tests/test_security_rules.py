@@ -201,7 +201,7 @@ def test_uv_release_age_must_be_exactly_seven_days(tmp_path: Path) -> None:
     _write(tmp_path, "uv.lock", "version = 1\n")
     _write(tmp_path, "pyproject.toml", '[tool.uv]\nexclude-newer = "6 days"\n')
 
-    _assert_status(_check(tmp_path, "SEC007"), "ERROR", 'exclude-newer to exactly 7')
+    _assert_status(_check(tmp_path, "SEC007"), "ERROR", "exclude-newer to exactly 7")
 
 
 def test_poetry_lockfile_requires_minimum_release_age(tmp_path: Path) -> None:
@@ -215,7 +215,7 @@ def test_poetry_release_age_must_be_exactly_seven_days(tmp_path: Path) -> None:
     _write(tmp_path, "poetry.lock", "")
     _write(tmp_path, "poetry.toml", f"[solver]\nmin-release-age = 6\n")
 
-    _assert_status(_check(tmp_path, "SEC007"), "ERROR", 'min-release-age to exactly 7')
+    _assert_status(_check(tmp_path, "SEC007"), "ERROR", "min-release-age to exactly 7")
 
 
 def test_security_report_includes_release_age_rule(tmp_path: Path) -> None:
