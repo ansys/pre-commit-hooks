@@ -34,6 +34,7 @@ The checks cover:
   public issues
 * Pre-commit repositories are pinned to commit SHAs
 * A ``uv.lock`` or ``poetry.lock`` lockfile pins the dependencies
+* uv and Poetry enforce a seven-day minimum release age for dependencies
 
 GitHub Actions workflow hardening, such as pinning actions to commit SHAs,
 version comments, token permissions, credential persistence, and dangerous
@@ -46,11 +47,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 import re
+import tomllib
 from typing import ClassVar, Final
 
 import yaml
 
 from ansys.pre_commit_hooks.quality_rules.common import (
+    DEPENDENCY_COOLDOWN_DAYS,
     RuleCheckResult,
     file_content,
     file_exists,
@@ -68,6 +71,7 @@ __all__ = [
     "SEC004",
     "SEC005",
     "SEC006",
+    "SEC007",
     "Security",
 ]
 
@@ -84,12 +88,66 @@ _MISPLACED_SECURITY_POLICIES: Final[tuple[str, ...]] = (
 _PRE_COMMIT_CONFIG: Final[str] = ".pre-commit-config.yaml"
 _LOCKFILES: Final[tuple[str, ...]] = ("uv.lock", "poetry.lock")
 _LOCAL_PRE_COMMIT_REPOSITORIES: Final[frozenset[str]] = frozenset({"local", "meta"})
+_UV_RELEASE_AGE: Final[str] = f"{DEPENDENCY_COOLDOWN_DAYS} days"
 
 _COMMIT_SHA: Final[re.Pattern[str]] = re.compile(r"[0-9a-f]{40}", re.IGNORECASE)
 _PUBLIC_ISSUE_WARNING: Final[re.Pattern[str]] = re.compile(
     r"\b(?:do\s+not|don['\u2019]t|never|must\s+not|should\s+not|avoid)\b[^.\n]{0,100}?\bissues?\b",
     re.IGNORECASE,
 )
+
+
+def _load_toml_configuration(repository_root: Path, filename: str) -> dict[str, object] | str:
+    """Read and parse a TOML file, returning an explicit error on failure."""
+    content = file_content(repository_root, filename)
+    if content is None:
+        return f"WARNING: {filename} not found or not readable, so this check was skipped."
+    try:
+        return tomllib.loads(content)
+    except ValueError as error:
+        return f"WARNING: {filename} is not valid TOML: {error}"
+
+
+def _check_release_age_setting(
+    repository_root: Path,
+    config_file: str,
+    setting_path: tuple[str, ...],
+    expected: str,
+) -> RuleCheckResult:
+    """Check a package manager's release-age setting when its lockfile exists.
+
+    Parameters
+    ----------
+    repository_root : pathlib.Path
+        Repository root directory.
+    config_file : str
+        TOML configuration file containing the policy.
+    setting_path : tuple[str, ...]
+        Nested TOML keys that locate the setting.
+    expected : str
+        Required value as text, shared with Dependabot DB006.
+
+    Returns
+    -------
+    bool or str
+        ``True`` when no matching lockfile exists or the setting matches,
+        otherwise an ``"ERROR: ..."`` message.
+    """
+    configuration = _load_toml_configuration(repository_root, config_file)
+    if isinstance(configuration, str):
+        return configuration
+
+    value: object = configuration
+    for key in setting_path:
+        value = value.get(key) if isinstance(value, dict) else None
+    if str(value) == expected:
+        return True
+
+    table = ".".join(setting_path[:-1])
+    return (
+        f"ERROR: {config_file} must set [{table}] {setting_path[-1]} to exactly "
+        f"{expected}, matching DB006."
+    )
 
 
 class Security(ABC):
@@ -280,4 +338,31 @@ class SEC006(Security):
         return (
             "ERROR: Commit a uv.lock or poetry.lock file at the repository root so "
             "development and CI use a controlled, reviewed set of dependencies."
+        )
+
+
+class SEC007(Security):
+    """The package manager enforces the same seven-day release-age limit as Dependabot."""
+
+    @staticmethod
+    def check(repository_root: Path, readme_file: str | None) -> RuleCheckResult:
+        """Check release-age settings for every dependency lockfile present."""
+        if file_exists(repository_root, "uv.lock"):
+            result = _check_release_age_setting(
+                repository_root,
+                "pyproject.toml",
+                ("tool", "uv", "exclude-newer"),
+                _UV_RELEASE_AGE,
+            )
+            return result
+        elif file_exists(repository_root, "poetry.lock"):
+            return _check_release_age_setting(
+                repository_root,
+                "poetry.toml",
+                ("solver", "min-release-age"),
+                str(DEPENDENCY_COOLDOWN_DAYS),
+            )
+        return (
+            "ERROR: Commit a uv.lock or poetry.lock file at the repository root with "
+            "a release-age setting for dependencies."
         )

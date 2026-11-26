@@ -31,6 +31,7 @@ from typing import ClassVar, Final, Protocol, TypeAlias
 __all__ = [
     "_first_doc_line",
     "all_workflows_content",
+    "DEPENDENCY_COOLDOWN_DAYS",
     "ERROR",
     "file_content",
     "file_exists",
@@ -45,6 +46,7 @@ __all__ = [
 ]
 
 RuleCheckResult: TypeAlias = bool | str
+DEPENDENCY_COOLDOWN_DAYS: Final[int] = 7
 
 
 class RuleStatus(StrEnum):
