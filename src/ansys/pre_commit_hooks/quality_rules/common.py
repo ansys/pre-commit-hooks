@@ -46,7 +46,9 @@ __all__ = [
 ]
 
 RuleCheckResult: TypeAlias = bool | str
+"""A raw quality-rule result: a boolean outcome or a prefixed detail string."""
 DEPENDENCY_COOLDOWN_DAYS: Final[int] = 7
+"""Minimum age in days required before a dependency release is considered stable."""
 
 
 class RuleStatus(StrEnum):
@@ -72,9 +74,13 @@ class RuleStatus(StrEnum):
 
 
 PASSED: Final[RuleStatus] = RuleStatus.PASSED
+"""Status indicating that a quality rule is satisfied."""
 RECOMMENDATION: Final[RuleStatus] = RuleStatus.RECOMMENDATION
+"""Status indicating an optional improvement that does not affect the score."""
 WARNING: Final[RuleStatus] = RuleStatus.WARNING
+"""Status indicating an issue that does not fail the report."""
 ERROR: Final[RuleStatus] = RuleStatus.ERROR
+"""Status indicating a failed rule that causes a non-zero exit code."""
 
 
 class _QualityRule(Protocol):
