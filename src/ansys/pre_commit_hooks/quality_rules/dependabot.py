@@ -549,7 +549,7 @@ class DB006(Dependabot):
         if invalid:
             return (
                 f"WARNING: Cooldown default-days: {DEPENDENCY_COOLDOWN_DAYS} missing or "
-                f"invalid for: "
+                "invalid for: "
                 f"{', '.join(invalid)}."
             )
         return True
