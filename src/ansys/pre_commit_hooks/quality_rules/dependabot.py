@@ -37,7 +37,12 @@ from typing import ClassVar, Final
 
 import yaml
 
-from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult, file_content, file_exists
+from ansys.pre_commit_hooks.quality_rules.common import (
+    DEPENDENCY_COOLDOWN_DAYS,
+    RuleCheckResult,
+    file_content,
+    file_exists,
+)
 
 __all__ = [
     "DB001",
@@ -73,7 +78,6 @@ _DEPENDABOT_PATHS: Final[tuple[str, ...]] = (
 )
 _PYTHON_ECOSYSTEMS: Final[frozenset[str]] = frozenset({"pip", "uv"})
 _MIN_FREQUENT_ECOSYSTEMS: Final[int] = 2
-_COOLDOWN_DAYS: Final[int] = 7
 _SCHEDULE_INTERVALS: Final[frozenset[str]] = frozenset({"daily", "weekly", "monthly"})
 _COMMIT_PREFIX_POLICY: Final[dict[str, str]] = {
     "pip": "build(deps)",
@@ -540,11 +544,12 @@ class DB006(Dependabot):
         for entry in updates:
             cooldown = entry.get("cooldown")
             days = cooldown.get("default-days") if isinstance(cooldown, dict) else None
-            if type(days) is not int or days != _COOLDOWN_DAYS:
+            if type(days) is not int or days != DEPENDENCY_COOLDOWN_DAYS:
                 invalid.append(str(entry["package-ecosystem"]))
         if invalid:
             return (
-                f"WARNING: Cooldown default-days: {_COOLDOWN_DAYS} missing or invalid for: "
+                f"WARNING: Cooldown default-days: {DEPENDENCY_COOLDOWN_DAYS} missing or "
+                "invalid for: "
                 f"{', '.join(invalid)}."
             )
         return True

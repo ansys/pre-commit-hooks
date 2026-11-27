@@ -35,7 +35,7 @@ from ansys.pre_commit_hooks.quality_rules import (
 )
 from ansys.pre_commit_hooks.quality_rules.common import RuleCheckResult
 
-_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 7))
+_RULE_IDS = tuple(f"SEC{number:03d}" for number in range(1, 8))
 _SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
 _ZIZMOR = """\
 rules:
@@ -75,6 +75,7 @@ def _write_repository(root: Path) -> None:
     _write(root, ".github/zizmor.yml", _ZIZMOR)
     _write(root, ".pre-commit-config.yaml", _PRE_COMMIT)
     _write(root, "SECURITY.md", _SECURITY_POLICY)
+    _write(root, "pyproject.toml", '[tool.uv]\nexclude-newer = "7 days"\n')
     _write(root, "uv.lock", "version = 1\n")
 
 
@@ -115,6 +116,7 @@ def test_missing_configuration(tmp_path: Path) -> None:
         "SEC004": "ERROR",
         "SEC005": "ERROR",
         "SEC006": "ERROR",
+        "SEC007": "ERROR",
     }
 
 
@@ -186,3 +188,43 @@ def test_lockfile_is_required(tmp_path: Path, lockfile: str) -> None:
 
     _write(tmp_path, lockfile, "")
     assert _check(tmp_path, "SEC006") is True
+
+
+def test_uv_lockfile_requires_exact_seven_day_release_age(tmp_path: Path) -> None:
+    _write(tmp_path, "uv.lock", "version = 1\n")
+    _write(tmp_path, "pyproject.toml", '[tool.uv]\nexclude-newer = "7 days"\n')
+
+    assert _check(tmp_path, "SEC007") is True
+
+
+def test_uv_release_age_must_be_exactly_seven_days(tmp_path: Path) -> None:
+    _write(tmp_path, "uv.lock", "version = 1\n")
+    _write(tmp_path, "pyproject.toml", '[tool.uv]\nexclude-newer = "6 days"\n')
+
+    _assert_status(_check(tmp_path, "SEC007"), "ERROR", "exclude-newer to exactly 7")
+
+
+def test_poetry_lockfile_requires_minimum_release_age(tmp_path: Path) -> None:
+    _write(tmp_path, "poetry.lock", "")
+    _write(tmp_path, "poetry.toml", "[solver]\nmin-release-age = 7\n")
+
+    assert _check(tmp_path, "SEC007") is True
+
+
+def test_poetry_release_age_must_be_exactly_seven_days(tmp_path: Path) -> None:
+    _write(tmp_path, "poetry.lock", "")
+    _write(tmp_path, "poetry.toml", f"[solver]\nmin-release-age = 6\n")
+
+    _assert_status(_check(tmp_path, "SEC007"), "ERROR", "min-release-age to exactly 7")
+
+
+def test_security_report_includes_release_age_rule(tmp_path: Path) -> None:
+    _write(tmp_path, "uv.lock", "version = 1\n")
+    _write(tmp_path, "pyproject.toml", '[tool.uv]\nexclude-newer = "7 days"\n')
+
+    result = report._run_checks(tmp_path, selected_rule_ids={"SEC007"})["results"]
+
+    assert len(result) == 1
+    assert result[0]["id"] == "SEC007"
+    assert result[0]["family"] == "security"
+    assert result[0]["status"] == "PASSED"
